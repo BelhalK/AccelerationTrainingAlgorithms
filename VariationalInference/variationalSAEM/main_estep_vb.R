@@ -57,6 +57,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 	phiMc<-phiM
 
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
+		print(u)
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -188,11 +189,13 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		#Initialization
 
 		mu <- list(etaM,etaM)
-		Gamma <- 0.5*diag(nb.etas)
-		sGamma <- solve(chol(Gamma))
-		K <- 20
-		L <- 50
-		rho <- 0.0000001
+		# Gamma <- 0.5*diag(nb.etas)
+		# sGamma <- solve(chol(Gamma))
+		Gamma <- omega.eta
+		sGamma <- somega
+		K <- 50 #nb iterations gradient ascent
+		L <- 100 #nb iterations MONTE CARLO
+		rho <- 0.000001 #gradient ascent stepsize
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			print(u)
 			for(vk2 in 1:nb.etas) {
@@ -202,8 +205,8 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				for (k in 1:K) {
 					#monte carlo integration of the gradient of the ELBO
 				
-					sample <- list(etaM,etaM)
-					sample1 <- list(etaM,etaM)
+					sample <- list(etaM,etaM)  #list of samples for monte carlo integration
+					sample1 <- list(etaM,etaM)  #list of samples for gradient computation
 					estim <- list(etaM,etaM)
 					gradlogq <- etaM
 					
@@ -217,7 +220,9 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 							fpred<-log(cutoff(fpred))
 						gpred<-error(fpred,varList$pres)
 						DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-						logp <- colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+						#Log complete computation
+						logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
+						#Log proposal computation
 						logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
 						for (j in 1:nb.etas) {
 							sample1[[l]] <- sample[[l]]

@@ -43,7 +43,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 100
+iter_mcmc = 50
 
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
@@ -63,7 +63,7 @@ model1cpt<-function(psi,id,xidep) {
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
-# saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
+saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
 saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
 
 post_rwm<-saemix_vb(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
@@ -83,12 +83,12 @@ for (i in 2:length(post_vb)) {
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_vb, title="Variational Bayes")
-
+graphConvMC_twokernels(final_rwm,final_vb, title="EM")
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
 graphConvMC_twokernels(post_rwm[[1]],post_vb[[1]], title="EM")
 
-graphConvMC_twokernels(final_rwm,final_vb, title="EM")
+
 
 
 
