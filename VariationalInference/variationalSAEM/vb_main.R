@@ -107,6 +107,7 @@ saemix_vb<-function(model,data,control=list()) {
   DYF<-xinit$DYF
   opt<-xinit$opt
   betas<-betas.ini<-xinit$betas
+  # betas<-betas.ini<-xinit$betas
   fixed.psi<-xinit$fixedpsi.ini
   var.eta<-varList$diag.omega
   theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
