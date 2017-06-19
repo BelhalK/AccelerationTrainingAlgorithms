@@ -28,7 +28,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('zzz.R') 
   source("mixtureFunctions.R")
 setwd("/Users/karimimohammedbelhal/Desktop/git_phd/saem/VariationalInference/variationalSAEM")
-source('vb_main.R') 
+source('vb_main.R')
 source('main_estep_vb.R')
 
 library(ggplot2)

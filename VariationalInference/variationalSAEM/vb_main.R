@@ -1,13 +1,3 @@
-#' Stochastic Approximation Expectation Maximization (SAEM) algorithm
-#' 
-#' SAEM algorithm perform parameter estimation for nonlinear mixed effects
-#' models without any approximation of the model (linearization, quadrature
-#' approximation, . . . )
-#' 
-#' The SAEM algorithm is a stochastic approximation version of the standard EM
-#' algorithm proposed by Kuhn and Lavielle (see reference). Details of the
-#' algorithm can be found in the pdf file accompanying the package.
-#' 
 #' @param model an object of class SaemixModel, created by a call to the
 #' function \code{\link{saemixModel}}
 #' @param data an object of class SaemixData, created by a call to the function
