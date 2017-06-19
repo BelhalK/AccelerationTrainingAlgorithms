@@ -1,4 +1,4 @@
-library(rstan)
+#library(rstan)
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -10,7 +10,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('func_simulations.R') 
   source('ggplot2_global.R') 
   # source('KL.R') 
-  source('vi.R') 
+  #source('vi.R') 
   source('global.R')
   source('main.R')
   source('mcmc_main.R') 
@@ -31,6 +31,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/git_phd/saem/VariationalInference/var
 source('vb_main.R') 
 source('main_estep_vb.R')
 
+library(ggplot2)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
