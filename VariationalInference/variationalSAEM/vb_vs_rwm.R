@@ -31,7 +31,6 @@ setwd("/Users/karimimohammedbelhal/Desktop/git_phd/saem/VariationalInference/var
 source('vb_main.R')
 source('main_estep_vb.R')
 
-library(ggplot2)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
