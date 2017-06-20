@@ -153,29 +153,29 @@ estep_amcmc<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varL
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		for (u in 1:opt$nbiter.mcmc[4]) {
-			for(vk2 in 1:nb.etas) {
-				etaMc<-etaM
-				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
-				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
-				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				etaM[ind,]<-etaMc[ind,]
-				for (i in 1:(nrow(phiM))) {
-					post_amcmc[[i]][u,2:(ncol(post_amcmc[[i]]) - 1)] <- etaM[i,]
-				}
-				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-				U.eta[ind]<-Uc.eta[ind]
-				nbc2[vk2]<-nbc2[vk2]+length(ind)
-				nt2[vk2]<-nt2[vk2]+Dargs$NM
+
+			#initialize the student and generate realizations
+
+
+
+
+			#Apply T MCMC transitions (teacher) on those samples/realizations
+			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
+			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+			psiMc<-transphi(phiMc,Dargs$transform.par)
+			fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred<-log(cutoff(fpred))
+			gpred<-error(fpred,varList$pres)
+			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+			Uc.y<-colSums(DYF)
+			deltau<-Uc.y-U.y
+			ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+			etaM[ind,]<-etaMc[ind,]
+			U.y[ind]<-Uc.y[ind]
+
+			#Update the parameter of the student via Gradient descent
+
 			}
 		}
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
