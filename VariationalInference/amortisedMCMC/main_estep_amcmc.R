@@ -148,40 +148,76 @@ estep_amcmc<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varL
 
 	}
 
-
+#Amortised MCMC
 	if(opt$nbiter.mcmc[4]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
+		mu_mcmc <- list(etaM,etaM)
 		for (u in 1:opt$nbiter.mcmc[4]) {
-
+			print(u)	
 			#initialize the student and generate realizations
-
+			mu_gd <- list(etaM,etaM)
+			Gamma <- omega.eta
+			sGamma <- somega
+			K <- 10 #nb iterations gradient ascent
+			L <- 50 #nb iterations MONTE CARLO
+			M <- 20 #nb iterations MCMC
+			rho <- 0.000001 #gradient ascent stepsize
 
 
 
 			#Apply T MCMC transitions (teacher) on those samples/realizations
-			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
-			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-			psiMc<-transphi(phiMc,Dargs$transform.par)
-			fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-			if(Dargs$error.model=="exponential")
-				fpred<-log(cutoff(fpred))
-			gpred<-error(fpred,varList$pres)
-			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-			Uc.y<-colSums(DYF)
-			deltau<-Uc.y-U.y
-			ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-			etaM[ind,]<-etaMc[ind,]
-			U.y[ind]<-Uc.y[ind]
-
-			#Update the parameter of the student via Gradient descent
-
+			for (j in 1:opt$nbiter.mcmc[4]) {
+				etaMc<-mu_mcmc[[u]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
+				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+				psiMc<-transphi(phiMc,Dargs$transform.par)
+				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred<-log(cutoff(fpred))
+				gpred<-error(fpred,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+				Uc.y<-colSums(DYF)
+				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+				etaM[ind,]<-etaMc[ind,]
+				for (i in 1:(nrow(phiM))) {
+					post_amcmc[[i]][u,2:(ncol(post_amcmc[[i]]) - 1)] <- etaM[i,]
+				}
+				U.y[ind]<-Uc.y[ind]
 			}
-		}
-		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+			
+			#Update the parameter of the student via Gradient Ascent
+			for (k in 1:K) {
+
+				sample <- list(etaM,etaM)  #list of samples for monte carlo integration
+				sample1 <- list(etaM,etaM)  #list of samples for gradient computation
+				estim <- list(etaM,etaM)
+				gradlogq <- etaM
+
+				for (l in 1:L) {
+					sample[[l]] <- mu_mcmc[[u]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
+					for (j in 1:nb.etas) {
+						sample1[[l]] <- sample[[l]]
+						sample1[[l]][,j] <- sample[[l]][,j] + 0.01
+						gradlogq[,j] <- (0.5*rowSums(sample1[[l]]*(sample1[[l]]%*%sGamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))) / 0.01
+					}
+					estim[[l]] <- sample[[l]]
+					for (i in 1:Dargs$NM) {
+						estim[[l]][i,] <- gradlogq[i,]
+					}
+				}
+
+				grad_div <- 1/L*Reduce("+", estim) 
+				mu_gd[[k+1]] <- mu_gd[[k]] + rho*grad_div
+			}
+			mu_mcmc[[u+1]] <- mu_gd[[K]]
+			}
 	}
 
-		#Amortised MCMC
+
+
+#Variational SAEM
 		if(opt$nbiter.mcmc[5]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -258,9 +294,7 @@ estep_amcmc<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varL
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
 				etaM[ind,]<-etaMc[ind,]
-				for (i in 1:(nrow(phiM))) {
-					post_amcmc[[i]][u,2:(ncol(post_amcmc[[i]]) - 1)] <- etaM[i,]
-				}
+
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)

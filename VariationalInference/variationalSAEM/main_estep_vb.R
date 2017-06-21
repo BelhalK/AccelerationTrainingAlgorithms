@@ -255,8 +255,8 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
+				# ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
 				etaM[ind,]<-etaMc[ind,]
 				for (i in 1:(nrow(phiM))) {
 					post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]

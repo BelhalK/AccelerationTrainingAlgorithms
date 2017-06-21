@@ -139,8 +139,8 @@ saemix_amcmc<-function(model,data,control=list()) {
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
   post_rwm<-xmcmc$post_rwm
-  post_vb<-xmcmc$post_vb
+  post_amcmc<-xmcmc$post_amcmc
 
-  return(list(post_rwm = post_rwm,post_vb = post_vb))
+  return(list(post_rwm = post_rwm,post_amcmc = post_amcmc))
 
 }
