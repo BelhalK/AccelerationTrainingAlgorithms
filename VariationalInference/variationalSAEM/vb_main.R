@@ -140,7 +140,8 @@ saemix_vb<-function(model,data,control=list()) {
   phiM<-xmcmc$phiM
   post_rwm<-xmcmc$post_rwm
   post_vb<-xmcmc$post_vb
+  post_vb_linear<-xmcmc$post_vb_linear
 
-  return(list(post_rwm = post_rwm,post_vb = post_vb))
+  return(list(post_rwm = post_rwm,post_vb = post_vb,post_vb_linear = post_vb_linear))
 
 }
