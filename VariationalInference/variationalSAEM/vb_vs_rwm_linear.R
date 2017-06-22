@@ -27,7 +27,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
   source("mixtureFunctions.R")
-setwd("/Users/karimimohammedbelhal/Desktop/git_phd/saem/VariationalInference/variationalSAEM")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
 source('vb_main.R')
 source('main_estep_vb.R')
 
