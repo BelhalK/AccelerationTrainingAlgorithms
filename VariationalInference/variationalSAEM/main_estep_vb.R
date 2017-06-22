@@ -167,8 +167,9 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		#Initialization
 
 		mu <- list(etaM,etaM)
-		browser()
-		A <- matrix(c(Dargs$XM[1,],0,1,0), ncol=nb.etas)
+		A <- matrix(1:20, ncol=nb.etas)
+		A[,1] <- Dargs$XM[1:10,]
+		A[,2] <- 1
 
 		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta))
 		sGamma <- solve(Gamma)
