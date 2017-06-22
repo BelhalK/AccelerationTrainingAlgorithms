@@ -74,25 +74,27 @@ for (i in 2:length(post_rwm)) {
   final_rwm <- rbind(final_rwm, post_rwm[[i]])
 }
 
+
+final_vb_linear <- post_vb_linear[[1]]
+for (i in 2:length(post_vb_linear)) {
+  final_vb_linear <- rbind(final_vb_linear, post_vb_linear[[i]])
+}
+
 final_vb <- post_vb[[1]]
 for (i in 2:length(post_vb)) {
   final_vb <- rbind(final_vb, post_vb[[i]])
 }
 
-final_vb_linear <- post_vb_linear[[1]]
-for (i in 2:length(post_vb_linear)) {
-  final_vb_linear <- rbind(final_vb, post_vb_linear[[i]])
-}
-
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_vb, title="Variational Bayes")
-graphConvMC_new(final_vb_linear, title="Variational Bayes")
+# graphConvMC_new(final_vb, title="Variational Bayes")
+graphConvMC_new(final_vb_linear, title="VB Linear case")
 graphConvMC_twokernels(final_rwm,final_vb, title="EM")
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
 graphConvMC_twokernels(post_rwm[[1]],post_vb[[1]], title="EM")
 
+graphConvMC_twokernels(post_rwm[[1]],post_vb_linear[[1]], title="EM")
 
 
 

@@ -159,7 +159,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 	}
 
 
-		#Variational Inference
+		#VI with linear model
 		if(opt$nbiter.mcmc[4]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -167,7 +167,9 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		#Initialization
 
 		mu <- list(etaM,etaM)
-		Gamma <- solve(/(varList$pres)^2+solve(Omega))
+		A <- matrix(c(Dargs$XM[1,],0,1,0), ncol=nb.etas)
+
+		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta))
 		sGamma <- solve(Gamma)
 		# Gamma <- omega.eta
 		# sGamma <- somega
@@ -233,8 +235,8 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				# ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
+				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
 				etaM[ind,]<-etaMc[ind,]
 				for (i in 1:(nrow(phiM))) {
 					post_vb_linear[[i]][u,2:(ncol(post_vb_linear[[i]]) - 1)] <- etaM[i,]
