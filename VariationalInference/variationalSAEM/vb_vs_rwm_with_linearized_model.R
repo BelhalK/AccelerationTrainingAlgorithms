@@ -30,6 +30,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
 source('vb_main.R')
 source('main_estep_vb.R')
+source('vb_main_linearized.R')
+source('main_estep_vb_linearized.R')
 
 require(ggplot2)
 require(gridExtra)
@@ -42,30 +44,31 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 50
+iter_mcmc = 10
 
 # Doc
-theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
-saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Time"),name.response=c("y"),name.X="Time")
-# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 model1cpt<-function(psi,id,xidep) { 
-	tim<-xidep[,1]  
-	d<-psi[id,1]
-	b<-psi[id,2]
-
-	ypred<-d*tim+b
+	dose<-xidep[,1]
+	tim<-xidep[,2]  
+	ka<-psi[id,1]
+	V<-psi[id,2]
+	CL<-psi[id,3]
+	k<-CL/V
+	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
 	return(ypred)
 }
 # Default model, no covariate
-saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(5,5),ncol=2,byrow=TRUE, dimnames=list(NULL, c("d","b"))),transform.par=c(0,0))
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
 saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
 saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
 
 post_rwm<-saemix_vb(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_vb_linear<-saemix_vb(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear
+post_vb_linearized_model<-saemix_vb_linearized(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear
 post_vb<-saemix_vb(saemix.model,saemix.data,saemix.options_vb)$post_vb
 
 
@@ -75,9 +78,9 @@ for (i in 2:length(post_rwm)) {
 }
 
 
-final_vb_linear <- post_vb_linear[[1]]
-for (i in 2:length(post_vb_linear)) {
-  final_vb_linear <- rbind(final_vb_linear, post_vb_linear[[i]])
+final_vb_linear <- post_vb_linearized_model[[1]]
+for (i in 2:length(post_vb_linearized_model)) {
+  final_vb_linear <- rbind(final_vb_linear, post_vb_linearized_model[[i]])
 }
 
 final_vb <- post_vb[[1]]
@@ -94,7 +97,7 @@ graphConvMC_twokernels(final_rwm,final_vb, title="EM")
 graphConvMC_new(post_rwm[[1]], title="EM")
 graphConvMC_twokernels(post_rwm[[1]],post_vb[[1]], title="EM")
 
-graphConvMC_twokernels(post_rwm[[1]],post_vb_linear[[1]], title="EM")
+graphConvMC_twokernels(post_rwm[[1]],post_vb_linearized_model[[1]], title="EM")
 
 
 

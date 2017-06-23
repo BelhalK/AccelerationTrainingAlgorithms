@@ -133,7 +133,7 @@ saemix_vb_linearized<-function(model,data,control=list()) {
   structural.model<-saemix.model["model"]
   #  nb.parameters<-saemix.model["nb.parameters"]
 
-  xmcmc<-estep_vb_linearized(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
+  xmcmc<-estep_vb_linearized(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   # xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF

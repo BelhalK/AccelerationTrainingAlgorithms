@@ -19,7 +19,7 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=ncol(final_rwm)-2, top=title))
+  do.call("grid.arrange", c(graf, ncol=ncol(df)-2, top=title))
 }
 
 
@@ -41,6 +41,6 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
     graf[[o[j]]] <- grafj
 
   }
-  do.call("grid.arrange", c(graf, ncol=ncol(final_rwm)-2, top=title))
+  do.call("grid.arrange", c(graf, ncol=ncol(df)-2, top=title))
 }
 
