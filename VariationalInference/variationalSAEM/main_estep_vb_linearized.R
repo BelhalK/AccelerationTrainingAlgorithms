@@ -169,6 +169,7 @@ estep_vb_linearized<-function(kiter, Uargs, Dargs, opt, structural.model, mean.p
 		mu <- list(etaM,etaM)
 		A <- matrix((1:(nb.etas*Dargs$NM)), ncol=nb.etas)
 		browser()
+		if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
 		# A[,1] <- Dargs$XM[1:10,]
 		# A[,2] <- 1
 
