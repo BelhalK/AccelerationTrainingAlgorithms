@@ -236,6 +236,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
@@ -259,7 +260,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		}
 	}
 
-		#Variational Inference
+		#True posterior as proposal
 		if(opt$nbiter.mcmc[5]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -269,14 +270,16 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		A[,1] <- Dargs$XM[1:10,]
 		A[,2] <- 1
 
-		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta))
+		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta)) #true posterior variance
 		sGamma <- solve(Gamma)
 
 		mu <- etaM
+		# browser()
+		#true posterior mean
 		for (i in 1:Dargs$NM){
-			mu[i] <- t((Gamma%*%t(A)/(varList$pres[1])^2)%*%(cbind(c(Dargs$yM[1:10]))-A%*%mean.phiM[1,]))
+			mu[i] <- t((Gamma%*%t(A)/(varList$pres[1])^2)%*%(cbind(c(Dargs$yM[(i*10-9):(i*10)]))-A%*%mean.phiM[1,]))
 		}
-
+		etaM <- mu
 		
 		# Gamma <- solve(/(varList$pres)^2+solve(Omega))
 		# sGamma <- solve(Gamma)
@@ -345,8 +348,23 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				gpred<-error(fpred,varList$pres)
 				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
-				Uc.eta<-0.5*rowSums((etaMc-mu)*(etaMc-mu)%*%sGamma)
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
+				U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+				phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
+				psiM<-transphi(phiM,Dargs$transform.par)
+				fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred<-log(cutoff(fpred))
+				gpred<-error(fpred,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+				U.y<-colSums(DYF)
+
+				prop <- 0.5*rowSums((etaM-mu)*(etaM-mu)%*%sGamma)
+				propc <- 0.5*rowSums((etaMc-mu)*(etaMc-mu)%*%sGamma)
+
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
 				etaM[ind,]<-etaMc[ind,]

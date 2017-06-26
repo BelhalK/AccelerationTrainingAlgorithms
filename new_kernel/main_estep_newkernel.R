@@ -159,7 +159,7 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 	}
 
 
-		#NEw kernel
+		#New kernel
 		if(opt$nbiter.mcmc[4]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1

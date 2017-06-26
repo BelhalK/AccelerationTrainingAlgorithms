@@ -65,8 +65,8 @@ saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
 
 post_rwm<-saemix_vb(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_vb_linear<-saemix_vb(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear
-post_vb<-saemix_vb(saemix.model,saemix.data,saemix.options_vb)$post_vb
+post_vb_linear<-saemix_vb(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear #VI with the right Gamma (see if the mu tends to the correct mu)
+post_vb<-saemix_vb(saemix.model,saemix.data,saemix.options_vb)$post_vb #true posterior implemented (should converge directly)
 
 
 final_rwm <- post_rwm[[1]]
@@ -74,16 +74,17 @@ for (i in 2:length(post_rwm)) {
   final_rwm <- rbind(final_rwm, post_rwm[[i]])
 }
 
+final_vb <- post_vb[[1]]
+for (i in 2:length(post_vb)) {
+  final_vb <- rbind(final_vb, post_vb[[i]])
+}
 
 final_vb_linear <- post_vb_linear[[1]]
 for (i in 2:length(post_vb_linear)) {
   final_vb_linear <- rbind(final_vb_linear, post_vb_linear[[i]])
 }
 
-final_vb <- post_vb[[1]]
-for (i in 2:length(post_vb)) {
-  final_vb <- rbind(final_vb, post_vb[[i]])
-}
+
 
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
