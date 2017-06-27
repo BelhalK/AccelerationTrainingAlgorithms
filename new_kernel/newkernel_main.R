@@ -133,15 +133,15 @@ saemix_newkernel<-function(model,data,control=list()) {
   structural.model<-saemix.model["model"]
   #  nb.parameters<-saemix.model["nb.parameters"]
 
-  xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
+  xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM, saemixObject)
   # xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
   post_rwm<-xmcmc$post_rwm
   post_vb<-xmcmc$post_vb
-  post_vb_linear<-xmcmc$post_vb_linear
+  post_newkernel<-xmcmc$post_newkernel
 
-  return(list(post_rwm = post_rwm,post_vb = post_vb,post_vb_linear = post_vb_linear))
+  return(list(post_rwm = post_rwm,post_vb = post_vb,post_newkernel = post_newkernel))
 
 }

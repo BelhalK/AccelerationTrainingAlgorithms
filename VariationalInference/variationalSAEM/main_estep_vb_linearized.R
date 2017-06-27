@@ -261,69 +261,97 @@ estep_vb_linearized<-function(kiter, Uargs, Dargs, opt, structural.model, mean.p
 	}
 
 		#Variational Inference
+		#New kernel
 		if(opt$nbiter.mcmc[5]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
+		
+		#MAP calculation
+		saemix.options<-saemixObject["options"]
+	  	saemix.model<-saemixObject["model"]
+	  	saemix.data<-saemixObject["data"]
+	  	saemix.options$map <- TRUE
+	  	saemixObject["results"]["omega"] <- omega.eta
+	  	saemixObject["results"]["mean.phi"] <- mean.phi
+	  	saemixObject["results"]["phi"] <- phiM
+	  	saemixObject["results"]["respar"] <- varList$pres
 
-		#Initialization
+	  	i1.omega2<-saemixObject["model"]["indx.omega"]
+	    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+	  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
+	  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
+	  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
+	  	id.list<-unique(id)
+	  	phi.map<-saemixObject["results"]["phi"]
 
-		mu <- list(etaM,etaM)
-		# Gamma <- solve(/(varList$pres)^2+solve(Omega))
+	  	for(i in 1:Dargs$NM) {
+		    isuj<-id.list[i]
+		    xi<-xind[id==isuj,,drop=FALSE]
+		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+		    yi<-yobs[id==isuj]
+		    idi<-rep(1,length(yi))
+		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+		    phii<-saemixObject["results"]["phi"][i,]
+		    phi1<-phii[i1.omega2]
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
+		    phi.map[i,i1.omega2]<-phi1.opti$par
+		  }
+
+	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+		map.psi<-data.frame(id=id.list,map.psi)
+		map.phi<-data.frame(id=id.list,phi.map)
+
+		psi_map <- as.matrix(map.psi[,-c(1)])
+		phi_map <- as.matrix(map.phi[,-c(1)])
+		eta_map <- phi_map - mean.phiM
+		
+		#gradient at the map estimation
+		gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
+
+
+		for (j in 1:nb.etas) {
+			phi_map2 <- phi_map
+			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			for (i in 1:(Dargs$NM)){
+				r = 1:sum(Dargs$IdM == i)
+                r = r+sum(as.matrix(gradf[,j]) != 0L)
+				gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+			}
+		}
+
+		#calculation of the covariance matrix of the proposal
+	
+		Gamma <- list(omega.eta,omega.eta)
+		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
+		for (i in 1:(Dargs$NM)){
+			r = 1:sum(Dargs$IdM == i)
+			r <- r+sum(as.matrix(z) != 0L)
+            z[r] <- gradf[r,1]
+			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+		}
+		# Gamma <- solve(t(gradf)%*%gradf/(varList$pres[1])^2+solve(omega.eta))
 		# sGamma <- solve(Gamma)
-		Gamma <- omega.eta
-		sGamma <- somega
-		K <- 10 #nb iterations gradient ascent
-		L <- 50 #nb iterations MONTE CARLO
-		rho <- 0.000001 #gradient ascent stepsize
+		
+
+		
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			print(u)
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
-				
-			#VI to find the right mean mu (gradient descent along the elbo)
-				for (k in 1:K) {
-					#monte carlo integration of the gradient of the ELBO
-				
-					sample <- list(etaM,etaM)  #list of samples for monte carlo integration
-					sample1 <- list(etaM,etaM)  #list of samples for gradient computation
-					estim <- list(etaM,etaM)
-					gradlogq <- etaM
+				etaM <- eta_map
+				propc <- U.eta
+				prop <- U.eta
+				#generate candidate eta
 					
-					for (l in 1:L) {
-
-						sample[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
-						phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+sample[[l]]
-						psiMc<-transphi(phiMc,Dargs$transform.par)
-						fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-						if(Dargs$error.model=="exponential")
-							fpred<-log(cutoff(fpred))
-						gpred<-error(fpred,varList$pres)
-						DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-						#Log complete computation
-						logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
-						#Log proposal computation
-						logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
-						for (j in 1:nb.etas) {
-							sample1[[l]] <- sample[[l]]
-							sample1[[l]][,j] <- sample[[l]][,j] + 0.01
-							gradlogq[,j] <- (0.5*rowSums(sample1[[l]]*(sample1[[l]]%*%sGamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))) / 0.01
-						}
-						estim[[l]] <- sample[[l]]
-						for (i in 1:Dargs$NM) {
-							estim[[l]][i,] <- (logp[i] - logq[i])*gradlogq[i,]
-						}
-						
-						
-					}
-					grad_elbo <- 1/L*Reduce("+", estim) 
-					#Gradient ascent along that gradient
-					mu[[k+1]] <- mu[[k]] + rho*grad_elbo
+				for (i in 1:(Dargs$NM)){
+					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
+					etaMc[i,]<- eta_map[i,] +M[i,]
 				}
 
-				#generate candidate eta
-				etaMc<- mu[[K]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
 
-				#Use this VI output as a proposal for the MH
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
@@ -333,9 +361,16 @@ estep_vb_linearized<-function(kiter, Uargs, Dargs, opt, structural.model, mean.p
 				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				# ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
+
+
+				for (i in 1:(Dargs$NM)){
+					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+				}
+
+
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				for (i in 1:(nrow(phiM))) {
 					post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]

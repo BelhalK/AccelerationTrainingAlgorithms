@@ -43,7 +43,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 10
+iter_mcmc = 100
 
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
@@ -67,7 +67,7 @@ saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 
 
 post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_vb_linearized_model<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear
+post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_newkernel
 
 
 
@@ -77,20 +77,20 @@ for (i in 2:length(post_rwm)) {
 }
 
 
-final_vb_linear <- post_vb_linearized_model[[1]]
-for (i in 2:length(post_vb_linearized_model)) {
-  final_vb_linear <- rbind(final_vb_linear, post_vb_linearized_model[[i]])
+final_newkernel <- post_newkernel[[1]]
+for (i in 2:length(post_newkernel)) {
+  final_newkernel <- rbind(final_newkernel, post_newkernel[[i]])
 }
 
 
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_vb_linear, title="VB Linear case")
+graphConvMC_new(final_newkernel, title="VB Linear case")
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
 
-
-graphConvMC_twokernels(post_rwm[[1]],post_vb_linearized_model[[1]], title="EM")
+graphConvMC_twokernels(final_rwm,final_newkernel, title="EM")
+graphConvMC_twokernels(post_rwm[[1]],post_newkernel[[1]], title="EM")
 
 
 

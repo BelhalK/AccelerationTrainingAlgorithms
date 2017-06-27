@@ -81,7 +81,6 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
-
 		U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -171,13 +170,14 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		A[,1] <- Dargs$XM[1:10,]
 		A[,2] <- 1
 
-		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta))
+		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta)) #true posterior variance
 		sGamma <- solve(Gamma)
+
 		# Gamma <- omega.eta
 		# sGamma <- somega
-		K <- 30 #nb iterations gradient ascent
-		L <- 10 #nb iterations MONTE CARLO
-		rho <- 0.000001 #gradient ascent stepsize
+		K <- 2 #nb iterations gradient ascent
+		L <- 2 #nb iterations MONTE CARLO
+		rho <- 0.00000000001 #gradient ascent stepsize
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			print(u)
 			for(vk2 in 1:nb.etas) {
@@ -206,6 +206,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 						logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
 						#Log proposal computation
 						logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
+						#gradlogq computation
 						for (j in 1:nb.etas) {
 							sample1[[l]] <- sample[[l]]
 							sample1[[l]][,j] <- sample[[l]][,j] + 0.01
@@ -223,6 +224,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 					mu[[k+1]] <- mu[[k]] + rho*grad_elbo
 				}
 
+				mu[[K]] <- etaM
 				#generate candidate eta
 				etaMc<- mu[[K]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
 
@@ -237,8 +239,12 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				prop <- 0.5*rowSums((etaM-mu[[K]])*((etaM-mu[[K]])%*%sGamma))
+				propc <- 0.5*rowSums((etaMc-mu[[K]])*((etaMc-mu[[K]])%*%sGamma))
+
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				print(length(ind)/Dargs$NM)
 				# ind <- 1:Dargs$NM #(Use VI output as the posterior distribution we simulate from)
 				etaM[ind,]<-etaMc[ind,]
 				for (i in 1:(nrow(phiM))) {
@@ -266,6 +272,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		nrs2<-1
 
 		#Initialization
+	
 		A <- matrix(1:20, ncol=nb.etas)
 		A[,1] <- Dargs$XM[1:10,]
 		A[,2] <- 1

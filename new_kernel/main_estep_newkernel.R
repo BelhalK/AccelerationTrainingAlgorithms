@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM) {
+estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -51,14 +51,14 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 		post_vb[[i]][,ncol(post_vb[[i]])] <- i
 	}
 
-	post_vb_linear <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
+	post_newkernel <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
 
 	for (i in 1:(nrow(phiM))) {
-		post_vb_linear[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
-		names(post_vb_linear[[i]])[1] <- "iteration" 
-		names(post_vb_linear[[i]])[ncol(post_vb_linear[[i]])] <- "individual"
-		post_vb_linear[[i]][,1] <- 1:max(opt$nbiter.mcmc)
-		post_vb_linear[[i]][,ncol(post_vb_linear[[i]])] <- i
+		post_newkernel[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
+		names(post_newkernel[[i]])[1] <- "iteration" 
+		names(post_newkernel[[i]])[ncol(post_newkernel[[i]])] <- "individual"
+		post_newkernel[[i]][,1] <- 1:max(opt$nbiter.mcmc)
+		post_newkernel[[i]][,ncol(post_newkernel[[i]])] <- i
 	}
 
 	
@@ -165,26 +165,91 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 		nrs2<-1
 
 		#MAP calculation
-		if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
-		browser()
+		saemix.options<-saemixObject["options"]
+	  	saemix.model<-saemixObject["model"]
+	  	saemix.data<-saemixObject["data"]
+	  	saemix.options$map <- TRUE
+	  	saemixObject["results"]["omega"] <- omega.eta
+	  	saemixObject["results"]["mean.phi"] <- mean.phi
+	  	saemixObject["results"]["phi"] <- phiM
+	  	saemixObject["results"]["respar"] <- varList$pres
 
+	  	i1.omega2<-saemixObject["model"]["indx.omega"]
+	    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+	  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
+	  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
+	  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
+	  	id.list<-unique(id)
+	  	phi.map<-saemixObject["results"]["phi"]
+
+	  	for(i in 1:Dargs$NM) {
+		    isuj<-id.list[i]
+		    xi<-xind[id==isuj,,drop=FALSE]
+		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+		    yi<-yobs[id==isuj]
+		    idi<-rep(1,length(yi))
+		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+		    phii<-saemixObject["results"]["phi"][i,]
+		    phi1<-phii[i1.omega2]
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
+		    phi.map[i,i1.omega2]<-phi1.opti$par
+		  }
+
+	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+		map.psi<-data.frame(id=id.list,map.psi)
+		map.phi<-data.frame(id=id.list,phi.map)
+
+		psi_map <- as.matrix(map.psi[,-c(1)])
+		phi_map <- as.matrix(map.phi[,-c(1)])
+		eta_map <- phi_map - mean.phiM
+		
 		#gradient at the map estimation
+		gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
 
+
+		for (j in 1:nb.etas) {
+			phi_map2 <- phi_map
+			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			for (i in 1:(Dargs$NM)){
+				r = 1:sum(Dargs$IdM == i)
+                r = r+sum(as.matrix(gradf[,j]) != 0L)
+				gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+			}
+		}
 
 		#calculation of the covariance matrix of the proposal
-		Gamma <- solve(t(A)%*%A/(varList$pres[1])^2+solve(omega.eta))
-		sGamma <- solve(Gamma)
+	
+		Gamma <- list(omega.eta,omega.eta)
+		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
+		for (i in 1:(Dargs$NM)){
+			r = 1:sum(Dargs$IdM == i)
+			r <- r+sum(as.matrix(z) != 0L)
+            z[r] <- gradf[r,1]
+			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+		}
+		# Gamma <- solve(t(gradf)%*%gradf/(varList$pres[1])^2+solve(omega.eta))
+		# sGamma <- solve(Gamma)
 		
+
 		
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			print(u)
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
-
+				etaM <- eta_map
+				propc <- U.eta
+				prop <- U.eta
 				#generate candidate eta
-				etaMc<- eta_map +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)
+					
+				for (i in 1:(Dargs$NM)){
+					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
+					etaMc[i,]<- eta_map[i,] +M[i,]
+				}
 
-				
+
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
@@ -195,14 +260,18 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 
-				propc <- 0.5*rowSums((etaMc-eta_map)*(etaMc-eta_map)%*%sGamma))
-				prop <- 0.5*rowSums((etaM-eta_map)*(etaM-eta_map)%*%sGamma))
-				
+
+				for (i in 1:(Dargs$NM)){
+					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+				}
+
+
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				for (i in 1:(nrow(phiM))) {
-					post_vb_linear[[i]][u,2:(ncol(post_vb_linear[[i]]) - 1)] <- etaM[i,]
+					post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i,]
 				}
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
@@ -224,5 +293,6 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 	
 		
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_vb_linear = post_vb_linear))
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_newkernel = post_newkernel))
 }
+

@@ -69,7 +69,7 @@ saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mc
 
 post_rwm<-saemix_vb(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_vb_linearized_model<-saemix_vb_linearized(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear
-post_vb<-saemix_vb(saemix.model,saemix.data,saemix.options_vb)$post_vb
+post_vb<-saemix_vb_linearized(saemix.model,saemix.data,saemix.options_vb)$post_vb
 
 
 final_rwm <- post_rwm[[1]]

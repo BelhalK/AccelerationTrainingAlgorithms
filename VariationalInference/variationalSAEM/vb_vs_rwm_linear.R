@@ -85,17 +85,17 @@ for (i in 2:length(post_vb_linear)) {
 }
 
 
-
+index = 55
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
-# graphConvMC_new(final_vb, title="Variational Bayes")
+# graphConvMC_new(final_vb, title="True posterior")
 graphConvMC_new(final_vb_linear, title="VB Linear case")
 graphConvMC_twokernels(final_rwm,final_vb, title="EM")
 #first individual posteriors
-graphConvMC_new(post_rwm[[1]], title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_vb[[1]], title="EM")
+graphConvMC_new(post_rwm[[index]], title="EM")
+graphConvMC_twokernels(post_rwm[[index]],post_vb[[index]], title="EM")
 
-graphConvMC_twokernels(post_rwm[[1]],post_vb_linear[[1]], title="EM")
+graphConvMC_twokernels(post_rwm[[index]],post_vb_linear[[index]], title="EM")
 
 
 
