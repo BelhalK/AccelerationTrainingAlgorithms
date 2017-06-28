@@ -1,0 +1,8 @@
+[LONGITUDINAL]
+input = {d,b}
+ 
+EQUATION:
+Cc = d*t+b
+                      
+OUTPUT:
+output = Cc
