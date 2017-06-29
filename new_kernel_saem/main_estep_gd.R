@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
+estep_gd<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -158,7 +158,8 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 		K1 <- saemix.options$nbiter.saemix[1]
 		K2 <- saemix.options$nbiter.saemix[2]
-		if (kiter < (K1+K2+1)){
+		gd_step <- saemix.options$step.gd
+		if (kiter < 2){
 	  	for(i in 1:Dargs$NM) {
 		    isuj<-id.list[i]
 		    xi<-xind[id==isuj,,drop=FALSE]
@@ -209,7 +210,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 					gradp[i,kj] <- (P2.y[i]*P2.eta[i]-P.y[i]*P.eta[i])/(phi_map[i,kj]/100)
 				}
 			}
-			phi.map <- phi.map + 0*gradp
+			phi.map <- phi.map + gd_step*gradp
 			# phi.map <- phi.map
 		}
 	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])

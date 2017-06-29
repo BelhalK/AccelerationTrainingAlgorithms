@@ -178,12 +178,7 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		K <- 2 #nb iterations gradient ascent
 		L <- 2 #nb iterations MONTE CARLO
 		rho <- 0.00000000001 #gradient ascent stepsize
-		for (u in 1:opt$nbiter.mcmc[4]) {
-			print(u)
-			for(vk2 in 1:nb.etas) {
-				etaMc<-etaM
-				
-			#VI to find the right mean mu (gradient descent along the elbo)
+		#VI to find the right mean mu (gradient descent along the elbo)
 				for (k in 1:K) {
 					#monte carlo integration of the gradient of the ELBO
 				
@@ -224,6 +219,12 @@ estep_vb<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 					mu[[k+1]] <- mu[[k]] + rho*grad_elbo
 				}
 
+		for (u in 1:opt$nbiter.mcmc[4]) {
+			print(u)
+			for(vk2 in 1:nb.etas) {
+				etaMc<-etaM
+				
+			
 				mu[[K]] <- etaM
 				#generate candidate eta
 				etaMc<- mu[[K]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma)

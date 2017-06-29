@@ -7,7 +7,6 @@ require(reshape2)
 graphConvMC_new <- function(df, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
-  df$individual <- as.factor(df$individual)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -19,7 +18,7 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=ncol(final_rwm)-2, top=title))
+  do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 
 
@@ -27,8 +26,6 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
 graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
-  df$individual <- as.factor(df$individual)
-  df2$individual <- as.factor(df2$individual)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -41,6 +38,6 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
     graf[[o[j]]] <- grafj
 
   }
-  do.call("grid.arrange", c(graf, ncol=ncol(final_rwm)-2, top=title))
+  do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 

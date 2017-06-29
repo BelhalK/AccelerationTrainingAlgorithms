@@ -25,12 +25,15 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  source("mixtureFunctions.R")
+  
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 source('newkernel_main.R')
 source('main_new.R')
 source('main_estep_new.R')
+source('main_gd.R')
+source('main_estep_gd.R')
 source('main_estep_newkernel.R')
+source("mixtureFunctions.R")
 
 #####################################################################################
 # Theophylline
@@ -58,14 +61,55 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2))
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5))
-theo.onlypop<-saemix_new(saemix.model,saemix.data,options.new)
-theo.onlypop<-saemix(saemix.model,saemix.data,options)
+K1 = 300
+K2 = 100
+iterations = 1:(K1+K2+1)
+gd_step = 0.01
 
-saemix.options<-list(seed=632545,save=save.results,save.graphs=save.results,directory=file.path(save.dir,"theoNoCov"))
 
+#RWM
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+theo_ref <- cbind(iterations, theo_ref)
+
+#ref (map always)
+options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iterations, theo_new_ref)
+
+
+#MAP once and GD
+options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
+theo_gd <- cbind(iterations, theo_gd)
+
+#MAP once and  NO GD
+options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
+theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
+theo_nogd <- cbind(iterations, theo_nogd)
+
+
+
+
+
+#RWM vs always MAP (ref)
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
+#ref vs map once no gd
+graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
+#map once no gd vs map once and gd
+graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
+#ref vs map once gd
+graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
+#RWM vs GD
+graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+
+
+
+# graphConvMC_new(theo_gd, title="new kernel")
+
+# graphConvMC_twokernels(theo_ref,theo_gd, title="new kernel")
 
 # saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
 # plot(saemix.fit,plot.type="individual")
 
+# saemix.options<-list(seed=632545,save=save.results,save.graphs=save.results,directory=file.path(save.dir,"theoNoCov"))
