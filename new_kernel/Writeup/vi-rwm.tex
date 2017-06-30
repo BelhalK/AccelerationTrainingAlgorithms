@@ -16,7 +16,7 @@
 
 % For citations
 \usepackage{natbib}
-
+\usepackage{amsmath}
 % For algorithms
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -99,17 +99,17 @@ Bridging the gap between Independent Metropolis Hastings and Variational Inferen
 % Remove it (just {}) if you do not need this facility.
 
 %\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
-\printAffiliationsAndNotice{} % otherwise use the standard text.
+
 
 \begin{abstract} 
-Variational inference and MCMC methods have been two popular methods in order to sample from a posterior distribution. Whereas the former extends the computation feasibility to higher dimension, the latter takes advantage of nice convergence properties to the exact posterior distribution. In this work we'll draw the parallel between a famous MCMC scheme called the Independent Metropolis Hastings and Variational inference. We'll explain our work on both Linear and Non-linear gaussian cases. In the non linear case, a new proposal will be introduced motivated by a faster convergence of the Markov chain.
+Variational inference and MCMC methods have been two popular methods in order to sample from a posterior distribution. Whereas the former extends the computation feasibility to higher dimension, the latter takes advantage of nice convergence properties to the exact posterior distribution. In this work we'll draw the parallel between a famous MCMC scheme called the Independent Metropolis Hastings and Variational inference. We'll explain our work on both Linear and Non-linear Gaussian cases. In the non linear case, a new proposal will be introduced motivated by a faster convergence of the Markov chain.
 \end{abstract} 
 
 \section{Introduction}
 
 We consider a complete model (y,z) where the realizations of y are observed and z is the missing data. When the complete model $p(y,z,\theta)$ is parametric, the goal is to compute the maximum likelihood (ML) estimate of the parameter of this joint distribution.
 \begin{equation}
-\theta^{ML} = \arg\max p(y,\theta)
+\theta^{ML} = \arg\max \limits_{\theta} p(y,\theta)
 \end{equation}
 When the direct derivation of this expression is hard, several methods use the complete model to iteratively find the quantity of interest.
 The EM algorithm has been the object of considerable interest since its presentation by Dempster, Laird and Rubin in 1977. It has been relatively effective in context of maximum likelihood estimation of parameters of incomplete model (unobserved or more). This algorithm is monotonic in likelihood making it a stable tool to work with.
@@ -146,19 +146,19 @@ In those both cases, we need to be able to simulate from the posterior distribut
 \section{Background on Posterior sampling} 
  
 \subsection{Independent Metropolis Hastings}
-Metropolis-Hastings are a powerful class of inference that belong to MCMC methods. This kind of algorithm constructs a Markov Chain by proposing candidate states sampled from a proposal distribution and then accepting or rejecting it according to the MH-step (see Algorithm ~\ref{alg:IMH} for detail). When this proposal is independent of the current state of the chain, we call the algorithm Independent Metropolis Hastings.
+Metropolis-Hastings are a powerful class of inference algorithms that belong to the family of  MCMC methods. This kind of algorithm constructs a Markov Chain by proposing candidate states sampled from a proposal distribution and then accepting or rejecting it according to the MH-step (see Algorithm ~\ref{alg:IMH} for detail). When this proposal is independent of the current state of the chain, we call the algorithm Independent Metropolis Hastings.
 
 \begin{algorithm}[h]
    \caption{Independent Metropolis Hastings}
    \label{alg:IMH}
 \begin{algorithmic}
-   \STATE {\bfseries Input:} initial state $\eta_0$, proposal distribution $q$, number of iterations $M$, target measure $\pi$
+   \STATE {\bfseries Input:} initial state $Z_0$, proposal distribution $q$, number of iterations $M$, target measure $\pi$
 
 
    \FOR{$m=1$ {\bfseries to} $M$}
-   \STATE $\eta_m \sim q(\eta|\eta_{m-1})$
-   \STATE $\alpha(\eta_m,\eta_{m-1}) = \frac{\pi(\eta_m) q(\eta_{m-1}|\eta_{m})}{\pi(\eta_{m-1}) q(\eta_{m}|\eta_{m-1})}$
-   \STATE Accept $\eta_m$ with probability $\min(\alpha,1)$
+   \STATE $Z_m \sim q(Z)$
+   \STATE $\alpha(Z_m,Z_{m-1}) = \frac{\pi(Z_m) q(Z_{m-1})}{\pi(Z_{m-1}) q(Z_{m})}$
+   \STATE Accept $Z_m$ with probability $\min(\alpha,1)$
    \ENDFOR
 
 \end{algorithmic}
@@ -167,23 +167,23 @@ Metropolis-Hastings are a powerful class of inference that belong to MCMC method
 We will explicitly write our target measure $\pi$ in the different cases we'll deal with in the sequel.\\
 
 \subsection{Variational Inference}
-Variational methods approximates those intractable distributions by finding the best distribution minimizing a divergence criteria. Let $\mathcal{D}$ be a family of distributions over the latent variable $\eta_i$. Variational Methods solve the following optimization problem:
+Variational methods approximates those intractable distributions by finding the best distribution minimizing a divergence criteria. Let $\mathcal{D}$ be a family of distributions over the latent variable $Z_i$. Variational Methods solve the following optimization problem:
 \begin{equation}
-q^* = \arg \min \limits_{q \in \mathcal{D}} D_{KL}(q||P_{\eta_i|y_i,\theta_0})
+q^* = \arg \min \limits_{q \in \mathcal{D}} D_{KL}(q||P_{Z_i|Y_i,\theta_0})
 \end{equation}
 
 Which simplifies to:
 \begin{equation}
 q^* = \arg \max \limits_{q \in \mathcal{D}} \mathcal{L}(q)
 \end{equation}
-Where $\mathcal{L}(q) = \mathbb{E}_q(\log p(y_i,\eta_i,\theta_0)) - \mathbb{E}_q(\log q(\eta_i))$ is called the ELBO (Evidence Lower BOund).\\
+Where $\mathcal{L}(q) = \mathbb{E}_q(\log p(y_i,z_i,\theta_0)) - \mathbb{E}_q(\log q(z_i))$ is called the ELBO (Evidence Lower BOund).\\
 
-The practical implementation of such an algorithm consisting in first, restricting the search space to a family of known distributions (in our case the Gaussian family). Then, performing a Monte Carlo integration of the gradient of the ELBO, see \citep{ranganath} and finally performing a gradient ascent  as described by Algorithm ~\ref{alg:VI}. We restrict ourselves to the family of Gaussian distributions of mean $\mu$ and variance $\Gamma$. We run the variational inference on the mean and fix the value of $\Gamma$. As a result the problem now is written, if we denote $q_{\mu}$ the gaussian density of mean $\mu$:
+The practical implementation of such an algorithm consisting in first, restricting the search space to a family of known distributions (in our case the Gaussian family). Then, performing a Monte Carlo integration of the gradient of the ELBO, see \citep{ranganath} and finally performing a gradient ascent  as described by Algorithm ~\ref{alg:VI}. We restrict ourselves to the family of Gaussian distributions of mean $\mu$ and variance $\Gamma$. We run the variational inference on the mean and fix the value of $\Gamma$. As a result the problem now is written, if we denote $q_{\mu}$ the Gaussian density of mean $\mu$:
 \begin{equation}
 \mu^* = \arg \max \limits_{\mu \in \mathbb{R}} \mathcal{L}(\mu)
 \end{equation}
 
-Where $\mathcal{L}(\mu) = \mathbb{E}_{q_{\mu}}(\log p(y_i,\eta_i,\theta_0)) - \mathbb{E}_{q_{\mu}}(\log q_{\mu}(\eta_i))$
+Where $\mathcal{L}(\mu) = \mathbb{E}_{q_{\mu}}(\log p(y_i,z_i,\theta_0)) - \mathbb{E}_{q_{\mu}}(\log q_{\mu}(z_i))$
 
 \begin{algorithm}[h]
    \caption{Gradient Descent for VI}
@@ -213,7 +213,7 @@ Where $f: \mathbb{R}^d \to \mathbb{R}$ is the structural model and is a function
 \end{equation}
 where $\eta_i \sim \mathcal{N}(0,\Omega)$.
 
-In this context, our goal is to sample from the posterior $P(\psi_i|y_i,\theta_0)$ for all individuals. For simplicity we'll consider the centered random variable $\eta_i$ in our study. Thus, the goal is to sample from $P(\eta_i|y_i,\theta_0) = P(y_i|\eta_i,\theta_0)P(\eta_i)$. For the purpose of the stochastic EM algorithm we can easily shift to $\psi_i = M(\eta_i, \psi_pop)$.\\
+In this context, our goal is to sample from the posterior $P(\psi_i|y_i,\theta_0)$ for all individuals. For simplicity we'll consider the centered random variable $\eta_i$ in our study. Thus, the goal is to sample from $P(\eta_i|y_i,\theta_0) = P(y_i|\eta_i,\theta_0)P(\eta_i)$. For the purpose of the stochastic EM algorithm we can easily shift to $\psi_i = M(\eta_i, \psi_{pop})$.\\
 We'll now separate the cases where the structural model is linear or not and explain how MCMC are Variational Inference can be applied to our problem.
 
 \subsection{Gaussian linear case}
@@ -227,7 +227,7 @@ Where $A_i$ is a design matrix and $\psi_i = \psi_{pop} + \eta_i$. In this case,
 \end{equation}
 Where $m = \Gamma A_i^\prime \Sigma^{-1} (y_i - A_i\psi_{pop})$ and $G = (A_i^\prime\Sigma^{-1}A_i + \Omega^{-1})^{-1}$
 
-In this case, we can sample directly from the true posterior distribution. Thus, using MCMC or Variational Inference has no sense. We can verify that those both methods, whether we propose in MCMC with the true posterior or we apply a gradient descent over the mean of a candidate distribution, will converge to the right distribution.
+In this case, we can sample directly from the true posterior distribution. Thus, using MCMC or Variational Inference has no sense. We can verify that those both methods, whether we propose in the context of an MCMC with the true posterior or we apply a gradient descent over the mean of a candidate distribution, will converge to the right distribution.
 
 \subsection{Gaussian non linear case}
 The model can be written as:
@@ -241,7 +241,10 @@ We are constructing a new independent proposal distribution for our Metropolis H
 \end{equation}
 which can rewrite, considering the distribution of the components of the model:
 \begin{equation}
-\hat{\psi_i} = \arg \max \limits_{\psi_i} \left\{ (y_i-f(\psi_i))' \Sigma^{-1} (y_i-f(\psi_i)) + \eta' \Omega^{-1} \eta \right\}
+\begin{split}
+\hat{\psi_i}  = \arg \max \limits_{\psi_i} \quad & (y_i-f(\psi_i))' \Sigma^{-1} (y_i-f(\psi_i)) \\
+&  + (\psi_i - \psi_{pop})' \Omega^{-1} (\psi_i - \psi_{pop})
+\end{split}
 \end{equation}
 
 The Taylor expansion around this point gives the following expression:
@@ -256,12 +259,12 @@ We can now write the posterior distribution $\eta_i|y_i$ and show that  $\eta_i|
 $\mu_{lin} = \mathbb{E}(\eta_i|y_i) = \hat{\eta_i} = \hat{\psi_i} - \psi_{pop}$ and $\Gamma_{lin}^{-1} = \nabla_{\psi}f(\hat{\psi_i})'\Sigma^{-1} \nabla_{\psi}f(\hat{\psi_i}) + \Omega^{-1}$ 
 
 This new distribution will serve as an independent (independent of the current state of the chain since always centered in $\hat{\eta_i}$) proposal for our MH algorithm.\\
-The other aspect we want to develop is to know if a variational approach where our candidate distribution would be taken in the family of the Gaussian distribution of variance $\Gamma_{lin}$ and of mean $\mu$ on which we'll do the calculus of variations, would converge to the same mean $\hat{\eta_i}$. In other words, we want to highlight the equivalence of those two methods based on the same approximation (that the proposal is a Gaussian distribution even though, due to the non-linearity of the model, the true posterior does not belong to a known family of distribution.
+The other aspect we want to develop is to know if a variational approach where our candidate distribution would be taken in the family of the Gaussian distributions with variance $\Gamma_{lin}$ and with mean $\mu$ on which we'll do perform the gradient ascent, would converge to the same mean $\hat{\eta_i}$. In other words, we want to highlight the equivalence of those two methods based on the same approximation (that the proposal is a Gaussian distribution even though, due to the non-linearity of the model, the true posterior does not belong to a known family of distribution).
 
 \section{Experiments} 
 
 \subsection{One-compartment model for Theophylline}
-This section develop the application of those two methods on a Pharmacokinetics (PK) example. Beforehand, the standard approach is to approximate the body as a simple compartment models. In this example we will focus on a one-compartment model for theophylline following oral dose D at time $t=0$ leads to description of concentration $y(t_i)$ at time $t_i \geq 0$ (i varies from 1 to N and denote the individual of the population):
+This section develops the application of those two methods on a Pharmacokinetics (PK) example. Beforehand, the standard approach is to approximate the body as a simple compartment models. In this example we will focus on a one-compartment model for theophylline following oral dose D at time $t=0$ leading to description of concentration $y(t_i)$ at time $t_i \geq 0$ (i varies from 1 to N and denote the individual of the population):
 \begin{equation}
 y_i = y(t_i) = f(\psi_i)+ \epsilon_i
 \end{equation}
@@ -270,7 +273,7 @@ With :
 f(\psi_i) = \frac{D(k_a)_i}{V_i((k_a)_i - (C_l)_i/V_i)}(e^{(-(k_a)_it_i)}-e^{(-\frac{(C_l)_i}{V_i}t_i)})
 \end{equation}
 Where $(k_a)_i$ is the fractional rate of absorption for individual $i$, $(C_l)_i$ is the clearance rate for individual $i$ and $V_i$ is the volume of distribution for individual $i$ and D is the dose injected.\\
-In our notation, the complete model is $p(y_i,\psi_i,\theta_0)$ where $\psi_i = ((k_a)_i, (C_l)_i, V_i)$ is the vector of individual parameters where each component is composed of a fixed population term and a random effect (a centered Gaussian with same variance $\Omega$) and $\theta_0 = (\Omega_0, \Sigma_0$ (with $\epsilon_i \sim \mathcal{N}(0,\Sigma_0)$ and $(k_a)_i = (k_a)_{pop} + \eta_{(k_a)_i}$ and $\eta_{(k_a)_i} \sim \mathcal{N}(0,\Omega_0)$).\\
+In our notation, the complete model is $p(y_i,\psi_i,\theta_0)$ where $\psi_i = ((k_a)_i, (C_l)_i, V_i)$ is the vector of individual parameters where each component is composed of a fixed effect term and a random effect (a centered Gaussian with same variance $\Omega$) and $\theta_0 = (\Omega_0, \Sigma_0$ (with $\epsilon_i \sim \mathcal{N}(0,\Sigma_0)$ and $(k_a)_i = (k_a)_{pop} + \eta_{(k_a)_i}$ and $\eta_{(k_a)_i} \sim \mathcal{N}(0,\Omega_0)$).\\
 Our goal is to simulate for instance from the posterior distribution $P((k_a)_i|y_i,\theta_0)$. As we said above we can work on the distribution $P(\eta_{(k_a)_i}|y_i,\theta_0)$ and equivalently for the others parameters.\\
 Following the method of linearization of this model as described above, we obtain faster convergence of the MH algorithm with this new independent proposal than our reference Random Walk Metropolis consisting in three successive kernels proposing with a Gaussian centered in the current state of the chain and whose variance adapts with respect to the optimum acceptance rate.
 
@@ -286,7 +289,7 @@ Following the method of linearization of this model as described above, we obtai
 
 \section{Discussion} 
 This work is still in progress. Our goals are multiple. First of all, following \citep{kuhn} setting convergence properties for the SAEM algorithm coupled with an MCMC procedure, we are aiming at setting up similar properties for the SAEM coupled with a variational inference procedure (See also \citep{gunawardana} for the Variational EM algorithm). Moreover, we would like to theoretically draw some parallels between those two methods. And finally, many PK-PD models consider not continuous but categorical or count data. In this case, an alternative to linearization has to be found in order to construct such a proposal.\\
-Also, in our context of applying this method to the SAEM algorithm, while calculating the MAP once for one MCMC run is not costly, doing it K times (K being the number of SAEM iterations) can be. We are investigating a way to calculate the MAP once at the beginning and then apply a single step of gradient descent at each SAEM iteration in order to slowly move the MAP estimate after each update of the posterior distribution towards the a better approximation.
+Also, in our context of applying this method to the SAEM algorithm, while calculating the MAP once for one MCMC run is not costly, doing it K times (K being the number of SAEM iterations) can be. We are investigating a way to calculate the MAP once at the beginning and then apply a single step of gradient descent at each SAEM iteration in order to slowly move the MAP estimate after each update of the posterior distribution towards a better approximation.
 % In the unusual situation where you want a paper to appear in the
 % references without citing it in the main text, use \nocite
 
