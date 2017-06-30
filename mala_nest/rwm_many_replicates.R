@@ -46,10 +46,10 @@ require(reshape2)
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 iter_mcmc = 800
-replicate = 5
+replicate = 20
 seed0 = 39546
 indiv=4
-burn = 500
+burn = 5
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -86,7 +86,7 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[5]<-paste("id")
 final_rwm <- final_rwm[c(5,1,2)]
-
+prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80))
 # graphConvMC_new(final_rwm, title="replicates")
 
 
@@ -103,6 +103,7 @@ for (j in 1:replicate){
 names(final_mala)[1]<-paste("time")
 names(final_mala)[5]<-paste("id")
 final_mala <- final_mala[c(5,1,2)]
+prctilemlx(final_mala[-1,],band = list(number = 8, level = 80))
 #ALl individual posteriors
 # graphConvMC_new(final_mala, title="replicates")
 
@@ -126,6 +127,21 @@ final_nest <- final_nest[c(5,1,2)]
 prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80))
 prctilemlx(final_mala[-1,],band = list(number = 8, level = 80))
 prctilemlx(final_nest[-1,],band = list(number = 8, level = 80))
+
+
+final_rwm['algo'] <- 'rwm'
+final_mala['algo'] <- 'mala'
+final_nest['algo'] <- 'nest'
+final <- rbind(final_rwm,final_mala)
+
+
+labels <- c("rwm","mala")
+prctilemlx(final, labels=c("rwm","mala")) + theme(legend.position = "none")
+
+prctilemlx(resC, group="group",facet=FALSE)+ theme(legend.position = "none")
+
+
+
 
 
 

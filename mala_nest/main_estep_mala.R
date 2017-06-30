@@ -214,7 +214,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			# 
 
 			if (u>1){
-				adap <- adap - gamma*(deltu - 0.57)
+				adap <- adap - gamma*(deltu + log(0.57))
 			}
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
@@ -335,7 +335,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			# 
 
 			if (u>1){
-				adap <- adap - gamma*(deltu - 0.57)
+				adap <- adap - gamma*(deltu + log(0.57))
 			}
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
