@@ -14,7 +14,7 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") + ylab(names(df[j])) +theme_bw()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
@@ -35,7 +35,7 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") + ylab(names(df[j])) +theme_bw()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
@@ -57,7 +57,7 @@ graphConvMC_threekernels <- function(df,df2,df3, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="red")+
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") + ylab(names(df[j])) +theme_bw()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj

@@ -31,7 +31,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mala_nest")
 source('mala_main.R')
 source('main_estep_mala.R')
 source("mixtureFunctions.R")
-
+library("mlxR")
 
 require(ggplot2)
 require(gridExtra)
@@ -44,7 +44,10 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1000
+iter_mcmc = 300
+replicate = 5
+seed0 = 39546
+indiv = 4
 
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
@@ -68,67 +71,48 @@ model1cpt<-function(psi,id,xidep) {
 # saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0))
-saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc))
 
 
-post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
-post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
+final_rwm <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
+  post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+  post_rwm[[indiv]]['individual'] <- j
+  final_rwm <- rbind(final_rwm,post_rwm[[indiv]])
+}
 
-index = 4
-names(post_rwm[[index]])[2]<-paste("ka")
-names(post_rwm[[index]])[3]<-paste("V")
-names(post_rwm[[index]])[4]<-paste("Cl")
-
-names(post_mala[[index]])[2]<-paste("ka")
-names(post_mala[[index]])[3]<-paste("V")
-names(post_mala[[index]])[4]<-paste("Cl")
-
-graphConvMC_twokernels(post_rwm[[index]][,-c(3,4)],post_mala[[index]][,-c(3,4)])
-
-
-graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="EM")
-graphConvMC_twokernels(post_mala[[index]],post_nest[[index]], title="EM")
-graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nest[[index]], title="EM")
-
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+final_mala <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0))
+  post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
+  post_mala[[indiv]]['individual'] <- j
+  final_mala <- rbind(final_mala,post_mala[[indiv]])
 }
 
 
-final_mala <- post_mala[[1]]
-for (i in 2:length(post_mala)) {
-  final_mala <- rbind(final_mala, post_mala[[i]])
-}
-
-final_nest <- post_nest[[1]]
-for (i in 2:length(post_nest)) {
-  final_nest <- rbind(final_nest, post_nest[[i]])
-}
-
-graphConvMC_threekernels(final_rwm,final_mala,final_nest, title="EM")
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[5]<-paste("id")
+final_rwm <- final_rwm[c(5,1,2)]
 
 
-#ALl individual posteriors
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_mala, title="MALA")
-graphConvMC_new(final_nest, title="Nest")
+prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80))
 
-#first individual posteriors
-graphConvMC_new(post_rwm[[1]], title="EM")
 
-graphConvMC_twokernels(final_rwm,final_mala, title="EM")
-graphConvMC_threekernels(final_rwm,final_mala,final_nest, title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_mala[[1]], title="EM")
+names(final_mala)[1]<-paste("time")
+names(final_mala)[5]<-paste("id")
+final_mala <- final_mala[c(5,1,2)]
+prctilemlx(final_mala[-1,],band = list(number = 8, level = 80))
 
 
 
+names(post_rwm[[indiv]])[2]<-paste("ka")
+names(post_rwm[[indiv]])[3]<-paste("V")
+names(post_rwm[[indiv]])[4]<-paste("Cl")
 
-# theo.onlypop<-saemix(saemix.model,saemix.data,saemix.options)
+names(post_mala[[indiv]])[2]<-paste("ka")
+names(post_mala[[indiv]])[3]<-paste("V")
+names(post_mala[[indiv]])[4]<-paste("Cl")
 
-# saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
-# plot(saemix.fit,plot.type="individual")
-
+graphConvMC_twokernels(post_rwm[[indiv]][,-c(3,4)],post_mala[[indiv]][,-c(3,4)])
