@@ -49,7 +49,7 @@ iter_mcmc = 800
 replicate = 20
 seed0 = 39546
 indiv=4
-burn = 5
+burn = 500
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -86,7 +86,7 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[5]<-paste("id")
 final_rwm <- final_rwm[c(5,1,2)]
-prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80))
+prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
 # graphConvMC_new(final_rwm, title="replicates")
 
 
@@ -103,7 +103,7 @@ for (j in 1:replicate){
 names(final_mala)[1]<-paste("time")
 names(final_mala)[5]<-paste("id")
 final_mala <- final_mala[c(5,1,2)]
-prctilemlx(final_mala[-1,],band = list(number = 8, level = 80))
+prctilemlx(final_mala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
 #ALl individual posteriors
 # graphConvMC_new(final_mala, title="replicates")
 
@@ -121,6 +121,7 @@ for (j in 1:replicate){
 names(final_nest)[1]<-paste("time")
 names(final_nest)[5]<-paste("id")
 final_nest <- final_nest[c(5,1,2)]
+prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
 #ALl individual posteriors
 # graphConvMC_new(final_nest, title="replicates")
 
@@ -136,9 +137,8 @@ final <- rbind(final_rwm,final_mala)
 
 
 labels <- c("rwm","mala")
-prctilemlx(final, labels=c("rwm","mala")) + theme(legend.position = "none")
+prctilemlx(final) + theme(legend.position = "none")
 
-prctilemlx(resC, group="group",facet=FALSE)+ theme(legend.position = "none")
 
 
 

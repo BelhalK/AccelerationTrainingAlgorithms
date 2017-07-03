@@ -89,8 +89,8 @@ names(post_mala[[index]])[4]<-paste("Cl")
 graphConvMC_twokernels(post_rwm[[index]][,-c(3,4)],post_mala[[index]][,-c(3,4)])
 
 
-graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="EM")
-graphConvMC_twokernels(post_mala[[index]],post_nest[[index]], title="EM")
+graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="RWM vs MALA")
+graphConvMC_twokernels(post_mala[[index]],post_nest[[index]], title="MALA vs NEST")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nest[[index]], title="EM")
 
 final_rwm <- post_rwm[[1]]

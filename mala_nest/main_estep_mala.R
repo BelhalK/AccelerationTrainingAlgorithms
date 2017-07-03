@@ -344,7 +344,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			if (u>2){
 
 				for (i in 1:Dargs$NM){
-					etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
+					etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
 				}
 			}
 			
