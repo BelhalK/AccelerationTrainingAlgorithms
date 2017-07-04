@@ -33,6 +33,8 @@ source('mala_main.R')
 source('main_estep_mala.R')
 
 library("mlxR")
+library("psych")
+library("coda")
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
@@ -49,7 +51,7 @@ iter_mcmc = 800
 replicate = 20
 seed0 = 39546
 indiv=4
-burn = 500
+burn = 200
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -76,58 +78,70 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 final_rwm <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
   post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
   post_rwm[[indiv]]['individual'] <- j
-  final_rwm <- rbind(final_rwm,post_rwm[[indiv]][-(1:burn),])
+  final_rwm <- rbind(final_rwm,post_rwm[[indiv]][-1,])
 }
 
 
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[5]<-paste("id")
 final_rwm <- final_rwm[c(5,1,2)]
-prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
-# graphConvMC_new(final_rwm, title="replicates")
+prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+
+#burn
+rwm_burn <- final_rwm[final_rwm[,2]>burn,]
+prctilemlx(rwm_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+
 
 
 final_mala <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0))
   post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
   post_mala[[indiv]]['individual'] <- j
-  final_mala <- rbind(final_mala,post_mala[[indiv]][-(1:burn),])
+  final_mala <- rbind(final_mala,post_mala[[indiv]][-1,])
 }
 
 
 names(final_mala)[1]<-paste("time")
 names(final_mala)[5]<-paste("id")
 final_mala <- final_mala[c(5,1,2)]
-prctilemlx(final_mala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
-#ALl individual posteriors
-# graphConvMC_new(final_mala, title="replicates")
+prctilemlx(final_mala[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
+
+#burn
+mala_burn <- final_mala[final_mala[,2]>burn,]
+prctilemlx(mala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
+
 
 
 final_nest <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0))
   post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_vb
   post_nest[[indiv]]['individual'] <- j
-  final_nest <- rbind(final_nest,post_nest[[indiv]][-(1:burn),])
+  final_nest <- rbind(final_nest,post_nest[[indiv]][-1,])
 }
 
 
 names(final_nest)[1]<-paste("time")
 names(final_nest)[5]<-paste("id")
 final_nest <- final_nest[c(5,1,2)]
-prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1)
+prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
+
+
+
+#burn
+nest_burn <- final_nest[final_nest[,2]>burn,]
+prctilemlx(nest_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
+
+
+
 #ALl individual posteriors
 # graphConvMC_new(final_nest, title="replicates")
-
-prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80))
-prctilemlx(final_mala[-1,],band = list(number = 8, level = 80))
-prctilemlx(final_nest[-1,],band = list(number = 8, level = 80))
 
 
 final_rwm['algo'] <- 'rwm'
@@ -137,11 +151,29 @@ final <- rbind(final_rwm,final_mala)
 
 
 labels <- c("rwm","mala")
-prctilemlx(final) + theme(legend.position = "none")
+prctilemlx(final, gorup='algo', labels = labels) + theme(legend.position = "none")
+
+
+final_rwm <- final_rwm[,-c(4,5)]
+final_mala <- final_mala[,-c(4,5)]
+final_nest <- final_nest[,-c(4,5)]
 
 
 
+#Autocorrelation
+rwm.obj <- as.mcmc(post_rwm[[1]])
+corr_rwm <- autocorr(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2])
 
+mala.obj <- as.mcmc(post_mala[[1]])
+corr_mala <- autocorr(mala.obj[,2])
+autocorr.plot(mala.obj[,2])
 
-
+nest.obj <- as.mcmc(post_nest[[1]])
+corr_nest <- autocorr(nest.obj[,2])
+autocorr.plot(nest.obj[,2])
+#MSJD
+mssd(rwm_burn[,3])
+mssd(mala_burn[,3])
+mssd(nest_burn[,3])
 

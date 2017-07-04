@@ -341,11 +341,150 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
 			R=0.55
+			a = seq(0.5, 1, length.out=100)
 			if (u>2){
 
-				for (i in 1:Dargs$NM){
-					etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
+				if (u<400){
+					for (i in 1:Dargs$NM){
+						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
+					}
 				}
+				else {
+					for (i in 1:Dargs$NM){
+						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
+					}
+				}
+
+				
+			}
+			
+
+			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+			psiMc<-transphi(phiMc,Dargs$transform.par)
+			fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred<-log(cutoff(fpred))
+			gpred<-error(fpred,varList$pres)
+			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+			Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+			Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
+			#Gradient in candidate eta
+
+			for (kj in 1:(nb.etas)){
+				etaM2 <- etaMc
+				phiM2 <- phiMc
+				etaM2[,kj] <- etaMc[,kj] + etaMc[,kj]/100
+				phiM2 <- mean.phiM[,varList$ind.eta]+etaM2
+				psiM2<-transphi(phiM2,Dargs$transform.par)
+				fpred2<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred2)/gpred2)**2+log(gpred2)
+				U2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				U2.eta<-0.5*rowSums(etaM2*(etaM2%*%somega))
+				for (i in 1:Dargs$NM){
+					gradUc[i,kj] <- -(U2.y[i]-Uc.y[i]+U2.eta[i]-Uc.eta[i])/(etaMc[i,kj]/100)
+				}
+			}
+
+			
+			for (i in 1:(Dargs$NM)){
+				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
+				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
+			}
+			
+
+			P<-0.5*rowSums(prop)
+			Pc<-0.5*rowSums(propc)
+
+			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
+			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			# print(length(ind)/Dargs$NM)
+			etaM[ind,]<-etaMc[ind,]
+			x[[u]] <- etaM
+			for (i in 1:(nrow(phiM))) {
+				post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+			}
+			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+			U.eta[ind]<-Uc.eta[ind]
+			nbc2<-nbc2+length(ind)
+			nt2<-nt2+Dargs$NM
+
+			
+		}
+	}
+
+	#GMALA (Poncet)
+		if(opt$nbiter.mcmc[6]>0) {
+		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+		nrs2<-1
+		adap <- rep(1, Dargs$NM)
+		sigma <- 0.01
+		gamma <- 0.01
+		
+		for (u in 1:opt$nbiter.mcmc[6]) {
+			# print(u)
+			
+			etaMc<-etaM
+			propc <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			prop <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			gradU <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			gradUc <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			#Gradient in current eta
+			phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+			psiM<-transphi(phiM,Dargs$transform.par)
+			fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred<-log(cutoff(fpred))
+			gpred<-error(fpred,varList$pres)
+			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+			U.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+			U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+			for (kj in 1:(nb.etas)){
+				etaM2 <- etaM
+				phiM2 <- phiM
+				etaM2[,kj] <- etaM[,kj] + etaM[,kj]/100
+				phiM2 <- mean.phiM[,varList$ind.eta]+etaM2
+				psiM2<-transphi(phiM2,Dargs$transform.par)
+				fpred2<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred2)/gpred2)**2+log(gpred2)
+				U2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				U2.eta<-0.5*rowSums(etaM2*(etaM2%*%somega))
+				
+				for (i in 1:Dargs$NM){
+					gradU[i,kj] <- -(U2.y[i]-U.y[i]+U2.eta[i]-U.eta[i])/(etaM[i,kj]/100)
+				}
+			}
+			# 
+
+			if (u>1){
+				adap <- adap - gamma*(deltu + log(0.57))
+			}
+			
+			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
+
+			R=0.55
+			a = seq(0.5, 1, length.out=100)
+			if (u>2){
+
+				if (u<400){
+					for (i in 1:Dargs$NM){
+						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
+					}
+				}
+				else {
+					for (i in 1:Dargs$NM){
+						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
+					}
+				}
+
+				
 			}
 			
 

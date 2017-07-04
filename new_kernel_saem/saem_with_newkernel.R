@@ -61,8 +61,8 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
-K1 = 300
-K2 = 100
+K1 = 400
+K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
@@ -77,16 +77,16 @@ options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
+#MAP once and  NO GD
+options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
+theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
+theo_nogd <- cbind(iterations, theo_nogd)
+
 
 #MAP once and GD
 options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
 theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
-
-#MAP once and  NO GD
-options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
-theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
-theo_nogd <- cbind(iterations, theo_nogd)
 
 
 
