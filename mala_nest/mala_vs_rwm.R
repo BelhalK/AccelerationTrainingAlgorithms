@@ -53,6 +53,7 @@ for (i in 1:12){
   theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
 }
 saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 model1cpt<-function(psi,id,xidep) { 
 	dose<-xidep[,1]
