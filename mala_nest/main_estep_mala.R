@@ -341,15 +341,18 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
 			R=0.55
-			a = seq(0.5, 1, length.out=100)
+			a<-1
 			if (u>2){
 
-				if (u<400){
+				if (u<100){
+					a <- 0.5
 					for (i in 1:Dargs$NM){
-						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
+						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*a*sigma*adap[i])*Z[i,]
 					}
+					a<-1
 				}
 				else {
+					a <- 1
 					for (i in 1:Dargs$NM){
 						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
 					}
@@ -391,8 +394,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			
 			for (i in 1:(Dargs$NM)){
-				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
-				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
+				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*a*sigma*adap[i]))^2
+				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*a*sigma*adap[i]))^2
 			}
 			
 
@@ -416,7 +419,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		}
 	}
 
-	#GMALA (Poncet)
+	#Non reversible mala
 		if(opt$nbiter.mcmc[6]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -469,22 +472,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
-			R=0.55
-			a = seq(0.5, 1, length.out=100)
-			if (u>2){
-
-				if (u<400){
-					for (i in 1:Dargs$NM){
-						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*0.5*sigma*adap[i])*Z[i,]
-					}
-				}
-				else {
-					for (i in 1:Dargs$NM){
-						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
-					}
-				}
-
-				
+			for (i in 1:Dargs$NM){
+				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
 			}
 			
 
@@ -532,21 +521,24 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 			# print(length(ind)/Dargs$NM)
 			etaM[ind,]<-etaMc[ind,]
-			x[[u]] <- etaM
 			for (i in 1:(nrow(phiM))) {
-				post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
 			}
 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 			U.eta[ind]<-Uc.eta[ind]
 			nbc2<-nbc2+length(ind)
 			nt2<-nt2+Dargs$NM
 
+
+			# #Or Use the output of VI as the posterior distrib we simulate from
+			# etaM[ind,]<-etaMc[ind,]
+			# for (i in 1:(nrow(phiM))) {
+			# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+			# }
+
 			
 		}
-	}
-
-	
-	
+	}	
 		
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))

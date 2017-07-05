@@ -172,6 +172,7 @@ autocorr.plot(mala.obj[,2])
 nest.obj <- as.mcmc(post_nest[[1]])
 corr_nest <- autocorr(nest.obj[,2])
 autocorr.plot(nest.obj[,2])
+
 #MSJD
 mssd(rwm_burn[,3])
 mssd(mala_burn[,3])
