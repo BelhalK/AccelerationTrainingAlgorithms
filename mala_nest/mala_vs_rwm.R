@@ -35,6 +35,7 @@ source("mixtureFunctions.R")
 library("mlxR")
 library("psych")
 library("coda")
+library("Matrix")
 
 require(ggplot2)
 require(gridExtra)
@@ -47,7 +48,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1200
+iter_mcmc = 1000
 
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
@@ -76,19 +77,22 @@ saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.m
 saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0))
 saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0))
 saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0))
+saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc))
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
 post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
 post_amala<-saemix_mala(saemix.model,saemix.data,saemix.options_amala)$post_mala
+post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
 
 graphConvMC_twokernels(post_mala[[index]],post_amala[[index]], title="RWM vs MALA")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 
-
+graphConvMC_twokernels(post_rwm[[index]],post_nonrev[[index]], title="RWM vs MALA")
 
 index = 4
+graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nest[[index]], title="EM")
 
 
@@ -145,6 +149,27 @@ graphConvMC_twokernels(final_rwm,final_mala, title="EM")
 graphConvMC_threekernels(final_rwm,final_mala,final_nest, title="EM")
 graphConvMC_twokernels(post_rwm[[1]],post_mala[[1]], title="EM")
 
+
+#Autocorrelation
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+nest.obj <- as.mcmc(post_nest[[index]])
+corr_nest <- autocorr(nest.obj[,3])
+autocorr.plot(nest.obj[,3])
+
+amala.obj <- as.mcmc(post_amala[[index]])
+corr_amala <- autocorr(amala.obj[,3])
+autocorr.plot(amala.obj[,3])
+
+nonrev.obj <- as.mcmc(post_nonrev[[index]])
+corr_nonrev <- autocorr(nonrev.obj[,3])
+autocorr.plot(nonrev.obj[,3])
 
 
 

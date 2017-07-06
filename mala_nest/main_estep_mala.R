@@ -419,7 +419,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		}
 	}
 
-	#AMALA
+	#AMALA (improve autocorr and ergodicity)
 		if(opt$nbiter.mcmc[6]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -480,13 +480,11 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			sd <- chol(G)
 
 			B <- Z%*%t(sd)
-			# B <- sigma/max(sigma,norm(gradU))*gradU*Z
-			
 			
 			
 			for (i in 1:Dargs$NM){
 				# etaMc[i,] <- etaM[i,] + sigma/max(sigma,norm(gradU))*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
-				etaMc[i,] <- etaM[i,] + sigma*sigma/max(sigma,norm(gradU))*gradU[i,] + sqrt(sigma)*B[i,]
+				etaMc[i,] <- etaM[i,] + sigma*sigma/max(sigma,norm(gradU))*gradU[i,] + sqrt(2*sigma)*B[i,]
 			}
 			
 
@@ -521,14 +519,18 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			}
 
 			
-			# browser()
-
+			
+			sdc <- sigma/max(sigma,norm(gradUc))*gradUc
+			Gc <- t(sdc)%*%sdc
+			Gc <- Gc+10*diag(nb.etas)
+			sGc <- solve(Gc)
+			
 			for (i in 1:(Dargs$NM)){
 				# propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
 				# prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
 
-				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma/max(sigma,norm(gradU))*gradU[i,])/sqrt(sigma))^2%*%sG
-				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma/max(sigma,norm(gradU))*gradUc[i,])/sqrt(sigma))^2%*%sG
+				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma/max(sigma,norm(gradU))*gradU[i,])/sqrt(2*sigma))^2%*%sG
+				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma/max(sigma,norm(gradUc))*gradUc[i,])/sqrt(2*sigma))^2%*%sGc
 			}
 			
 
@@ -558,7 +560,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		}
 	}	
 	
-	#Non Reversible
+	#Non Reversible (lower the asymptotic variance)
 		if(opt$nbiter.mcmc[7]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -610,9 +612,12 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			}
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
-
+			
+			m <- Matrix(1:(2*Dargs$NM),12,12)
+			S <- skewpart(m)
+			skew <- S%*%gradU/norm(gradU)
 			for (i in 1:Dargs$NM){
-				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
+				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] - sigma*adap[i]*skew[i,] + sqrt(2*sigma*adap[i])*Z[i,]
 			}
 			
 
@@ -646,10 +651,10 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				}
 			}
 
-			
+			skewc <- S%*%gradUc/norm(gradU)
 			for (i in 1:(Dargs$NM)){
-				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
-				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
+				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,] + sigma*adap[i]*skew[i,])/sqrt(2*sigma*adap[i]))^2
+				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,] + sigma*adap[i]*skewc[i,])/sqrt(2*sigma*adap[i]))^2
 			}
 			
 

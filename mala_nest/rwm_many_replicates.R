@@ -35,6 +35,8 @@ source('main_estep_mala.R')
 library("mlxR")
 library("psych")
 library("coda")
+library("Matrix")
+
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
@@ -47,11 +49,11 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 500
-replicate = 20
+iter_mcmc = 200
+replicate = 30
 seed0 = 39546
 indiv=4
-burn = 200
+burn = 100
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -153,13 +155,40 @@ for (j in 1:replicate){
 names(final_amala)[1]<-paste("time")
 names(final_amala)[5]<-paste("id")
 final_amala <- final_amala[c(5,1,2)]
-prctilemlx(final_amala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
+prctilemlx(final_amala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("AMALA")
 
 
 
 #burn
 amala_burn <- final_amala[final_amala[,2]>burn,]
-prctilemlx(amala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
+prctilemlx(amala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("AMALA")
+
+
+
+
+
+final_nonrev <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_nonrev<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
+  post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
+  post_nonrev[[indiv]]['individual'] <- j
+  final_nonrev <- rbind(final_nonrev,post_nonrev[[indiv]][-1,])
+}
+
+
+names(final_nonrev)[1]<-paste("time")
+names(final_nonrev)[5]<-paste("id")
+final_nonrev <- final_nonrev[c(5,1,2)]
+prctilemlx(final_nonrev[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Non reversible")
+
+
+
+#burn
+nonrev_burn <- final_nonrev[final_nonrev[,2]>burn,]
+prctilemlx(nonrev_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Non reversible")
+
+
 
 
 
@@ -203,9 +232,14 @@ amala.obj <- as.mcmc(post_amala[[1]])
 corr_amala <- autocorr(amala.obj[,2])
 autocorr.plot(amala.obj[,2])
 
+nonrev.obj <- as.mcmc(post_nonrev[[1]])
+corr_nonrev <- autocorr(nonrev.obj[,2])
+autocorr.plot(nonrev.obj[,2])
+
 #MSJD
 mssd(rwm_burn[,3])
 mssd(mala_burn[,3])
 mssd(nest_burn[,3])
 mssd(amala_burn[,3])
+mssd(nonrev_burn[,3])
 
