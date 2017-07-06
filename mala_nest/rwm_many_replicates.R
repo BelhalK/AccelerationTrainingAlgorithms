@@ -47,7 +47,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 800
+iter_mcmc = 500
 replicate = 20
 seed0 = 39546
 indiv=4
@@ -78,7 +78,7 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 final_rwm <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
   post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
   post_rwm[[indiv]]['individual'] <- j
   final_rwm <- rbind(final_rwm,post_rwm[[indiv]][-1,])
@@ -99,7 +99,7 @@ prctilemlx(rwm_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + gg
 final_mala <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0))
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
   post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
   post_mala[[indiv]]['individual'] <- j
   final_mala <- rbind(final_mala,post_mala[[indiv]][-1,])
@@ -120,8 +120,8 @@ prctilemlx(mala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + g
 final_nest <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0))
-  post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_vb
+  saemix.options_nest<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
+  post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
   post_nest[[indiv]]['individual'] <- j
   final_nest <- rbind(final_nest,post_nest[[indiv]][-1,])
 }
@@ -137,6 +137,32 @@ prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + 
 #burn
 nest_burn <- final_nest[final_nest[,2]>burn,]
 prctilemlx(nest_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
+
+
+
+final_amala <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_amala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+  post_amala<-saemix_mala(saemix.model,saemix.data,saemix.options_amala)$post_mala
+  post_amala[[indiv]]['individual'] <- j
+  final_amala <- rbind(final_amala,post_amala[[indiv]][-1,])
+}
+
+
+names(final_amala)[1]<-paste("time")
+names(final_amala)[5]<-paste("id")
+final_amala <- final_amala[c(5,1,2)]
+prctilemlx(final_amala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
+
+
+
+#burn
+amala_burn <- final_amala[final_amala[,2]>burn,]
+prctilemlx(amala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
+
+
+
 
 
 
@@ -173,8 +199,13 @@ nest.obj <- as.mcmc(post_nest[[1]])
 corr_nest <- autocorr(nest.obj[,2])
 autocorr.plot(nest.obj[,2])
 
+amala.obj <- as.mcmc(post_amala[[1]])
+corr_amala <- autocorr(amala.obj[,2])
+autocorr.plot(amala.obj[,2])
+
 #MSJD
 mssd(rwm_burn[,3])
 mssd(mala_burn[,3])
 mssd(nest_burn[,3])
+mssd(amala_burn[,3])
 

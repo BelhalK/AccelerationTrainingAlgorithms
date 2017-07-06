@@ -419,7 +419,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		}
 	}
 
-	#Non reversible mala
+	#AMALA
 		if(opt$nbiter.mcmc[6]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -428,6 +428,145 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		gamma <- 0.01
 		
 		for (u in 1:opt$nbiter.mcmc[6]) {
+			# print(u)
+			
+			etaMc<-etaM
+			propc <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			prop <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			gradU <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			gradUc <- matrix(nrow = Dargs$NM,ncol = nb.etas)
+			#Gradient in current eta
+			phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+			psiM<-transphi(phiM,Dargs$transform.par)
+			fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred<-log(cutoff(fpred))
+			gpred<-error(fpred,varList$pres)
+			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+			U.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+			U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+			for (kj in 1:(nb.etas)){
+				etaM2 <- etaM
+				phiM2 <- phiM
+				etaM2[,kj] <- etaM[,kj] + etaM[,kj]/100
+				phiM2 <- mean.phiM[,varList$ind.eta]+etaM2
+				psiM2<-transphi(phiM2,Dargs$transform.par)
+				fpred2<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred2)/gpred2)**2+log(gpred2)
+				U2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				U2.eta<-0.5*rowSums(etaM2*(etaM2%*%somega))
+				
+				for (i in 1:Dargs$NM){
+					gradU[i,kj] <- -(U2.y[i]-U.y[i]+U2.eta[i]-U.eta[i])/(etaM[i,kj]/100)
+				}
+			}
+			# 
+
+			if (u>1){
+				adap <- adap - gamma*(deltu + log(0.57))
+			}
+			
+
+			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
+
+			sd <- sigma/max(sigma,norm(gradU))*gradU
+			G <- t(sd)%*%sd
+			G <- G+10*diag(nb.etas)
+			sG <- solve(G)
+			sd <- chol(G)
+
+			B <- Z%*%t(sd)
+			# B <- sigma/max(sigma,norm(gradU))*gradU*Z
+			
+			
+			
+			for (i in 1:Dargs$NM){
+				# etaMc[i,] <- etaM[i,] + sigma/max(sigma,norm(gradU))*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
+				etaMc[i,] <- etaM[i,] + sigma*sigma/max(sigma,norm(gradU))*gradU[i,] + sqrt(sigma)*B[i,]
+			}
+			
+
+			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+			psiMc<-transphi(phiMc,Dargs$transform.par)
+			fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred<-log(cutoff(fpred))
+			gpred<-error(fpred,varList$pres)
+			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+			Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+			Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
+			#Gradient in candidate eta
+
+			for (kj in 1:(nb.etas)){
+				etaM2 <- etaMc
+				phiM2 <- phiMc
+				etaM2[,kj] <- etaMc[,kj] + etaMc[,kj]/100
+				phiM2 <- mean.phiM[,varList$ind.eta]+etaM2
+				psiM2<-transphi(phiM2,Dargs$transform.par)
+				fpred2<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred2)/gpred2)**2+log(gpred2)
+				U2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				U2.eta<-0.5*rowSums(etaM2*(etaM2%*%somega))
+				for (i in 1:Dargs$NM){
+					gradUc[i,kj] <- -(U2.y[i]-Uc.y[i]+U2.eta[i]-Uc.eta[i])/(etaMc[i,kj]/100)
+				}
+			}
+
+			
+			# browser()
+
+			for (i in 1:(Dargs$NM)){
+				# propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
+				# prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
+
+				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma/max(sigma,norm(gradU))*gradU[i,])/sqrt(sigma))^2%*%sG
+				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma/max(sigma,norm(gradU))*gradUc[i,])/sqrt(sigma))^2%*%sG
+			}
+			
+
+			P<-0.5*rowSums(prop)
+			Pc<-0.5*rowSums(propc)
+
+			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
+			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			# print(length(ind)/Dargs$NM)
+			etaM[ind,]<-etaMc[ind,]
+			for (i in 1:(nrow(phiM))) {
+				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
+			}
+			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+			U.eta[ind]<-Uc.eta[ind]
+			nbc2<-nbc2+length(ind)
+			nt2<-nt2+Dargs$NM
+
+
+			# #Or Use the output of VI as the posterior distrib we simulate from
+			# etaM[ind,]<-etaMc[ind,]
+			# for (i in 1:(nrow(phiM))) {
+			# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+			# }
+
+			
+		}
+	}	
+	
+	#Non Reversible
+		if(opt$nbiter.mcmc[7]>0) {
+		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+		nrs2<-1
+		adap <- rep(1, Dargs$NM)
+		sigma <- 0.01
+		gamma <- 0.01
+		
+		for (u in 1:opt$nbiter.mcmc[7]) {
 			# print(u)
 			
 			etaMc<-etaM
@@ -539,7 +678,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 		}
 	}	
-		
+
+	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
 }
