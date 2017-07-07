@@ -30,6 +30,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
 source('vb_main.R')
 source('main_estep_vb.R')
+source('stan_main.R')
+source('main_estep_stan.R')
 
 require(ggplot2)
 require(gridExtra)
@@ -62,10 +64,12 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
 saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
+saemix.options_stan<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
 saemix.options_vb<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
 
 post_rwm<-saemix_vb(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_vb_linear<-saemix_vb(saemix.model,saemix.data,saemix.options_linear)$post_vb_linear #VI with the right Gamma (see if the mu tends to the correct mu)
+post_stan_linear<-saemix_stan(saemix.model,saemix.data,saemix.options_stan)$post_vb_linear #VI with the right Gamma (see if the mu tends to the correct mu)
 post_vb<-saemix_vb(saemix.model,saemix.data,saemix.options_vb)$post_vb #true posterior implemented (should converge directly)
 
 

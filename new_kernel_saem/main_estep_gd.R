@@ -192,6 +192,7 @@ estep_gd<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 			P.eta<-0.5*rowSums(exp(-eta_map*(eta_map%*%somega)))
 
 
+
 			gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
 			for(kj in 1:nb.etas){
 				phi_map2 <- phi_map

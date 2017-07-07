@@ -49,11 +49,11 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 200
-replicate = 30
+iter_mcmc = 700
+replicate = 5
 seed0 = 39546
 indiv=4
-burn = 100
+burn = 300
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -90,7 +90,7 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[5]<-paste("id")
 final_rwm <- final_rwm[c(5,1,2)]
-prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+# prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
 
 #burn
 rwm_burn <- final_rwm[final_rwm[,2]>burn,]
@@ -111,7 +111,7 @@ for (j in 1:replicate){
 names(final_mala)[1]<-paste("time")
 names(final_mala)[5]<-paste("id")
 final_mala <- final_mala[c(5,1,2)]
-prctilemlx(final_mala[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
+# prctilemlx(final_mala[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
 
 #burn
 mala_burn <- final_mala[final_mala[,2]>burn,]
@@ -129,10 +129,12 @@ for (j in 1:replicate){
 }
 
 
+graphConvMC_twokernels(post_nest[[indiv]],post_nest[[indiv]], title="RWM vs MALA")
+
 names(final_nest)[1]<-paste("time")
 names(final_nest)[5]<-paste("id")
 final_nest <- final_nest[c(5,1,2)]
-prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
+# prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
 
 
 

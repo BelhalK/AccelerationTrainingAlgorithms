@@ -35,6 +35,7 @@ source('main_estep_gd.R')
 source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
 
+library(sgd)
 #####################################################################################
 # Theophylline
 
