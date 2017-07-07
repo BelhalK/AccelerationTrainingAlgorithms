@@ -50,7 +50,7 @@ require(reshape2)
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 iter_mcmc = 700
-replicate = 5
+replicate = 15
 seed0 = 39546
 indiv=4
 burn = 300
@@ -129,7 +129,6 @@ for (j in 1:replicate){
 }
 
 
-graphConvMC_twokernels(post_nest[[indiv]],post_nest[[indiv]], title="RWM vs MALA")
 
 names(final_nest)[1]<-paste("time")
 names(final_nest)[5]<-paste("id")

@@ -141,7 +141,8 @@ saemix_mala<-function(model,data,control=list()) {
   post_rwm<-xmcmc$post_rwm
   post_vb<-xmcmc$post_vb
   post_mala<-xmcmc$post_mala
+  rates<-xmcmc$rates
 
-  return(list(post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
+  return(list(rates=rates,post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
 
 }

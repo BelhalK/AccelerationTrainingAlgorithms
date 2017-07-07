@@ -14,7 +14,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	somega<-solve(omega.eta)
 	
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
-	
+	saemix.options<-saemixObject["options"]
 	VK<-rep(c(1:nb.etas),2)
 	Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
@@ -171,9 +171,10 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
-		sigma <- 0.01
+		sigma <- saemix.options$sigma.val
 		gamma <- 0.01
-		
+		l<-c()
+		acc <- 0
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			# print(u)
 			
@@ -264,9 +265,16 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			P<-0.5*rowSums(prop)
 			Pc<-0.5*rowSums(propc)
 
+			
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
+
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			# print(length(ind)/Dargs$NM)
+			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
+			# if (ind[1]==1){
+			# 	acc <- acc + 1
+			# }
+			
+			# l[1] <- 1 - acc/opt$nbiter.mcmc[4]
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
@@ -275,13 +283,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			U.eta[ind]<-Uc.eta[ind]
 			nbc2<-nbc2+length(ind)
 			nt2<-nt2+Dargs$NM
-
-
-			# #Or Use the output of VI as the posterior distrib we simulate from
-			# etaM[ind,]<-etaMc[ind,]
-			# for (i in 1:(nrow(phiM))) {
-			# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
-			# }
 
 			
 		}
@@ -343,8 +344,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			a<-1
 			if (u>2){
-				R=0.55
-				# R=(u-1)/(u+2)
+				# R=0.02
+				R=0.05*(u-1)/(u+2)
 				if (u<100){
 					a <- 1
 					for (i in 1:Dargs$NM){
@@ -393,7 +394,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				}
 			}
 
-			if (u>100000){
+			if (u>2){
 				for (i in 1:(Dargs$NM)){
 					propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,] - R*(etaM[i,] - x[[u-2]][i,]))/sqrt(2*a*sigma*adap[i]))^2
 					prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,] - R*(etaMc[i,] - x[[u-2]][i,]))/sqrt(2*a*sigma*adap[i]))^2
@@ -670,7 +671,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			# print(length(ind)/Dargs$NM)
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
@@ -693,6 +693,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
+	return(list(rates=l,varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
 }
 

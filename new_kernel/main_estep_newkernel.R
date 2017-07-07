@@ -67,7 +67,7 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 	phiMc<-phiM
 
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
-		print(u)
+		
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -236,7 +236,7 @@ estep_newkernel<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, 
 
 		
 		for (u in 1:opt$nbiter.mcmc[4]) {
-			print(u)
+
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
 				etaM <- eta_map

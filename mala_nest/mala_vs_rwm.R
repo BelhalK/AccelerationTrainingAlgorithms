@@ -82,7 +82,7 @@ saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
-post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
+post_nest2<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
 post_amala<-saemix_mala(saemix.model,saemix.data,saemix.options_amala)$post_mala
 post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
 
@@ -90,6 +90,8 @@ graphConvMC_twokernels(post_mala[[index]],post_amala[[index]], title="RWM vs MAL
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 
 graphConvMC_twokernels(post_rwm[[index]],post_nonrev[[index]], title="RWM vs MALA")
+
+graphConvMC_twokernels(post_nest[[index]],post_nest2[[index]], title="RWM vs MALA")
 
 index = 4
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
@@ -110,6 +112,7 @@ graphConvMC_twokernels(post_rwm[[index]][,-c(3,4)],post_mala[[index]][,-c(3,4)])
 
 graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="RWM vs MALA")
 graphConvMC_twokernels(post_mala[[index]],post_nest[[index]], title="MALA vs NEST")
+
 
 
 final_rwm <- post_rwm[[1]]

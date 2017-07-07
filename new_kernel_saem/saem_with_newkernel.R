@@ -106,11 +106,15 @@ graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
 
 
 
-# graphConvMC_new(theo_gd, title="new kernel")
+# Dimensions
+N <- 1e5  # number of data points
+d <- 1e2  # number of features
 
-# graphConvMC_twokernels(theo_ref,theo_gd, title="new kernel")
+# Generate data.
+X <- matrix(rnorm(N*d), ncol=d)
+theta <- rep(5, d+1)
+eps <- rnorm(N)
+y <- cbind(1, X) %*% theta + eps
+dat <- data.frame(y=y, x=X)
 
-# saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
-# plot(saemix.fit,plot.type="individual")
-
-# saemix.options<-list(seed=632545,save=save.results,save.graphs=save.results,directory=file.path(save.dir,"theoNoCov"))
+sgd.theta <- sgd(y ~ ., data=dat, model="lm")
