@@ -158,8 +158,9 @@ estep_gd<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 
 		K1 <- saemix.options$nbiter.saemix[1]
 		K2 <- saemix.options$nbiter.saemix[2]
+		K_gd <- 2
 		gd_step <- saemix.options$step.gd
-		if (kiter < 2){
+		if (kiter < 5){
 	  	for(i in 1:Dargs$NM) {
 		    isuj<-id.list[i]
 		    xi<-xind[id==isuj,,drop=FALSE]
@@ -192,7 +193,27 @@ estep_gd<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 			P.eta<-0.5*rowSums(exp(-eta_map*(eta_map%*%somega)))
 
 
+			for (k in 1:K_gd){
+				gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+			for(kj in 1:nb.etas){
+				phi_map2 <- phi_map
+				phi_map2[,kj] <- phi_map[,kj]+phi_map[,kj]/100
+				psi_map2 <- transphi(phi_map2,Dargs$transform.par)
+				eta_map2 <- phi_map2 - mean.phiM
+				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-1/sqrt(2*pi*gpred2)*exp(-0.5*((Dargs$yM-fpred2)/gpred2)**2)
+				P2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				P2.eta<-0.5*rowSums(exp(-eta_map2*(eta_map2%*%somega)))
 
+				for (i in 1:Dargs$NM){
+					gradp[i,kj] <- (P2.y[i]*P2.eta[i]-P.y[i]*P.eta[i])/(phi_map[i,kj]/100)
+				}
+			}
+			phi.map <- phi.map + gd_step*gradp
+			}
 			gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
 			for(kj in 1:nb.etas){
 				phi_map2 <- phi_map

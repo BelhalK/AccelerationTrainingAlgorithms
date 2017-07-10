@@ -76,10 +76,10 @@ saemix.model<-saemixModel(model=growthcow,
   omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
 
-K1 = 400
+K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
-gd_step = 0.01
+gd_step = 0.0000001
 
 
 #RWM

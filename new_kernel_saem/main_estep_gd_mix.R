@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
+estep_gd_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -53,8 +53,8 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 	
 	# Second stage
-	
-	if(opt$nbiter.mcmc[2]>0) {
+	seuil <- 30
+	if(opt$nbiter.mcmc[2]>0 & kiter > (seuil-1) ) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		for (u in 1:opt$nbiter.mcmc[2]) {
@@ -83,7 +83,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	}
 	
-	if(opt$nbiter.mcmc[3]>0) {
+	if(opt$nbiter.mcmc[3]>0 & kiter > (seuil-1)) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-kiter%%(nb.etas-1)+2
 		if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
@@ -113,9 +113,6 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
-				for (i in 1:(nrow(phiM))) {
-					post[[i]][u,] <- etaM[i,]
-				}
 
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
 				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
@@ -131,7 +128,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	}
 
 	#New kernel
-		if(opt$nbiter.mcmc[4]>0) {
+		if(opt$nbiter.mcmc[4]>0 & kiter < seuil) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -158,7 +155,9 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 		K1 <- saemix.options$nbiter.saemix[1]
 		K2 <- saemix.options$nbiter.saemix[2]
-		if (kiter < (K1+K2+1)){
+		K_gd <- 1
+		gd_step <- saemix.options$step.gd
+		if (kiter < 5){
 	  	for(i in 1:Dargs$NM) {
 		    isuj<-id.list[i]
 		    xi<-xind[id==isuj,,drop=FALSE]
@@ -168,7 +167,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"], control=list(maxiter = 2))
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		  }
 		 }
@@ -191,6 +190,27 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 			P.eta<-0.5*rowSums(exp(-eta_map*(eta_map%*%somega)))
 
 
+			for (k in 1:K_gd){
+				gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+			for(kj in 1:nb.etas){
+				phi_map2 <- phi_map
+				phi_map2[,kj] <- phi_map[,kj]+phi_map[,kj]/100
+				psi_map2 <- transphi(phi_map2,Dargs$transform.par)
+				eta_map2 <- phi_map2 - mean.phiM
+				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-1/sqrt(2*pi*gpred2)*exp(-0.5*((Dargs$yM-fpred2)/gpred2)**2)
+				P2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				P2.eta<-0.5*rowSums(exp(-eta_map2*(eta_map2%*%somega)))
+
+				for (i in 1:Dargs$NM){
+					gradp[i,kj] <- (P2.y[i]*P2.eta[i]-P.y[i]*P.eta[i])/(phi_map[i,kj]/100)
+				}
+			}
+			phi.map <- phi.map + gd_step*gradp
+			}
 			gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
 			for(kj in 1:nb.etas){
 				phi_map2 <- phi_map
@@ -209,7 +229,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 					gradp[i,kj] <- (P2.y[i]*P2.eta[i]-P.y[i]*P.eta[i])/(phi_map[i,kj]/100)
 				}
 			}
-			phi.map <- phi.map + 0*gradp
+			phi.map <- phi.map + gd_step*gradp
 			# phi.map <- phi.map
 		}
 	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])

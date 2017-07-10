@@ -92,7 +92,7 @@ graphConvMC_new(final_amcmc, title="Variational Bayes")
 graphConvMC_twokernels(final_rwm,final_amcmc, title="EM")
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
-index = 1
+index = 2
 graphConvMC_twokernels(post_rwm[[index]],post_amcmc[[index]], title="EM")
 
 

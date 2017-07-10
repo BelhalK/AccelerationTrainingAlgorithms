@@ -168,8 +168,8 @@ if(opt$nbiter.mcmc[1]>0){
 			mu_gd <- list(etaM,etaM)
 			Gamma <- omega.eta
 			sGamma <- somega
-			K <- 60 #nb iterations gradient ascent
-			L <- 60 #nb iterations MONTE CARLO
+			K <- 100 #nb iterations gradient ascent
+			L <- 100 #nb iterations MONTE CARLO
 			M <- 1 #nb iterations MCMC
 			rho <- 0.0001 #gradient ascent stepsize
 			for (i in 1:(nrow(phiM))) {
