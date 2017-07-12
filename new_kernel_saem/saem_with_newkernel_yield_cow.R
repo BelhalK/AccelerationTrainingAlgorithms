@@ -32,6 +32,9 @@ source('main_new.R')
 source('main_estep_new.R')
 source('main_gd.R')
 source('main_estep_gd.R')
+source('main_gd_mix.R')
+source('main_estep_gd_mix.R')
+source('main_estep_mix.R')
 source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
 
@@ -79,7 +82,7 @@ saemix.model<-saemixModel(model=growthcow,
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
-gd_step = 0.0000001
+gd_step = 0.01
 
 
 #RWM
@@ -103,7 +106,13 @@ options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1
 theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
 
+#MAP mix
+options.gd_mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+theo_gd_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.gd_mix))
+theo_gd_mix <- cbind(iterations, theo_gd_mix)
 
+
+graphConvMC_twokernels(theo_ref,theo_gd_mix, title="ref vs GD")
 
 
 

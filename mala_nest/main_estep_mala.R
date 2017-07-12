@@ -344,8 +344,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			a<-1
 			if (u>2){
-				# R=0.02
-				R=0.05*(u-1)/(u+2)
+				R=0.02
+				# R=0.05*(u-1)/(u+2)
 				if (u<100){
 					a <- 1
 					for (i in 1:Dargs$NM){

@@ -1,4 +1,5 @@
-#library(rstan)
+library(rstan)
+library(mvtnorm)
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -30,6 +31,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
 source('vb_main.R')
 source('main_estep_vb.R')
+source('main_estep_stan.R')
 source('stan_main.R')
 source('main_estep_stan.R')
 

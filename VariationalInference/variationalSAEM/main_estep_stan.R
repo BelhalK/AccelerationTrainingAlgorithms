@@ -167,6 +167,21 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			print(u)
+			browser()
+
+			samples <- stan(file = 'theo.stan',
+                data = list (
+                    y = Dargs$yobs,
+                    time = Dargs$XM
+                ),
+                
+                algorithm="Fixed_param",
+                seed = 42,
+                chains = 1,
+                iter =1
+                )
+
+
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
 				

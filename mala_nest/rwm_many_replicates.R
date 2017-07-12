@@ -49,11 +49,11 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 700
-replicate = 15
+iter_mcmc = 1000
+replicate = 10
 seed0 = 39546
 indiv=4
-burn = 300
+burn = 600
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -94,14 +94,14 @@ final_rwm <- final_rwm[c(5,1,2)]
 
 #burn
 rwm_burn <- final_rwm[final_rwm[,2]>burn,]
-prctilemlx(rwm_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+# prctilemlx(rwm_burn[-1,-4],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
 
 
 
 final_mala <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0),sigma.val=0.01)
   post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
   post_mala[[indiv]]['individual'] <- j
   final_mala <- rbind(final_mala,post_mala[[indiv]][-1,])
@@ -115,8 +115,7 @@ final_mala <- final_mala[c(5,1,2)]
 
 #burn
 mala_burn <- final_mala[final_mala[,2]>burn,]
-prctilemlx(mala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
-
+# prctilemlx(mala_burn[-1,-4],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
 
 
 final_nest <- 0
@@ -139,7 +138,7 @@ final_nest <- final_nest[c(5,1,2)]
 
 #burn
 nest_burn <- final_nest[final_nest[,2]>burn,]
-prctilemlx(nest_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
+# prctilemlx(nest_burn[-1,],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("Nest")
 
 
 
@@ -162,7 +161,7 @@ prctilemlx(final_amala[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) +
 
 #burn
 amala_burn <- final_amala[final_amala[,2]>burn,]
-prctilemlx(amala_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("AMALA")
+prctilemlx(amala_burn[-1,],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("AMALA")
 
 
 
@@ -187,7 +186,7 @@ prctilemlx(final_nonrev[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) 
 
 #burn
 nonrev_burn <- final_nonrev[final_nonrev[,2]>burn,]
-prctilemlx(nonrev_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("Non reversible")
+prctilemlx(nonrev_burn[-1,],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("Non reversible")
 
 
 
@@ -200,14 +199,19 @@ prctilemlx(nonrev_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) +
 # graphConvMC_new(final_nest, title="replicates")
 
 
-final_rwm['algo'] <- 'rwm'
-final_mala['algo'] <- 'mala'
-final_nest['algo'] <- 'nest'
-final <- rbind(final_rwm,final_mala)
+rwm_burn['group'] <- 1
+mala_burn['group'] <- 2
+mala_burn$id <- mala_burn$id +1
+nest_burn['group'] <- 3
+nest_burn$id <- nest_burn$id +2
+final <- 0
+final <- rbind(rwm_burn,mala_burn)
+final <- rbind(rwm_burn,mala_burn, nest_burn)
 
 
-labels <- c("rwm","mala")
-prctilemlx(final, gorup='algo', labels = labels) + theme(legend.position = "none")
+labels <- c("rwm","mala","nest")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 
 
 final_rwm <- final_rwm[,-c(4,5)]
@@ -243,4 +247,3 @@ mssd(mala_burn[,3])
 mssd(nest_burn[,3])
 mssd(amala_burn[,3])
 mssd(nonrev_burn[,3])
-
