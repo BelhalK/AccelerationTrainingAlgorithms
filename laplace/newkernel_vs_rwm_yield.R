@@ -32,7 +32,7 @@ source('main_estep_laplace.R')
 source("mixtureFunctions.R")
 
 
-
+library(abind)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
@@ -84,10 +84,14 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 
 
 post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
 post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
 post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
-post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
+
+index = 1
+graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
+graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
 
 
 final_rwm <- post_rwm[[1]]
@@ -96,9 +100,9 @@ for (i in 2:length(post_rwm)) {
 }
 
 
-final_laplace <- post_laplace[[1]]
-for (i in 2:length(post_laplace)) {
-  final_laplace <- rbind(final_laplace, post_laplace[[i]])
+final_foce <- post_foce[[1]]
+for (i in 2:length(post_foce)) {
+  final_foce <- rbind(final_foce, post_foce[[i]])
 }
 
 
@@ -106,11 +110,11 @@ for (i in 2:length(post_laplace)) {
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_laplace, title="VB Linear case")
 #first individual posteriors
-graphConvMC_new(post_rwm[[1]], title="EM")
+graphConvMC_new(post_rwm[[index]], title="EM")
 
-graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_fo[[1]], title="EM")
-graphConvMC_threekernels(post_rwm[[1]],post_fo[[1]],post_foce[[1]], title="EM")
+graphConvMC_twokernels(final_rwm,final_foce, title="EM")
+
+graphConvMC_threekernels(post_rwm[[index]],post_fo[[index]],post_foce[[index]], title="EM")
 
 
 

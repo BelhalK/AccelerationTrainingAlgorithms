@@ -263,7 +263,7 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]] )/(varList$pres[1])^2 +solve(omega.eta))
 			}
 			
-			
+			browser()
 			for (u in 1:opt$nbiter.mcmc[4]) {
 
 					etaMc<-etaM
@@ -460,8 +460,9 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 
 
 					for (i in 1:(Dargs$NM)){
-						propc[i] <- 0.5*rowSums((etaMc[i,]-- Gamma[[i]]%*%gradg[i,])*(etaMc[i,]-- Gamma[[i]]%*%gradg[i,])%*%solve(Gamma[[i]]))
-						prop[i] <- 0.5*rowSums((etaM[i,]-- Gammac[[i]]%*%gradgc[i,])*(etaM[i,]-- Gammac[[i]]%*%gradgci,])%*%solve(Gamma[[i]]))
+
+						propc[i] <- 0.5*rowSums((etaMc[i,]-- t(gradg[i,])%*%Gamma[[i]])*(etaMc[i,]-- t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
+						prop[i] <- 0.5*rowSums((etaM[i,]-- t(gradgc[i,])%*%Gamma[[i]])*(etaM[i,]-- t(gradgc[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
 					}
 
 
