@@ -26,11 +26,11 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  source("mixtureFunctions.R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel")
-source('newkernel_main.R')
-source('main_estep_newkernel.R')
-
+  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
+source('laplace_main.R')
+source('main_estep_laplace.R')
+source("mixtureFunctions.R")
 
 require(ggplot2)
 require(gridExtra)
@@ -62,12 +62,14 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
+saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0))
+saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc))
 
 
-post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_newkernel
+post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
+post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
 
 
 
@@ -77,26 +79,21 @@ for (i in 2:length(post_rwm)) {
 }
 
 
-final_newkernel <- post_newkernel[[1]]
-for (i in 2:length(post_newkernel)) {
-  final_newkernel <- rbind(final_newkernel, post_newkernel[[i]])
+final_laplace <- post_laplace[[1]]
+for (i in 2:length(post_laplace)) {
+  final_laplace <- rbind(final_laplace, post_laplace[[i]])
 }
 
 
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_newkernel, title="VB Linear case")
+graphConvMC_new(final_laplace, title="VB Linear case")
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
 
-graphConvMC_twokernels(final_rwm,final_newkernel, title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_newkernel[[1]], title="EM")
+graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
+graphConvMC_twokernels(post_rwm[[1]],post_laplace[[1]], title="EM")
+graphConvMC_threekernels(post_rwm[[1]],post_laplace[[1]],post_fo[[1]], title="EM")
 
 
-
-
-# theo.onlypop<-saemix(saemix.model,saemix.data,saemix.options)
-
-# saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
-# plot(saemix.fit,plot.type="individual")
 

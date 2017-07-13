@@ -1,4 +1,3 @@
-#library(rstan)
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -26,16 +25,13 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
+  
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
-source('laplace_main.R')
+source('newkernel_main.R')
+source('main_laplace.R')
 source('main_estep_laplace.R')
+# source('main_estep_laplace_saem.R')
 source("mixtureFunctions.R")
-
-
-
-require(ggplot2)
-require(gridExtra)
-require(reshape2)
 
 #####################################################################################
 # Theophylline
@@ -44,8 +40,6 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 300
-
 
 
 # Doc
@@ -77,40 +71,33 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
-saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0))
-saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0))
-saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc))
 
 
-post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
-post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
-post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
+K1 = 100
+K2 = 50
+iterations = 1:(K1+K2+1)
+gd_step = 0.00001
 
 
+#RWM
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+theo_ref <- cbind(iterations, theo_ref)
 
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
-}
-
-
-final_laplace <- post_laplace[[1]]
-for (i in 2:length(post_laplace)) {
-  final_laplace <- rbind(final_laplace, post_laplace[[i]])
-}
+#ref (map always)
+options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+theo_new_ref<-data.frame(saemix_laplace(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iterations, theo_new_ref)
 
 
-#ALl individual posteriors
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_laplace, title="VB Linear case")
-#first individual posteriors
-graphConvMC_new(post_rwm[[1]], title="EM")
-
-graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_fo[[1]], title="EM")
-graphConvMC_threekernels(post_rwm[[1]],post_fo[[1]],post_foce[[1]], title="EM")
-
-
+#RWM vs always MAP (ref)
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
+#ref vs map once no gd
+graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
+#map once no gd vs map once and gd
+graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
+#ref vs map once gd
+graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
+#RWM vs GD
+graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
 

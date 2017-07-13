@@ -66,7 +66,7 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
-K1 = 400
+K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
