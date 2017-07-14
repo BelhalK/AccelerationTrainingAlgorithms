@@ -233,9 +233,9 @@ for (i in 1:(Dargs$NM)){
 			phi_map2 <- phi_map
 			phi_map3 <- phi_map
 			phi_map4 <- phi_map
-			phi_map2[,l] <- phi_map[,l]+delta
-			phi_map3[,j] <- phi_map[,j]+delta
-			phi_map4[,j] <- phi_map2[,j]+delta
+			phi_map2[,l] <- phi_map[,l]+phi_map[,l]/100
+			phi_map3[,j] <- phi_map[,j]+phi_map[,j]/100
+			phi_map4[,j] <- phi_map2[,j]+phi_map2[,j]/100
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			psi_map3 <- transphi(phi_map3,saemixObject["model"]["transform.par"]) 
 			psi_map4 <- transphi(phi_map4,saemixObject["model"]["transform.par"]) 
@@ -249,7 +249,7 @@ for (i in 1:(Dargs$NM)){
 				r1 = 1:sum(Dargs$IdM == n)
 				r1 = r1+sum(as.matrix(testgrad) != 0L)
 				testgrad[r1] <- 1
-				linehess[[l]][,j] <- ((fpred4[r1]  - fpred3[r1]  - fpred2[r1] + fpred1[r1] )/delta^2)%*%(Dargs$yM[r1] - fpredmap[r1])
+				linehess[[l]][,j] <- ((fpred4[r1]  - fpred3[r1]  - fpred2[r1] + fpred1[r1] )/(phi_map[n,j]/100)/(phi_map[n,l]/100))%*%(Dargs$yM[r1] - fpredmap[r1])
 			}
 
 			
@@ -258,7 +258,7 @@ for (i in 1:(Dargs$NM)){
 
 	}
 	cov[[i]] <- abind(linehess,along=1)		
-	browser()
+	# cov[[i]] <- matrix(0L, nrow = 3, ncol = 3) 
 }		
 
 
@@ -304,6 +304,7 @@ for (i in 1:(Dargs$NM)){
 						# M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%Gamma[[i]]
 						etaMc[i,]<- eta_map[i,] +M[i,]
 					}
+					browser()
 
 
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
