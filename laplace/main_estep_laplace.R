@@ -287,7 +287,7 @@ for (i in 1:(Dargs$NM)){
 				r <- r+sum(as.matrix(z) != 0L)
 	            z[r] <- gradf[r,1]
 				# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
-				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]] )/(varList$pres[1])^2 +solve(omega.eta))
+				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]]/1000 )/(varList$pres[1])^2 +solve(omega.eta))
 			}
 			
 
@@ -304,7 +304,7 @@ for (i in 1:(Dargs$NM)){
 						# M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%Gamma[[i]]
 						etaMc[i,]<- eta_map[i,] +M[i,]
 					}
-					browser()
+					
 
 
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
@@ -435,8 +435,8 @@ for (i in 1:(Dargs$NM)){
 
 					for (i in 1:(Dargs$NM)){
 
-						propc[i] <- 0.5*rowSums((etaMc[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaMc[i,]+ t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
-						prop[i] <- 0.5*rowSums((etaM[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaM[i,]+ t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
+						propc[i] <- 0.5*rowSums((etaMc[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaMc[i,] + t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
+						prop[i] <- 0.5*rowSums((etaM[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaM[i,] + t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
 					}
 					
 					
