@@ -44,13 +44,13 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 100
+iter_mcmc = 200
 
 
 
-theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
+theo.saemix<-read.table("data/linear_matlab2.txt",header=TRUE,na=".",sep=",")
+# theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
 saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Time"),name.response=c("y"),name.X="Time")
-# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 model1cpt<-function(psi,id,xidep) { 
   tim<-xidep[,1]  
@@ -81,7 +81,7 @@ post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 index = 1
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
-graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
+graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")-
 graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
 graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]], title="rwm vs foce vs laplace")
 
@@ -102,6 +102,12 @@ for (i in 2:length(post_laplace)) {
   final_laplace <- rbind(final_laplace, post_laplace[[i]])
 }
 
+final_fo2 <- post_fo2[[1]]
+for (i in 2:length(post_fo2)) {
+  final_fo2 <- rbind(final_fo2, post_fo2[[i]])
+}
+
+
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_laplace, title="VB Linear case")
@@ -110,8 +116,8 @@ graphConvMC_new(post_rwm[[index]], title="EM")
 
 graphConvMC_twokernels(final_rwm,final_foce, title="EM")
 graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
+graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
 
-graphConvMC_threekernels(post_rwm[[index]],post_fo[[index]],post_foce[[index]], title="EM")
 
 
 

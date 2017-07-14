@@ -257,7 +257,7 @@ for (i in 1:(Dargs$NM)){
 			
 
 	}
-	cov[[i]] <- abind(linehess,along=1)		
+	cov[[i]] <- abind(linehess,along=1)/1000	
 	# cov[[i]] <- matrix(0L, nrow = 3, ncol = 3) 
 }		
 
@@ -287,7 +287,7 @@ for (i in 1:(Dargs$NM)){
 				r <- r+sum(as.matrix(z) != 0L)
 	            z[r] <- gradf[r,1]
 				# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
-				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]]/1000 )/(varList$pres[1])^2 +solve(omega.eta))
+				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]] )/(varList$pres[1])^2 +solve(omega.eta))
 			}
 			
 
@@ -341,14 +341,15 @@ for (i in 1:(Dargs$NM)){
 ############   FO2														############
 ###############################################################################################
 		if(opt$nbiter.mcmc[6]>0) {
-			
+
+
 
 				gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
 
 				for (j in 1:nb.etas) {
 					
 					phiM1 <- mean.phiM
-					phiM2 <- phiM
+					phiM2 <- phiM1
 					phiM2[,j] <- phiM1[,j] + phiM1[,j]/100;
 					psiM1 <- transphi(phiM1,saemixObject["model"]["transform.par"]) 
 					psiM2 <- transphi(phiM2,saemixObject["model"]["transform.par"]) 
@@ -360,6 +361,10 @@ for (i in 1:(Dargs$NM)){
 						gradf[r,j] <- (fpred2[r] - fpred1[r])/(phiM1[i,j]/100)
 					}
 				}
+				
+
+
+
 
 				#calculation of the covariance matrix of the proposal
 				Gamma <- list(omega.eta,omega.eta)
@@ -380,7 +385,7 @@ for (i in 1:(Dargs$NM)){
 					for (j in 1:nb.etas) {
 
 							phiM1 <- mean.phiM
-							phiM2 <- phiM
+							phiM2 <- phiM1
 							phiM2[,j] <- phiM1[,j]+phiM1[,j]/100;
 							etaM2 <- phiM2[,varList$ind.eta]-mean.phiM[,varList$ind.eta]
 							etaM1 <- phiM1[,varList$ind.eta]-mean.phiM[,varList$ind.eta]

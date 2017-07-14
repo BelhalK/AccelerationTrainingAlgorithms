@@ -91,7 +91,7 @@ post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newke
 post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 
 
-index = 1
+index = 3
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
 graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
@@ -115,6 +115,12 @@ for (i in 2:length(post_laplace)) {
   final_laplace <- rbind(final_laplace, post_laplace[[i]])
 }
 
+final_fo2 <- post_fo2[[1]]
+for (i in 2:length(post_fo2)) {
+  final_fo2 <- rbind(final_fo2, post_fo2[[i]])
+}
+
+
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_laplace, title="VB Linear case")
@@ -123,10 +129,7 @@ graphConvMC_new(post_rwm[[index]], title="EM")
 
 graphConvMC_twokernels(final_rwm,final_foce, title="EM")
 graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
-
-graphConvMC_threekernels(post_rwm[[index]],post_fo[[index]],post_foce[[index]], title="EM")
-
-
+graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
 
 
 
