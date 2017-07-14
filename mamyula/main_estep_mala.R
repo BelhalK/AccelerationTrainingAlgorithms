@@ -384,7 +384,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			
 				
-			gradU <- gradU-(1/lambda)*(etaM - eta_prox)
+			gradU <- gradU+(1/lambda)*(etaM - eta_prox)
 
 
 			if (u>1){
@@ -454,7 +454,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				}
 			}
 
-			gradUc <- gradUc-(1/lambda)*(etaMc - etac_prox)
+			gradUc <- gradUc + (1/lambda)*(etaMc - etac_prox)
 			
 			for (i in 1:(Dargs$NM)){
 				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
