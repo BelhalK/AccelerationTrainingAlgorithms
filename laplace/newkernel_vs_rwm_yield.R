@@ -134,3 +134,42 @@ graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
 
 
 
+
+
+
+final_rwm <- post_rwm[[1]]
+for (i in 2:length(post_rwm)) {
+  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+}
+
+
+final_foce <- post_foce[[1]]
+for (i in 2:length(post_foce)) {
+  final_foce <- rbind(final_foce, post_foce[[i]])
+}
+
+
+final_laplace <- post_laplace[[1]]
+for (i in 2:length(post_laplace)) {
+  final_laplace <- rbind(final_laplace, post_laplace[[i]])
+}
+
+final_fo2 <- post_fo2[[1]]
+for (i in 2:length(post_fo2)) {
+  final_fo2 <- rbind(final_fo2, post_fo2[[i]])
+}
+
+
+#ALl individual posteriors
+graphConvMC_new(final_rwm, title="RWM")
+graphConvMC_new(final_laplace, title="VB Linear case")
+#first individual posteriors
+graphConvMC_new(post_rwm[[index]], title="EM")
+
+graphConvMC_twokernels(final_rwm,final_foce, title="EM")
+graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
+graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
+
+
+
+
