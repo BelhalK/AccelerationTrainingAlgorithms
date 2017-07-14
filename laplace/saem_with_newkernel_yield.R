@@ -101,32 +101,3 @@ graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
 #RWM vs GD
 graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
 
-
-K1 = 100
-K2 = 50
-iterations = 1:(K1+K2+1)
-gd_step = 0.00001
-
-
-#RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
-theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
-theo_ref <- cbind(iterations, theo_ref)
-
-#ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_laplace(saemix.model,saemix.data,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
-
-
-#RWM vs always MAP (ref)
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
-#ref vs map once no gd
-graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
-#map once no gd vs map once and gd
-graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
-#ref vs map once gd
-graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
-#RWM vs GD
-graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
-
