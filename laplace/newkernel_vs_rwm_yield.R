@@ -77,21 +77,25 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
-saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0))
-saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0))
-saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc))
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
+saemix.fo2<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
 
 
 post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
 post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
-post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
+# post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
+post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 
 
 index = 1
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
-graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
+# graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
+graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
+graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
 
 
 final_rwm <- post_rwm[[1]]
@@ -106,6 +110,11 @@ for (i in 2:length(post_foce)) {
 }
 
 
+final_laplace <- post_laplace[[1]]
+for (i in 2:length(post_laplace)) {
+  final_laplace <- rbind(final_laplace, post_laplace[[i]])
+}
+
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_laplace, title="VB Linear case")
@@ -113,6 +122,7 @@ graphConvMC_new(final_laplace, title="VB Linear case")
 graphConvMC_new(post_rwm[[index]], title="EM")
 
 graphConvMC_twokernels(final_rwm,final_foce, title="EM")
+graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
 
 graphConvMC_threekernels(post_rwm[[index]],post_fo[[index]],post_foce[[index]], title="EM")
 

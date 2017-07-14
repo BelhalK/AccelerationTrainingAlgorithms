@@ -159,7 +159,9 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 	}
 
 
-		#Laplace
+###############################################################################################
+############   LAPLACE													############
+###############################################################################################
 		if(opt$nbiter.mcmc[4]>0) {
 			nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 			nrs2<-1
@@ -224,6 +226,7 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 
 			
 		
+		#Calculus of the hessian
 			
 			cov <- list(omega.eta,omega.eta)
 			test <- matrix(0L, nrow = length(fpred), ncol = 1) 
@@ -263,7 +266,7 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]] )/(varList$pres[1])^2 +solve(omega.eta))
 			}
 			
-			browser()
+			
 			for (u in 1:opt$nbiter.mcmc[4]) {
 
 					etaMc<-etaM
@@ -274,6 +277,7 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 						
 					for (i in 1:(Dargs$NM)){
 						M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
+						# M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%Gamma[[i]]
 						etaMc[i,]<- eta_map[i,] +M[i,]
 					}
 
@@ -307,7 +311,11 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 			}
 		}
 
-		#first order
+
+###############################################################################################
+############   FO												############
+###############################################################################################
+
 		if(opt$nbiter.mcmc[5]>0) {
 			for (u in 1:opt$nbiter.mcmc[5]) {
 				gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
@@ -478,8 +486,132 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 			}
 		}
 
-	#New kernel
+###############################################################################################
+############   FO2														############
+###############################################################################################
 		if(opt$nbiter.mcmc[6]>0) {
+			
+
+				gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
+
+				for (j in 1:nb.etas) {
+					
+					phiM1 <- mean.phiM
+					phiM2 <- phiM
+					phiM2[,j] <- phiM1[,j] + phiM1[,j]/100;
+					psiM1 <- transphi(phiM1,saemixObject["model"]["transform.par"]) 
+					psiM2 <- transphi(phiM2,saemixObject["model"]["transform.par"]) 
+					fpred1<-structural.model(psiM1 , Dargs$IdM, Dargs$XM)
+					fpred2<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+					for (i in 1:(Dargs$NM)){
+						r = 1:sum(Dargs$IdM == i)
+		                r = r+sum(as.matrix(gradf[,j]) != 0L)
+						gradf[r,j] <- (fpred2[r] - fpred1[r])/(phiM1[i,j]/100)
+					}
+				}
+
+				#calculation of the covariance matrix of the proposal
+				Gamma <- list(omega.eta,omega.eta)
+				z <- matrix(0L, nrow = length(fpred), ncol = 1) 
+				for (i in 1:(Dargs$NM)){
+					r = 1:sum(Dargs$IdM == i)
+					r <- r+sum(as.matrix(z) != 0L)
+		            z[r] <- gradf[r,1]
+					Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+				}
+			
+					
+					
+					#generate candidate eta
+					gradlogq <- etaM
+					gradlogp <- etaM
+
+					for (j in 1:nb.etas) {
+
+							phiM1 <- mean.phiM
+							phiM2 <- phiM
+							phiM2[,j] <- phiM1[,j]+phiM1[,j]/100;
+							etaM2 <- phiM2[,varList$ind.eta]-mean.phiM[,varList$ind.eta]
+							etaM1 <- phiM1[,varList$ind.eta]-mean.phiM[,varList$ind.eta]
+							gradlogq[,j] <- (0.5*rowSums(etaM2*(etaM2%*%somega)) - 0.5*rowSums(etaM1*(etaM1%*%somega))) / (phiM1[,j]/100)
+
+							
+							psiM1<-transphi(phiM1,Dargs$transform.par)
+							fpred<-structural.model(psiM1, Dargs$IdM, Dargs$XM)
+							if(Dargs$error.model=="exponential")
+								fpred<-log(cutoff(fpred))
+							gpred<-error(fpred,varList$pres)
+							DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+							logp<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+
+							psiM2<-transphi(phiM2,Dargs$transform.par)
+							fpred<-structural.model(psiM2, Dargs$IdM, Dargs$XM)
+							if(Dargs$error.model=="exponential")
+								fpred<-log(cutoff(fpred))
+							gpred<-error(fpred,varList$pres)
+							DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+							logp2<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+
+							gradlogp[,j] <- (logp2 - logp) / (phiM1[,j]/100)
+
+						}
+
+					
+						gradg <- gradlogp+gradlogq
+		
+				for (u in 1:opt$nbiter.mcmc[6]) {
+
+					
+					etaMc<-etaM
+					propc <- U.eta
+					prop <- U.eta
+					for (i in 1:(Dargs$NM)){
+						M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
+						etaMc[i,]<-  - Gamma[[i]]%*%gradg[i,] +M[i,]
+					}
+
+
+
+					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+					psiMc<-transphi(phiMc,Dargs$transform.par)
+					fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+					if(Dargs$error.model=="exponential")
+						fpred<-log(cutoff(fpred))
+					gpred<-error(fpred,varList$pres)
+					DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+					Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+					Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
+					if (u<50){
+						for (i in 1:(Dargs$NM)){
+						etaM[i,]<-  - Gamma[[i]]%*%gradg[i,]
+						}
+					}
+
+					for (i in 1:(Dargs$NM)){
+
+						propc[i] <- 0.5*rowSums((etaMc[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaMc[i,]+ t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
+						prop[i] <- 0.5*rowSums((etaM[i,]+ t(gradg[i,])%*%Gamma[[i]])*(etaM[i,]+ t(gradg[i,])%*%Gamma[[i]])%*%solve(Gamma[[i]]))
+					}
+					
+					
+					deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+					ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+					etaM[ind,]<-etaMc[ind,]
+					for (i in 1:(nrow(phiM))) {
+						post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i,]
+					}
+					U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+					U.eta[ind]<-Uc.eta[ind]
+
+			}
+		}
+
+
+###############################################################################################
+############   NEW KERNEl														############
+###############################################################################################
+		if(opt$nbiter.mcmc[7]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -553,8 +685,9 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 		# sGamma <- solve(Gamma)
 		
 
+
 		
-		for (u in 1:opt$nbiter.mcmc[6]) {
+		for (u in 1:opt$nbiter.mcmc[7]) {
 
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
