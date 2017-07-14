@@ -219,57 +219,64 @@ estep_laplace<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, va
 			test <- matrix(0L, nrow = length(fpred), ncol = 1) 
 			testgrad <- matrix(0L, nrow = length(fpred), ncol = 1) 
 
+
+
+
+delta <- 0.0001
 for (i in 1:(Dargs$NM)){
 	linehess <- rep(list(matrix(0L, nrow = 1, ncol = nb.etas) ), nb.etas)
 	seq = 1:sum(Dargs$IdM == i)
 	seq = seq+sum(as.matrix(test) != 0L)
 	test[seq] <- 1
 	for(l in 1:nb.etas){
-
+		for (j in 1:nb.etas) {
+			phi_map2 <- phi_map
+			phi_map3 <- phi_map
+			phi_map4 <- phi_map
+			phi_map2[,l] <- phi_map[,l]+delta
+			phi_map3[,j] <- phi_map[,j]+delta
+			phi_map4[,j] <- phi_map2[,j]+delta
+			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+			psi_map3 <- transphi(phi_map3,saemixObject["model"]["transform.par"]) 
+			psi_map4 <- transphi(phi_map4,saemixObject["model"]["transform.par"]) 
+			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			fpred3<-structural.model(psi_map3, Dargs$IdM, Dargs$XM)
+			fpred4<-structural.model(psi_map4, Dargs$IdM, Dargs$XM)
 
 			testgrad <- matrix(0L, nrow = length(fpred), ncol = 1) 
-			for (j in 1:nb.etas) {
-				phi_map2 <- phi_map
-				phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100
-				psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-				fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-
-				phi_map6 <- phi_map5
-				phi_map6[,j] <- phi_map5[,j]+phi_map5[,j]/100
-				psi_map5 <- transphi(phi_map5,saemixObject["model"]["transform.par"]) 
-				psi_map6 <- transphi(phi_map6,saemixObject["model"]["transform.par"]) 
-				fpred5<-structural.model(psi_map5, Dargs$IdM, Dargs$XM)
-				fpred6<-structural.model(psi_map6, Dargs$IdM, Dargs$XM)
-
-				testgrad <- matrix(0L, nrow = length(fpred), ncol = 1) 
-				for (n in 1:(Dargs$NM)){
-					r1 = 1:sum(Dargs$IdM == n)
-					r1 = r1+sum(as.matrix(testgrad) != 0L)
-					testgrad[r1] <- 1
-					gradf[r1,j] <- (fpred2[r1] - fpred1[r1])/(phi_map[n,j]/100)
-					gradf2[r1,j] <- (fpred6[r1] - fpred5[r1])/(phi_map5[n,j]/100)
-				}
-				
-			g <- matrix(0L, nrow = length(fpred), ncol = 1) 
-        	g2 <- matrix(0L, nrow = length(fpred), ncol = 1) 
-        	g[seq] <- gradf[seq,l]
-			g2[seq] <- gradf2[seq,l]
-			linehess[[l]][,j] <- ((g2[seq] - g[seq])/(phi_map2[i,]/100))%*%(Dargs$yM[seq] - fpredmap[seq])
+			for (n in 1:(Dargs$NM)){
+				r1 = 1:sum(Dargs$IdM == n)
+				r1 = r1+sum(as.matrix(testgrad) != 0L)
+				testgrad[r1] <- 1
+				linehess[[l]][,j] <- ((fpred4[r1]  - fpred3[r1]  - fpred2[r1] + fpred1[r1] )/delta^2)%*%(Dargs$yM[r1] - fpredmap[r1])
 			}
-			
-			
-        	
-						
 
+			
+		}
+			
 
 	}
 	cov[[i]] <- abind(linehess,along=1)		
+	browser()
+}		
 
-}
 
-		
+			
+			gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
 
+			for (j in 1:nb.etas) {
+				phi_map2 <- phi_map
+				phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+				psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+				fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+				for (i in 1:(Dargs$NM)){
+					r = 1:sum(Dargs$IdM == i)
+	                r = r+sum(as.matrix(gradf[,j]) != 0L)
+					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+				}
+			}
 			
 			#calculation of the covariance matrix of the proposal
 				
@@ -283,7 +290,6 @@ for (i in 1:(Dargs$NM)){
 				Gamma[[i]] <- solve( ( t(gradf[r,])%*%gradf[r,]-cov[[i]] )/(varList$pres[1])^2 +solve(omega.eta))
 			}
 			
-			browser()
 
 			for (u in 1:opt$nbiter.mcmc[4]) {
 
