@@ -37,6 +37,14 @@ source('main_estep_gd_mix.R')
 source('main_estep_mix.R')
 source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
+
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
 
 #####################################################################################
 # Theophylline
@@ -82,62 +90,77 @@ K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
-
+replicate = 10
+seed0 = 39546
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
-theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
-theo_ref <- cbind(iterations, theo_ref)
-
-#ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
-
-#MAP once and  NO GD
-options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
-theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
-theo_nogd <- cbind(iterations, theo_nogd)
+final_rwm <- 0
+for (j in 1:replicate){
+  print(j)
+  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+  theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+  theo_ref <- cbind(iterations, theo_ref)
+  theo_ref['individual'] <- j
+  final_rwm <- rbind(final_rwm,theo_ref)
+}
 
 
-#MAP once and GD
-options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
-theo_gd <- cbind(iterations, theo_gd)
 
-#mix (MAP first 4 iter then gd for 30 and then RWM)
-options.gd_mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.gd_mix))
-theo_gd_mix <- cbind(iterations, theo_gd_mix)
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[9]<-paste("id")
+final_rwm1 <- final_rwm[c(9,1,2)]
+prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix <- cbind(iterations, theo_mix)
-
-
-theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix2 <- cbind(iterations, theo_mix2)
-#RWM vs mix
-graphConvMC_twokernels(theo_ref,theo_ref, title="ref vs GD")
-graphConvMC_twokernels(theo_mix,theo_mix2, title="ref vs GD")
-graphConvMC_twokernels(theo_new_ref,theo_mix, title="ref vs GD")
-
-
-
-graphConvMC_twokernels(theo_ref,theo_gd_mix, title="ref vs GD")
-graphConvMC_twokernels(theo_gd_mix,theo_new_ref, title="ref vs GD")
+final_mix <- 0
+for (j in 1:replicate){
+  print(j)
+  options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+  theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
+}
 
 
 
-#RWM vs always MAP (ref)
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
-#ref vs map once no gd
-graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
-#map once no gd vs map once and gd
-graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
-#ref vs map once gd
-graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
-#RWM vs GD
-graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+names(final_mix)[1]<-paste("time")
+names(final_mix)[9]<-paste("id")
+final_mix1 <- final_mix[c(9,1,2)]
+prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
+
+#map always 
+final_map <- 0
+for (j in 1:replicate){
+  print(j)
+  options.new<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+  theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+  theo_new_ref <- cbind(iterations, theo_new_ref)
+  theo_new_ref['individual'] <- j
+  final_map <- rbind(final_map,theo_new_ref)
+}
+
+
+names(final_map)[1]<-paste("time")
+names(final_map)[9]<-paste("id")
+final_map1 <- final_map[c(9,1,2)]
+prctilemlx(final_map1[-1,],band = list(number = 8, level = 80)) + ggtitle("map")
+
+
+final_rwm1['group'] <- 1
+final_mix1['group'] <- 2
+final_mix1$id <- final_mix1$id +1
+final_map1['group'] <- 2
+final_map1$id <- final_map1$id +2
+
+final <- 0
+final <- rbind(final_rwm1[-1,],final_mix1[-1,])
+final <- rbind(final_rwm1[-1,],final_mix1[-1,],final_map1[-1,])
+
+
+
+labels <- c("rwm","mix")
+labels <- c("rwm","mix","map")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 

@@ -32,12 +32,14 @@ source('main_new.R')
 source('main_estep_new.R')
 source('main_gd.R')
 source('main_estep_gd.R')
+source('main_estep_newkernel.R')
 source('main_gd_mix.R')
 source('main_estep_gd_mix.R')
 source('main_estep_mix.R')
 source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
 
+library(sgd)
 #####################################################################################
 # Theophylline
 
@@ -48,44 +50,30 @@ source("mixtureFunctions.R")
 
 
 # Doc
-data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
-  name.predictors=c("dose"),name.response=c("yield"),
-  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
-  covariates=c("kg/ha")))
+theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-yield.LP<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
+model1cpt<-function(psi,id,xidep) { 
+	dose<-xidep[,1]
+	tim<-xidep[,2]  
+	ka<-psi[id,1]
+	V<-psi[id,2]
+	CL<-psi[id,3]
+	k<-CL/V
+	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+	return(ypred)
 }
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
-  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE),error.model="constant")
-
-
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
-gd_step = 0.00001
+gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -105,29 +93,12 @@ options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1
 theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
 
-#mix (MAP first 4 iter then gd for 30 and then RWM)
-options.gd_mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.gd_mix))
-theo_gd_mix <- cbind(iterations, theo_gd_mix)
-
 #mix (RWM and MAP new kernel for liste of saem iterations)
 options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 
-
-theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix2 <- cbind(iterations, theo_mix2)
-#RWM vs mix
-graphConvMC_twokernels(theo_ref,theo_ref, title="ref vs GD")
-graphConvMC_twokernels(theo_mix,theo_mix2, title="ref vs GD")
-graphConvMC_twokernels(theo_new_ref,theo_mix, title="ref vs GD")
-
-
-
-graphConvMC_twokernels(theo_ref,theo_gd_mix, title="ref vs GD")
-graphConvMC_twokernels(theo_gd_mix,theo_new_ref, title="ref vs GD")
-
+graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
 
 
 #RWM vs always MAP (ref)
@@ -141,3 +112,17 @@ graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
 #RWM vs GD
 graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
 
+
+
+# Dimensions
+N <- 1e5  # number of data points
+d <- 1e2  # number of features
+
+# Generate data.
+X <- matrix(rnorm(N*d), ncol=d)
+theta <- rep(5, d+1)
+eps <- rnorm(N)
+y <- cbind(1, X) %*% theta + eps
+dat <- data.frame(y=y, x=X)
+
+sgd.theta <- sgd(y ~ ., data=dat, model="lm")

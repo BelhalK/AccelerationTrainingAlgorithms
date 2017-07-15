@@ -26,12 +26,17 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
-source('newkernel_main.R')
-source('main_laplace.R')
-source('main_estep_laplace.R')
-# source('main_estep_laplace_saem.R')
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplaceandfo_saem")
+
+source('main_new.R')
+source('main_estep_new.R')
 source("mixtureFunctions.R")
+
+library(abind)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
 
 #####################################################################################
 # Theophylline
@@ -80,24 +85,27 @@ gd_step = 0.00001
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-#ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_laplace(saemix.model,saemix.data,options.new))
+#foce
+options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2))
+theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
+#Laplace
+options.laplace<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2))
+theo_laplace<-data.frame(saemix_new(saemix.model,saemix.data,options.laplace))
+theo_laplace <- cbind(iterations, theo_laplace)
 
-#RWM vs always MAP (ref)
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
-#ref vs map once no gd
-graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
-#map once no gd vs map once and gd
-graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
-#ref vs map once gd
-graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
-#RWM vs GD
-graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+#First order
+options.fo<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,5),nbiter.saemix = c(K1,K2))
+theo_fo<-data.frame(saemix_new(saemix.model,saemix.data,options.fo))
+theo_fo <- cbind(iterations, theo_fo)
 
+
+#RWM vs mix
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="ref vs foce")
+graphConvMC_twokernels(theo_ref,theo_laplace, title="ref vs laplace")
+graphConvMC_twokernels(theo_ref,theo_fo, title="ref vs fo")

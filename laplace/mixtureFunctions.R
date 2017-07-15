@@ -44,6 +44,10 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=ncol(df)-2, top=title))
 }
 
+
+
+
+
 graphConvMC_threekernels <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
