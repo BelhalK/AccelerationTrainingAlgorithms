@@ -48,7 +48,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 400
+iter_mcmc = 50
 
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
@@ -84,7 +84,8 @@ post_mamyula<-saemix_mala(saemix.model,saemix.data,saemix.options_mamyula)$post_
 
 
 index = 4
-graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
+graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="EM")
+graphConvMC_twokernels(post_rwm[[index]],post_mamyula[[index]], title="EM")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_mamyula[[index]], title="EM")
 
 

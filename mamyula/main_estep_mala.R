@@ -329,7 +329,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			    yi<-yobs[id==isuj]
 			    idi<-rep(1,length(yi))
 			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
-			    phii<-saemixObject["results"]["phi"][i,]
+			    # phii<-saemixObject["results"]["phi"][i,]
+			    phii<-phiM
 			    phi1<-phii[i1.omega2]
 			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiM)
 			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
@@ -418,7 +419,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			    yi<-yobs[id==isuj]
 			    idi<-rep(1,length(yi))
 			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
-			    phii<-saemixObject["results"]["phi"][i,]
+			    # phii<-saemixObject["results"]["phi"][i,]
+			    phii<-phiMc
 			    phi1<-phii[i1.omega2]
 			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiMc)
 			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
