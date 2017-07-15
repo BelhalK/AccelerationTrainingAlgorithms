@@ -41,7 +41,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 
-iter_mcmc = 100
+iter_mcmc = 10
 
 
 # Doc
@@ -79,7 +79,7 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.00000001)
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.01)
 saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc),sigma.val = 0.01)
 
 

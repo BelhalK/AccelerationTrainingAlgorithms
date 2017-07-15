@@ -81,7 +81,8 @@ K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-
+replicate = 15
+seed0 = 39546
 
 
 final_rwm <- 0
@@ -99,7 +100,7 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
 final_rwm1 <- final_rwm[c(9,1,2)]
-prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mala <- 0
@@ -108,8 +109,8 @@ for (j in 1:replicate){
   options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
-  theo_mix['individual'] <- j
-  final_mala <- rbind(final_mala,theo_mix)
+  theo_mala['individual'] <- j
+  final_mala <- rbind(final_mala,theo_mala)
 }
 
 
@@ -117,7 +118,7 @@ theo_mala <- cbind(iterations, theo_mala)
 names(final_mala)[1]<-paste("time")
 names(final_mala)[9]<-paste("id")
 final_mala1 <- final_mala[c(9,1,2)]
-prctilemlx(final_mala1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
+prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala")
 
 #map always 
 final_mamyula <- 0
@@ -126,15 +127,15 @@ for (j in 1:replicate){
   options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.1)
   theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
   theo_mamyula <- cbind(iterations, theo_mamyula)
-  theo_new_ref['individual'] <- j
-  final_mamyula <- rbind(final_mamyula,theo_new_ref)
+  theo_mamyula['individual'] <- j
+  final_mamyula <- rbind(final_mamyula,theo_mamyula)
 }
 
 
 names(final_mamyula)[1]<-paste("time")
 names(final_mamyula)[9]<-paste("id")
 final_mamyula1 <- final_mamyula[c(9,1,2)]
-prctilemlx(final_mamyula1[-1,],band = list(number = 8, level = 80)) + ggtitle("map")
+# prctilemlx(final_mamyula1[-1,],band = list(number = 8, level = 80)) + ggtitle("mamyula")
 
 
 final_rwm1['group'] <- 1
@@ -149,8 +150,8 @@ final <- rbind(final_rwm1[-1,],final_mala1[-1,],final_mamyula1[-1,])
 
 
 
-labels <- c("rwm","mix")
-labels <- c("rwm","mix","map")
+labels <- c("rwm","mala")
+labels <- c("rwm","mala","mamyula")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 
