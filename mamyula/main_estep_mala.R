@@ -75,6 +75,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		# print(u)
+
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -173,7 +174,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
 		gamma <- 0.01
-		l<-c()
+	
 		acc <- 0
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			# print(u)
@@ -219,6 +220,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			}
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
+
 
 			for (i in 1:Dargs$NM){
 				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
@@ -269,12 +271,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
-			# if (ind[1]==1){
-			# 	acc <- acc + 1
-			# }
-			
-			# l[1] <- 1 - acc/opt$nbiter.mcmc[4]
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
@@ -297,8 +293,9 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
 		gamma <- 0.01
-		l<-c()
+
 		acc <- 0
+		lambda<-0.2
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			# print(u)
 			
@@ -321,14 +318,14 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		  	phi.prox<-saemixObject["results"]["phi"]
 
 		  	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-		  	lambda=0.2
+		  	
 		  	for(i in 1:Dargs$NM) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
 			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
 			    yi<-yobs[id==isuj]
 			    idi<-rep(1,length(yi))
-			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+			    mean.phi1<-mean.phiM
 			    # phii<-saemixObject["results"]["phi"][i,]
 			    phii<-phiM
 			    phi1<-phii[i1.omega2]
@@ -378,7 +375,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				
 				for (i in 1:Dargs$NM){
 					# gradU[i,kj] <- -(U2.y[i]-U.y[i]+U2.eta[i]-U.eta[i])/(etaM[i,kj]/100)
-					gradU[i,kj] <- -(U2.eta[i]-U.eta[i])/(etaM[i,kj]/100)
+					gradU[i,kj] <- (U2.eta[i]-U.eta[i])/(etaM[i,kj]/100)
 				}
 			}
 			# 
@@ -388,14 +385,14 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			gradU <- gradU+(1/lambda)*(etaM - eta_prox)
 
 
-			if (u>1){
-				adap <- adap - gamma*(deltu + log(0.57))
-			}
+			# if (u>1){
+			# 	adap <- adap - gamma*(deltu + log(0.57))
+			# }
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
 			for (i in 1:Dargs$NM){
-				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
+				etaMc[i,] <- etaM[i,] - sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
 				# etaMc[i,] <- etaM[i,] + sigma*adap[i]*(gradU[i,]+1/lambda*(etaM[i,] - eta_prox[i,])) + sqrt(2*sigma*adap[i])*Z[i,]
 			}
 			
@@ -409,32 +406,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 			Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 			Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-
-#######find the prox of g(eta_candidate)
-
-			for(i in 1:Dargs$NM) {
-			    isuj<-id.list[i]
-			    xi<-xind[id==isuj,,drop=FALSE]
-			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
-			    yi<-yobs[id==isuj]
-			    idi<-rep(1,length(yi))
-			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
-			    # phii<-saemixObject["results"]["phi"][i,]
-			    phii<-phiMc
-			    phi1<-phii[i1.omega2]
-			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiMc)
-			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
-			    phi.prox[i,i1.omega2]<-phi1.opti$par
-			  }
-
-			prox.psi<-transphi(phi.prox,saemixObject["model"]["transform.par"])
-			prox.psi<-data.frame(id=id.list,prox.psi)
-			prox.phi<-data.frame(id=id.list,phi.prox)
-
-			psic_prox <- as.matrix(prox.psi[,-c(1)])
-			phic_prox <- as.matrix(prox.phi[,-c(1)])
-			etac_prox <- phic_prox - mean.phiM
-
 
 			#Gradient in candidate eta
 
@@ -452,15 +423,43 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				U2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				U2.eta<-0.5*rowSums(etaM2*(etaM2%*%somega))
 				for (i in 1:Dargs$NM){
-					gradUc[i,kj] <- -(U2.eta[i]-Uc.eta[i])/(etaMc[i,kj]/100)
+					gradUc[i,kj] <- (U2.eta[i]-Uc.eta[i])/(etaMc[i,kj]/100)
 				}
 			}
 
+#######find the prox of g(eta_candidate)
+
+			for(i in 1:Dargs$NM) {
+			    isuj<-id.list[i]
+			    xi<-xind[id==isuj,,drop=FALSE]
+			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+			    yi<-yobs[id==isuj]
+			    idi<-rep(1,length(yi))
+			    mean.phi1<-mean.phiM
+			    # phii<-saemixObject["results"]["phi"][i,]
+			    phii<-phiMc
+			    phi1<-phii[i1.omega2]
+			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiMc)
+			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
+			    phi.prox[i,i1.omega2]<-phi1.opti$par
+			  }
+
+			prox.phi<-data.frame(id=id.list,phi.prox)
+			prox.psi<-transphi(phi.prox,saemixObject["model"]["transform.par"])
+			prox.psi<-data.frame(id=id.list,prox.psi)
+			
+
+			psic_prox <- as.matrix(prox.psi[,-c(1)])
+			phic_prox <- as.matrix(prox.phi[,-c(1)])
+			etac_prox <- phic_prox - mean.phiM
+
+
+			
 			gradUc <- gradUc + (1/lambda)*(etaMc - etac_prox)
 			
 			for (i in 1:(Dargs$NM)){
-				propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
-				prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
+				propc[i,] <- ((etaMc[i,]-etaM[i,] + sigma*adap[i]*gradU[i,])/sqrt(2*sigma*adap[i]))^2
+				prop[i,] <- ((etaM[i,]-etaMc[i,] + sigma*adap[i]*gradUc[i,])/sqrt(2*sigma*adap[i]))^2
 			}
 			
 
@@ -471,12 +470,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
-			# if (ind[1]==1){
-			# 	acc <- acc + 1
-			# }
 			
-			# l[1] <- 1 - acc/opt$nbiter.mcmc[4]
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
@@ -492,6 +486,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	return(list(rates=l,varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
+	return(list(rates=0,varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_mala = post_mala))
 }
 
