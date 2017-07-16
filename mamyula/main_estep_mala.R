@@ -385,9 +385,9 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			gradU <- gradU+(1/lambda)*(etaM - eta_prox)
 
 
-			# if (u>1){
-			# 	adap <- adap - gamma*(deltu + log(0.57))
-			# }
+			if (u>1){
+				adap <- adap - gamma*(deltu + log(0.57))
+			}
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
