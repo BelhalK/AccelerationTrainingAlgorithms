@@ -106,7 +106,7 @@ prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
 final_mala <- 0
 for (j in 1:replicate){
   print(j)
-  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01)
+  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
   theo_mala['individual'] <- j
@@ -124,7 +124,7 @@ prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala
 final_mamyula <- 0
 for (j in 1:replicate){
   print(j)
-  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.1)
+  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
   theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
   theo_mamyula <- cbind(iterations, theo_mamyula)
   theo_mamyula['individual'] <- j

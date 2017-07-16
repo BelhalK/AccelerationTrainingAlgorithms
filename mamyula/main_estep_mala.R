@@ -173,7 +173,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
-		gamma <- 0.01
+		gamma <- saemix.options$gamma.val
 	
 		acc <- 0
 		for (u in 1:opt$nbiter.mcmc[4]) {
@@ -292,7 +292,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
-		gamma <- 0.01
+		gamma <- saemix.options$gamma.val
 
 		acc <- 0
 		lambda<-0.2
