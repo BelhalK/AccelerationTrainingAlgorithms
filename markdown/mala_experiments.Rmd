@@ -1,6 +1,8 @@
 ---
 title: "Mala experiments"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 header-includes:
 - \usepackage{bbm}
 - \usepackage{amsmath}
@@ -9,45 +11,211 @@ header-includes:
 - \usepackage[T1]{fontenc}
 - \usepackage[french]{babel}
 - \usepackage{enumitem}
-- \usepackage{amssymb}
 ---
 $\newcommand{\expec}{\mathbb{E}}$
 $\newcommand{\prob}{\mathbb{P}}$
 $\newcommand{\indic}{\mathbb{1}}$
 $\DeclareMathOperator*{\argmax}{arg\,max}$
 
-In this document, we will deal with the MALA and variants algorithms such as: MALA, Nesterov, Adaptive MALA, Anisotropic MALA, Non reversible MALA
+In this document, we will deal with the MALA and variants algorithms such as: MALA, Nesterov, Adaptive MALA, Anisotropic MALA, Non reversible MALA. The second part will deal with an improvment of the diffusion taking into considerantion non smoothness of the potential we are sampling.
 
-## The Model
-First of all, let's define the model for a mixture of J distributions:
-$$\text{N i.i.d. observations } y = (y_i, 1\leqslant i \leqslant N)$$
-$$\text{J distributions } f_1, f_2, ..., f_J$$
+# The Model
+We study a classical missing data problem where:
 
-The incomplete density for a single data point , $p(y_i)$ can be written as:
-$$p(y_i) = \sum_{j=1}^{J}{\pi_jf_j(y_i)}$$
-Now, we can consider parametrized distributions.
-In that case, $f_j = f(.;\theta_j)$ where $\theta_j$ is the parameter associated to the distribution $f_j$.
+* The observed data is a continuous random variable $Y = (Y_i, 1\leq i \leq N)$ that has observed values $(y_i, 1\leq i \leq N)$ in $\mathcal{Y}$
+* The latent data is a continuous random variable $\psi = (\psi_i, 1\leq i \leq N)$ that takes on the values $(\psi_i, 1\leq i \leq N)$ in $\mathcal{Z}$ and consists in $N$ independent variables
+* The components $Y_i$ are generated independently of each other and from their corresponding $\psi_i$
+* $\log p(y,\theta)$ is the incomplete data log-likelihood
+* $\log p(y,z,\theta)$ is the complete data log-likelihood and obtained by augmenting the observed data with the missing data
+* We'll call $P_{Y_i,\psi_i,\theta}$ and $P_{\psi_i|Y_i,\theta}$ the probability distributions associated to the densities $p(y_i,\psi_i,\theta)$ and $p(\psi_i|y_i,\theta)$
 
-The parameterized incomplete likelihood distribution is now equal to:
-$$p(y_i; \theta) = \sum_{j=1}^{J}{\pi_jf(y_i; \theta_j)}$$
+Our objective is to create samples from the posterior distribiution $P_{\psi_i|Y_i,\theta}$ for all individuals i and at a fixed model parameter $\theta$.
 
-Where $\theta$ is the parameter of the incomplete likelihood and is equal to $(\pi_1,...,\pi_J,\theta_1,...,\theta_J)$.
-In order to define the parameters $\pi_1,...,\pi_J$, known as the mixture weights, we need to introduce latent variables $\psi = (\psi_i, 1\leqslant i \leqslant N)$:
-$$\psi_i \in \{1,...,J\}$$
-$$\prob(\psi_i = j) = \pi_j$$ 
-$$\text{with } \sum_{j=1}^{J}{\pi_j} = 1$$ 
 
-We can now write the complete data likelihood for each individual $p(y_i, \psi_i; \theta)$:
-$$p(y_i, \psi_i; \theta) = p(y_i| \psi_i; \theta)p(\psi_i; \theta)$$
-$$\text{Since } p(y_i| \psi_i; \theta) = \prod_{j=1}^{J}{f(y_i,\theta_j)^{\indic_{\psi_i=j}}} \text{ and } p(\psi_i; \theta) = \prod_{j=1}^{J}{\pi_j^{\indic_{\psi_i=j}}}$$
-$$p(y_i, \psi_i; \theta) = \prod_{j=1}^{J}{(\pi_j f(y_i,\theta_j))^{\indic_{\psi_i=j}}}$$
+In this document, we will consider N i.i.d. observations $y=(y_i, 1\leqslant i \leqslant N)$, unobserved individuals parameters $\psi=(\psi_i, 1\leqslant i \leqslant N)$ and a vector of parameters $\theta$.
+The goal is to find the parameter $\theta$ that maximizes the likelihood $p(y;\theta)$:
 
-The complete log density for a single data point is thus:
-$$\log p(y_i, \psi_i; \theta) = \sum_{j=1}^{J}{\indic_{\psi_i=j}(\log\pi_j + \log f(y_i,\theta_j))}$$
+$$p(y;\theta) = \int_{}^{} p(y,\psi;\theta) \, \mathrm{d}\psi$$
 
-Let's simulate some data using R and plot them (for a mixture of 2 gaussians):
+We are going to restrict ourselves to models that belong to the exponential family.
+The complete data log likelihood can be expressed as:
 
-```{r}
+$$\log p(y, \psi; \theta) = -\phi(\theta) + \langle S(y,\psi){,} \Phi(\theta) \rangle$$
+
+With $\langle \cdot{,} \cdot \rangle$ being the scalar product and $\phi(\theta)$, $\Phi(\theta)$ and $S(y,\psi)$ are known functions.\\
+We consider a joint model for the observations $y = (y_i, 1\leqslant i \leqslant N)$ and the individual parameters $\psi = (\psi_i, 1\leqslant i \leqslant N)$:
+$$p(y, \psi; \theta) = p(y|\psi; \theta)p(\psi; \theta)$$
+Where $p(y|\psi; \theta)$ is the conditional distribution of the observations of individual $i$ and $p(\psi; \theta)$ the distribution of the individual parameters.
+Also:
+
+\begin{split}
+& y_i = f(t_i)+\sigma\epsilon_i \textrm{ with $\epsilon_i\sim \mathcal{N}(0,1)$}\\
+&\psi_i = c_i*\psi_{pop}+\eta_i\textrm{ with $\eta_i\sim \mathcal{N}(0,\Omega)$}
+\end{split}
+\end{equation}
+$f$ is a non linear function solution of a PK-PD Ordinary Differential Equation.\\
+As a result we have the following hierarchical model:
+
+\begin{split}
+& y_i|\psi_i \sim \mathcal{N}(f(t),\sigma)\\
+& \psi_i \sim \mathcal{N}(\psi_{pop}, \Omega)
+\end{split}
+
+#MALA and variants
+##Mala
+In this section, we will describe an MCMC method that consists in constructing a Markov chain based on the discretized Langevin diffusion. Samples are accepted and rejected thanks to a MH step.
+Let denote $\pi$ the distibution we want to sample from. In our case it is the conditional density $p(\psi|y;\theta)$.
+We consider the overdamped Langevin diffusion:
+
+$$\dot{X} = \nabla \log \pi(X) + \sqrt{2}\dot{W}$$
+
+This diffusion is driven by the time derivative of a Brownian motion W.
+It is proven that this diffusion admits as stationary distribution $\pi$.
+We'll use the Euler-Maruyama discretization of this diffusion such as:
+
+$$X_{k+1} = X_k + \gamma\nabla\log\pi(X) + \sqrt{2\gamma}Z$$
+
+$\gamma > 0$ is the discretization step.
+
+The algorithm consists then in drawing a sample candidate from the Langevin proposal (basically a gaussian, implied by the brownian motion, centered in $X_k + \gamma\nabla\log\pi(X)$ with variance $\sqrt{2\gamma}$) and applying an MH step.
+
+
+$$\eta_i^k = \eta_i^{k-1}+\gamma\nabla\log\pi(\eta_i^{k-1}+\sqrt{2\gamma} Z \textrm{ with }Z \sim \mathcal{N}(0,1)$$
+
+
+And the acceptance ratio:
+$$
+\begin{split}
+\alpha(\eta_i^{k},\eta_i^{k-1}) = \frac{q(\eta_i^{k-1}|\eta_i^{k})p_{\eta_i}(\eta_i^{k})p_{y_i|\eta_i}(\eta_i^{k})}{q(\eta_{k}|\eta_i^{k-1})p_{\eta_i}(\eta_i^{k-1})p_{y_i|\eta_i}(\eta_i^{k-1})}
+\end{split}
+$$
+With $q(.)$ being the proposal distribution.
+Here again, in our implementation the adaptive stepsize $\gamma$ updates consists in (cf Atachadé adaptive MALA):
+
+$$\gamma = \gamma (1+\delta(\alpha(\eta_i^{k},\eta_i^{k-1})-\alpha^{*}))$$
+
+The stationnary distribution of that Markov Chain is the conditional distribution we intended to sample from.
+
+###Theophylline (12 individuals 10 observations per individual)
+
+Beforehand, the standard approach is to approximate the body as a simple compartment models. In this example we will focus on a one-compartment model for theophylline following oral dose D at time $t=0$ leading to description of concentration $y(t_i)$ at time $t_i \geq 0$ (i varies from 1 to N and denote the individual of the population):
+$$
+y_i = y(t_i) = f(\psi_i)+ \epsilon_i
+$$
+With :
+
+$$f(\psi_i) = \frac{D(k_a)_i}{V_i((k_a)_i - (C_l)_i/V_i)}(e^{(-(k_a)_it_i)}-e^{(-\frac{(C_l)_i}{V_i}t_i)})$$
+
+Where $(k_a)_i$ is the fractional rate of absorption for individual $i$, $(C_l)_i$ is the clearance rate for individual $i$ and $V_i$ is the volume of distribution for individual $i$ and D is the dose injected.
+In our notation, the complete model is $p(y_i,\psi_i,\theta_0)$ where $\psi_i = ((k_a)_i, (C_l)_i, V_i)$ is the vector of individual parameters where each component is composed of a fixed effect term and a random effect (a centered Gaussian with same variance $\Omega$) and $\theta_0 = (\Omega_0, \Sigma_0)$ (with $\epsilon_i \sim \mathcal{N}(0,\Sigma_0)$ and $(k_a)_i = (k_a)_{pop} + \eta_{(k_a)_i}$ and $\eta_{(k_a)_i} \sim \mathcal{N}(0,\Omega_0)$).
+Our goal is to simulate for instance from the posterior distribution $P((k_a)_i|y_i,\theta_0)$. As we said above we can work on the distribution $P(\eta_{(k_a)_i}|y_i,\theta_0)$ and equivalently for the others parameters.
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+#library(rstan)
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mala_nest")
+source('mala_main.R')
+source('main_estep_mala.R')
+source("mixtureFunctions.R")
+
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
+
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+iter_mcmc = 300
+
+# Doc
+theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
+l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
+for (i in 1:12){
+  theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
+}
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+	dose<-xidep[,1]
+	tim<-xidep[,2]  
+	ka<-psi[id,1]
+	V<-psi[id,2]
+	CL<-psi[id,3]
+	k<-CL/V
+	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+	return(ypred)
+}
+# Default model, no covariate
+# saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc),sigma.val = 0.01,gamma.val=0.01)
+
+
+post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+index = 4
+graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="RWM vs MALA")
+```
+
+
+###Cow (560 individuals 5455 obs)
+
+$$
+y_i = y(t_i) = f(\psi_i)+ \epsilon_i
+$$
+With :
+
+$$f(\psi_i) = a.(1-(b/1000).*exp(-k.*(x/100000)))$$
+
+With $\psi_i = (a_i,b_i,k_i)$
+
+
+##Nesterov acceleration
+##Anisotropic MALA
+##Non reversible MALA
+
+```{r,echo=FALSE}
 mixt.simulate <-function(n,weight,mu,sigma)
 {
   G <- length(mu)

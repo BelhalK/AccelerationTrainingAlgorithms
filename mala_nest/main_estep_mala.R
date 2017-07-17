@@ -75,6 +75,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		# print(u)
+	l<-c()
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -144,6 +145,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
+				l[u] <-1 - length(ind)/Dargs$NM #rejection rate
 				etaM[ind,]<-etaMc[ind,]
 
 				for (i in 1:(nrow(phiM))) {
@@ -172,7 +174,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
-		gamma <- 0.01
+		gamma <- saemix.options$gamma.val
 		l<-c()
 		acc <- 0
 		for (u in 1:opt$nbiter.mcmc[4]) {
@@ -293,9 +295,9 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
-		sigma <- 0.01
-		gamma <- 0.01
-		
+		sigma <- saemix.options$sigma.val
+		gamma <- saemix.options$gamma.val
+		l<-c()
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			# print(u)
 			
@@ -344,7 +346,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			a<-1
 			if (u>2){
-				R=0.02
+				R=saemix.options$memory
 				# R=0.05*(u-1)/(u+2)
 				if (u<100){
 					a <- 1
@@ -412,6 +414,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
 			# print(length(ind)/Dargs$NM)
 			etaM[ind,]<-etaMc[ind,]
 			x[[u]] <- etaM
@@ -432,9 +435,9 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
-		sigma <- 0.01
-		gamma <- 0.01
-		
+		sigma <- saemix.options$sigma.val
+		gamma <- saemix.options$gamma.val
+		l<-c()
 		for (u in 1:opt$nbiter.mcmc[6]) {
 			# print(u)
 			
@@ -547,7 +550,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			# print(length(ind)/Dargs$NM)
+			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]
@@ -573,9 +576,9 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		adap <- rep(1, Dargs$NM)
-		sigma <- 0.01
-		gamma <- 0.01
-		
+		sigma <- saemix.options$sigma.val
+		gamma <- saemix.options$gamma.val
+		l<-c()
 		for (u in 1:opt$nbiter.mcmc[7]) {
 			# print(u)
 			
@@ -621,7 +624,8 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 			
-			m <- Matrix(1:(2*Dargs$NM),12,12)
+
+			m <- Matrix(1:(2*Dargs$NM),Dargs$NM,Dargs$NM)
 			S <- skewpart(m)
 			skew <- S%*%gradU/norm(gradU)
 			for (i in 1:Dargs$NM){
@@ -671,6 +675,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			l[u] <-1 - length(ind)/Dargs$NM #rejection rate
 			etaM[ind,]<-etaMc[ind,]
 			for (i in 1:(nrow(phiM))) {
 				post_mala[[i]][u,2:(ncol(post_mala[[i]]) - 1)] <- etaM[i,]

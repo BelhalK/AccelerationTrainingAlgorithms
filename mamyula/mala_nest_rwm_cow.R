@@ -48,7 +48,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 400
+iter_mcmc = 200
 
 # Doc
 # Doc
@@ -63,7 +63,8 @@ saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"),
 growthcow<-function(psi,id,xidep) {
 # input:
 #   psi : matrix of parameters (3 columns, a, b, k)
-#   id : vector of indices 
+#   id : vector of indices add --all
+
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
@@ -84,10 +85,10 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.01)
-saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0))
-saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0))
-saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc))
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.000001,gamma.val=0.00001)
+saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0),sigma.val = 0.000001,gamma.val=0.00001,memory=0.08)
+saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0),sigma.val = 0.000001,gamma.val=0.00001)
+saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc),sigma.val = 0.0000001,gamma.val=0.00001)
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
@@ -96,16 +97,19 @@ post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
 post_amala<-saemix_mala(saemix.model,saemix.data,saemix.options_amala)$post_mala
 post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
 
-graphConvMC_twokernels(post_mala[[index]],post_amala[[index]], title="RWM vs MALA")
+graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="RWM vs MALA")
+graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="RWM vs MALA")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 
 graphConvMC_twokernels(post_rwm[[index]],post_nonrev[[index]], title="RWM vs MALA")
 
 graphConvMC_twokernels(post_nest[[index]],post_nest2[[index]], title="RWM vs MALA")
 
-index = 4
+index = 1
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nest[[index]], title="EM")
+graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nonrev[[index]], title="EM")
+
 
 
 
