@@ -48,7 +48,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 400
+iter_mcmc = 600
 
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
@@ -74,10 +74,10 @@ model1cpt<-function(psi,id,xidep) {
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.01)
-saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0))
-saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0))
-saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc))
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0),sigma.val = 0.01,gamma.val=0.01,memory=0.02)
+saemix.options_amala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,iter_mcmc,0),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,0,0,iter_mcmc),sigma.val = 0.01,gamma.val=0.01)
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
@@ -93,7 +93,8 @@ graphConvMC_twokernels(post_rwm[[index]],post_nonrev[[index]], title="RWM vs MAL
 
 graphConvMC_twokernels(post_nest[[index]],post_nest2[[index]], title="RWM vs MALA")
 
-index = 4
+index = 6
+graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="RWM vs MALA")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_amala[[index]], title="EM")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_nest[[index]], title="EM")
 
@@ -136,7 +137,14 @@ for (i in 2:length(post_amala)) {
   final_amala <- rbind(final_amala, post_amala[[i]])
 }
 
+
+final_nonrev <- post_nonrev[[1]]
+for (i in 2:length(post_nonrev)) {
+  final_nonrev <- rbind(final_nonrev, post_nonrev[[i]])
+}
+graphConvMC_twokernels(final_rwm,final_mala, title="EM")
 graphConvMC_threekernels(final_rwm,final_mala,final_nest, title="EM")
+graphConvMC_threekernels(final_rwm,final_mala,final_amala, title="EM")
 
 
 #ALl individual posteriors
@@ -154,6 +162,7 @@ graphConvMC_twokernels(post_rwm[[1]],post_mala[[1]], title="EM")
 
 
 #Autocorrelation
+index=4
 rwm.obj <- as.mcmc(post_rwm[[index]])
 corr_rwm <- autocorr(rwm.obj[,3])
 autocorr.plot(rwm.obj[,3])
@@ -161,6 +170,8 @@ autocorr.plot(rwm.obj[,3])
 mala.obj <- as.mcmc(post_mala[[index]])
 corr_mala <- autocorr(mala.obj[,3])
 autocorr.plot(mala.obj[,3])
+
+
 
 nest.obj <- as.mcmc(post_nest[[index]])
 corr_nest <- autocorr(nest.obj[,3])
@@ -174,6 +185,8 @@ nonrev.obj <- as.mcmc(post_nonrev[[index]])
 corr_nonrev <- autocorr(nonrev.obj[,3])
 autocorr.plot(nonrev.obj[,3])
 
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
 
 
 #MSJD

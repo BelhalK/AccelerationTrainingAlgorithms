@@ -41,7 +41,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 
-iter_mcmc = 10
+iter_mcmc = 200
 
 
 # Doc
@@ -79,15 +79,15 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.01,gamma.val=0.01)
-saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc),sigma.val = 0.01,gamma.val=0.01)
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.000001,gamma.val=0.00001)
+saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc),sigma.val = 0.000001,gamma.val=0.00001)
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
 post_mamyula<-saemix_mala(saemix.model,saemix.data,saemix.options_mamyula)$post_mala
 
-index = 4
+index = 1
 graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="EM")
 graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_mamyula[[index]], title="EM")
 

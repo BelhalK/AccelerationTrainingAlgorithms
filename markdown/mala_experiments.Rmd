@@ -110,6 +110,8 @@ Where $(k_a)_i$ is the fractional rate of absorption for individual $i$, $(C_l)_
 In our notation, the complete model is $p(y_i,\psi_i,\theta_0)$ where $\psi_i = ((k_a)_i, (C_l)_i, V_i)$ is the vector of individual parameters where each component is composed of a fixed effect term and a random effect (a centered Gaussian with same variance $\Omega$) and $\theta_0 = (\Omega_0, \Sigma_0)$ (with $\epsilon_i \sim \mathcal{N}(0,\Sigma_0)$ and $(k_a)_i = (k_a)_{pop} + \eta_{(k_a)_i}$ and $\eta_{(k_a)_i} \sim \mathcal{N}(0,\Omega_0)$).
 Our goal is to simulate for instance from the posterior distribution $P((k_a)_i|y_i,\theta_0)$. As we said above we can work on the distribution $P(\eta_{(k_a)_i}|y_i,\theta_0)$ and equivalently for the others parameters.
 
+####Posterior samples for all individuals
+
 ```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
 #library(rstan)
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
@@ -161,7 +163,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 300
+iter_mcmc = 600
 
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
@@ -194,10 +196,129 @@ saemix.options_nonrev<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-index = 4
-graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="RWM vs MALA")
+post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
+
+
+
+
+
+final_rwm <- post_rwm[[1]]
+for (i in 2:length(post_rwm)) {
+  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+}
+
+
+final_mala <- post_mala[[1]]
+for (i in 2:length(post_mala)) {
+  final_mala <- rbind(final_mala, post_mala[[i]])
+}
+
+
+graphConvMC_twokernels(final_rwm,final_mala, title="RWM vs MALA")
 ```
 
+####Autocorrelations and MSJD
+In terms of Autocorrelation and Mean Square jump distance we get
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+index=4
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+
+```
+
+```{r}
+index=4
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
+```
+####Variance of the estimator
+20 replicates of RWM and MALA during 1000 iterations
+Only the 400 last iterations are used to compare the variances of the estimator
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+iter_mcmc = 1000
+replicate = 20
+seed0 = 39546
+indiv=4
+burn = 600
+# Doc
+theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
+for (i in 1:12){
+  theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
+}
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+	dose<-xidep[,1]
+	tim<-xidep[,2]  
+	ka<-psi[id,1]
+	V<-psi[id,2]
+	CL<-psi[id,3]
+	k<-CL/V
+	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+	return(ypred)
+}
+
+# Default model, no covariate
+# saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+
+final_rwm <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+  post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+  post_rwm[[indiv]]['individual'] <- j
+  final_rwm <- rbind(final_rwm,post_rwm[[indiv]][-1,])
+}
+
+
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[5]<-paste("id")
+final_rwm <- final_rwm[c(5,1,2)]
+# prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+
+#burn
+rwm_burn <- final_rwm[final_rwm[,2]>burn,]
+prctilemlx(rwm_burn[-1,-4],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+
+
+
+final_mala <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0),sigma.val=0.01,gamma.val=0.01)
+  post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
+  post_mala[[indiv]]['individual'] <- j
+  final_mala <- rbind(final_mala,post_mala[[indiv]][-1,])
+}
+
+
+names(final_mala)[1]<-paste("time")
+names(final_mala)[5]<-paste("id")
+final_mala <- final_mala[c(5,1,2)]
+# prctilemlx(final_mala[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + ggtitle("MALA")
+
+#burn
+mala_burn <- final_mala[final_mala[,2]>burn,]
+
+rwm_burn['group'] <- 1
+mala_burn['group'] <- 2
+mala_burn$id <- mala_burn$id +1
+final <- 0
+final <- rbind(rwm_burn,mala_burn)
+labels <- c("rwm","mala")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+```
 
 ###Cow (560 individuals 5455 obs)
 
@@ -212,36 +333,361 @@ With $\psi_i = (a_i,b_i,k_i)$
 
 
 ##Nesterov acceleration
-##Anisotropic MALA
-##Non reversible MALA
+Inspired by the Nesterov acceleration of the gradient descent we add a memory term to the Overdamped discretized langevin diffusion
 
-```{r,echo=FALSE}
-mixt.simulate <-function(n,weight,mu,sigma)
-{
-  G <- length(mu)
-  Z <- sample(1:G, n, prob=weight, replace=T)
-  x<-NULL
-  for (g in 1:G)
-  {
-    x<-c(x,rnorm(length(which(Z==g)),mu[g],sigma[g]))
-  }
-  return(x)
+$$X_{k+1} = X_k + \gamma\nabla\log\pi(X) +R(X_{k} - X_{k-1}) + \sqrt{2\gamma}Z$$
+
+Where $R>0$
+
+
+
+###Theo case
+
+####Posterior samples for all individuals
+
+####Autocorrelations and MSJD
+In terms of Autocorrelation and Mean Square jump distance we get
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+index=4
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+
+nest.obj <- as.mcmc(post_nest[[index]])
+corr_nest <- autocorr(nest.obj[,3])
+autocorr.plot(nest.obj[,3])
+
+```
+
+```{r}
+index=4
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
+print(paste0("msjd nesterov: ", mssd(post_nest[[index]][,3])))
+```
+
+####Variance of the estimator
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+
+
+final_nest <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_nest<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0),sigma.val=0.01,gamma.val=0.01,memory=0.02)
+  post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
+  post_nest[[indiv]]['individual'] <- j
+  final_nest <- rbind(final_nest,post_nest[[indiv]][-1,])
 }
 
-n <- 1000
-weight<-c(0.7, 0.3) 
-mu<-c(0,4)
-sigma<-c(2,1)*1
 
-x <- matrix(0,nrow=n,ncol=1)
-x <- mixt.simulate(n,weight,mu,sigma)
 
-plot(x)
+names(final_nest)[1]<-paste("time")
+names(final_nest)[5]<-paste("id")
+final_nest <- final_nest[c(5,1,2)]
+# prctilemlx(final_nest[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Nesterov")
+
+
+
+#burn
+nest_burn <- final_nest[final_nest[,2]>burn,]
+
+nest_burn$id <- nest_burn$id +2
+final <- 0
+final <- rbind(rwm_burn,mala_burn,nest_burn)
+labels <- c("rwm","mala","nest")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+```
+
+##Anisotropic MALA
+In this section we consider the regular langevin diffusion markov chain and set a dependence on the direction of the diffusion for the stepsize for the drift term. The stepsize of the brownian motion, in other words the covariance of the proposal is also dependent of the direction of the gradient.
+
+$$X_{k+1} = X_k + \gamma_1\nabla\log\pi(X)  + \sqrt{2\gamma_2}Z$$
+
+Where:
+$$\gamma_1 = \frac{b}{max(b, |\nabla \log \pi|)}$$
+Where $b>0$ is a threshold term and:
+$$\gamma_2 = \gamma_1^2 \nabla \log \pi^{t} \nabla \log \pi$$
+
+###Theo case
+
+####Posterior samples for all individuals
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+
+post_amala<-saemix_mala(saemix.model,saemix.data,saemix.options_amala)$post_mala
+final_amala <- post_amala[[1]]
+for (i in 2:length(post_amala)) {
+  final_amala <- rbind(final_amala, post_amala[[i]])
+}
+
+graphConvMC_threekernels(final_rwm,final_mala,final_amala, title="EM")
+```
+####Autocorrelations and MSJD
+In terms of Autocorrelation and Mean Square jump distance we get
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+index=4
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+nest.obj <- as.mcmc(post_nest[[index]])
+corr_nest <- autocorr(nest.obj[,3])
+autocorr.plot(nest.obj[,3])
+
+amala.obj <- as.mcmc(post_amala[[index]])
+corr_amala <- autocorr(amala.obj[,3])
+autocorr.plot(amala.obj[,3])
+```
+
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
+print(paste0("msjd amala: ", mssd(post_amala[[index]][,3])))
+```
+
+
+####Variance of the estimator
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+```
+
+##Non reversible MALA
+Finally, another method is implemented in order to improve autocorrelation and variance properties.
+Following R. Poncet Generalized Mala and Neal paper "Non reversible chains are better" (https://arxiv.org/pdf/math/0407281.pdf)
+
+####Posterior samples for all individuals
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+
+post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
+final_nonrev <- post_nonrev[[1]]
+for (i in 2:length(post_nonrev)) {
+  final_nonrev <- rbind(final_nonrev, post_nonrev[[i]])
+}
+graphConvMC_threekernels(final_rwm,final_mala,final_nonrev, title="EM")
+```
+####Autocorrelations and MSJD
+In terms of Autocorrelation and Mean Square jump distance we get
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+index=4
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+
+nonrev.obj <- as.mcmc(post_nonrev[[index]])
+corr_nonrev <- autocorr(nonrev.obj[,3])
+autocorr.plot(nonrev.obj[,3])
+```
+
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
+print(paste0("msjd non reversible: ", mssd(post_nonrev[[index]][,3])))
+```
+
+
+####Variance of the estimator
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+final_nonrev <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.options_nonrev<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc),sigma.val=0.01,gamma.val=0.01)
+  post_nonrev<-saemix_mala(saemix.model,saemix.data,saemix.options_nonrev)$post_mala
+  post_nonrev[[indiv]]['individual'] <- j
+  final_nonrev <- rbind(final_nonrev,post_nonrev[[indiv]][-1,])
+}
+
+
+names(final_nonrev)[1]<-paste("time")
+names(final_nonrev)[5]<-paste("id")
+final_nonrev <- final_nonrev[c(5,1,2)]
+# prctilemlx(final_nonrev[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("Non reversible")
+
+
+
+#burn
+nonrev_burn <- final_nonrev[final_nonrev[,2]>burn,]
+rwm_burn['group'] <- 1
+mala_burn['group'] <- 2
+mala_burn$id <- mala_burn$id +1
+nonrev_burn['group'] <- 3
+nonrev_burn$id <- nonrev_burn$id +3
+
+final <- 0
+final <- rbind(rwm_burn,mala_burn, nonrev_burn)
+
+
+labels <- c("rwm","mala","nonrev")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+
+```
+
+#Moreau Yosida MALA (MAMYULA)
+
+In all of our cases the potential is composed of a smooth and a non smooth part.
+
+
+####Theo case
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+#library(rstan)
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
+source('mala_main.R')
+source('main_estep_mala.R')
+source("mixtureFunctions.R")
+
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
+
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+iter_mcmc = 200
+
+# Doc
+theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
+l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
+for (i in 1:12){
+  theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
+}
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  CL<-psi[id,3]
+  k<-CL/V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
+}
+# Default model, no covariate
+# saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.01,gamma.val = 0.01)
+saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc),sigma.val = 0.1,gamma.val = 0.01)
+
+
+post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
+post_mamyula<-saemix_mala(saemix.model,saemix.data,saemix.options_mamyula)$post_mala
+
+index = 4
+graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_mamyula[[index]], title="EM")
 
 ```
 
 
-dd
+####Posterior samples for all individuals
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+final_rwm <- post_rwm[[1]]
+for (i in 2:length(post_rwm)) {
+  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+}
+
+
+final_mala <- post_mala[[1]]
+for (i in 2:length(post_mala)) {
+  final_mala <- rbind(final_mala, post_mala[[i]])
+}
+
+final_mamyula <- post_mamyula[[1]]
+for (i in 2:length(post_mamyula)) {
+  final_mamyula <- rbind(final_mamyula, post_mamyula[[i]])
+}
+
+
+
+graphConvMC_threekernels(final_rwm,final_mala,final_mamyula, title="EM")
+```
+
+####Autocorrelations and MSJD
+In terms of Autocorrelation and Mean Square jump distance we get
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+index=4
+rwm.obj <- as.mcmc(post_rwm[[index]])
+corr_rwm <- autocorr(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3])
+
+mala.obj <- as.mcmc(post_mala[[index]])
+corr_mala <- autocorr(mala.obj[,3])
+autocorr.plot(mala.obj[,3])
+
+mamyula.obj <- as.mcmc(post_mamyula[[index]])
+corr_mamyula <- autocorr(mamyula.obj[,3])
+autocorr.plot(mamyula.obj[,3])
+
+```
+
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+print(paste0("msjd rwm: ", mssd(post_rwm[[index]][,3])))
+print(paste0("msjd mala: ", mssd(post_mala[[index]][,3])))
+print(paste0("msjd mamyula: ", mssd(post_mamyula[[index]][,3])))
+```
+
+
+####Variance of the estimator
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+```
+
 
 
 

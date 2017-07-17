@@ -344,19 +344,19 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
 			
-			a<-1
+			a<-0.5
 			if (u>2){
 				R=saemix.options$memory
 				# R=0.05*(u-1)/(u+2)
 				if (u<100){
-					a <- 1
+					# a <- 1
 					for (i in 1:Dargs$NM){
 						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*a*sigma*adap[i])*Z[i,]
 					}
-					a<-1
+					
 				}
 				else {
-					a <- 1
+					# a <- 1
 					for (i in 1:Dargs$NM){
 						etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] +R*(etaM[i,] - x[[u-2]][i,]) + sqrt(2*sigma*adap[i])*Z[i,]
 					}
@@ -398,6 +398,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 			if (u>2){
 				for (i in 1:(Dargs$NM)){
+					a<-1
 					propc[i,] <- ((etaMc[i,]-etaM[i,] - sigma*adap[i]*gradU[i,] - R*(etaM[i,] - x[[u-2]][i,]))/sqrt(2*a*sigma*adap[i]))^2
 					prop[i,] <- ((etaM[i,]-etaMc[i,] - sigma*adap[i]*gradUc[i,] - R*(etaMc[i,] - x[[u-2]][i,]))/sqrt(2*a*sigma*adap[i]))^2
 				}

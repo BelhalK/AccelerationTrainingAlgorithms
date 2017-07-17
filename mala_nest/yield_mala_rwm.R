@@ -76,15 +76,20 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.000001,gamma.val=0.00001)
-saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0),sigma.val = 0.000001,gamma.val=0.00001,memory=0.02)
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0),sigma.val = 0.0001,gamma.val=0.001)
+saemix.options_nest<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0,0),sigma.val = 0.0001,gamma.val=0.001,memory=0.02)
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
 post_nest<-saemix_mala(saemix.model,saemix.data,saemix.options_nest)$post_vb
 
-index = 6
+index = 20
+graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="RWM vs MALA")
+graphConvMC_twokernels(post_mala[[index]],post_nest[[index]], title="MALA vs NEST")
+
+
+
 names(post_rwm[[index]])[2]<-paste("ka")
 names(post_rwm[[index]])[3]<-paste("V")
 names(post_rwm[[index]])[4]<-paste("Cl")

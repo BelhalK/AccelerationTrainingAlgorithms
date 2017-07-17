@@ -88,7 +88,7 @@ seed0 = 39546
 final_rwm <- 0
 for (j in 1:replicate){
   print(j) 
-  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2),sigma.val = 0.01)
+  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2),sigma.val = 0.01)
   theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
@@ -100,13 +100,13 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
 final_rwm1 <- final_rwm[c(9,1,2)]
-prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
+# prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mala <- 0
 for (j in 1:replicate){
   print(j)
-  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
   theo_mala['individual'] <- j
@@ -118,13 +118,13 @@ theo_mala <- cbind(iterations, theo_mala)
 names(final_mala)[1]<-paste("time")
 names(final_mala)[9]<-paste("id")
 final_mala1 <- final_mala[c(9,1,2)]
-prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala")
+# prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala")
 
 #map always 
 final_mamyula <- 0
 for (j in 1:replicate){
   print(j)
-  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
+  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
   theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
   theo_mamyula <- cbind(iterations, theo_mamyula)
   theo_mamyula['individual'] <- j
@@ -154,4 +154,5 @@ labels <- c("rwm","mala")
 labels <- c("rwm","mala","mamyula")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+
 
