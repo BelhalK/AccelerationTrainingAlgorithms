@@ -87,7 +87,7 @@ seed0 = 39546
 
 final_rwm <- 0
 for (j in 1:replicate){
-  print(j)
+  print(j) 
   options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2),sigma.val = 0.01)
   theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
