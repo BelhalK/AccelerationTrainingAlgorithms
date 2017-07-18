@@ -61,7 +61,7 @@ Pop.CondInit 10 10 1.05
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
     Number of chains:  5 
-    Seed:  39546 
+    Seed:  197730 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -75,17 +75,17 @@ Pop.CondInit 10 10 1.05
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        1.535   
-[2,] V         0.451   
-[3,] CL        0.041   
-[4,] a         0.728   
+[1,] ka        1.633   
+[2,] V         0.466   
+[3,] CL        0.039   
+[4,] a         0.733   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.417   
-V  omega2.V  0.018   
-CL omega2.CL 0.065   
+ka omega2.ka 0.482   
+V  omega2.V  0.020   
+CL omega2.CL 0.058   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

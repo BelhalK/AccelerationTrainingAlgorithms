@@ -75,7 +75,7 @@ model1cpt<-function(psi,id,xidep) {
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 K1 = 100
-K2 = 50
+K2 = 5
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 replicate = 50
@@ -98,7 +98,8 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
 final_rwm1 <- final_rwm[c(9,1,2)]
-# prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
+prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
+
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mala <- 0
@@ -155,4 +156,36 @@ final <- final[c(1,4,2,3)]
 
 perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 ggsave('percentile_mamyula.png', perc)
+
+
+
+
+for(i in 2:7){
+  final_rwm1 <- final_rwm[c(9,1,i)]
+  final_mala1 <- final_mala[c(9,1,i)]
+  final_mamyula1 <- final_mamyula[c(9,1,i)]
+
+
+  final_rwm1['group'] <- 1
+  final_mala1['group'] <- 2
+  final_mala1$id <- final_mala1$id +1
+  final_mamyula1['group'] <- 3
+  final_mamyula1$id <- final_mamyula1$id +2
+
+
+  final <- 0
+  final <- rbind(final_rwm1[-1,],final_mala1[-1,],final_mamyula1[-1,])
+
+
+
+  labels <- c("rwm","mala","mamyula")
+  final <- final[c(1,4,2,3)]
+  perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+  ggsave(plot = perc, file = paste("file",i,".pdf",sep=""))
+}
+
+
+
+
+
 

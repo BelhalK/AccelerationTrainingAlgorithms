@@ -1,5 +1,5 @@
 ---
-title: "EM and SAEM algorithm"
+title: "New kernel for Metropolis Hasting (bridging the gap with variational inference)"
 output: html_document
 header-includes:
 - \usepackage{bbm}
@@ -12,36 +12,59 @@ $\newcommand{\indic}{\mathbb{1}}$
 $\DeclareMathOperator*{\argmax}{arg\,max}$
 
 In this document, we will introduce a new proposal for our Metropolis hastings algorithm.
+The construction of this kernel is based off of approximation methods that consist in approximating the log likelihood. The following methods are applicable to continuous and discrete hierarchical models (the likelihood is whether discrete or continuous and the prior on the latent variable is always continuous).
 
-## The Model
-First of all, let's define the model for a mixture of J distributions:
-$$\text{N i.i.d. observations } y = (y_i, 1\leqslant i \leqslant N)$$
-$$\text{J distributions } f_1, f_2, ..., f_J$$
+# The Model
+We study a classical missing data problem where:
 
-The incomplete density for a single data point , $p(y_i)$ can be written as:
-$$p(y_i) = \sum_{j=1}^{J}{\pi_jf_j(y_i)}$$
-Now, we can consider parametrized distributions.
-In that case, $f_j = f(.;\theta_j)$ where $\theta_j$ is the parameter associated to the distribution $f_j$.
+* The observed data is a continuous random variable $Y = (Y_i, 1\leq i \leq N)$ that has observed values $(y_i, 1\leq i \leq N)$ in $\mathcal{Y}$
+* The latent data is a continuous random variable $\psi = (\psi_i, 1\leq i \leq N)$ that takes on the values $(\psi_i, 1\leq i \leq N)$ in $\mathcal{Z}$ and consists in $N$ independent variables
+* The components $Y_i$ are generated independently of each other and from their corresponding $\psi_i$
+* $\log p(y,\theta)$ is the incomplete data log-likelihood
+* $\log p(y,z,\theta)$ is the complete data log-likelihood and obtained by augmenting the observed data with the missing data
+* We'll call $P_{Y_i,\psi_i,\theta}$ and $P_{\psi_i|Y_i,\theta}$ the probability distributions associated to the densities $p(y_i,\psi_i,\theta)$ and $p(\psi_i|y_i,\theta)$
 
-The parameterized incomplete likelihood distribution is now equal to:
-$$p(y_i; \theta) = \sum_{j=1}^{J}{\pi_jf(y_i; \theta_j)}$$
+Our objective is to create samples from the posterior distribiution $P_{\psi_i|Y_i,\theta}$ for all individuals i and at a fixed model parameter $\theta$.
 
-Where $\theta$ is the parameter of the incomplete likelihood and is equal to $(\pi_1,...,\pi_J,\theta_1,...,\theta_J)$.
-In order to define the parameters $\pi_1,...,\pi_J$, known as the mixture weights, we need to introduce latent variables $\psi = (\psi_i, 1\leqslant i \leqslant N)$:
-$$\psi_i \in \{1,...,J\}$$
-$$\prob(\psi_i = j) = \pi_j$$ 
-$$\text{with } \sum_{j=1}^{J}{\pi_j} = 1$$ 
 
-We can now write the complete data likelihood for each individual $p(y_i, \psi_i; \theta)$:
-$$p(y_i, \psi_i; \theta) = p(y_i| \psi_i; \theta)p(\psi_i; \theta)$$
-$$\text{Since } p(y_i| \psi_i; \theta) = \prod_{j=1}^{J}{f(y_i,\theta_j)^{\indic_{\psi_i=j}}} \text{ and } p(\psi_i; \theta) = \prod_{j=1}^{J}{\pi_j^{\indic_{\psi_i=j}}}$$
-$$p(y_i, \psi_i; \theta) = \prod_{j=1}^{J}{(\pi_j f(y_i,\theta_j))^{\indic_{\psi_i=j}}}$$
+In this document, we will consider N i.i.d. observations $y=(y_i, 1\leqslant i \leqslant N)$, unobserved individuals parameters $\psi=(\psi_i, 1\leqslant i \leqslant N)$ and a vector of parameters $\theta$.
+The goal is to find the parameter $\theta$ that maximizes the likelihood $p(y;\theta)$:
 
-The complete log density for a single data point is thus:
-$$\log p(y_i, \psi_i; \theta) = \sum_{j=1}^{J}{\indic_{\psi_i=j}(\log\pi_j + \log f(y_i,\theta_j))}$$
+$$p(y;\theta) = \int_{}^{} p(y,\psi;\theta) \, \mathrm{d}\psi$$
 
-Let's simulate some data using R and plot them (for a mixture of 2 gaussians):
+We are going to restrict ourselves to models that belong to the exponential family.
+The complete data log likelihood can be expressed as:
 
+$$\log p(y, \psi; \theta) = -\phi(\theta) + \langle S(y,\psi){,} \Phi(\theta) \rangle$$
+
+With $\langle \cdot{,} \cdot \rangle$ being the scalar product and $\phi(\theta)$, $\Phi(\theta)$ and $S(y,\psi)$ are known functions.\\
+We consider a joint model for the observations $y = (y_i, 1\leqslant i \leqslant N)$ and the individual parameters $\psi = (\psi_i, 1\leqslant i \leqslant N)$:
+$$p(y, \psi; \theta) = p(y|\psi; \theta)p(\psi; \theta)$$
+Where $p(y|\psi; \theta)$ is the conditional distribution of the observations of individual $i$ and $p(\psi; \theta)$ the distribution of the individual parameters.
+Also:
+
+\begin{split}
+& y_i = f(t_i)+\sigma\epsilon_i \textrm{ with $\epsilon_i\sim \mathcal{N}(0,1)$}\\
+&\psi_i = c_i*\psi_{pop}+\eta_i\textrm{ with $\eta_i\sim \mathcal{N}(0,\Omega)$}
+\end{split}
+\end{equation}
+$f$ is a non linear function solution of a PK-PD Ordinary Differential Equation.\\
+As a result we have the following hierarchical model:
+
+\begin{split}
+& y_i|\psi_i \sim \mathcal{N}(f(t),\sigma)\\
+& \psi_i \sim \mathcal{N}(\psi_{pop}, \Omega)
+\end{split}
+
+
+#Introduction to approximation methods
+##Laplace approximation
+Laplace approximation consists in approximating an integral of the form:
+$$I(m) := \int{e^{mg(x)}dx}$$
+Where $m \in \mathbb{R}$ and g is three times differentiable.
+
+Based on a second order taylor expansion of the function g around a point $x_0$ we get:
+$$g(x) = g(x_0) + $$
 ```{r}
 mixt.simulate <-function(n,weight,mu,sigma)
 {
