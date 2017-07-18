@@ -136,7 +136,7 @@ $$Z \sim \mathcal{N}(Z_{MEAN}, (- \frac{\nabla l(z_{MEAN})\nabla  l(z_{MEAN})}{l
 
 
 #MCMC proposals in the context of non linear mixed effects models
-###Theophylline (12 individuals 10 observations per individual)
+###Yield (37 individuals 224 observations)
 
 Beforehand, the standard approach is to approximate the body as a simple compartment models. In this example we will focus on a one-compartment model for theophylline following oral dose D at time $t=0$ leading to description of concentration $y(t_i)$ at time $t_i \geq 0$ (i varies from 1 to N and denote the individual of the population):
 $$
@@ -144,12 +144,8 @@ y_i = y(t_i) = f(\psi_i)+ \epsilon_i
 $$
 With :
 
-$$f(\psi_i) = \frac{D(k_a)_i}{V_i((k_a)_i - (C_l)_i/V_i)}(e^{(-(k_a)_it_i)}-e^{(-\frac{(C_l)_i}{V_i}t_i)})$$
-
-Where $(k_a)_i$ is the fractional rate of absorption for individual $i$, $(C_l)_i$ is the clearance rate for individual $i$ and $V_i$ is the volume of distribution for individual $i$ and D is the dose injected.
-In our notation, the complete model is $p(y_i,\psi_i,\theta_0)$ where $\psi_i = ((k_a)_i, (C_l)_i, V_i)$ is the vector of individual parameters where each component is composed of a fixed effect term and a random effect (a centered Gaussian with same variance $\Omega$) and $\theta_0 = (\Omega_0, \Sigma_0)$ (with $\epsilon_i \sim \mathcal{N}(0,\Sigma_0)$ and $(k_a)_i = (k_a)_{pop} + \eta_{(k_a)_i}$ and $\eta_{(k_a)_i} \sim \mathcal{N}(0,\Omega_0)$).
-Our goal is to simulate for instance from the posterior distribution $P((k_a)_i|y_i,\theta_0)$. As we said above we can work on the distribution $P(\eta_{(k_a)_i}|y_i,\theta_0)$ and equivalently for the others parameters.
-
+$$f(\psi_i) = Y_{max} +B(x-X_{max})$$
+Where $\psi = (X_{max},Y_{max},B)$
 
 
 #SAEM coupled with an MCMC procedure for non linear mixed effects models
