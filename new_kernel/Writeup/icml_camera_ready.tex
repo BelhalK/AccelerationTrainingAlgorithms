@@ -43,7 +43,7 @@
 % Employ this version of the ``usepackage'' statement after the paper has
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
-\usepackage[accepted]{icml2017}
+\usepackage[accepted]{implicitworkshop2017} 
 
 
 % The \icmltitle you define below is probably too long as a header.
@@ -69,18 +69,15 @@ Bridging the gap between Independent Metropolis Hastings and Variational Inferen
 % you can specify symbols, otherwise they are numbered in order
 % ideally, you should not use this facility. affiliations will be numbered
 % in order of appearance and this is the preferred way.
-\icmlsetsymbol{equal}{*}
 
 \begin{icmlauthorlist}
-% \icmlauthor{Belhal Karimi}{to}
-% \icmlauthor{Marc Lavielle}{to}
-% \icmlauthor{Eric Moulines}{to}
-\icmlauthor{Anonymous Authors}{to}
+\icmlauthor{Belhal Karimi}{to}
+
 \end{icmlauthorlist}
 
-\icmlaffiliation{to}{Ecole Polytechnique, Palaiseau, France}
+\icmlaffiliation{to}{Ecole Polytechnique, France}
 
-\icmlcorrespondingauthor{Belhal Karimi}{belhal.karimi@polytechnique.fr}
+\icmlcorrespondingauthor{Belhal Karimi}{belhal.karimi@polytechnique.edu}
 
 % You may provide any keywords that you 
 % find helpful for describing your paper; these are used to populate 
@@ -99,9 +96,7 @@ Bridging the gap between Independent Metropolis Hastings and Variational Inferen
 % Remove it (just {}) if you do not need this facility.
 
 %\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
-
-
-\begin{abstract} 
+\printAffiliationsAndNotice{\icmlEqualContribution}\begin{abstract} 
 Variational inference and MCMC methods have been two popular methods in order to sample from a posterior distribution. Whereas the former extends the computation feasibility to higher dimension, the latter takes advantage of nice convergence properties to the exact posterior distribution. In this work we'll draw the parallel between a famous MCMC scheme called the Independent Metropolis Hastings and Variational inference. We'll explain our work on both Linear and Non-linear Gaussian cases. In the non linear case, a new proposal will be introduced motivated by a faster convergence of the Markov chain.
 \end{abstract} 
 

@@ -61,11 +61,11 @@
 % The widths of these boxes can be easily edited to accommodate your content as you see fit
 
 \begin{minipage}[b]{0.75\linewidth}
-\veryHuge \color{Navy} \textbf{Exploitation de données pour l'optimisation de trajectoires aériennes} \color{Black}\\[2cm] % Title
+\veryHuge \color{Navy} \textbf{Fast Incremental Stochastic Version of the EM algorithm} \color{Black}\\[2cm] % Title
 %\Huge\textit{Identification de système dynamique}\\[2cm] % Subtitle
-\huge \textbf{Cédric Rommel$^{1,2,3}$, F. Bonnans$^{1,2}$, P. Martinon$^{1,2}$, B. Gregorutti$^3$}\\[0.5cm] % Author(s)
-\huge INRIA$^1$, CMAP École Polytechnique$^2$, Safety Line$^3$\\[0.4cm] % University/organization
-\Large \texttt{cedric.rommel@cmap.polytechnique.fr} --- +33 (0)1 55 43 75 71 \\
+\huge \textbf{Belhal Karimi$^{1,2}$, M. Lavielle$^{1,2}$, E. Moulines$^{2}$}\\[0.5cm] % Author(s)
+\huge INRIA$^1$, CMAP École Polytechnique$^2$\\[0.4cm] % University/organization
+\Large \texttt{belhal.karimi@cmap.polytechnique.edu}\\
 \end{minipage}
 %
 \begin{minipage}[b]{0.25\linewidth}
@@ -103,7 +103,7 @@
 %\color{opticlimb}
 \color{DarkSlateGray}
 
-\section{Introduction}
+\section{Problem statement}
 \color{Navy} % Navy color
 %\color{DarkSlateGray} % DarkSlateGray color for the rest of the content
 L'avion est aujourd'hui le transport le plus polluant par passager et par kilomètre parcouru. De plus, la quantité de carburant consommée par vol reste un paramètre économique crucial pour les compagnies aériennes. 
@@ -119,7 +119,7 @@ Dans ce contexte, nous nous sommes intéressés à \textbf{l'utilisation de donn
 
 \color{DarkSlateGray} % DarkSlateGray color for the rest of the content
 %\vspace{1cm}
-\section{Motivation d'un problème d'identification}
+\section{Model and notations}
 
 Notre finalité est de proposer une méthode permettant de fournir des trajectoires optimales, réalisables et acceptables. Ceci peut se traduire mathématiquement par un \textbf{problème de commande optimale} de la forme suivante :
 \begin{equation}
@@ -149,7 +149,7 @@ Les autres éléments intervenants dans les équations précédentes, à savoir 
 %	MATERIALS AND METHODS
 %----------------------------------------------------------------------------------------
 %\vspace{1cm}
-\section{L'utilisation de techniques de Machine Learning}
+\section{Convergence Theorems}
 
 Des modèles paramétriques des fonctions $T,D,L$ et $C_{sp}$ ont été définis. En isolant ces éléments inconnus dans les membres de droite, les trois dernières équations du système \eqref{eq-sys} permettent de définir le \textbf{problème de régression} suivant:
 
@@ -188,10 +188,16 @@ où $\hat{Y}_k$ désigne la prédiction de $Y_k$, un des membres de gauche des �
 %	RESULTS 
 %----------------------------------------------------------------------------------------
 %\vspace{1cm}
-\section{Résultats}
+\section{Incremental in Practice}
 
 Résultats obtenus à partir d'une base de 1000 variables enregistrées toutes les secondes au cours de 78 vols d'un unique avion.
 
+\subsection{Simple Gaussian case}
+Maths for imcem and iem and show how the growing batch is the best option (parallel with online EM)\\
+Also ISAEM on mixture of gaussians to show optimal batch size
+
+\subsection{PK-PD datasets}
+Graphs of ISAEM on pkpd datasets
 
 %\begin{center}\vspace{1cm}
 %\includegraphics[width=0.8\linewidth]{resultats2}
