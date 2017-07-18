@@ -1,5 +1,5 @@
 #library(rstan)
-setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+setwd("/home/belhal.karimi/Desktop/Belhal/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -26,15 +26,12 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 
-source("mixtureFunctions.R")
-
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
+setwd("/home/belhal.karimi/Desktop/Belhal/mamyula")
 source('mala_main.R')
 source('main_estep_mala.R')
 source('main_mamyula.R')
-# source("mixtureFunctions.R")
+source("mixtureFunctions.R")
 
 library("mlxR")
 library("psych")
@@ -144,16 +141,14 @@ final_mamyula1 <- final_mamyula[c(9,1,2)]
 final_rwm1['group'] <- 1
 final_mala1['group'] <- 2
 final_mala1$id <- final_mala1$id +1
-final_mamyula1['group'] <- 2
+final_mamyula1['group'] <- 3
 final_mamyula1$id <- final_mamyula1$id +2
 
 final <- 0
-final <- rbind(final_rwm1[-1,],final_mala1[-1,])
 final <- rbind(final_rwm1[-1,],final_mala1[-1,],final_mamyula1[-1,])
 
 
 
-labels <- c("rwm","mala")
 labels <- c("rwm","mala","mamyula")
 final <- final[c(1,4,2,3)]
 # prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
