@@ -50,15 +50,11 @@ require(reshape2)
 iter_mcmc = 200
 
 
+warfarin.saemix<-read.table("data/pkcat_data",header=T,na=".")
+saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-# Doc
-data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
-  name.predictors=c("dose"),name.response=c("yield"),
-  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
-  covariates=c("kg/ha")))
 
-yield.LP<-function(psi,id,xidep) {
+warfarin<-function(psi,id,xidep) {
 # input:
 #   psi : matrix of parameters (3 columns, ymax, xmax, slope)
 #   id : vector of indices 
@@ -101,19 +97,6 @@ graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
 graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
 graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]], title="rwm vs foce vs laplace")
 graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
-graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs fo vs laplace")
-
-
-post_rwm[[index]]$algo <- 'rwm'
-post_foce[[index]]$algo <- 'foce'
-post_laplace[[index]]$algo <- 'laplace'
-post_fo2[[index]]$algo <- 'fo2'
-comparison <- 0
-comparison <- rbind(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]])
-comparison <- comparison[,-5]
-var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
-var <- graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
-
 
 
 final_rwm <- post_rwm[[1]]

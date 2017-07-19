@@ -380,8 +380,7 @@ for (i in 1:(Dargs$NM)){
 					
 					#generate candidate eta
 					gradlogq <- etaM
-					gradlogp <- etaM
-
+					gradlogp <- matrix(0L, nrow = nrow(etaM), ncol = nb.etas) 
 					for (j in 1:nb.etas) {
 
 							phiM1 <- mean.phiM
@@ -407,23 +406,17 @@ for (i in 1:(Dargs$NM)){
 							gpred<-error(fpred,varList$pres)
 							DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 							logp2<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
-
-							gradlogp[,j] <- (logp2 - logp) / (phiM1[,j]/100)
+							
+							for (i in 1:(Dargs$NM)){
+								gradlogp[i,j] <- (logp2[i] - logp[i])/(phiM1[i,j]/100)
+							}
 
 						}
 
 					
 						gradg <- gradlogp+gradlogq
 
-						etaM <- etaM
-						phiM <- mean.phiM + etaM
-						psiM<-transphi(phiM,Dargs$transform.par)
-						fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-						if(Dargs$error.model=="exponential")
-							fpred<-log(cutoff(fpred))
-						gpred<-error(fpred,varList$pres)
-						DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-						U.y<-colSums(DYF)
+						
 						U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 		
 				for (u in 1:opt$nbiter.mcmc[6]) {
@@ -434,13 +427,10 @@ for (i in 1:(Dargs$NM)){
 					prop <- U.eta
 					for (i in 1:(Dargs$NM)){
 						M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
-						etaMc[i,]<-  - Gamma[[i]]%*%gradg[i,] + M[i,]
+						etaMc[i,]<-  - t(gradg[i,])%*%Gamma[[i]] + M[i,]
 					}
 
-					if (u<2){
-					etaM <- etaMc
-					}
-
+					
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 					psiMc<-transphi(phiMc,Dargs$transform.par)
 					fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)

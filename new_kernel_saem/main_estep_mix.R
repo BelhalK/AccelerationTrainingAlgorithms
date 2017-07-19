@@ -36,7 +36,7 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 	phiMc<-phiM
 	map_range <- c(1:3)
-	# map_range <- c(5,15,25)
+	# map_range <- c(15,25,35)
 
 	if (!(kiter %in% map_range)){
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau

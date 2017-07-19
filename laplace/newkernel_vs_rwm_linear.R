@@ -44,7 +44,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 200
+iter_mcmc = 1000
 
 
 
@@ -78,12 +78,25 @@ post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newke
 post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 
 
-index = 1
+index = 2
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
 graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
 graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
 graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+
+post_rwm[[index]]$algo <- 'rwm'
+post_foce[[index]]$algo <- 'foce'
+post_laplace[[index]]$algo <- 'laplace'
+post_fo2[[index]]$algo <- 'fo2'
+comparison <- 0
+comparison <- rbind(post_rwm[[index]],post_fo2[[index]],post_foce[[index]],post_laplace[[index]])
+comparison <- comparison[,-4]
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+var <- graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+
+
 
 final_rwm <- post_rwm[[1]]
 for (i in 2:length(post_rwm)) {

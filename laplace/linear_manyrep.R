@@ -30,11 +30,11 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
 source('laplace_main.R')
 source('main_estep_laplace.R')
 source("mixtureFunctions.R")
+
 library("mlxR")
 library("psych")
 library("coda")
 library("Matrix")
-
 library(abind)
 require(ggplot2)
 require(gridExtra)
@@ -47,42 +47,29 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 700
-replicate = 15
+iter_mcmc = 200
+replicate = 5
 seed0 = 39546
-indiv=4
-burn = 300
+indiv=2
+burn = 50
 
 
 
-# Doc
-data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
-  name.predictors=c("dose"),name.response=c("yield"),
-  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
-  covariates=c("kg/ha")))
 
-yield.LP<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
+theo.saemix<-read.table("data/linear_matlab2.txt",header=TRUE,na=".",sep=",")
+# theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Time"),name.response=c("y"),name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+  tim<-xidep[,1]  
+  d<-psi[id,1]
+  b<-psi[id,2]
+
+  ypred<-d*tim+b
+  return(ypred)
 }
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
-  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE),error.model="constant")
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(5,5),ncol=2,byrow=TRUE, dimnames=list(NULL, c("d","b"))),transform.par=c(0,0))
 
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
 saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
@@ -109,8 +96,8 @@ for (j in 1:replicate){
 
 
 names(final_rwm)[1]<-paste("time")
-names(final_rwm)[5]<-paste("id")
-final_rwm <- final_rwm[c(5,1,2)]
+names(final_rwm)[4]<-paste("id")
+final_rwm <- final_rwm[c(4,1,2)]
 # prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
 
 #burn
@@ -128,8 +115,8 @@ for (j in 1:replicate){
 
 
 names(final_foce)[1]<-paste("time")
-names(final_foce)[5]<-paste("id")
-final_foce <- final_foce[c(5,1,2)]
+names(final_foce)[4]<-paste("id")
+final_foce <- final_foce[c(4,1,2)]
 # prctilemlx(final_foce[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("foce")
 
 #burn
@@ -148,8 +135,8 @@ for (j in 1:replicate){
 
 
 names(final_fo2)[1]<-paste("time")
-names(final_fo2)[5]<-paste("id")
-final_fo2 <- final_fo2[c(5,1,2)]
+names(final_fo2)[4]<-paste("id")
+final_fo2 <- final_fo2[c(4,1,2)]
 # prctilemlx(final_fo2[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("fo2")
 
 #burn
@@ -168,8 +155,8 @@ for (j in 1:replicate){
 
 
 names(final_laplace)[1]<-paste("time")
-names(final_laplace)[5]<-paste("id")
-final_laplace <- final_laplace[c(5,1,2)]
+names(final_laplace)[4]<-paste("id")
+final_laplace <- final_laplace[c(4,1,2)]
 # prctilemlx(final_laplace[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("laplace")
 
 #burn
@@ -199,7 +186,7 @@ prctilemlx(final, band = list(number = 2, level = 80),group='group', label = lab
 #Autocorrelation
 rwm.obj <- as.mcmc(post_rwm[[1]])
 corr_rwm <- autocorr(rwm.obj[,2])
-autocorr.plot(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2],main="rwm")
 
 foce.obj <- as.mcmc(post_foce[[1]])
 corr_foce <- autocorr(foce.obj[,2])
@@ -213,8 +200,11 @@ laplace.obj <- as.mcmc(post_laplace[[1]])
 corr_laplace <- autocorr(laplace.obj[,2])
 autocorr.plot(laplace.obj[,2])
 
+
+
 #MSJD
-mssd(rwm_burn[,3])
+print(paste0("msjd rwm: ", mssd(rwm_burn[,3])))
+
 mssd(foce_burn[,3])
 mssd(fo2_burn[,3])
 mssd(laplace_burn[,3])

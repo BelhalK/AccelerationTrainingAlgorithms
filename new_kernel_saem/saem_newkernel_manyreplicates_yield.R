@@ -146,6 +146,30 @@ names(final_map)[9]<-paste("id")
 final_map1 <- final_map[c(9,1,2)]
 prctilemlx(final_map1[-1,],band = list(number = 8, level = 80)) + ggtitle("map")
 
+for(i in 2:7){
+  final_rwm1 <- final_rwm[c(9,1,i)]
+  final_map1 <- final_map[c(9,1,i)]
+  
+
+
+ final_rwm1['group'] <- 1
+final_map1['group'] <- 2
+final_map1$id <- final_map1$id +2
+
+
+  final <- 0
+  final <- rbind(final_rwm1[-1,],final_map1[-1,])
+
+
+
+  labels <- c("rwm","MAP")
+  final <- final[c(1,4,2,3)]
+  perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+  ggsave(plot = perc, file = paste("file_map_yield",i,".pdf",sep=""))
+}
+
+
+
 
 final_rwm1['group'] <- 1
 final_mix1['group'] <- 2

@@ -80,46 +80,69 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 K1 = 100
 K2 = 50
-iterations = 1:(K1+K2+1)
+iteration = 1:(K1+K2+1)
 gd_step = 0.00001
 
 
 #RWM
 options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
-theo_ref <- cbind(iterations, theo_ref)
+theo_ref <- cbind(iteration, theo_ref)
 
 #ref (map always)
 options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
+theo_new_ref <- cbind(iteration, theo_new_ref)
 
-#MAP once and  NO GD
-options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
-theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
-theo_nogd <- cbind(iterations, theo_nogd)
+# #MAP once and  NO GD
+# options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
+# theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
+# theo_nogd <- cbind(iterations, theo_nogd)
 
 
 #MAP once and GD
 options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
 theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
-theo_gd <- cbind(iterations, theo_gd)
+theo_gd <- cbind(iteration, theo_gd)
 
 #mix (MAP first 4 iter then gd for 30 and then RWM)
 options.gd_mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
 theo_gd_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.gd_mix))
-theo_gd_mix <- cbind(iterations, theo_gd_mix)
+theo_gd_mix <- cbind(iteration, theo_gd_mix)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix <- cbind(iterations, theo_mix)
+theo_mix <- cbind(iteration, theo_mix)
 
 
 theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix2 <- cbind(iterations, theo_mix2)
+theo_mix2 <- cbind(iteration, theo_mix2)
+
+graphConvMC_threekernels(theo_ref,theo_mix,theo_mix2, title="ref vs GD")
+
+theo_ref$algo <- 'rwm'
+theo_new_ref$algo <- 'MAP'
+theo_mix$algo <- 'Mix'
+
+comparison <- 0
+comparison <- rbind(theo_ref,theo_mix)
+comparison <- rbind(theo_ref,theo_new_ref,theo_mix)
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=FALSE)
+
+
+
+
 #RWM vs mix
 graphConvMC_twokernels(theo_ref,theo_ref, title="ref vs GD")
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="ref vs GD")
+graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+graphConvMC_twokernels(theo_ref,theo_mix, title="ref vs GD")
+graphConvMC_threekernels(theo_ref,theo_new_ref,theo_mix, title="ref vs GD")
+
+
+
 graphConvMC_twokernels(theo_mix,theo_mix2, title="ref vs GD")
 graphConvMC_twokernels(theo_new_ref,theo_mix, title="ref vs GD")
 

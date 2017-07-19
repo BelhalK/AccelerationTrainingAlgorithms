@@ -136,6 +136,344 @@ $$Z \sim \mathcal{N}(Z_{MEAN}, (- \frac{\nabla l(z_{MEAN})\nabla  l(z_{MEAN})}{l
 
 
 #MCMC proposals in the context of non linear mixed effects models
+
+###Linear case (20 individuals 10 obs per individual)
+
+$$
+y_i = y(t_i) = f(\psi_i)+ \epsilon_i
+$$
+With :
+
+$$f(\psi_i) = b_i*t+d_i$$
+
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+#library(rstan)
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
+source('laplace_main.R')
+source('main_estep_laplace.R')
+source("mixtureFunctions.R")
+
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
+library(abind)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+iter_mcmc = 1000
+
+
+
+theo.saemix<-read.table("data/linear_matlab2.txt",header=TRUE,na=".",sep=",")
+# theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Time"),name.response=c("y"),name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+  tim<-xidep[,1]  
+  d<-psi[id,1]
+  b<-psi[id,2]
+
+  ypred<-d*tim+b
+  return(ypred)
+}
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(5,5),ncol=2,byrow=TRUE, dimnames=list(NULL, c("d","b"))),transform.par=c(0,0))
+
+
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+# saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
+saemix.fo2<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
+
+
+post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
+post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
+# post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
+post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
+
+
+index = 2
+# graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
+# # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
+# graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
+# graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
+# graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+# graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+
+
+```
+
+####Autocorr and msjd
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+
+
+rwm.obj <- as.mcmc(post_rwm[[1]])
+corr_rwm <- autocorr(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2],main="rwm")
+
+foce.obj <- as.mcmc(post_foce[[1]])
+corr_foce <- autocorr(foce.obj[,2])
+autocorr.plot(foce.obj[,2],main="foce")
+
+fo2.obj <- as.mcmc(post_fo2[[1]])
+corr_fo2 <- autocorr(fo2.obj[,2])
+autocorr.plot(fo2.obj[,2],main="fo")
+
+laplace.obj <- as.mcmc(post_laplace[[1]])
+corr_laplace <- autocorr(laplace.obj[,2])
+autocorr.plot(laplace.obj[,2],main="laplace")
+
+```
+
+####Posterior samples for one individual
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+post_rwm[[index]]$algo <- 'rwm'
+post_foce[[index]]$algo <- 'foce'
+post_laplace[[index]]$algo <- 'laplace'
+post_fo2[[index]]$algo <- 'fo2'
+comparison <- 0
+comparison <- rbind(post_rwm[[index]],post_fo2[[index]],post_foce[[index]],post_laplace[[index]])
+comparison <- comparison[,-4]
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+var <- graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+```
+
+
+####Variance of the estimator
+```{r, eval=FALSE, message=FALSE, warning=FALSE, cache=FALSE, comment=FALSE, include=FALSE, results=FALSE}
+#library(rstan)
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
+source('laplace_main.R')
+source('main_estep_laplace.R')
+source("mixtureFunctions.R")
+
+
+library(abind)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+iter_mcmc = 700
+replicate = 20
+seed0 = 39546
+indiv=2
+burn = 300
+
+
+
+
+theo.saemix<-read.table("data/linear_matlab2.txt",header=TRUE,na=".",sep=",")
+# theo.saemix<-read.table("data/linear_matlab.txt",header=TRUE,na=".",sep=",")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Time"),name.response=c("y"),name.X="Time")
+
+model1cpt<-function(psi,id,xidep) { 
+  tim<-xidep[,1]  
+  d<-psi[id,1]
+  b<-psi[id,2]
+
+  ypred<-d*tim+b
+  return(ypred)
+}
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(5,5),ncol=2,byrow=TRUE, dimnames=list(NULL, c("d","b"))),transform.par=c(0,0))
+
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+# saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
+saemix.fo2<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
+
+
+post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
+post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
+# post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
+post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
+
+
+final_rwm <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+  post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.rwm)$post_rwm
+  post_rwm[[indiv]]['individual'] <- j
+  final_rwm <- rbind(final_rwm,post_rwm[[indiv]][-1,])
+}
+
+
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[4]<-paste("id")
+final_rwm <- final_rwm[c(4,1,2)]
+# prctilemlx(final_rwm[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+
+#burn
+rwm_burn <- final_rwm[final_rwm[,2]>burn,]
+
+
+final_foce <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.foce<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
+  post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
+  post_foce[[indiv]]['individual'] <- j
+  final_foce <- rbind(final_foce,post_foce[[indiv]][-1,])
+}
+
+
+names(final_foce)[1]<-paste("time")
+names(final_foce)[4]<-paste("id")
+final_foce <- final_foce[c(4,1,2)]
+# prctilemlx(final_foce[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("foce")
+
+#burn
+foce_burn <- final_foce[final_foce[,2]>burn,]
+
+
+
+final_fo2 <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.fo2<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+  post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
+  post_fo2[[indiv]]['individual'] <- j
+  final_fo2 <- rbind(final_fo2,post_fo2[[indiv]][-1,])
+}
+
+
+names(final_fo2)[1]<-paste("time")
+names(final_fo2)[4]<-paste("id")
+final_fo2 <- final_fo2[c(4,1,2)]
+# prctilemlx(final_fo2[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("fo2")
+
+#burn
+fo2_burn <- final_fo2[final_fo2[,2]>burn,]
+
+
+
+final_laplace <- 0
+for (j in 1:replicate){
+  print(j)
+  saemix.laplace<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+  post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
+  post_laplace[[indiv]]['individual'] <- j
+  final_laplace <- rbind(final_laplace,post_laplace[[indiv]][-1,])
+}
+
+
+names(final_laplace)[1]<-paste("time")
+names(final_laplace)[4]<-paste("id")
+final_laplace <- final_laplace[c(4,1,2)]
+# prctilemlx(final_laplace[-1,],band = list(number = 8, level = 80)) + ylim(-3,-1) + ggtitle("laplace")
+
+#burn
+laplace_burn <- final_laplace[final_laplace[,2]>burn,]
+
+
+
+rwm_burn['group'] <- 1
+foce_burn['group'] <- 2
+foce_burn$id <- foce_burn$id +1
+fo2_burn['group'] <- 3
+fo2_burn$id <- fo2_burn$id +2
+laplace_burn['group'] <- 4
+laplace_burn$id <- laplace_burn$id +3
+
+final <- 0
+final <- rbind(rwm_burn,foce_burn, fo2_burn,laplace_burn)
+
+
+labels <- c("rwm","foce","fo2","laplace")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+
+
+
+```
+
+
+
+```{r, eval=FALSE, include=FALSE}
+#MSJD
+paste0("msjd rwm: ", mssd(rwm_burn[,3]))
+paste0("msjd rwm: ", mssd(foce_burn[,3]))
+paste0("msjd rwm: ", mssd(fo2_burn[,3]))
+paste0("msjd rwm: ", mssd(laplace_burn[,3]))
+```
+
+
 ###Yield (37 individuals 224 observations)
 
 Beforehand, the standard approach is to approximate the body as a simple compartment models. In this example we will focus on a one-compartment model for theophylline following oral dose D at time $t=0$ leading to description of concentration $y(t_i)$ at time $t_i \geq 0$ (i varies from 1 to N and denote the individual of the population):
@@ -147,31 +485,277 @@ With :
 $$f(\psi_i) = Y_{max} +B(x-X_{max})$$
 Where $\psi = (X_{max},Y_{max},B)$
 
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+#library(rstan)
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/laplace")
+source('laplace_main.R')
+source('main_estep_laplace.R')
+source("mixtureFunctions.R")
 
-#SAEM coupled with an MCMC procedure for non linear mixed effects models
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
+library(abind)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+iter_mcmc = 200
 
 
-```{r}
-mixt.simulate <-function(n,weight,mu,sigma)
-{
-  G <- length(mu)
-  Z <- sample(1:G, n, prob=weight, replace=T)
-  x<-NULL
-  for (g in 1:G)
-  {
-    x<-c(x,rnorm(length(which(Z==g)),mu[g],sigma[g]))
-  }
-  return(x)
+
+# Doc
+data(yield.saemix)
+saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
+  name.predictors=c("dose"),name.response=c("yield"),
+  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
+  covariates=c("kg/ha")))
+
+yield.LP<-function(psi,id,xidep) {
+# input:
+#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
+#   id : vector of indices 
+#   xidep : dependent variables (same nb of rows as length of id)
+# returns:
+#   a vector of predictions of length equal to length of id
+  x<-xidep[,1]
+  ymax<-psi[id,1]
+  xmax<-psi[id,2]
+  slope<-psi[id,3]
+  f<-ymax+slope*(x-xmax)
+#  cat(length(f),"  ",length(ymax),"\n")
+  f[x>xmax]<-ymax[x>xmax]
+  return(f)
 }
+saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
+  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")
 
-n <- 1000
-weight<-c(0.7, 0.3) 
-mu<-c(0,4)
-sigma<-c(2,1)*1
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
+saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
+# saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
+saemix.fo2<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
+saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
 
-x <- matrix(0,nrow=n,ncol=1)
-x <- mixt.simulate(n,weight,mu,sigma)
 
-plot(x)
+post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
+post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
+# post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
+post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
+
+
+index = 1
+graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs fo vs laplace")
+```
+
+
+####Autocorr and msjd
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+
+
+rwm.obj <- as.mcmc(post_rwm[[1]])
+corr_rwm <- autocorr(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2],main="rwm")
+
+foce.obj <- as.mcmc(post_foce[[1]])
+corr_foce <- autocorr(foce.obj[,2])
+autocorr.plot(foce.obj[,2],main="foce")
+
+fo2.obj <- as.mcmc(post_fo2[[1]])
+corr_fo2 <- autocorr(fo2.obj[,2])
+autocorr.plot(fo2.obj[,2],main="fo")
+
+laplace.obj <- as.mcmc(post_laplace[[1]])
+corr_laplace <- autocorr(laplace.obj[,2])
+autocorr.plot(laplace.obj[,2],main="laplace")
 
 ```
+
+```{r, eval=FALSE, include=FALSE}
+paste0("msjd rwm: ", mssd(rwm_burn[,3]))
+paste0("msjd rwm: ", mssd(foce_burn[,3]))
+paste0("msjd rwm: ", mssd(fo2_burn[,3]))
+paste0("msjd rwm: ", mssd(laplace_burn[,3]))
+```
+#SAEM coupled with an MCMC procedure for non linear mixed effects models
+In this section we focus on the FOCE method. We will loop the mcmc procedure with the SAEM updates. In this case the parameter estimate $\theta$ becomes the quantity of interest. We will first compare the regular SAEM (6 RWM transition kernel in the MCMC procedure) and the best new one (1 RWM kernel and 5 FOCE transition) where at each iteration of the SAEM, the MAP is calculated.
+
+
+###Yield example
+
+####SAEM ref vs SAEM_FOCE
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+  source('compute_LL.R') 
+  source('func_aux.R') 
+  source('func_cov.R') 
+  source('func_distcond.R') 
+  source('func_FIM.R') 
+  source('func_ggplot2.R') 
+  source('func_plots.R') 
+  source('func_simulations.R') 
+  source('ggplot2_global.R') 
+  # source('KL.R') 
+  #source('vi.R') 
+  source('global.R')
+  source('main.R')
+  source('mcmc_main.R') 
+  source('main_estep.R')
+  source('main_estep_mcmc.R') 
+  source('main_estep_morekernels.R') 
+  source('main_initialiseMainAlgo.R') 
+  source('main_mstep.R') 
+  source('SaemixData.R')
+  source('plots_ggplot2.R') 
+  source('saemix-package.R') 
+  source('SaemixModel.R') 
+  source('SaemixRes.R') 
+  source('SaemixObject.R') 
+  source('zzz.R') 
+  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
+source('newkernel_main.R')
+source('main_new.R')
+source('main_estep_new.R')
+source('main_gd.R')
+source('main_estep_gd.R')
+source('main_gd_mix.R')
+source('main_estep_gd_mix.R')
+source('main_estep_mix.R')
+source('main_estep_newkernel.R')
+source("mixtureFunctions.R")
+
+#####################################################################################
+# Theophylline
+
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+
+
+# Doc
+data(yield.saemix)
+saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
+  name.predictors=c("dose"),name.response=c("yield"),
+  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
+  covariates=c("kg/ha")))
+
+yield.LP<-function(psi,id,xidep) {
+# input:
+#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
+#   id : vector of indices 
+#   xidep : dependent variables (same nb of rows as length of id)
+# returns:
+#   a vector of predictions of length equal to length of id
+  x<-xidep[,1]
+  ymax<-psi[id,1]
+  xmax<-psi[id,2]
+  slope<-psi[id,3]
+  f<-ymax+slope*(x-xmax)
+#  cat(length(f),"  ",length(ymax),"\n")
+  f[x>xmax]<-ymax[x>xmax]
+  return(f)
+}
+saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
+  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")
+
+
+
+K1 = 100
+K2 = 50
+iteration = 1:(K1+K2+1)
+gd_step = 0.00001
+
+
+#RWM
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+theo_ref <- cbind(iteration, theo_ref)
+
+#ref (map always)
+options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iteration, theo_new_ref)
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
+```
+
+<img src="/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/pics/file_map_yield2.pdf" alt="Drawing" style="width: 1000px;"/>
+
+####SAEM ref vs SAEM_FOCE_GD
+Since computing the MAP at each SAEM iteration is costly, we could imagine computing the MAP first and then do a gradient descent step towards the gradient of the log posterior to update the MAP at each iteration
+
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+#MAP once and GD
+options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
+theo_gd <- cbind(iteration, theo_gd)
+
+graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+```
+
+
+####SAEM ref vs SAEM_MIX_FOCE_RWM
+
+Another solution consists in mixing the costly algorithm with RWM. Basically, we compute the MAP for the first X iterations, propose via the same independent proposal and then switch to the RWM. According to the models (linear gaussian, Theo, Cow, YieldLP) the number of times the MAP has to be computed at the beginning varies but for all cases it is always better to propose via the FOCE proposal during the first iterations of SAEM and then switch to the regular RWM rather than using this new kernel from time to time.
+```{r,echo=FALSE,cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE,message=FALSE}
+options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
+theo_mix <- cbind(iteration, theo_mix)
+
+
+
+theo_ref$algo <- 'rwm'
+theo_new_ref$algo <- 'MAP'
+theo_mix$algo <- 'Mix'
+
+comparison <- 0
+
+comparison <- rbind(theo_ref,theo_new_ref,theo_mix)
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+var <- graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+
+```
+
