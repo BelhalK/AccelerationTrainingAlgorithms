@@ -41,7 +41,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 
-iter_mcmc = 200
+iter_mcmc = 20
 
 
 # Doc
@@ -78,9 +78,9 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0),sigma.val = 0.000001,gamma.val=0.00001)
-saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc),sigma.val = 0.000001,gamma.val=0.00001)
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0),sigma.val = 0.000001,gamma.val=0.00001)
+saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0),sigma.val = 0.0001,gamma.val=0.001)
 
 
 post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm

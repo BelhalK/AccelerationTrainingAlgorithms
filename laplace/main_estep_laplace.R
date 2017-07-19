@@ -437,7 +437,9 @@ for (i in 1:(Dargs$NM)){
 						etaMc[i,]<-  - Gamma[[i]]%*%gradg[i,] + M[i,]
 					}
 
-
+					if (u<2){
+					etaM <- etaMc
+					}
 
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 					psiMc<-transphi(phiMc,Dargs$transform.par)

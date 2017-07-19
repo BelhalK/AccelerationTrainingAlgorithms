@@ -31,7 +31,10 @@ source('laplace_main.R')
 source('main_estep_laplace.R')
 source("mixtureFunctions.R")
 
-
+library("mlxR")
+library("psych")
+library("coda")
+library("Matrix")
 library(abind)
 require(ggplot2)
 require(gridExtra)
@@ -44,7 +47,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 300
+iter_mcmc = 200
 
 
 
@@ -121,11 +124,12 @@ final_fo2 <- post_fo2[[1]]
 for (i in 2:length(post_fo2)) {
   final_fo2 <- rbind(final_fo2, post_fo2[[i]])
 }
-
+graphConvMC_new(final_fo2, title="VB Linear case")
 
 #ALl individual posteriors
 graphConvMC_new(final_rwm, title="RWM")
 graphConvMC_new(final_laplace, title="VB Linear case")
+
 #first individual posteriors
 graphConvMC_new(post_rwm[[index]], title="EM")
 
@@ -155,10 +159,10 @@ corr_laplace <- autocorr(laplace.obj[,2])
 autocorr.plot(laplace.obj[,2])
 
 #MSJD
-mssd(rwm_burn[,3])
-mssd(foce_burn[,3])
-mssd(fo2_burn[,3])
-mssd(laplace_burn[,3])
+mssd(post_rwm[[index]][,2])
+mssd(post_foce[[index]][,2])
+mssd(post_fo2[[index]][,2])
+mssd(post_laplace[[index]][,2])
 
 
 

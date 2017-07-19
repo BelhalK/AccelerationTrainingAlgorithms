@@ -174,6 +174,21 @@ laplace_burn <- final_laplace[final_laplace[,2]>burn,]
 
 
 
+rwm_burn['group'] <- 1
+foce_burn['group'] <- 2
+foce_burn$id <- foce_burn$id +1
+fo2_burn['group'] <- 3
+fo2_burn$id <- fo2_burn$id +2
+laplace_burn['group'] <- 4
+laplace_burn$id <- laplace_burn$id +3
+
+final <- 0
+final <- rbind(rwm_burn,foce_burn, fo2_burn,laplace_burn)
+
+
+labels <- c("rwm","foce","fo2","laplace")
+final <- final[c(1,4,2,3)]
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 
 
 

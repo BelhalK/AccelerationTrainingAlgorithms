@@ -85,7 +85,7 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 K1 = 100
-K2 = 5
+K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 replicate = 50
@@ -99,7 +99,7 @@ for (j in 1:replicate){
   options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2))
   theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
-  theo_ref['individual'] <- j
+  theo_ref['individual'] <- j 
   final_rwm <- rbind(final_rwm,theo_ref)
 }
 
@@ -108,7 +108,7 @@ for (j in 1:replicate){
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
 final_rwm1 <- final_rwm[c(9,1,2)]
-prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
+# prctilemlx(final_rwm1[-1,],band = list(number = 2, level = 80)) + ggtitle("RWM")
 
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
@@ -135,7 +135,7 @@ final_mamyula <- 0
 for (j in 1:replicate){
   print("MAMYULA")
   print(j)
-  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.000001,gamma.val=0.00001)
+  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
   theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
   theo_mamyula <- cbind(iterations, theo_mamyula)
   theo_mamyula['individual'] <- j
@@ -168,7 +168,7 @@ for(i in 2:7){
   labels <- c("rwm","mala","mamyula")
   final <- final[c(1,4,2,3)]
   perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
-  ggsave(plot = perc, file = paste("file",i,".pdf",sep=""))
+  ggsave(plot = perc, file = paste("file_cow",i,".pdf",sep=""))
 }
 
 
