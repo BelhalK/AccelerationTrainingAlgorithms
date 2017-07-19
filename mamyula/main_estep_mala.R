@@ -187,6 +187,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			#Gradient in current eta
 			phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 			psiM<-transphi(phiM,Dargs$transform.par)
+
 			fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 			if(Dargs$error.model=="exponential")
 				fpred<-log(cutoff(fpred))
@@ -225,7 +226,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			for (i in 1:Dargs$NM){
 				etaMc[i,] <- etaM[i,] + sigma*adap[i]*gradU[i,] + sqrt(2*sigma*adap[i])*Z[i,]
 			}
-			
+		
 
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			psiMc<-transphi(phiMc,Dargs$transform.par)
