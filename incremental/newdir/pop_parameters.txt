@@ -82,17 +82,17 @@ Pop.CondInit    8  100   0.2
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] Ymax        9.186 
-[2,] Xmax      120.091 
-[3,] slope       0.027 
-[4,] a           0.254 
+[1,] Ymax      8.89    
+[2,] Xmax      8.25    
+[3,] slope     0.37    
+[4,] a         0.71    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-Ymax  omega2.Ymax  1.3e+00 
-Xmax  omega2.Xmax  2.4e+03 
-slope omega2.slope 1.4e-05 
+Ymax  omega2.Ymax  1.01684 
+Xmax  omega2.Xmax  7.79922 
+slope omega2.slope 0.00078 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

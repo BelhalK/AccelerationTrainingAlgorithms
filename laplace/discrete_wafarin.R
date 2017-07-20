@@ -50,17 +50,21 @@ require(reshape2)
 iter_mcmc = 200
 
 
-warfarin.saemix<-read.table("data/pkcat_data",header=T,na=".")
-saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+warfarin.saemix<-read.table("data/pkcat_data2.txt",header=T,na=".")
+saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.predictors=c("amt"),name.response=c("dv","dvid"),name.covariates=c("wt","sex","age"), name.X="time")
 
 
 warfarin<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  CL<-psi[id,3]
+  k<-CL/V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
+
+  
   x<-xidep[,1]
   ymax<-psi[id,1]
   xmax<-psi[id,2]

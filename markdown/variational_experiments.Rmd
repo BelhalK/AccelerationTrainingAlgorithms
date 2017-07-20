@@ -1,6 +1,8 @@
 ---
 title: "variational Inference SAEM"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 header-includes:
 - \usepackage{bbm}
 - \usepackage{amsmath}
@@ -17,6 +19,10 @@ The construction of this kernel is based off of approximation methods that consi
 # The Model
 We study a classical missing data problem where:
 
-<img src="/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/pics/file_map_yield2.pdf" alt="Drawing" style="width: 1000px;"/>
-
+```{r fig.width=100,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula/pics/file5.png")
+ grid.raster(img)
+```
 
