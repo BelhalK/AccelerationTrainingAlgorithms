@@ -44,3 +44,14 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=ncol(df)-2, top=title))
 }
 
+graphConvMC3_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
+{
+  G <- (ncol(df)-2)/3
+  df$algo <- as.factor(df$algo)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  graf <- ggplot(df,aes(colour=df$algo ))+geom_line(aes(iteration,value,by=value),show.legend = legend) +
+  xlab("iteration") + ylab('value') + facet_wrap(~variable,scales = "free_y") #+ coord_trans(x = "log10")
+  grid.arrange(graf)
+  # do.call("grid.arrange", c(graf, ncol=1, top=title))
+}

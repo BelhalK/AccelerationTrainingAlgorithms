@@ -1,3 +1,4 @@
+
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -39,40 +40,26 @@ source("mixtureFunctions.R")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-
 # Doc
-data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
-  name.predictors=c("dose"),name.response=c("yield"),
-  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
-  covariates=c("kg/ha")))
+theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-yield.LP<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
+model1cpt<-function(psi,id,xidep) { 
+	dose<-xidep[,1]
+	tim<-xidep[,2]  
+	ka<-psi[id,1]
+	V<-psi[id,2]
+	CL<-psi[id,3]
+	k<-CL/V
+	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+	return(ypred)
 }
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
-  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE),error.model="constant")
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 
-
-K1 = 200
-K2 = 50
+K1 = 150
+K2 = 30
 iteration = 1:(K1+K2+1)
 
 
@@ -85,7 +72,7 @@ theo_ref <- cbind(iteration, theo_ref)
 
 
 #ref (map always)
-options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=100,displayProgress=FALSE)
+options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=60,displayProgress=FALSE)
 theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data,options.incremental))
 theo_incremental <- cbind(iteration, theo_incremental)
 

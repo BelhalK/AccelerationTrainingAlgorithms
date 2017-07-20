@@ -1,5 +1,5 @@
 #library(rstan)
-setwd("/home/belhal.karimi/Desktop/Belhal/Dir2")
+setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -27,7 +27,8 @@ setwd("/home/belhal.karimi/Desktop/Belhal/Dir2")
   source('SaemixObject.R') 
   source('zzz.R') 
 
-setwd("/home/belhal.karimi/Desktop/Belhal/mamyula")
+# setwd("/home/belhal.karimi/Desktop/Belhal/mamyula")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
 source('mala_main.R')
 source('main_estep_mala.R')
 source('main_mamyula.R')
@@ -102,6 +103,7 @@ for (j in 1:replicate){
   theo_ref['individual'] <- j 
   final_rwm <- rbind(final_rwm,theo_ref)
 }
+
 
 
 

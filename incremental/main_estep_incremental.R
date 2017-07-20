@@ -35,18 +35,9 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
 	phiMc<-phiM
-
-	nb_replacement = saemix.options$nb.replacement
-	nb_replacement = round(nb_replacement*Dargs$NM/100)
-	random_perm = sample(1:Dargs$NM)
-
-	if((Dargs$NM - nb_replacement)>0){
-		ind_rand = random_perm[1:(Dargs$NM - nb_replacement)]
-	}
-	else{
-		ind_rand=0
-	}
 	
+	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
+	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
 
 	
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
@@ -146,6 +137,9 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		}
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	}
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+	phiMold<-phiM
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,]
+	phiM[ind_rand,varList$ind.eta] <- phiMold[ind_rand,varList$ind.eta]
+	# phiM[ind,varList$ind.eta]<-mean.phiM[ind,varList$ind.eta]+etaM[ind,]
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post))
 }

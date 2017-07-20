@@ -7,9 +7,8 @@ header-includes:
 - \usepackage{amsmath,amssymb,amsthm,mathrsfs,amsfonts,dsfont}
 ---
 $\newcommand{\expec}{\mathbb{E}}$
-$\newcommand{\prob}{\mathbb{P}}$
-$\newcommand{\indic}{\mathbb{1}}$
-$\DeclareMathOperator*{\argmax}{arg\,max}$
+
+
 
 In this document, we will introduce a new proposal for our Metropolis hastings algorithm.
 The construction of this kernel is based off of approximation methods that consist in approximating the incomplete log likelihood. The following methods are applicable to continuous and discrete hierarchical models (the likelihood is whether discrete or continuous and the prior on the latent variable is always continuous).
@@ -86,7 +85,7 @@ g(z) &=\log p(y|z)+\log p(z) \\
 & = \log l(z) + \log h(z)
 \end{split}
 $$
-For the first two methods that we will introduce (Laplace and First order conditional estimation methods), we do a taylor expansion around the Maximum a Posteriori (MAP) (also known as Empirical bayes estimate (EBE)). As a result $\nabla g(z_0)=0$ with $z_0 = \arg \max \limits_{z}p(y,z)$. In the third example, called First Order method, the taylor exapnsion is done around the expectation of the random variable z: $z_0 = \expec{z}$. Thus $\nabla g(z_0)$ is not equal to $0$.
+For the first two methods that we will introduce (Laplace and First order conditional estimation methods), we do a taylor expansion around the Maximum a Posteriori (MAP) (also known as Empirical bayes estimate (EBE)). As a result $\nabla g(z_0)=0$ with $z_0 = \arg \max \limits_{z}p(y,z)$. In the third example, called First Order method, the taylor exapnsion is done around the expectation of the random variable z: $z_0 = \mathbb{E}(z)$. Thus $\nabla g(z_0)$ is not equal to $0$.
 Also, we will apply previous results with $m=1$
 
 

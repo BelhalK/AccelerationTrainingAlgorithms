@@ -26,11 +26,15 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
+
+source("mixtureFunctions.R")
+
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
 source('mala_main.R')
 source('main_estep_mala.R')
-source("mixtureFunctions.R")
+source('main_mamyula.R')
+# source("mixtureFunctions.R")
 
 library("mlxR")
 library("psych")
@@ -41,8 +45,13 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 
-iter_mcmc = 100
+#####################################################################################
+# Theophylline
 
+# Data - changing gender to M/F
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 # Doc
 # Doc
@@ -76,25 +85,30 @@ saemix.model<-saemixModel(model=growthcow,
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
   omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
+K1 = 100
+K2 = 50
+iterations = 1:(K1+K2+1)
+gd_step = 0.01
 
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0),sigma.val = 0.000001,gamma.val=0.00001)
-saemix.options_mamyula<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,0,iter_mcmc,0),sigma.val = 0.0001,gamma.val=0.001)
+#RWM
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+theo_ref <- cbind(iterations, theo_ref)
+
+#saem with mala
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.000001,gamma.val=0.00001)
+theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
+theo_mala <- cbind(iterations, theo_mala)
 
 
-post_rwm<-saemix_mala(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_mala<-saemix_mala(saemix.model,saemix.data,saemix.options_mala)$post_mala
-post_mamyula<-saemix_mala(saemix.model,saemix.data,saemix.options_mamyula)$post_mala
+#saem with mamyula
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
+theo_mamyula <- cbind(iterations, theo_mamyula)
 
-index = 1
-graphConvMC_twokernels(post_rwm[[index]],post_mala[[index]], title="EM")
-graphConvMC_threekernels(post_rwm[[index]],post_mala[[index]],post_mamyula[[index]], title="EM")
-
-
-
-
-
-
+graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
+graphConvMC_twokernels(theo_ref,theo_mamyula[,-1], title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula[-1], title="new kernel")
 
 

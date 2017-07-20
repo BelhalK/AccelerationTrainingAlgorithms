@@ -188,6 +188,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
 	# E-step
+  # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
   xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
