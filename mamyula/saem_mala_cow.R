@@ -29,11 +29,11 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 
 source("mixtureFunctions.R")
-
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
-source('mala_main.R')
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mala_nest")
 source('main_estep_mala.R')
-source('main_mamyula.R')
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
+source('main_mala.R')
+
 # source("mixtureFunctions.R")
 
 library("mlxR")
@@ -91,25 +91,36 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 
+
+
+
 #RWM
 options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.000001,gamma.val=0.00001)
-theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.000001,gamma.val=0.00001)
+theo_mala<-data.frame(saemix_mala(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
-#saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
-theo_mamyula <- cbind(iterations, theo_mamyula)
+#saem with amala
+options.amala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
+theo_amala<-data.frame(saemix_mala(saemix.model,saemix.data,options.amala))
+theo_amala <- cbind(iterations, theo_amala)
+
+
+#saem with nonrev
+options.nonrev<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
+theo_nonrev<-data.frame(saemix_mala(saemix.model,saemix.data,options.nonrev))
+theo_nonrev <- cbind(iterations, theo_nonrev)
+
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
-graphConvMC_twokernels(theo_mala,theo_mamyula, title="new kernel")
-graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
+graphConvMC_twokernels(theo_ref,theo_amala, title="new kernel")
+graphConvMC_twokernels(theo_mala,theo_amala, title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mala,theo_amala, title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mala,theo_nonrev, title="new kernel")
 
 

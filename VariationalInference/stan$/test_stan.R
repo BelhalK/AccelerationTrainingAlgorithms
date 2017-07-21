@@ -35,7 +35,7 @@ samples <- stan(file = 'pendulum.stan',
 
 
 s <- extract(samples,permuted=FALSE)
-plot(s[1,1,1:100])
+plot(s[1,1,1:200])
 
 
 zStan <- sin(s[1,1,1:nSamples])

@@ -89,9 +89,9 @@ Pop.CondInit 700 0.9 0.02
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
   Parameter Estimate
-A omega2.A  6.5e-03 
-B omega2.B  1.2e-05 
-k omega2.k  1.5e-02 
+A omega2.A  6.2e-03 
+B omega2.B  2.5e-05 
+k omega2.k  1.4e-02 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

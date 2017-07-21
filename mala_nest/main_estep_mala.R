@@ -294,6 +294,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		if(opt$nbiter.mcmc[5]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
+
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
 		gamma <- saemix.options$gamma.val
@@ -343,7 +344,6 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			
 			Z <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)
 
-			
 			a<-0.5
 			if (u>2){
 				R=saemix.options$memory
@@ -435,6 +435,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		if(opt$nbiter.mcmc[6]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
+
 		adap <- rep(1, Dargs$NM)
 		sigma <- saemix.options$sigma.val
 		gamma <- saemix.options$gamma.val

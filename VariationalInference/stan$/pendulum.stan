@@ -11,7 +11,7 @@ functions {
   }
 }
 data {
-  int<lower=1> T;
+  int<lower=1> T;cc
   real y0[2];
   real t0;
   real ts[T];

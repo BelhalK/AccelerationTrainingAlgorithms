@@ -36,6 +36,9 @@ source('main_estep_mala.R')
 source('main_mamyula.R')
 # source("mixtureFunctions.R")
 
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/oxboys")
+
 library("mlxR")
 library("psych")
 library("coda")
@@ -53,37 +56,32 @@ require(reshape2)
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
+
 # Doc
-# Doc
-data(cow.saemix)
-saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
-  name.predictors=c("time"),name.response=c("weight"), 
-  name.covariates=c("birthyear","twin","birthrank"), 
-  units=list(x="days",y="kg",covariates=c("yr","-","-")))
+oxboys.saemix<-read.table( "oxboys.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=oxboys.saemix,header=TRUE,
+  name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
+  units=list(x="yr",y="cm"))
 
 
-# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-growthcow<-function(psi,id,xidep) {
+growth.linear<-function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (3 columns, a, b, k)
+#   psi : matrix of parameters (2 columns, base and slope)
 #   id : vector of indices 
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  a<-psi[id,1]
-  b<-psi[id,2]
-  k<-psi[id,3]
-  f<-a*(1-b*exp(-k*x))
+  base<-psi[id,1]
+  slope<-psi[id,2]
+  f<-base+slope*x
   return(f)
 }
-saemix.model<-saemixModel(model=growthcow,
-  description="Exponential growth model", 
-  psi0=matrix(c(700,0.9,0.02,0,0,0),ncol=3,byrow=TRUE, 
-  dimnames=list(NULL,c("A","B","k"))),transform.par=c(1,1,1),fixed.estim=c(1,1,1), 
-  covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
-  omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
+saemix.model<-saemixModel(model=growth.linear,description="Linear model",
+  psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
+  transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
+  error.model="constant")
+
 
 K1 = 100
 K2 = 50
@@ -92,24 +90,23 @@ gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.000001,gamma.val=0.00001)
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.001)
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
 graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
-graphConvMC_twokernels(theo_mala,theo_mamyula, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 
 
