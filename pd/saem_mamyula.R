@@ -110,7 +110,7 @@ theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyul
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mamyula[,-1], title="new kernel")
-graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula[-1], title="new kernel")
+graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 
 
