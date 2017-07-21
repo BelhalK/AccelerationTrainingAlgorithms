@@ -56,6 +56,7 @@ require(reshape2)
 # Doc
 # Doc
 data(cow.saemix)
+cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980"&time!="364")
 saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
   name.predictors=c("time"),name.response=c("weight"), 
   name.covariates=c("birthyear","twin","birthrank"), 
@@ -85,10 +86,10 @@ saemix.model<-saemixModel(model=growthcow,
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
   omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
-K1 = 100
+K1 = 200
 K2 = 50
 iterations = 1:(K1+K2+1)
-gd_step = 0.01
+
 
 
 #RWM
@@ -107,9 +108,26 @@ options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc 
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
-graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
-graphConvMC_twokernels(theo_mala,theo_mamyula, title="new kernel")
-graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
+
+
+
+
+theo_ref$algo <- 'rwm'
+theo_mala$algo <- 'MALA'
+theo_mamyula$algo <- 'MAMYULA'
+
+comparison <- 0
+comparison <- rbind(theo_ref,theo_mala,theo_mamyula)
+
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+pl <- graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+
+
+ggsave(plot = pl, file = "cow_mamyula_lessdata.pdf")
+
+# graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
+# graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
+# graphConvMC_twokernels(theo_mala,theo_mamyula, title="new kernel")
+# graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 
 

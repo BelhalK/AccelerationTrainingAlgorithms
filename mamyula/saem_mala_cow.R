@@ -56,10 +56,12 @@ require(reshape2)
 # Doc
 # Doc
 data(cow.saemix)
+cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980")
 saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
   name.predictors=c("time"),name.response=c("weight"), 
   name.covariates=c("birthyear","twin","birthrank"), 
   units=list(x="days",y="kg",covariates=c("yr","-","-")))
+
 
 
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
