@@ -79,14 +79,15 @@ iteration = 1:(K1+K2+1)
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
+options<-list(seed=11,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iteration, theo_ref)
 
 
 
 #ref (map always)
-options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=25,displayProgress=FALSE)
+p=50
+options.incremental<-list(seed=11,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=p,displayProgress=FALSE)
 theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data,options.incremental))
 theo_incremental <- cbind(iteration, theo_incremental)
 
@@ -95,8 +96,8 @@ theo_incremental <- cbind(iteration, theo_incremental)
 theo_ref$algo <- 'rwm'
 theo_incremental$algo <- 'ISAEM'
 
-theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]
-theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
+theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=(100/p)),]
+theo_ref_scaled$iteration = 1:(100/p*(K1+K2+1))
 
 
 comparison <- 0

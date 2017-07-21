@@ -68,6 +68,9 @@ units=list(x="mg",y="-",covariates="-"))
 saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
+
+
+
 modelemax<-function(psi,id,xidep) {
 # input:
 # psi : matrix of parameters (3 columns, E0, Emax, EC50)
@@ -82,6 +85,8 @@ e50<-psi[id,3]
 f<-e0+emax*dose/(e50+dose)
 return(f)
 }
+
+
 saemix.model<-saemixModel(model=modelemax,description="Emax model",
 psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
 dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
@@ -91,7 +96,7 @@ byrow=TRUE),error.model="constant")
 
 
 
-K1 = 100
+K1 = 500
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -114,13 +119,18 @@ theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data1,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(1:50))
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data1,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 
+graphConvMC_twokernels(theo_ref,theo_mix, title="rwm vs mix")
+
+
 
 graphConvMC_threekernels(theo_ref,theo_new_ref,theo_mix, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
+
+
+
 
 
 #RWM vs always MAP (ref)

@@ -12,7 +12,7 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
-	
+	saemix.options<-saemixObject["options"]
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
@@ -35,7 +35,8 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
 	phiMc<-phiM
-	map_range <- c(1:3)
+	# map_range <- c(1:3)
+	map_range <- saemix.options$map.range
 	# map_range <- c(15,25,35)
 
 	if (!(kiter %in% map_range)){

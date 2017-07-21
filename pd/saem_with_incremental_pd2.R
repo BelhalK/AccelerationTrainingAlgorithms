@@ -76,8 +76,8 @@ covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
-K1 = 150
-K2 = 30
+K1 = 250
+K2 = 50
 iteration = 1:(K1+K2+1)
 
 
