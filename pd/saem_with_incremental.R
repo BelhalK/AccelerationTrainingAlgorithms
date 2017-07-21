@@ -99,11 +99,15 @@ theo_incremental <- cbind(iteration, theo_incremental)
 theo_ref$algo <- 'rwm'
 theo_incremental$algo <- 'ISAEM'
 
+theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]
+theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
+
+
 comparison <- 0
-comparison <- rbind(theo_ref,theo_incremental)
+# comparison <- rbind(theo_ref,theo_incremental)
+comparison <- rbind(theo_ref_scaled[iteration,],theo_incremental)
 
 var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
-
 
 
