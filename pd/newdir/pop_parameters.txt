@@ -4,64 +4,72 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset oxboys.saemix 
-    Structured data: height ~ age | Subject 
-    Predictor: age (yr) 
+Dataset PD1.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
 Dataset characteristics:
-    number of subjects:     26 
-    number of observations: 234 
-    average/min/max nb obs: 9.00  /  9  /  9 
+    number of subjects:     100 
+    number of observations: 300 
+    average/min/max nb obs: 3.00  /  3  /  3 
 First 10 lines of data:
-   Subject     age height mdv cens occ ytype
-1        1 -1.0000  140.5   0    0   1     1
-2        1 -0.7479  143.4   0    0   1     1
-3        1 -0.4630  144.8   0    0   1     1
-4        1 -0.1643  147.1   0    0   1     1
-5        1 -0.0027  147.7   0    0   1     1
-6        1  0.2466  150.2   0    0   1     1
-7        1  0.5562  151.7   0    0   1     1
-8        1  0.7781  153.3   0    0   1     1
-9        1  0.9945  155.8   0    0   1     1
-10       2 -1.0000  136.9   0    0   1     1
+   subject dose response gender mdv cens occ ytype
+1        1    0  11.2870      1   0    0   1     1
+2        1   10  63.6114      1   0    0   1     1
+3        1   90 122.9170      1   0    0   1     1
+4        2    0  15.0514      1   0    0   1     1
+5        2   10  39.5296      1   0    0   1     1
+6        2   90  60.8522      1   0    0   1     1
+7        3    0  25.5390      1   0    0   1     1
+8        3   10  58.0035      1   0    0   1     1
+9        3   90  81.1173      1   0    0   1     1
+10       4    0  22.1446      1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear model
+  Model function:  Emax model
 function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (2 columns, base and slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
 # returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
-  return(f)
+# a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
 }
-  Nb of parameters: 2 
-      parameter names:  base slope 
+  Nb of parameters: 3 
+      parameter names:  E0 Emax EC50 
       distribution:
      Parameter Distribution Estimated
-[1,] base      log-normal   Estimated
-[2,] slope     normal       Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
   Variance-covariance matrix:
-      base slope
-base     1     1
-slope    1     1
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
   Error model: constant , initial values: a=1 
-    No covariate in the model.
+  Covariate model:
+       [,1] [,2] [,3]
+gender    0    0    1
     Initial values
-             base slope
-Pop.CondInit  140     1
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
-    Number of chains:  2 
+    Number of chains:  1 
     Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -75,19 +83,23 @@ Pop.CondInit  140     1
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-     Parameter Estimate
-[1,] base      149.16  
-[2,] slope       6.53  
-[3,] a           0.66  
+     Parameter         Estimate
+[1,] E0                 23.33  
+[2,] Emax              105.90  
+[3,] EC50               11.09  
+[4,] beta_gender(EC50)   0.39  
+[5,] a                   5.07  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-      Parameter    Estimate
-base  omega2.base  0.0029  
-slope omega2.slope 2.7317  
+     Parameter   Estimate
+E0   omega2.E0   0.111   
+Emax omega2.Emax 0.318   
+EC50 omega2.EC50 0.027   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.base omega2.slope
-omega2.base  1.00        0.64        
-omega2.slope 0.64        1.00        
+            omega2.E0 omega2.Emax omega2.EC50
+omega2.E0   1         0           0          
+omega2.Emax 0         1           0          
+omega2.EC50 0         0           1          

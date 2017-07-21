@@ -33,7 +33,7 @@ source('main_estep_incremental.R')
 source("mixtureFunctions.R")
 
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/oxboys")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/pd")
 
 library("mlxR")
 library("psych")
@@ -47,8 +47,8 @@ library("Matrix")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 library(saemix)
-data(PD1.saemix)
-data(PD2.saemix)
+PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
+PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))

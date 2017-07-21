@@ -1,3 +1,4 @@
+#library(rstan)
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -25,32 +26,28 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 
-  setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
-source('newkernel_main.R')
-source('main_new.R')
-source('main_estep_new.R')
-source('main_gd.R')
-source('main_estep_gd.R')
-source('main_estep_newkernel.R')
-source('main_gd_mix.R')
-source('main_estep_gd_mix.R')
-source('main_estep_mix.R')
-source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
 
-  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mamyula")
+source('mala_main.R')
+source('main_estep_mala.R')
+source('main_mamyula.R')
+# source("mixtureFunctions.R")
+
+
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/pd")
 
-source('main_new.R')
-source('main_estep_new.R')
-source("mixtureFunctions.R")
-
-library(sgd)
 library("mlxR")
 library("psych")
 library("coda")
 library("Matrix")
+
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+
 #####################################################################################
 # Theophylline
 
@@ -90,7 +87,6 @@ fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
 
-
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
@@ -98,53 +94,23 @@ gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix(saemix.model,saemix.data1,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix(saemix.model,saemix.data2,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-#ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data1,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
+#saem with mala
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+theo_mala <- cbind(iterations, theo_mala)
 
 
-#MAP once and GD
-options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data1,options.gd))
-theo_gd <- cbind(iterations, theo_gd)
+#saem with mamyula
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
+theo_mamyula <- cbind(iterations, theo_mamyula)
 
-#mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data1,options.mix))
-theo_mix <- cbind(iterations, theo_mix)
-
-
-graphConvMC_threekernels(theo_ref,theo_new_ref,theo_mix, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
+graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
+graphConvMC_twokernels(theo_ref,theo_mamyula[,-1], title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula[-1], title="new kernel")
 
 
-#RWM vs always MAP (ref)
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
-#ref vs map once no gd
-graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
-#map once no gd vs map once and gd
-graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
-#ref vs map once gd
-graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
-#RWM vs GD
-graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
-
-
-
-# Dimensions
-N <- 1e5  # number of data points
-d <- 1e2  # number of features
-
-# Generate data.
-X <- matrix(rnorm(N*d), ncol=d)
-theta <- rep(5, d+1)
-eps <- rnorm(N)
-y <- cbind(1, X) %*% theta + eps
-dat <- data.frame(y=y, x=X)
-
-sgd.theta <- sgd(y ~ ., data=dat, model="lm")

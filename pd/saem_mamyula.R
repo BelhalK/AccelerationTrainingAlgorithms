@@ -37,7 +37,7 @@ source('main_mamyula.R')
 # source("mixtureFunctions.R")
 
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/oxboys")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/pd")
 
 library("mlxR")
 library("psych")
@@ -57,8 +57,8 @@ require(reshape2)
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 library(saemix)
-data(PD1.saemix)
-data(PD2.saemix)
+PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
+PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
@@ -99,13 +99,13 @@ theo_ref<-data.frame(saemix(saemix.model,saemix.data1,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 

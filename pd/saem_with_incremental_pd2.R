@@ -1,3 +1,4 @@
+
 setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -25,28 +26,15 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-
-  setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
-source('newkernel_main.R')
-source('main_new.R')
-source('main_estep_new.R')
-source('main_gd.R')
-source('main_estep_gd.R')
-source('main_estep_newkernel.R')
-source('main_gd_mix.R')
-source('main_estep_gd_mix.R')
-source('main_estep_mix.R')
-source('main_estep_newkernel.R')
+  
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/incremental")
+source('main_incremental.R')
+source('main_estep_incremental.R')
 source("mixtureFunctions.R")
 
-  
+
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/pd")
 
-source('main_new.R')
-source('main_estep_new.R')
-source("mixtureFunctions.R")
-
-library(sgd)
 library("mlxR")
 library("psych")
 library("coda")
@@ -58,7 +46,6 @@ library("Matrix")
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-
 library(saemix)
 PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
 PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
@@ -89,62 +76,34 @@ covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
+K1 = 150
+K2 = 30
+iteration = 1:(K1+K2+1)
 
-
-K1 = 100
-K2 = 50
-iterations = 1:(K1+K2+1)
-gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix(saemix.model,saemix.data1,options))
-theo_ref <- cbind(iterations, theo_ref)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
+theo_ref<-data.frame(saemix(saemix.model,saemix.data2,options))
+theo_ref <- cbind(iteration, theo_ref)
+
+
 
 #ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data1,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
-
-
-#MAP once and GD
-options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data1,options.gd))
-theo_gd <- cbind(iterations, theo_gd)
-
-#mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data1,options.mix))
-theo_mix <- cbind(iterations, theo_mix)
-
-
-graphConvMC_threekernels(theo_ref,theo_new_ref,theo_mix, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
-
-
-#RWM vs always MAP (ref)
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
-#ref vs map once no gd
-graphConvMC_twokernels(theo_new_ref,theo_nogd, title="ref vs NOGD")
-#map once no gd vs map once and gd
-graphConvMC_twokernels(theo_nogd,theo_gd, title="NO GD vs GD")
-#ref vs map once gd
-graphConvMC_twokernels(theo_new_ref,theo_gd, title="ref vs GD")
-#RWM vs GD
-graphConvMC_twokernels(theo_ref,theo_gd, title="ref vs GD")
+options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=60,displayProgress=FALSE)
+theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data2,options.incremental))
+theo_incremental <- cbind(iteration, theo_incremental)
 
 
 
-# Dimensions
-N <- 1e5  # number of data points
-d <- 1e2  # number of features
+theo_ref$algo <- 'rwm'
+theo_incremental$algo <- 'ISAEM'
 
-# Generate data.
-X <- matrix(rnorm(N*d), ncol=d)
-theta <- rep(5, d+1)
-eps <- rnorm(N)
-y <- cbind(1, X) %*% theta + eps
-dat <- data.frame(y=y, x=X)
+comparison <- 0
+comparison <- rbind(theo_ref,theo_incremental)
 
-sgd.theta <- sgd(y ~ ., data=dat, model="lm")
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+
+
+
