@@ -90,7 +90,7 @@ theo_ref <- cbind(iteration, theo_ref)
 
 
 #ref (map always)
-options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=60,displayProgress=FALSE)
+options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=50,displayProgress=FALSE)
 theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data1,options.incremental))
 theo_incremental <- cbind(iteration, theo_incremental)
 
@@ -99,7 +99,7 @@ theo_incremental <- cbind(iteration, theo_incremental)
 theo_ref$algo <- 'rwm'
 theo_incremental$algo <- 'ISAEM'
 
-theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]
+theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
 theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
 
 

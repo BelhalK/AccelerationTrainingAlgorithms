@@ -89,6 +89,10 @@ for (j in 1:replicate){
   options.ref<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data1,options.ref))
 theo_ref <- cbind(iteration, theo_ref)
+theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
+theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
+theo_ref <- theo_ref_scaled[iteration,]
+
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
 }
@@ -97,7 +101,7 @@ theo_ref <- cbind(iteration, theo_ref)
 
 names(final_ref)[1]<-paste("time")
 names(final_ref)[9]<-paste("id")
-final_ref1 <- final_ref[c(4,1,2)]
+final_ref1 <- final_ref[c(9,1,4)]
 # prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala")
 
 #map always 
@@ -115,10 +119,9 @@ for (j in 1:replicate){
 
 names(final_incremental)[1]<-paste("time")
 names(final_incremental)[9]<-paste("id")
-final_incremental1 <- final_incremental[c(4,1,2)]
+final_incremental1 <- final_incremental[c(9,1,4)]
 
-theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
-theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
+
 
 
 final_ref1['group'] <- 1
@@ -129,13 +132,13 @@ final_incremental1$id <- final_incremental1$id +1
 
 
 final <- 0
-final <- rbind(final_rwm1[-1,],final_incremental1[-1,])
+final <- rbind(final_ref1[-1,],final_incremental1[-1,])
 
 
 
-labels <- c("rwm","incremental")
+labels <- c("ref","incremental")
 final <- final[c(1,4,2,3)]
-perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
 
 
 
