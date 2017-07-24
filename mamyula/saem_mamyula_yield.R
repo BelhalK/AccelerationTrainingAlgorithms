@@ -82,8 +82,8 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   byrow=TRUE),error.model="constant")
 
 
-K1 = 100
-K2 = 50
+K1 = 40
+K2 = 10
 iteration = 1:(K1+K2+1)
 
 
@@ -100,10 +100,9 @@ theo_mala <- cbind(iteration, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.001,gamma.val=0)
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.0001,gamma.val=0.0001,lambda.val=0.01)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
 theo_mamyula <- cbind(iteration, theo_mamyula)
-
 
 
 
@@ -113,16 +112,9 @@ theo_mala$algo <- 'MALA'
 theo_mamyula$algo <- 'MAMYULA'
 
 comparison <- 0
-comparison <- rbind(theo_ref,theo_mala)
+# comparison <- rbind(theo_ref,theo_mala)
 comparison <- rbind(theo_ref,theo_mala,theo_mamyula)
 
 var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
-
-
-# graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
-# graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
-# graphConvMC_twokernels(theo_mala,theo_mamyula, title="new kernel")
-# graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
-
 

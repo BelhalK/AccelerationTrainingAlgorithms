@@ -296,7 +296,7 @@ estep_mala<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		gamma <- saemix.options$gamma.val
 
 		acc <- 0
-		lambda<-0.2
+		lambda<-saemix.options$lambda.val
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			# print(u)
 			

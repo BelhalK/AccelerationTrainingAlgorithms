@@ -62,9 +62,8 @@ dose<-xidep[,1]
   CL<-psi[id,3]
   k<-CL/V
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-  return(ypred)
 
-  
+
   x<-xidep[,1]
   ymax<-psi[id,1]
   xmax<-psi[id,2]
