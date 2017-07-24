@@ -166,7 +166,7 @@ cat("Running main SAEM algorithm\n")
 print(date())
 
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
-
+print(kiter)
 # SAEM convergence plots
 	if(kiter%%saemix.options$nbdisplay==0) {
     cat(".")
