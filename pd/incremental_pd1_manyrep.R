@@ -87,8 +87,8 @@ for (j in 1:replicate){
   print("ref")
   print(j)
   options.ref<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
-theo_ref<-data.frame(saemix(saemix.model,saemix.data,options.ref))
-theo_ref <- cbind(iterations, theo_ref)
+theo_ref<-data.frame(saemix(saemix.model,saemix.data1,options.ref))
+theo_ref <- cbind(iteration, theo_ref)
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
 }
@@ -97,7 +97,7 @@ theo_ref <- cbind(iterations, theo_ref)
 
 names(final_ref)[1]<-paste("time")
 names(final_ref)[9]<-paste("id")
-final_ref1 <- final_ref[c(9,1,2)]
+final_ref1 <- final_ref[c(4,1,2)]
 # prctilemlx(final_mala1[-1,],band = list(number = 2, level = 80)) + ggtitle("mala")
 
 #map always 
@@ -106,8 +106,8 @@ for (j in 1:replicate){
   print("incremental")
   print(j)
   options.incremental<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=50,displayProgress=FALSE)
-  theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data,options.incremental))
-  theo_incremental <- cbind(iterations, theo_incremental)
+  theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data1,options.incremental))
+  theo_incremental <- cbind(iteration, theo_incremental)
   theo_incremental['individual'] <- j
   final_incremental <- rbind(final_incremental,theo_incremental)
 }
@@ -115,7 +115,7 @@ for (j in 1:replicate){
 
 names(final_incremental)[1]<-paste("time")
 names(final_incremental)[9]<-paste("id")
-final_incremental1 <- final_incremental[c(9,1,2)]
+final_incremental1 <- final_incremental[c(4,1,2)]
 
 theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
 theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
