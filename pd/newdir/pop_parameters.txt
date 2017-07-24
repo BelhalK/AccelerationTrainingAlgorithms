@@ -70,7 +70,7 @@ Cov.CondInit  0    0    0
     Algorithms: estimation only
     Number of iterations:  K1=150, K2=30 
     Number of chains:  1 
-    Seed:  1067742 
+    Seed:  197730 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -84,18 +84,18 @@ Cov.CondInit  0    0    0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter         Estimate
-[1,] E0                 23.40  
-[2,] Emax              106.04  
-[3,] EC50               11.25  
-[4,] beta_gender(EC50)   0.37  
-[5,] a                   4.84  
+[1,] E0                 22.9   
+[2,] Emax              108.1   
+[3,] EC50               11.5   
+[4,] beta_gender(EC50)   0.4   
+[5,] a                   4.7   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-E0   omega2.E0   0.108   
-Emax omega2.Emax 0.310   
-EC50 omega2.EC50 0.053   
+E0   omega2.E0   0.129   
+Emax omega2.Emax 0.300   
+EC50 omega2.EC50 0.072   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

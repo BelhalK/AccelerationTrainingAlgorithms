@@ -79,7 +79,7 @@ byrow=TRUE),error.model="constant")
 K1 = 150
 K2 = 30
 iteration = 1:(K1+K2+1)
-replicate = 10
+replicate = 5
 seed0 = 39546
 
 final_ref <- 0
@@ -138,8 +138,8 @@ final <- rbind(final_ref1[-1,],final_incremental1[-1,])
 
 labels <- c("ref","incremental")
 final <- final[c(1,4,2,3)]
-prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
-
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels, facet=FALSE) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+prctilemlx(final, band = list(number = 4, level = 80),group='group', label = labels) + ggtitle(colnames(final)[4])
 
 
 
