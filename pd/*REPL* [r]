@@ -1,0 +1,467 @@
+
+R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R est un logiciel libre livr'e sans AUCUNE GARANTIE.
+Vous pouvez le redistribuer sous certaines conditions.
+Tapez 'license()' ou 'licence()' pour plus de d'etails.
+
+R est un projet collaboratif avec de nombreux contributeurs.
+Tapez 'contributors()' pour plus d'information et
+'citation()' pour la facon de le citer dans les publications.
+
+Tapez 'demo()' pour des d'emonstrations, 'help()' pour l'aide
+en ligne ou 'help.start()' pour obtenir l'aide au format HTML.
+Tapez 'q()' pour quitter R.
+
+> 
+> setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/<medbelhal/Desktop/variationalBayes/mcmc_R_isolate/D                        ir2")
+>   source('compute_LL.R') 
+>   source('func_aux.R') 
+>   source('func_cov.R') 
+>   source('func_distcond.R') 
+>   source('func_FIM.R') 
+>   source('func_ggplot2.R') 
+>   source('func_plots.R') 
+>   source('func_simulations.R') 
+>   source('ggplot2_global.R') 
+Loading ggplot2.
+>   # source('KL.R') 
+>   #source('vi.R') 
+>   source('global.R')
+>   source('main.R')
+>   source('mcmc_main.R') 
+>   source('main_estep.R')
+>   source('main_estep_mcmc.R') 
+>   source('main_estep_morekernels.R') 
+>   source('main_initialiseMainAlgo.R') 
+>   source('main_mstep.R') 
+>   source('SaemixData.R')
+>   source('plots_ggplot2.R') 
+>   source('saemix-package.R') 
+>   source('SaemixModel.R') 
+>   source('SaemixRes.R') 
+>   source('SaemixObject.R') 
+>   source('zzz.R') 
+>   
+> setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/incremental")
+> source('main_incremental.R')
+> source('main_estep_incremental.R')
+> source("mixtureFunctions.R")
+Le chargement a n'ecessit'e le package : gridExtra
+Le chargement a n'ecessit'e le package : reshape2
+> 
+> 
+> setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/pd")
+> 
+> library("mlxR")
+> library("psych")
+
+Attachement du package : 'psych'
+
+The following object is masked _by_ '.GlobalEnv':
+
+    phi
+
+The following objects are masked from 'package:ggplot2':
+
+    %+%, alpha
+
+> library("coda")
+> library("Matrix")
+> ###########################################################################<###################################################                        #########
+> # Theophylline
+> 
+> # Data - changing gender to M/F
+> # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+> # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
+> # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, <(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, n                        ame.group=c("Id"),name.pr<der=TRUE,sep=" ",na=NA, name.group=c("Id"),name.pre                        dictors=c("Dose","Time"),<me.group=c("Id"),name.predictors=c("Dose","Time"),n                        ame.response=c("Concentra<ictors=c("Dose","Time"),name.response=c("Concentrat                        ion"),name.covariates=c("<me.response=c("Concentration"),name.covariates=c("W                        eight","Sex"),units=list(<on"),name.covariates=c("Weight","Sex"),units=list(x                        ="hr",y="mg/L",covariates<ight","Sex"),units=list(x="hr",y="mg/L",covariates=                        c("kg","-")), name.X="Tim<"hr",y="mg/L",covariates=c("kg","-")), name.X="Time                        ")
+> 
+> PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
+> PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
+> PD2.saemix <- subset(PD2.saemix, dose!="90")
+> saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("sub<name.data=PD1.saemix,header=TRUE,name.group=c("subj                        ect"),
++ name.predictors=c("dose"),name.response=c("response"),name.covariates=c("ge<,name.response=c("response"),name.covariates=c("gen                        der"),
++ units=list(x="mg",y="-",covariates="-"))
+Using the object called PD1.saemix in this R session as the data.
+[1] "gender"
+NULL
+
+
+The following SaemixData object was successfully created:
+
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD1.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
+> saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("sub<name.data=PD2.saemix,header=TRUE,name.group=c("subj                        ect"),
++ name.predictors=c("dose"),name.response=c("response"),name.covariates=c("ge<,name.response=c("response"),name.covariates=c("gen                        der"),
++ units=list(x="mg",y="-",covariates="-"))
+Using the object called PD2.saemix in this R session as the data.
+[1] "gender"
+NULL
+
+
+The following SaemixData object was successfully created:
+
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD2.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
+> modelemax<-function(psi,id,xidep) {
++ # input:
++ # psi : matrix of parameters (3 columns, E0, Emax, EC50)
++ # id : vector of indices
++ # xidep : dependent variables (same nb of rows as length of id)
++ # returns:
++ # a vector of predictions of length equal to length of id
++ dose<-xidep[,1]
++ e0<-psi[id,1]
++ emax<-psi[id,2]
++ e50<-psi[id,3]
++ f<-e0+emax*dose/(e50+dose)
++ return(f)
++ }
+> saemix.model<-saemixModel(model=modelemax,description="Emax model",
++ psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
++ dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
++ covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
++ fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
++ byrow=TRUE),error.model="constant")
+
+
+The following SaemixModel object was successfully created:
+
+Nonlinear mixed-effects model
+  Model function:  Emax model
+function(psi,id,xidep) {
+# input:
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
+# returns:
+# a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
+}
+  Nb of parameters: 3 
+      parameter names:  E0 Emax EC50 
+      distribution:
+     Parameter Distribution Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
+  Variance-covariance matrix:
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
+  Error model: constant , initial values: a=1 
+  Covariate model:
+     E0 Emax EC50
+[1,]  0    0    1
+    Initial values
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
+> 
+> K1 = 250
+> K2 = 50
+> iteration = 1:(K1+K2+1)
+> 
+> 
+> #RWM
+> options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c<map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(                        2,2,2), nbiter.saemix = c<ins = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(                        K1,K2),nbiter.sa=0,displa<,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,display                        Progress=FALSE)
+> theo_ref<-data.frame(saemix(saemix.model,saemix.data2,options))
+Running main SAEM algorithm
+[1] "Tue Jul 25 14:16:05 2017"
+...
+    Minimisation finished
+[1] "Tue Jul 25 14:16:07 2017"
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD2.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
+Dataset characteristics:
+    number of subjects:     100 
+    number of observations: 266 
+    average/min/max nb obs: 2.66  /  2  /  3 
+First 10 lines of data:
+   subject dose response gender mdv cens occ ytype
+1        1    0  21.8124      1   0    0   1     1
+2        1   10  65.7807      1   0    0   1     1
+4        2    0  33.2081      1   0    0   1     1
+5        2   10  65.2646      1   0    0   1     1
+7        3    0  31.5014      1   0    0   1     1
+8        3   10  81.0744      1   0    0   1     1
+10       4    0  20.3392      1   0    0   1     1
+11       4   10  28.6598      1   0    0   1     1
+13       5    0  12.8953      1   0    0   1     1
+14       5   10  58.0220      1   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  Emax model
+function(psi,id,xidep) {
+# input:
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
+# returns:
+# a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
+}
+  Nb of parameters: 3 
+      parameter names:  E0 Emax EC50 
+      distribution:
+     Parameter Distribution Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
+  Variance-covariance matrix:
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
+  Error model: constant , initial values: a=1 
+  Covariate model:
+       [,1] [,2] [,3]
+gender    0    0    1
+    Initial values
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=250, K2=50 
+    Number of chains:  1 
+    Seed:  39546 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter         Estimate
+[1,] E0                22.980  
+[2,] Emax              95.350  
+[3,] EC50              11.178  
+[4,] beta_gender(EC50) -0.015  
+[5,] a                  4.082  
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+     Parameter   Estimate
+E0   omega2.E0   0.160   
+Emax omega2.Emax 0.195   
+EC50 omega2.EC50 0.071   
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+            omega2.E0 omega2.Emax omega2.EC50
+omega2.E0   1         0           0          
+omega2.Emax 0         1           0          
+omega2.EC50 0         0           1          
+Overwriting files in directory newdir 
+Estimating the individual parameters, please wait a few moments...
+....................................................................................................
+Plotting the data
+Plotting convergence plots
+Plotting observations versus predictions
+Plotting individual fits
+> theo_ref <- cbind(iteration, theo_ref)
+> 
+> 
+> 
+> #ref (map always)
+> options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbi<(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbit                        er.mcmc = c(2,2,2),nbiter<.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.                        saemix = c(K1,K2),nb.repl<r.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.repla                        cement=50,displayProgress<aemix = c(K1,K2),nb.replacement=50,displayProgress=                        FALSE)
+> theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data2,o<ame(incremental_saemix(saemix.model,saemix.data2,op                        tions.incremental))
+Running main SAEM algorithm
+[1] "Tue Jul 25 14:16:09 2017"
+...
+    Minimisation finished
+[1] "Tue Jul 25 14:16:11 2017"
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD2.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
+Dataset characteristics:
+    number of subjects:     100 
+    number of observations: 266 
+    average/min/max nb obs: 2.66  /  2  /  3 
+First 10 lines of data:
+   subject dose response gender mdv cens occ ytype
+1        1    0  21.8124      1   0    0   1     1
+2        1   10  65.7807      1   0    0   1     1
+4        2    0  33.2081      1   0    0   1     1
+5        2   10  65.2646      1   0    0   1     1
+7        3    0  31.5014      1   0    0   1     1
+8        3   10  81.0744      1   0    0   1     1
+10       4    0  20.3392      1   0    0   1     1
+11       4   10  28.6598      1   0    0   1     1
+13       5    0  12.8953      1   0    0   1     1
+14       5   10  58.0220      1   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  Emax model
+function(psi,id,xidep) {
+# input:
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
+# returns:
+# a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
+}
+  Nb of parameters: 3 
+      parameter names:  E0 Emax EC50 
+      distribution:
+     Parameter Distribution Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
+  Variance-covariance matrix:
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
+  Error model: constant , initial values: a=1 
+  Covariate model:
+       [,1] [,2] [,3]
+gender    0    0    1
+    Initial values
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=250, K2=50 
+    Number of chains:  1 
+    Seed:  39546 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter         Estimate
+[1,] E0                22.807  
+[2,] Emax              97.133  
+[3,] EC50              11.668  
+[4,] beta_gender(EC50) -0.034  
+[5,] a                  3.901  
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+     Parameter   Estimate
+E0   omega2.E0   0.17    
+Emax omega2.Emax 0.20    
+EC50 omega2.EC50 0.20    
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+            omega2.E0 omega2.Emax omega2.EC50
+omega2.E0   1         0           0          
+omega2.Emax 0         1           0          
+omega2.EC50 0         0           1          
+Overwriting files in directory newdir 
+Estimating the individual parameters, please wait a few moments...
+....................................................................................................
+Plotting the data
+Plotting convergence plots
+Plotting observations versus predictions
+Plotting individual fits
+> theo_incremental <- cbind(iteration, theo_incremental)
+> 
+> 
+> 
+> theo_ref$algo <- 'rwm'
+> theo_incremental$algo <- 'ISAEM'
+> 
+> theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
+> theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
+> 
+> 
+> comparison <- 0
+> # comparison <- rbind(theo_ref,theo_incremental)
+> comparison <- rbind(theo_ref_scaled[iteration,],theo_incremental)
+> 
+> var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
+> graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
+Warning: Ignoring unknown aesthetics: by
+> 
+> 
+> saemix.data2
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD2.saemix 
+    Structured data: response ~ dose | subject 
+    covariates: gender (-) 
+266     observations in 100 subjects
+First lines of data:
+   subject dose response gender mdv cens occ ytype
+1        1    0  21.8124      1   0    0   1     1
+2        1   10  65.7807      1   0    0   1     1
+4        2    0  33.2081      1   0    0   1     1
+5        2   10  65.2646      1   0    0   1     1
+7        3    0  31.5014      1   0    0   1     1
+8        3   10  81.0744      1   0    0   1     1
+10       4    0  20.3392      1   0    0   1     1
+11       4   10  28.6598      1   0    0   1     1
+13       5    0  12.8953      1   0    0   1     1
+14       5   10  58.0220      1   0    0   1     1
+> 
