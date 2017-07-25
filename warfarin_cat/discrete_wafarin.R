@@ -51,16 +51,16 @@ require(reshape2)
 iter_mcmc = 200
 
 
-warfarin.saemix<-read.table("data/pkcat_data2.txt",header=T,na=".")
-saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.predictors=c("amt"),name.response=c("dv","dvid"),name.covariates=c("wt","sex","age"), name.X="time")
+cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.predictors=c("amt"),name.response=c("dv","dvid"),name.covariates=c("wt","sex","age"), name.X="time")
 
 
-warfarin<-function(psi,id,xidep) {
+cat_data.model<-function(psi,id,xidep) {
 dose<-xidep[,1]
   
   return(f)
 }
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
+saemix.model<-saemixModel(model=cat_data.model,description="Linear plus plateau model",   
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
