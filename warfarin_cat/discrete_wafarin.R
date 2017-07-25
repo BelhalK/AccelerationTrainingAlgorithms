@@ -27,8 +27,9 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat")
-source('laplace_main.R')
-source('main_estep_laplace.R')
+source('post_cat.R')
+source('main_cat.R')
+source('main_estep_cat.R')
 source("mixtureFunctions.R")
 
 library("mlxR")
@@ -56,21 +57,7 @@ saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, nam
 
 warfarin<-function(psi,id,xidep) {
 dose<-xidep[,1]
-  tim<-xidep[,2]  
-  ka<-psi[id,1]
-  V<-psi[id,2]
-  CL<-psi[id,3]
-  k<-CL/V
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-
-
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
+  
   return(f)
 }
 saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
@@ -79,27 +66,32 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
+
+
 saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0,0,0,0))
-saemix.laplace<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc,0,0,0))
-# saemix.fo<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,iter_mcmc,0,0))
-saemix.fo2<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,iter_mcmc,0))
 saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,iter_mcmc))
 
 
-post_rwm<-saemix_laplace(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_foce<-saemix_laplace(saemix.model,saemix.data,saemix.foce)$post_newkernel
-post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newkernel
-# post_fo<-saemix_laplace(saemix.model,saemix.data,saemix.fo)$post_newkernel
-post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
+post_rwm<-saemix_post_cat(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
+
+
+
+# #RWM
+# options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
+# theo_ref<-data.frame(saemix(saemix.model,saemix.data2,options))
+# theo_ref <- cbind(iteration, theo_ref)
+
+
+
+# #ref (map always)
+# options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=50,displayProgress=FALSE)
+# cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data2,options.cat))
+# cat_saem <- cbind(iteration, cat_saem)
 
 
 index = 1
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
-# graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
-graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
-graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
-graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]], title="rwm vs foce vs laplace")
-graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
 
 
 final_rwm <- post_rwm[[1]]
@@ -114,30 +106,8 @@ for (i in 2:length(post_foce)) {
 }
 
 
-final_laplace <- post_laplace[[1]]
-for (i in 2:length(post_laplace)) {
-  final_laplace <- rbind(final_laplace, post_laplace[[i]])
-}
-
-final_fo2 <- post_fo2[[1]]
-for (i in 2:length(post_fo2)) {
-  final_fo2 <- rbind(final_fo2, post_fo2[[i]])
-}
-graphConvMC_new(final_fo2, title="VB Linear case")
-
-#ALl individual posteriors
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_laplace, title="VB Linear case")
-
-#first individual posteriors
-graphConvMC_new(post_rwm[[index]], title="EM")
 
 graphConvMC_twokernels(final_rwm,final_foce, title="EM")
-graphConvMC_twokernels(final_rwm,final_laplace, title="EM")
-graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
-
-
-
 
 
 #Autocorrelation
@@ -149,19 +119,10 @@ foce.obj <- as.mcmc(post_foce[[1]])
 corr_foce <- autocorr(foce.obj[,2])
 autocorr.plot(foce.obj[,2])
 
-fo2.obj <- as.mcmc(post_fo2[[1]])
-corr_fo2 <- autocorr(fo2.obj[,2])
-autocorr.plot(fo2.obj[,2])
-
-laplace.obj <- as.mcmc(post_laplace[[1]])
-corr_laplace <- autocorr(laplace.obj[,2])
-autocorr.plot(laplace.obj[,2])
 
 #MSJD
 mssd(post_rwm[[index]][,2])
 mssd(post_foce[[index]][,2])
-mssd(post_fo2[[index]][,2])
-mssd(post_laplace[[index]][,2])
 
 
 
