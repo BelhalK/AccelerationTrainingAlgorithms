@@ -76,7 +76,7 @@ covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
-K1 = 150
+K1 = 200
 K2 = 30
 iteration = 1:(K1+K2+1)
 replicate = 5
@@ -139,7 +139,45 @@ final <- rbind(final_ref1[-1,],final_incremental1[-1,])
 labels <- c("ref","incremental")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels, facet=FALSE) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+
+plot.S1 <- plot.prediction.intervals(final, 
+                                    labels       = labels, 
+                                    legend.title = "arm")
+plot.S <- plot.S1  + ylab("Survival prediction interval") +theme_bw()
+print(plot.S1+theme_bw())
+
+
 prctilemlx(final, band = list(number = 4, level = 80),group='group', label = labels) + ggtitle(colnames(final)[4])
 
-
+plot.prediction.intervals <- function(r, plot.median=TRUE, level=80, labels=NULL, 
+                                      legend.title=NULL, colors=NULL) {
+  P <- prctilemlx(r, number=1, level=level, plot=FALSE)
+  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(legend.title))  legend.title <- "group"
+  names(P$y)[2:4] <- c("p.min","p50","p.max")
+  pp <- ggplot(data=P$y)+ylab(NULL)+ 
+    geom_ribbon(aes(x=time,ymin=p.min, ymax=p.max,fill=group),alpha=.5) 
+  if (plot.median)
+    pp <- pp + geom_line(aes(x=time,y=p50,colour=group))
+  
+  if (is.null(colors)) {
+    pp <- pp + scale_fill_discrete(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels)
+    pp <- pp + scale_colour_discrete(name=legend.title,
+                                     breaks=levels(r$group),
+                                     labels=labels, 
+                                     guide=FALSE)
+  } else {
+    pp <- pp + scale_fill_manual(name=legend.title,
+                                 breaks=levels(r$group),
+                                 labels=labels,
+                                 values=colors)
+    pp <- pp + scale_colour_manual(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels,
+                                   guide=FALSE,values=colors)
+  }  
+  return(pp)
+}
 

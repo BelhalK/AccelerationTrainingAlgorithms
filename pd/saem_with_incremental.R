@@ -48,6 +48,9 @@ library("Matrix")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 library(saemix)
 PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
+PD1.saemix <- subset(PD1.saemix, dose!="90")
+
+
 PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
@@ -55,6 +58,8 @@ units=list(x="mg",y="-",covariates="-"))
 saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
+
+
 modelemax<-function(psi,id,xidep) {
 # input:
 # psi : matrix of parameters (3 columns, E0, Emax, EC50)
@@ -69,6 +74,8 @@ e50<-psi[id,3]
 f<-e0+emax*dose/(e50+dose)
 return(f)
 }
+
+
 saemix.model<-saemixModel(model=modelemax,description="Emax model",
 psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
 dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
