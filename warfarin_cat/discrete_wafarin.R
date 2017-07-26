@@ -61,21 +61,25 @@ th1 <- psi[id,1]
 th2 <- psi[id,2]
 th3 <- psi[id,3]
   
-Pcum1 <- 1/(1+e^(-th1))
-Pcum2 <- 1/(1+e^(-th1-th2))
-Pcum3 <- 1/(1+e^(-th1-th2-th3))
+P0 <- 1/(1+e^(-th1))
+Pcum1 <- 1/(1+e^(-th1-th2))
+Pcum2 <- 1/(1+e^(-th1-th2-th3))
 
-P.0 <- Pcum1
-P.1 <- Pcum2 - P.0
-P.2 <- Pcum3 - Pcum2
-P.3 <- 1 - P.2
+P1 <- Pcum1 - P0
+P2 <- Pcum2 - Pcum1
+P3 <- 1 - Pcum2
 
-P.obs <- P.1*1 + P.2*2 + P.3*3
-  return(P.obs)
+
+P.obs <- P1*level[level=="1",] + P2*level[level=="2",] + P3*level[level=="3",]
+
+return(P.obs)
+
 }
-saemix.model<-saemixModel(model=cat_data.model,description="Linear plus plateau model",   
+
+
+saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 

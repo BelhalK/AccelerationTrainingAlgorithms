@@ -171,10 +171,11 @@ plt <- prctilemlx(final, band = list(number = 4, level = 80),group='group', labe
 blank<-rectGrob(gp=gpar(col="white")) # make a white spacer grob
 grid.arrange(plt,plot.S, ncol=2)
 
+
 plot.prediction.intervals <- function(r, plot.median=TRUE, level=80, labels=NULL, 
                                       legend.title=NULL, colors=NULL) {
   P <- prctilemlx(r, number=1, level=level, plot=FALSE)
-  if (is.null(labels))  labels <- a[-3]
+  if (is.null(labels))  labels <- a
   if (is.null(legend.title))  legend.title <- "group"
   names(P$y)[2:4] <- c("p.min","p50","p.max")
   pp <- ggplot(data=P$y)+ylab(NULL)+ 
@@ -184,19 +185,19 @@ plot.prediction.intervals <- function(r, plot.median=TRUE, level=80, labels=NULL
   
   if (is.null(colors)) {
     pp <- pp + scale_fill_discrete(name=legend.title,
-                                   breaks=a[-3],
+                                   breaks=a,
                                    labels=labels)
     pp <- pp + scale_colour_discrete(name=legend.title,
-                                     breaks=a[-3],
+                                     breaks=a,
                                      labels=labels, 
                                      guide=FALSE)
   } else {
     pp <- pp + scale_fill_manual(name=legend.title,
-                                 breaks=a[-3],
+                                 breaks=,
                                  labels=labels,
                                  values=colors)
     pp <- pp + scale_colour_manual(name=legend.title,
-                                   breaks=a[-3],
+                                   breaks=a,
                                    labels=labels,
                                    guide=FALSE,values=colors)
   }  
