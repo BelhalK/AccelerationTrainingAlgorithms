@@ -49,11 +49,11 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1000
-replicate = 20
+iter_mcmc = 500
+replicate = 10
 seed0 = 39546
 indiv=4
-burn = 600
+burn = 100
 # Doc
 theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
@@ -94,7 +94,7 @@ final_rwm <- final_rwm[c(5,1,2)]
 
 #burn
 rwm_burn <- final_rwm[final_rwm[,2]>burn,]
-prctilemlx(rwm_burn[-1,-4],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
+#prctilemlx(rwm_burn[-1,-4],band = list(number = 2, level = 80)) + ylim(-3,-1) + ggtitle("RWM")
 
 
 
@@ -208,7 +208,7 @@ nonrev_burn['group'] <- 3
 nonrev_burn$id <- nonrev_burn$id +3
 final <- 0
 final <- rbind(rwm_burn,mala_burn)
-final <- rbind(rwm_burn,mala_burn, nonrev_burn)
+final <- rbind(rwm_burn,mala_burn, nest_burn)
 
 
 labels <- c("rwm","mala","nest")

@@ -56,9 +56,22 @@ saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, nam
 
 
 cat_data.model<-function(psi,id,xidep) {
-dose<-xidep[,1]
+level<-xidep[,1]
+th1 <- psi[id,1]
+th2 <- psi[id,2]
+th3 <- psi[id,3]
   
-  return(f)
+Pcum1 <- 1/(1+e^(-th1))
+Pcum2 <- 1/(1+e^(-th1-th2))
+Pcum3 <- 1/(1+e^(-th1-th2-th3))
+
+P.0 <- Pcum1
+P.1 <- Pcum2 - P.0
+P.2 <- Pcum3 - Pcum2
+P.3 <- 1 - P.2
+
+P.obs <- P.1*1 + P.2*2 + P.3*3
+  return(P.obs)
 }
 saemix.model<-saemixModel(model=cat_data.model,description="Linear plus plateau model",   
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   

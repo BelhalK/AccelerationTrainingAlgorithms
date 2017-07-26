@@ -1,0 +1,24 @@
+
+[LONGITUDINAL] 
+input={Tk0, V, Cl, alpha, beta, a}
+
+EQUATION:
+C = pkmodel(Tk0, V, Cl)
+h = exp(-alpha - beta*C)
+H_0 = 0
+ddt_H = h
+S = exp(-H)
+                          
+DEFINITION:
+y = {distribution=lognormal, prediction=C, sd=a}
+e={type=event,maxEventNumber=1,rightCensoringTime=200,hazard=h}
+                          
+[INDIVIDUAL]
+input={Tk0_pop,V_pop,Cl_pop,alpha_pop,omega_Tk0,omega_V,omega_Cl,omega_alpha,a}
+
+DEFINITION:
+Tk0   = {distribution=lognormal,   prediction=Tk0_pop,  sd=omega_Tk0}
+V     = {distribution=lognormal,   prediction=V_pop,    sd=omega_V}
+Cl    = {distribution=lognormal,   prediction=Cl_pop,   sd=omega_Cl}
+alpha = {distribution=lognormal,   prediction=alpha_pop,sd=omega_alpha}
+

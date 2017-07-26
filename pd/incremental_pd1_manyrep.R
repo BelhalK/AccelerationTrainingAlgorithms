@@ -46,7 +46,7 @@ library("Matrix")
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-library(saemix)
+# library(saemix)
 PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
 PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
@@ -79,7 +79,7 @@ byrow=TRUE),error.model="constant")
 K1 = 200
 K2 = 30
 iteration = 1:(K1+K2+1)
-replicate = 5
+replicate = 2
 seed0 = 39546
 
 final_ref <- 0
@@ -124,10 +124,9 @@ final_incremental1 <- final_incremental[c(9,1,4)]
 
 
 
-final_ref1['group'] <- 1
-final_incremental1['group'] <- 2
+final_ref1['group'] <- as.integer(1)
+final_incremental1['group'] <- as.integer(2)
 final_incremental1$id <- final_incremental1$id +1
-
 
 
 
@@ -136,23 +135,46 @@ final <- rbind(final_ref1[-1,],final_incremental1[-1,])
 
 
 
-labels <- c("ref","incremental")
+labels <- c("SAEM","ISAEM 50%")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels, facet=FALSE) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
 
+
+final$group <- as.integer(final$group)
+
+
 plot.S1 <- plot.prediction.intervals(final, 
                                     labels       = labels, 
+                                    legend.title = "Algorithm")
+plot.S <- plot.S1  + ylab("EC50") + theme(legend.position=c(0.9,0.8)) + theme_bw()
+print(plot.S1+ theme_bw())
+
+
+plot.S1 <- plot.prediction.intervals(res1$S, 
+                                    labels       = c("placebo","25 mg","50mg"), 
                                     legend.title = "arm")
-plot.S <- plot.S1  + ylab("Survival prediction interval") +theme_bw()
-print(plot.S1+theme_bw())
+plot.S <- plot.S1  + ylab("Survival prediction interval") + theme(legend.position=c(0.9,0.8))
+print(plot.S1 )
 
 
-prctilemlx(final, band = list(number = 4, level = 80),group='group', label = labels) + ggtitle(colnames(final)[4])
+
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+
+
+
+
+
+plt <- prctilemlx(final, band = list(number = 4, level = 80),group='group', label = labels)
+blank<-rectGrob(gp=gpar(col="white")) # make a white spacer grob
+grid.arrange(plt,plot.S, ncol=2)
 
 plot.prediction.intervals <- function(r, plot.median=TRUE, level=80, labels=NULL, 
                                       legend.title=NULL, colors=NULL) {
   P <- prctilemlx(r, number=1, level=level, plot=FALSE)
-  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(labels))  labels <- a[-3]
   if (is.null(legend.title))  legend.title <- "group"
   names(P$y)[2:4] <- c("p.min","p50","p.max")
   pp <- ggplot(data=P$y)+ylab(NULL)+ 
@@ -162,19 +184,19 @@ plot.prediction.intervals <- function(r, plot.median=TRUE, level=80, labels=NULL
   
   if (is.null(colors)) {
     pp <- pp + scale_fill_discrete(name=legend.title,
-                                   breaks=levels(r$group),
+                                   breaks=a[-3],
                                    labels=labels)
     pp <- pp + scale_colour_discrete(name=legend.title,
-                                     breaks=levels(r$group),
+                                     breaks=a[-3],
                                      labels=labels, 
                                      guide=FALSE)
   } else {
     pp <- pp + scale_fill_manual(name=legend.title,
-                                 breaks=levels(r$group),
+                                 breaks=a[-3],
                                  labels=labels,
                                  values=colors)
     pp <- pp + scale_colour_manual(name=legend.title,
-                                   breaks=levels(r$group),
+                                   breaks=a[-3],
                                    labels=labels,
                                    guide=FALSE,values=colors)
   }  
