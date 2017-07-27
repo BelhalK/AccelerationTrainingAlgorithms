@@ -72,9 +72,9 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
 		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-		if(Dargs$error.model=="exponential")
-			fpred<-log(cutoff(fpred))
-		gpred<-error(fpred,varList$pres)
+		# if(Dargs$error.model=="exponential")
+		# 	fpred<-log(cutoff(fpred))
+		# gpred<-error(fpred,varList$pres)
 		# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 		DYF[Uargs$ind.ioM] <- fpred
 		Uc.y<-colSums(DYF)
@@ -94,9 +94,9 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
+				# if(Dargs$error.model=="exponential")
+				# 	fpred<-log(cutoff(fpred))
+				# gpred<-error(fpred,varList$pres)
 				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 				DYF[Uargs$ind.ioM] <- fpred
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
@@ -131,9 +131,9 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
+				# if(Dargs$error.model=="exponential")
+				# 	fpred<-log(cutoff(fpred))
+				# gpred<-error(fpred,varList$pres)
 				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 				DYF[Uargs$ind.ioM] <- fpred
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
@@ -563,9 +563,9 @@ for (i in 1:(Dargs$NM)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
+				# if(Dargs$error.model=="exponential")
+				# 	fpred<-log(cutoff(fpred))
+				# gpred<-error(fpred,varList$pres)
 				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 				DYF[Uargs$ind.ioM] <- fpred
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs

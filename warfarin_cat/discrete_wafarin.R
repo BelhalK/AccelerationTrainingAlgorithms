@@ -52,7 +52,7 @@ iter_mcmc = 200
 
 
 cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.predictors=c("amt"),name.response=c("dv","dvid"),name.covariates=c("wt","sex","age"), name.X="time")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("Y"), name.X="time")
 
 
 cat_data.model<-function(psi,id,xidep) {

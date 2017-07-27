@@ -16,7 +16,7 @@ model2 <- inlineModel("
               logit(P(level<=1)) = th1 + th2
               logit(P(level<=2)) = th1 + th2 + th3
               }
-              
+
               [INDIVIDUAL]
               input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
                       
@@ -28,9 +28,9 @@ model2 <- inlineModel("
                       
                       ")
 
-p <- c(th1_pop=60, o_th1=0.5,
-       th2_pop=1, o_th2=1, 
-       th3_pop=100, o_th3=0.1)
+p <- c(th1_pop=1, o_th1=0.5,
+       th2_pop=5, o_th2=1, 
+       th3_pop=10, o_th3=0.1)
 
 
 y1 <- list(name='y1', time=seq(1,to=50,by=2))
