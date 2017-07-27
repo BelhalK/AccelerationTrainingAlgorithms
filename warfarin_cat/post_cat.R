@@ -74,6 +74,7 @@ saemix_post_cat<-function(model,data,control=list()) {
     cat("Please provide a valid data object (see the help page for SaemixData)\n")
     return()
   }
+  
 
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
@@ -97,7 +98,7 @@ saemix_post_cat<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+  xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs

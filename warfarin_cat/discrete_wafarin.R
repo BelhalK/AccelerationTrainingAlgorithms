@@ -48,11 +48,11 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 200
+iter_mcmc = 20
 
 
 cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("Y"), name.X="time")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"), name.X="TIME")
 
 
 cat_data.model<-function(psi,id,xidep) {
@@ -60,17 +60,17 @@ level<-xidep[,1]
 th1 <- psi[id,1]
 th2 <- psi[id,2]
 th3 <- psi[id,3]
-  
-P0 <- 1/(1+e^(-th1))
-Pcum1 <- 1/(1+e^(-th1-th2))
-Pcum2 <- 1/(1+e^(-th1-th2-th3))
+
+P0 <- 1/(1+exp(-th1))
+Pcum1 <- 1/(1+exp(-th1-th2))
+Pcum2 <- 1/(1+exp(-th1-th2-th3))
 
 P1 <- Pcum1 - P0
 P2 <- Pcum2 - Pcum1
 P3 <- 1 - Pcum2
 
 
-P.obs <- P1*level[level=="1",] + P2*level[level=="2",] + P3*level[level=="3",]
+P.obs <- P1*1 + P2*2 + P3*3
 
 return(P.obs)
 
@@ -78,7 +78,7 @@ return(P.obs)
 
 
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(0.5,0.5,0.5,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
@@ -93,21 +93,29 @@ post_rwm<-saemix_post_cat(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
+K1 = 100
+K2 = 20
+iterations = 1:(K1+K2+1)
+gd_step = 0.01
 
-# #RWM
-# options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
-# theo_ref<-data.frame(saemix(saemix.model,saemix.data2,options))
-# theo_ref <- cbind(iteration, theo_ref)
+#RWM
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE)
+theo_ref<-data.frame(saemix_cat(saemix.model,saemix.data,options))
+theo_ref <- cbind(iterations, theo_ref)
+
+graphConvMC_saem(theo_ref, title="new kernel")
+
+#ref (map always)
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,7),nbiter.saemix = c(K1,K2),displayProgress=FALSE)
+cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data,options.cat))
+cat_saem <- cbind(iteration, cat_saem)
 
 
-
-# #ref (map always)
-# options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=50,displayProgress=FALSE)
-# cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data2,options.cat))
-# cat_saem <- cbind(iteration, cat_saem)
+graphConvMC2_saem(theo_ref, title="new kernel")
 
 
 index = 1
+graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 
 
@@ -124,6 +132,7 @@ for (i in 2:length(post_foce)) {
 
 
 
+graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
 graphConvMC_twokernels(final_rwm,final_foce, title="EM")
 
 

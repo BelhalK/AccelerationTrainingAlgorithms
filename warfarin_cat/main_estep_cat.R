@@ -20,6 +20,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
+	
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	if(Dargs$error.model=="exponential")
 		fpred<-log(cutoff(fpred))
