@@ -1,0 +1,25 @@
+In order to apply Zangwill's convergence theorem, we still need to show:
+\begin{equation}\label{equivalence}
+A(B \circ F_{i,k}(\theta^{(k-1)},\delta_1^{k-1},\dots,\delta_N^{k-1})) = A(\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)}) \equiv (\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)}) \in \Gamma
+\end{equation}
+\textbf{Proving the equality condition:}\\
+We'll prove the equality condition ~\ref{equivalence} by contradiction. We need to show that having an unchanged criteria A for a tuple that does not belong to the solution set is not possible and also that the mapping of a tuple that is in the solution set changes the criteria.\\
+First, we consider a tuple $(\theta,\delta_1,\dots,\delta_N)$  outside of the solution  set such that for all $i in [\![1,N]\!]$, $A \circ T_i(\theta,\delta_1,\dots,\delta_N) = A(\theta,\delta_1,\dots,\delta_N)$. Since the tuple we consider is not in the solution set, there exists at least one of the component that is not equal to the others. We suppose that there exists an index $I$ such that $delta_I \neq \arg \min \limits_{\delta_I \in \Theta} A_I(\theta, \delta_I)$. Thent, we consider the mapping $T_I$ that assign:
+\begin{equation}
+\delta_I = \arg \min \limits_{\delta_I \in \Theta}A_I(\theta, \delta_I) = \theta
+\end{equation}
+
+By construction we have:
+\begin{equation}
+A_I(\theta, \delta_I) \leq A_I(\theta, \delta_I)
+\end{equation}
+And thus 
+
+\begin{equation}
+A \circ T_I(\theta,\delta_1,\dots,\delta_N) \leq A(\theta,\delta_1,\dots,\delta_N)
+\end{equation}
+Which is in contradiction with the assumption.\\
+Then, we consider a tuple $(\theta,\delta_1,\dots,\delta_N)$  in the solution  set such that for all $i in [\![1,N]\!]$, $A \circ T_i(\theta,\delta_1,\dots,\delta_N) \neq A(\theta,\delta_1,\dots,\delta_N)$. Directly, we see that if this tuple is in the solution set, $\theta = \delta_1 = \dots = \delta_N$ and thus for all $i \in [\![1,N]\!]$, 
+$T_i(\theta,\delta_1,\dots,\delta_N) = (\theta,\delta_1,\dots,\delta_N)$. as a result $A \circ T_i(\theta,\delta_1,\dots,\delta_N) = A(\theta,\delta_1,\dots,\delta_N)$ which is in contradiction with the assumption.\\
+
+Those two elements proves the equality condition ~\ref{equivalence} needed and as a consequence that the criteria $A$ decreases strictly if its argument is outside the set of solution.

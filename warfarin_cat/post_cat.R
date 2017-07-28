@@ -98,7 +98,7 @@ saemix_post_cat<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-  xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
+  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs
