@@ -56,7 +56,7 @@ saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, nam
 
 
 cat_data.model<-function(psi,id,xidep) {
-level<-xidep[,1]
+# level<-xidep[,1]
 th1 <- psi[id,1]
 th2 <- psi[id,2]
 th3 <- psi[id,3]
