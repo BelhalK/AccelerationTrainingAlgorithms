@@ -21,36 +21,65 @@
 
 \documentclass[a0,portrait]{a0poster}
 \usepackage[utf8]{inputenc}
+\usepackage{algorithmic}
+
 \usepackage{multicol} % This is so we can have multiple columns of text side-by-side
 \columnsep=100pt % This is the amount of white space between the columns in the poster
 \columnseprule=3pt % This is the thickness of the black line between the columns in the poster
 
 \usepackage[svgnames]{xcolor} % Specify colors by their 'svgnames', for a full list of all colors available see here: http://www.latextemplates.com/svgnames-colors
 
+\usepackage{empheq}
+\usepackage[most]{tcolorbox}
+
+\tcbset{colback=yellow!10!white, colframe=red!50!black, 
+        highlight math style= {enhanced, %<-- needed for the ’remember’ options
+            colframe=red,colback=red!10!white,boxsep=0pt}
+        }
+
 \definecolor{opticlimb}{rgb}{0,0.65,0.65}
 
 %\usepackage{times} % Use the times font
 %\usepackage{palatino} % Uncomment to use the Palatino font
 %\usepackage{helvet}
-\usepackage{avant}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems}
 
+\newtcbtheorem[number within=section]{mytheo}{Theorem}%
+{colback=blue!5,colframe=blue!35!black,fonttitle=\bfseries}{th}
+
+\usepackage{avant}
+\bibliographystyle{plainnat}
 \usepackage{graphicx} % Required for including images
 \graphicspath{{figures/}} % Location of the graphics files
 \usepackage{booktabs} % Top and bottom rules for table
 \usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
 \usepackage{amsfonts, amsmath, amsthm, amssymb,bm} % For math fonts, symbols and environments
 \usepackage{wrapfig} % Allows wrapping text around tables and figures
-
+\usepackage{tikz}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage[font=footnotesize]{subcaption}
 \renewcommand{\familydefault}{\sfdefault}
 
 \newcommand{\E}[1]{\mathbb{E}[#1]}
 \newcommand{\parametre}[1]{\color{OrangeRed} #1 \color{Black}}
 \newcommand{\etat}[1]{\color{ForestGreen} #1 \color{Black}}
 \newcommand{\control}[1]{\color{Blue} #1 \color{Black}}
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+\newcommand{\infdiv}{D_{KL}\infdivx}
 %\newcommand{\donnee}[1]{\color{BurntOrange} #1 \color{Black}}
-
+\newtheorem{thm}{Theorem}
 \begin{document}
 
+{\begin{tikzpicture}[remember picture, overlay]
+     \node [anchor=north east, inner sep=8cm]  at (current page.north east)
+     {\includegraphics[height=5cm]{logo_x.jpg}
+     \includegraphics[height=5cm]{logo_inria.png}};
+  \end{tikzpicture}}
 %----------------------------------------------------------------------------------------
 %	POSTER HEADER 
 %----------------------------------------------------------------------------------------
@@ -60,21 +89,16 @@
 % The second is 25% wide and houses a logo for your university/organization or a photo of you
 % The widths of these boxes can be easily edited to accommodate your content as you see fit
 
-\begin{minipage}[b]{0.75\linewidth}
+\begin{minipage}[b]{0.7\linewidth}
 \veryHuge \color{Navy} \textbf{Fast Incremental Stochastic Version of the EM algorithm} \color{Black}\\[2cm] % Title
 %\Huge\textit{Identification de système dynamique}\\[2cm] % Subtitle
-\huge \textbf{Belhal Karimi$^{1,2}$, M. Lavielle$^{1,2}$, E. Moulines$^{2}$}\\[0.5cm] % Author(s)
+\huge \textbf{B. Karimi$^{1,2}$, M. Lavielle$^{1,2}$, E. Moulines$^{2}$}\\[0.5cm] % Author(s)
 \huge INRIA$^1$, CMAP École Polytechnique$^2$\\[0.4cm] % University/organization
-\Large \texttt{belhal.karimi@cmap.polytechnique.edu}\\
+\Large \texttt{belhal.karimi@polytechnique.edu}
+
 \end{minipage}
 %
-\begin{minipage}[b]{0.25\linewidth}
 
-\begin{center}
-%\includegraphics[width=12cm]{logo.jpg}\\
-%\includegraphics[width=15cm]{opticlimb.png}\\
-\end{center}
-\end{minipage}
 
 \vspace{1cm} % A bit of extra whitespace between the header and poster content
 
@@ -89,9 +113,7 @@
 %\color{Navy} % Navy color for the abstract
 
 %\begin{abstract}
-%
-%Sed fringilla tempus hendrerit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Etiam ut elit sit amet metus lobortis consequat sit amet in libero. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus vel sem magna. Nunc at convallis urna. isus ante. Pellentesque condimentum dui. Etiam sagittis purus non tellus tempor volutpat. Donec et dui non massa tristique adipiscing. Quisque vestibulum eros eu. Phasellus imperdiet, tortor vitae congue bibendum, felis enim sagittis lorem, et volutpat ante orci sagittis mi. Morbi rutrum laoreet semper. Morbi accumsan enim nec tortor consectetur non commodo nisi sollicitudin. Proin sollicitudin. Pellentesque eget orci eros. Fusce ultricies, tellus et pellentesque fringilla, ante massa luctus libero, quis tristique purus urna nec nibh.
-%
+%\noindent The Expectation Maximization (EM), The Monte Carlo EM (MCEM) and the Stochastic Approximation EM (SAEM) are powerful inference algorithms in the context of missing data models. We introduce variants of those algorithms that justifies incremental versions where only one, or a batch of individuals, are considered at each iteration. Since Generalized EM framework can not be used in this case where the E-step is not computed exactly, we'll use the Generalized Alternative Minimization Framework to study the deterministic EM mapping in the context of continuous random variables and use this result for the different stochastic mappings considered under the constraint of selecting a single data at each iteration. In all those cases we'll prove almost-sure convergence and give experimental results on simple cases and on more complicated Pharmacokinetics models showing the effectiveness of our technique.
 %\end{abstract}
 
 %----------------------------------------------------------------------------------------
@@ -106,12 +128,12 @@
 \section{Problem statement}
 \color{Navy} % Navy color
 %\color{DarkSlateGray} % DarkSlateGray color for the rest of the content
-L'avion est aujourd'hui le transport le plus polluant par passager et par kilomètre parcouru. De plus, la quantité de carburant consommée par vol reste un paramètre économique crucial pour les compagnies aériennes. 
-
-Par ailleurs, alors que la phase de montée est la plus grande consommatrice de carburant, celle-ci se fait souvent à vitesse constante et poussée maximale. Parallèlement, une quantité croissante de données sont acquises par les boites noires au cours des vols et celles-ci sont de plus en plus accessibles.
-\newline
-
-Dans ce contexte, nous nous sommes intéressés à \textbf{l'utilisation de données de vols pour optimiser des trajectoires de montée dans le but de réduire la consommation de carburant et les émissions de $CO_2$ d'avions de ligne.}
+A wide class of statistical problems involves observed and unobserved data. We can consider, for example,
+inverse problems concerning deconvolution, source separation, change-points detection, etc. Linear and nonlinear
+mixed effects models can also be considered incomplete-data models. Estimation of the parameters of these
+models is a difficult challenge. In particular, the likelihood of the observations cannot usually be maximized in
+closed form. The EM algorithm proposed by Dempter, Laird and Rubin led to many variants when the conditional expectation of the complete log-likelihood is intractable. The MCEM (Meng, 1993) and the SAEM (Delyon, 1999) are two of them.\\
+Following Neal and Radford and Gunawardana efforts in justifying a variant version of the EM algorithm considering an incremental scheme, we decided to focus on the Incremental EM, MCEM and SAEM for continuous random variables.
 
 %----------------------------------------------------------------------------------------
 %	OBJECTIVES
@@ -119,85 +141,158 @@ Dans ce contexte, nous nous sommes intéressés à \textbf{l'utilisation de donn
 
 \color{DarkSlateGray} % DarkSlateGray color for the rest of the content
 %\vspace{1cm}
-\section{Model and notations}
-
-Notre finalité est de proposer une méthode permettant de fournir des trajectoires optimales, réalisables et acceptables. Ceci peut se traduire mathématiquement par un \textbf{problème de commande optimale} de la forme suivante :
-\begin{equation}
-\min_{(\bm{x,u}) \in \mathbb{X} \times \mathbb{U}} J(\bm{x,u}) 	\qquad     	 \textrm{tel que} \qquad \frac{d \bm{x} }{dt}=g(\bm{x,u})
-\end{equation}
-où $\bm{x}$ et $\bm{u}$ désignent les variables d'état et de contrôle de l'aéronef et $g$ est une fonction continue définissant la dynamique du système. La fonction coût $J$ à minimiser est ici supposée différentiable et définie à partir de la consommation de carburant et de la distance parcourue.
-
-
-Le caractère \textbf{réalisable} des solutions de tel problème est assuré par le respect de la contrainte dynamique $\frac{d \bm{x} }{dt}=g(\bm{x,u})$. Celle-ci correspond à un modèle du comportement de l'avion, qui doit être le plus proche possible de la réalité, de sorte que la solution du problème réduise effectivement la masse de carburant consommée. Une possibilité simple de modèle (réf.\cite{hull}) est illustré par la figure \ref{fig-dyn} et décrite ci-dessous:
-
-\begin{align} \label{eq-sys}
-\arraycolsep=1.4pt\def\arraystretch{1.8}
-\left\{ 
-\begin{array}{ll}
-\dot{h} &=  V \sin \gamma \\
-\dot{V} &=  \frac{T \cos \alpha - D - mg \sin \gamma}{m}\\
-\dot{\gamma} &= \frac{T \sin \alpha + L- mg \cos \gamma}{mV}\\
-\dot{m} &= -C_{sp} T
-\end{array} \right.
-\end{align}
-Le vecteur des variables d'état $\bm{x}$ est ici composé de l'altitude $h$ , la vitesse $V$, la pente $\gamma$ et la masse de l'avion $m$, tandis que les variables de contrôle $\bm{u}$ sont l'angle d'attaque $\alpha$ et le régime moteur $N_1$.
-\newline
-
-Les autres éléments intervenants dans les équations précédentes, à savoir $T,D,L$ et $C_{sp}$, désignent respectivement la force de poussée totale, la force de traînée, la force de portance et la consommation spécifique moyenne des moteurs. On suppose ici que ceux-ci peuvent être décrits comme des fonctions des variables d'état et de contrôle. \textbf{Notre objectif est donc, pour un avion donné, d'estimer ces fonctions à partir d'enregistrements de vol afin d'avoir une contrainte dynamique décrivant le plus fidèlement possible le comportement et les performance de celui-ci.}
+%\section{Model and notations}
+%We study a classical missing data problem where:
+%\begin{itemize}
+%\item The observed data is a continuous random variable $Y = (Y_i, 1\leq i \leq N)$ that has observed values $(y_i, 1\leq i \leq N)$ in $\mathcal{Y}$
+%\item The latent data is a continuous random variable $Z = (Z_i, 1\leq i \leq N)$ that takes on the values $(z_i, 1\leq i \leq N)$ in $\mathcal{Z}$ and consists in $N$ independent variables
+%\item The components $Y_i$ are generated independently of each other and from their corresponding $Z_i$
+%\item $\log p(y,\theta)$ is the incomplete data log-likelihood
+%\item $\log p(y,z,\theta)$ is the complete data log-likelihood and obtained by augmenting the observed data with the missing data
+%\item We'll call $P_{Y_i,Z_i,\theta}$ and $P_{Z_i|Y_i,\theta}$ the probability distributions associated to the densities $p(y_i,z_i,\theta)$ and $p(z_i|y_i,\theta)$
+%\end{itemize}
 
 %----------------------------------------------------------------------------------------
 %	MATERIALS AND METHODS
 %----------------------------------------------------------------------------------------
 %\vspace{1cm}
 \section{Convergence Theorems}
+   
+\subsection{IEM algorithm}
+Following Gunawardana work we can show that the IEM on missing data problem ($Y$ are observed and $Z$ are latent)can be seen as a Alternatively minimizing problem. In that context we proposed a criteria that we will be minimizing alternatively, for all $\theta \in \Theta$ and $(\delta_i)_{i=1}^N \in \Theta^N$:
+\begin{align*}
+  A \colon & \Theta^{N+1} \to \mathbb{R}\\
+  & (\theta, \delta_1,\dots,\delta_N) \mapsto \infdiv{\prod_{i=1}^{N}{P_{Z_i|Y_i,\delta_i}}}{\prod_{i=1}^{N}{P_{Z_i|Y_i,\theta}}} - \sum_{i=1}^{N}{\log p(y_i,\theta)}
+\end{align*}
 
-Des modèles paramétriques des fonctions $T,D,L$ et $C_{sp}$ ont été définis. En isolant ces éléments inconnus dans les membres de droite, les trois dernières équations du système \eqref{eq-sys} permettent de définir le \textbf{problème de régression} suivant:
+Two successive mappings $ F_{I_k,k} \colon \Theta^{N+1} \to \Theta^{N+1}$ and $ B \colon \Theta^{N+1} \to \Theta^{N+1}$ decrease this criteria, strictly when the input is outside the solution set.
+\begin{align*}
+& F_{I_k,k}(\theta,\delta_{I_k},\delta_{-I_k}) = (\theta,\arg \min \limits_{\delta_{I_k} \in \Theta}  \infdiv{P_{z_{I_{k}}|y_{I_{k}},\delta_{I_k}}}{P_{z_{I_{k}}|y_{I_{k}},\theta^{k-1}}},\delta_{-I_k})\\
+& B(\theta,(\delta_i)_{i=1}^N) = (\arg \min\limits_{\theta \in \Theta}A(\theta,\delta_1^{(k)},\dots, \delta_N^{(k)}),(\delta_i)_{i=1}^N)
+\end{align*}
+Using Zangwill global convergence theorem allows us to write this first convergence theorem.
 
-\begin{equation} \label{eq-regpb}
-\left\{
-\arraycolsep=1.4pt\def\arraystretch{1.5}
-\begin{array}{ll}
-Y_x &= T \cos(\alpha) - D + \varepsilon_x \\
-Y_z &= T \sin(\alpha) + L + \varepsilon_z \\
-Y_c &= C_{sp} T+ \varepsilon_c,
+Let $\{(\theta^k, \delta_1^k,\dots, \delta_N^k)\}_{k=0}^{\infty}$ be a sequence generated from a tuple $(\theta^0, \delta_1^0,\dots, \delta_N^0)$ by the iterative application, with its associated solution set $\Gamma$ of the point-to-set map $B \circ F_{i,k}$ at each iteration $k$:
+\begin{equation*}
+(\theta^k, \delta_1^k,\dots, \delta_N^k) = B \circ F_{i,k}(\theta^{k-1}, \delta_1^{k-1},\dots, \delta_N^{k-1})
+\end{equation*}
+
+
+\begin{mytheo}{IEM convergence theorem}{theoexample}
+
+Let $B \circ F_{i,k}: \Theta^{N+1} \to \Theta^{N+1}$ be the composition of the point-to-set maps $B$ and $F_{i,k}$ as defined in the algorithm.\\
+With certain assumptions of compactness and continuity:
+\begin{enumerate}
+\item All accumulation points of the sequence $\{(\theta^k, \delta_1^k,\dots, \delta_N^k)\}_{k=0}^{\infty}$ lie in the solution set $\Gamma$
+\item The sequence $\{\theta_k\}_{k=0}^{\infty}$ converges to stationary points of the incomplete data likelihood, i.e. all the accumulation points of this sequence are in  $\mathcal{L} = \{\theta \in \Theta, \partial_{\theta}l(\theta) = 0 \}$
+\end{enumerate}
+
+\end{mytheo}
+
+
+
+\subsection{IMCEM algorithm}
+One important assumption is needed in order to use the deterministic mapping $T_{i}$ to prove the convergence of the stochastic one $P_{i,k}$:
+For all $(\theta_k, \delta_1^k,\dots,\delta_N^k) \in \Theta^{N+1}$ :
+\begin{equation*}
+\lim\limits_{k} |A \circ P_{i,k}(\theta_k, \delta_1^k,\dots,\delta_N^k) - A \circ T_i(\theta_k, \delta_1^k,\dots,\delta_N^k)| = 0
+\end{equation*}
+
+ \begin{mytheo}{IMCEM convergence theorem}{imcem}
+With certain assumptions of compactness and continuity and a sequence of parameter estimates $\{\theta_{k}\}$ satisfying the IMCEM algorithm:
+\begin{enumerate}
+  \item if $A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$ has an empty interior, then the accumulation points of $\{\theta_{k}\}_{k \geq 0}$ are in $\mathcal{L}$
+\end{enumerate}
+\end{mytheo}
+   
+   
+   
+\section{Incremental algorithms in Practice}
+
+In this section we describe how incremental version of the MCEM and the SAEM can be implemented in the context of a simple linear gaussian case and a more complicated non linear mixed-effects models.
+\subsection{IMCEM on a simple Gaussian case}
+Let's consider the case when all the variables of interest are Gaussian.
+\begin{equation*}
+Y_i = Z_i + \epsilon_i
+\end{equation*}
+Where $Z_i \sim \mathcal{N}(\theta,\omega^2)$ and $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$.
+Since the $Z_i$ and $\epsilon_i$ are i.i.d we have that $Y_i \sim \mathcal{N}(\theta,\sigma^2 + \omega^2)$ and $Y_i|Z_i \sim \mathcal{N}(Z_i,\sigma^2)$.\\
+The goal is to find an estimate of the mean $\theta$ that maximizes the likelihood $p(y,\theta)$ considering that $\sigma^2$ and $\epsilon^2$ are known.
+
+\noindent We can now apply our maximization step:
+\begin{equation*}
+\begin{split}
+& \theta_{N+j} = \hat{\Theta}(S) = \frac{\alpha}{N} \sum_{i=1}^{N}{\theta_{N+j-i}} + (1-\alpha)\bar{y} + \bar{e}_{N+j}\\
+\end{split}
+\end{equation*}
+Where $\bar{e} \sim \mathcal{N}(0, \frac{\gamma^2}{M_{N+j}N})$
+
+If we define the vector of parameter as follow (with $k=N+j$):
+
+\begin{equation*}
+\theta_{k} = 
+\left(
+\begin{array}{c}
+\theta_{k}\\
+..\\
+\theta_{k-N+1}\\
 \end{array}
-\right.
-\end{equation}
-où $\{\varepsilon_k\}_{k=1}^3$ sont les erreurs de notre modèle.
+\right) = \rho \theta_{k-1} + (1-\alpha)\bar{y}e_1 + \bar{e}_k e_1
+\textrm{  where  } \rho = \begin{pmatrix} 
+\frac{\alpha}{N} & .. & .. & \frac{\alpha}{N} \\
+1 & 0 & .. & 0\\
+0 & 1 & .. & 0\\
+.. & .. & .. & ..\\
+.. & .. & .. & 0\\
+\end{pmatrix}
+\end{equation*}
 
-La principale difficulté de ce problème réside dans la troisième équation, qui est non-linéaire et ne permet pas d'identifier séparément $C_{sp}$ et $T$.
-\newline
 
-Pour tenter de résoudre ce problème d'apprentissage statistique et faire face à cette difficulté, trois approches différentes ont été testées :
-\begin{description}
-\item[Méthode 1 -] Ne pas identifier $C_{sp}$, en le remplaçant par un modèle prédéfini, et réaliser les trois régressions séparément ;
-\item[Méthode 2 -] Utiliser les deux premières équations simultanément pour identifier $T$, $D$ et $L$, puis injecter l'estimation de $T$ dans la dernière équation afin d'estimer $C_{sp}$ ;
-\item[Méthode 3 -] Se servir d'une approche de type Newton (réf. \cite{bonnans06}) pour réaliser toutes les trois régressions simultanément.
-\end{description}
-\vspace{1cm}
+\noindent Now if we consider a scheme where not only one individual is picked at each iteration but a batch pN (where p is a percentage). In that case we can write in scalar (to facilitate the notation we'll consider M=1 and $\bar{y} = 0$):
+\begin{equation*}
+\begin{split}
+\theta_k & = \rho^{1/p} \theta_{k-1/p} + \frac{1-\rho^{1/p}}{1-\rho}\bar{e}_k
+\end{split}
+\end{equation*}
+In that case we can calculate the expectation and the variance of our estimator $\theta_k$ in the stationary regime:
 
-Une des motivations des deux dernières approches citées ci-dessus est le résultats connu en statistiques selon lequel \textbf{la précision peut être améliorée en résolvant des problèmes de régression simultanément plutôt que séparément} (réf. \cite{stein61}).
+\begin{tcolorbox}[ams gather]
+ \E{\theta_{k}} = \rho^{k/p}\theta_0\\
+\textrm{Var } \theta_k = \frac{\gamma^2}{N(1-\rho)^2}\frac{1-\rho^{1/p}}{1+\rho^{1/p}}
+\end{tcolorbox}
+ 
 
-La mesure de précision utilisée ici a été l'\textbf{Erreur de Prédiction Espérée} :
-\begin{equation}
-\mbox{EPE}_k = \E{|Y_k - \hat{Y}_k|^2}, \qquad k\in \{x,z,c\}
-\end{equation}
-où $\hat{Y}_k$ désigne la prédiction de $Y_k$, un des membres de gauche des équations \eqref{eq-regpb}.
 
-%----------------------------------------------------------------------------------------
-%	RESULTS 
-%----------------------------------------------------------------------------------------
-%\vspace{1cm}
-\section{Incremental in Practice}
+With these two expressions we understand what strategy is best for the choice of the batch size at each iteration. Indeed the bias is small when p is small so one should start with picking one individual first to kill the bias and the variance is decreasing when p is increasing. So once the bias is killed one should increase the size of the batch to kill the variance of the estimator.\\
+\\
+This result implies as well that the Online EM algorithm introduced by (Cappe and Moulines, 2007) is the best strategy to follow even when all the data is initially available. In other words, even though one has access to the whole observed dataset, one should consider increasing batch of individuals at each iteration.
 
-Résultats obtenus à partir d'une base de 1000 variables enregistrées toutes les secondes au cours de 78 vols d'un unique avion.
 
-\subsection{Simple Gaussian case}
-Maths for imcem and iem and show how the growing batch is the best option (parallel with online EM)\\
-Also ISAEM on mixture of gaussians to show optimal batch size
+\begin{center}%\vspace{1cm}
+\includegraphics[width=25cm,height=10cm]{imcem_final.pdf}
+\captionof{figure}{Incremental MCEM for 50 replicates}
+\label{fig-dyn}
+\end{center}\vspace{1cm}
 
-\subsection{PK-PD datasets}
-Graphs of ISAEM on pkpd datasets
+
+\subsection{ISAEM on a PK-PD dataset}
+
+
+
+
+We use an example used by P. Girard and F. Mentre for the symposium dedicated to Comparison of Algorithms Using Simulated Data Sets and Blind Analysis, that took place in Lyon, France, September 2004.\\
+The dataset contains 100 individuals, each receiving 3 different doses:$(0, 10, 90)$, $(5, 25, 65)$ or $(0,20, 30)$. It was assumed that doses were given in a cross-over study with sufficient wash out period to avoid carry over. Responses $y_{ij}$ were simulated with the following pharmacodynamic model:
+\begin{tcolorbox}[ams gather]
+y_{ij} = E0_i + D_{ij} Emax_i/(D_{ij} + ED50_i) +\epsilon_{ij}
+\end{tcolorbox}
+Where $D_{ij}$ is the dose given to individual $i$ at time $t_j$ and the individual parameters $(E0_i,Emax_i,ED50_i)$ follow log normal distribution.
+
+
+\begin{center}%\vspace{1cm}
+\includegraphics[width=25cm,height=10cm]{isaem_pd_final.pdf}
+\captionof{figure}{Incremental SAEM for 50 replicates}
+\label{fig-dyn}
+\end{center}\vspace{1cm}
 
 %\begin{center}\vspace{1cm}
 %\includegraphics[width=0.8\linewidth]{resultats2}
@@ -213,18 +308,8 @@ Graphs of ISAEM on pkpd datasets
 %\vspace{1cm}
 \section{Conclusion}
 \color{Navy} % Navy color
+Incremental implies choice of the indices of the individuals at each iteration and the size of the number of individuals considered as well.
 
-Les résultats précédents permettent d'illustrer les conclusions suivantes:
-\begin{itemize}
-\item Les meilleures méthodes d'identification semblent être les méthodes 1 et 3, cette dernière étant bien plus complexe à mettre en œuvre.
-\item Les modèles identifiés à partir de la méthode 1 nous permettent déjà d'obtenir des résultats acceptables.
-\end{itemize}
-\textbf{Ceci illustre bien que l'accès à de grandes quantités de données rend parfois des approches simples compétitives face à des solutions plus sophistiquées.}
-\vspace{1cm}
-
-Par la suite, des modèles et méthodes de résolution différentes seront étudiés et nos expérimentations se feront sur des échantillons 10 fois plus importants.
-
-Il est également important de préciser que cette solution est déjà utilisée dans le produit \textbf{OptiClimb, commercialisé par la société Safety Line. Il permet d'obtenir 10\% d'économies de carburant sur la phase de montée.}
 
 \color{DarkSlateGray} % Set the color back to DarkSlateGray for the rest of the content
 
@@ -239,12 +324,10 @@ Il est également important de préciser que cette solution est déjà utilisée
 %	REFERENCES
 %----------------------------------------------------------------------------------------
 
-%\subsection*{Références}
+
 \small
 \nocite{*} % Print all references regardless of whether they were cited in the poster or not
-%\bibliographystyle{plain} % Plain referencing style
-\bibliographystyle{siam}
-\bibliography{edf} % Use the example bibliography file sample.bib
+\bibliography{ref.bib}
 
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
@@ -252,8 +335,15 @@ Il est également important de préciser que cette solution est déjà utilisée
 
 %\section*{Acknowledgements}
 
+%\includegraphics[width=15cm]{opticlimb.png}\\
+
 
 %----------------------------------------------------------------------------------------
 
 \end{multicols}
+\begin{center}
+%\includegraphics[width=10cm]{logo_x.jpg}
+%\includegraphics[width=10cm]{logo_inria.png}
+%\includegraphics[width=15cm]{opticlimb.png}\\
+\end{center}
 \end{document}
