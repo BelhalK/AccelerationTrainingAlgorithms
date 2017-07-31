@@ -79,7 +79,7 @@ return(P.obs)
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
   psi0=matrix(c(0.5,0.5,0.5,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
   byrow=TRUE),error.model="constant")
 
 
@@ -105,7 +105,7 @@ theo_ref <- cbind(iterations, theo_ref)
 graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,7),nbiter.saemix = c(K1,K2),displayProgress=FALSE)
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE)
 cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

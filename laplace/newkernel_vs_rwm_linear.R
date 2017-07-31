@@ -44,7 +44,7 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1000
+iter_mcmc = 200
 
 
 
@@ -80,11 +80,11 @@ post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 
 index = 2
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
-# graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
-graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
-graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
-graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
-graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+# # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
+# graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")
+# graphConvMC_twokernels(post_rwm[[index]],post_laplace[[index]], title="rwm vs laplace")
+# graphConvMC_threekernels(post_rwm[[index]],post_foce[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
+# graphConvMC_fourkernels(post_rwm[[index]],post_foce[[index]],post_laplace[[index]],post_fo2[[index]], title="rwm vs foce vs laplace")
 
 post_rwm[[index]]$algo <- 'rwm'
 post_foce[[index]]$algo <- 'foce'
@@ -134,3 +134,26 @@ graphConvMC_threekernels(final_rwm,final_fo2,final_foce, title="EM")
 
 
 
+
+#Autocorrelation
+rwm.obj <- as.mcmc(post_rwm[[1]])
+corr_rwm <- autocorr(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2])
+
+foce.obj <- as.mcmc(post_foce[[1]])
+corr_foce <- autocorr(foce.obj[,2])
+autocorr.plot(foce.obj[,2])
+
+fo2.obj <- as.mcmc(post_fo2[[1]])
+corr_fo2 <- autocorr(fo2.obj[,2])
+autocorr.plot(fo2.obj[,2])
+
+laplace.obj <- as.mcmc(post_laplace[[1]])
+corr_laplace <- autocorr(laplace.obj[,2])
+autocorr.plot(laplace.obj[,2])
+
+
+mssd(rwm_burn[,3])
+mssd(foce_burn[,3])
+mssd(fo2_burn[,3])
+mssd(laplace_burn[,3])

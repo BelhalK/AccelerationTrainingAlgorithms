@@ -22,10 +22,11 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	psiM<-transphi(phiM,Dargs$transform.par)
 	
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	if(Dargs$error.model=="exponential")
-		fpred<-log(cutoff(fpred))
-	gpred<-error(fpred,varList$pres)
-	DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+	# if(Dargs$error.model=="exponential")
+	# 	fpred<-log(cutoff(fpred))
+	# gpred<-error(fpred,varList$pres)
+	# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+	DYF[Uargs$ind.ioM] <- fpred
 	U.y<-colSums(DYF)
 	
 

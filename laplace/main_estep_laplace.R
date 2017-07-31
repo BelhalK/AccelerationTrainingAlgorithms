@@ -512,33 +512,61 @@ for (i in 1:(Dargs$NM)){
 		#gradient at the map estimation
 		gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
 
+		# for (j in 1:nb.etas) {
+		# 	phi_map2 <- phi_map
+		# 	phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+		# 	psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+		# 	fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+		# 	fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+		# 	for (i in 1:(Dargs$NM)){
+		# 		r = 1:sum(Dargs$IdM == i)
+  #               r = r+sum(as.matrix(gradf[,j]) != 0L)
+		# 		gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+		# 	}
+		# }
+
+
 		for (j in 1:nb.etas) {
 			phi_map2 <- phi_map
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred1<-log(cutoff(fpred1))
+			gpred1<-error(fpred1,varList$pres)
+			l1 <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred2<-log(cutoff(fpred2))
+			gpred2<-error(fpred2,varList$pres)
+			l2 <-exp(-(0.5*((Dargs$yM-fpred2)/gpred2)**2+log(gpred2)))
 			for (i in 1:(Dargs$NM)){
 				r = 1:sum(Dargs$IdM == i)
                 r = r+sum(as.matrix(gradf[,j]) != 0L)
-				gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+				gradf[r,j] <- (l2[r] - l1[r])/(phi_map[i,j]/100)
 			}
 		}
 
+
 		#calculation of the covariance matrix of the proposal
-	
+		
+		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+		if(Dargs$error.model=="exponential")
+			fpred<-log(cutoff(fpred))
+		gpred<-error(fpred1,varList$pres)
+		denom <- exp(-(0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)))**2
 		Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
 			r = 1:sum(Dargs$IdM == i)
 			r <- r+sum(as.matrix(z) != 0L)
             z[r] <- gradf[r,1]
-			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
-		}
-		# Gamma <- solve(t(gradf)%*%gradf/(varList$pres[1])^2+solve(omega.eta))
-		# sGamma <- solve(Gamma)
-		
+			# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+			browser()
+			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]+solve(omega.eta))
 
+		}
+		
 
 		
 		for (u in 1:opt$nbiter.mcmc[7]) {

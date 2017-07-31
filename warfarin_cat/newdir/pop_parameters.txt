@@ -29,7 +29,7 @@ First 10 lines of data:
 Nonlinear mixed-effects model
   Model function:  cat model
 function(psi,id,xidep) {
-level<-xidep[,1]
+# level<-xidep[,1]
 th1 <- psi[id,1]
 th2 <- psi[id,2]
 th3 <- psi[id,3]
@@ -46,20 +46,19 @@ P3 <- 1 - Pcum2
 P.obs <- P1*1 + P2*2 + P3*3
 
 return(P.obs)
-
 }
   Nb of parameters: 3 
       parameter names:  th1 th2 th3 
       distribution:
      Parameter Distribution Estimated
 [1,] th1       normal       Estimated
-[2,] th2       normal       Estimated
-[3,] th3       normal       Estimated
+[2,] th2       log-normal   Estimated
+[3,] th3       log-normal   Estimated
   Variance-covariance matrix:
     th1 th2 th3
 th1   1   0   0
-th2   0   1   0
-th3   0   0   1
+th2   0   0   0
+th3   0   0   0
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
@@ -85,21 +84,17 @@ Pop.CondInit 0.5 0.5 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] th1       2.75    
-[2,] th2       1.66    
-[3,] th3       0.95    
-[4,] a         0.60    
+[1,] th1       4.4e+00 
+[2,] th2       1.5e-16 
+[3,] th3       5.4e-20 
+[4,] a         6.1e-01 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
     Parameter  Estimate
-th1 omega2.th1 5.2e-05 
-th2 omega2.th2 7.6e-05 
-th3 omega2.th3 1.4e-04 
+th1 omega2.th1 0.054   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-           omega2.th1 omega2.th2 omega2.th3
-omega2.th1 1          0          0         
-omega2.th2 0          1          0         
-omega2.th3 0          0          1         
+           omega2.th1
+omega2.th1 1         
