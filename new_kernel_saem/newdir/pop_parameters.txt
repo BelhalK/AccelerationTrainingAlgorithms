@@ -4,58 +4,64 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset oxboys.saemix 
-    Structured data: height ~ age | Subject 
-    Predictor: age (yr) 
+Dataset yield.saemix 
+    Structured data: yield ~ dose | site 
+    Predictor: dose (kg/ha) 
+    covariates: soil.nitrogen (kg/ha) 
 Dataset characteristics:
-    number of subjects:     26 
-    number of observations: 234 
-    average/min/max nb obs: 9.00  /  9  /  9 
+    number of subjects:     37 
+    number of observations: 224 
+    average/min/max nb obs: 6.05  /  5  /  8 
 First 10 lines of data:
-   Subject     age height mdv cens occ ytype
-1        1 -1.0000  140.5   0    0   1     1
-2        1 -0.7479  143.4   0    0   1     1
-3        1 -0.4630  144.8   0    0   1     1
-4        1 -0.1643  147.1   0    0   1     1
-5        1 -0.0027  147.7   0    0   1     1
-6        1  0.2466  150.2   0    0   1     1
-7        1  0.5562  151.7   0    0   1     1
-8        1  0.7781  153.3   0    0   1     1
-9        1  0.9945  155.8   0    0   1     1
-10       2 -1.0000  136.9   0    0   1     1
+   site dose yield soil.nitrogen mdv cens occ ytype
+1  1901    0  6.70            70   0    0   1     1
+2  1901   70  8.58            70   0    0   1     1
+3  1901  120 10.56            70   0    0   1     1
+4  1901  170 11.54            70   0    0   1     1
+5  1901  220 10.63            70   0    0   1     1
+6  1901  270 11.54            70   0    0   1     1
+7  1902    0  6.98            80   0    0   1     1
+8  1902   70  9.94            80   0    0   1     1
+9  1902  120 10.56            80   0    0   1     1
+10 1902  170 11.07            80   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear model
+  Model function:  Linear plus plateau model
 function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (2 columns, base and slope)
+#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
 #   id : vector of indices 
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
+  ymax<-psi[id,1]
+  xmax<-psi[id,2]
+  slope<-psi[id,3]
+  f<-ymax+slope*(x-xmax)
+#  cat(length(f),"  ",length(ymax),"\n")
+  f[x>xmax]<-ymax[x>xmax]
   return(f)
 }
-  Nb of parameters: 2 
-      parameter names:  base slope 
+  Nb of parameters: 3 
+      parameter names:  Ymax Xmax slope 
       distribution:
      Parameter Distribution Estimated
-[1,] base      log-normal   Estimated
-[2,] slope     normal       Estimated
+[1,] Ymax      normal       Estimated
+[2,] Xmax      normal       Estimated
+[3,] slope     normal       Estimated
   Variance-covariance matrix:
-      base slope
-base     1     1
-slope    1     1
+      Ymax Xmax slope
+Ymax     1    0     0
+Xmax     0    1     0
+slope    0    0     1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             base slope
-Pop.CondInit  140     1
+             Ymax Xmax slope
+Pop.CondInit    8  100   0.2
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -76,18 +82,21 @@ Pop.CondInit  140     1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] base      149.16  
-[2,] slope       6.54  
-[3,] a           0.66  
+[1,] Ymax        9.184 
+[2,] Xmax      122.909 
+[3,] slope       0.026 
+[4,] a           0.299 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-base  omega2.base  0.0029  
-slope omega2.slope 2.6832  
+Ymax  omega2.Ymax  1.3e+00 
+Xmax  omega2.Xmax  2.2e+03 
+slope omega2.slope 4.3e-05 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.base omega2.slope
-omega2.base  1.00        0.64        
-omega2.slope 0.64        1.00        
+             omega2.Ymax omega2.Xmax omega2.slope
+omega2.Ymax  1           0           0           
+omega2.Xmax  0           1           0           
+omega2.slope 0           0           1           

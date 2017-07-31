@@ -471,7 +471,7 @@ for (i in 1:(Dargs$NM)){
 ###############################################################################################
 ############   NEW KERNEl														############
 ###############################################################################################
-		if(opt$nbiter.mcmc[7]>0) {
+				if(opt$nbiter.mcmc[7]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -516,36 +516,71 @@ for (i in 1:(Dargs$NM)){
 		eta_map <- phi_map - mean.phiM
 		
 		#gradient at the map estimation
-		gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
+		# gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas)
+		gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+
+		# for (j in 1:nb.etas) {
+		# 	phi_map2 <- phi_map
+		# 	phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+		# 	psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+		# 	fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+		# 	fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+		# 	for (i in 1:(Dargs$NM)){
+		# 		r = 1:sum(Dargs$IdM == i)
+  #               r = r+sum(as.matrix(gradf[,j]) != 0L)
+		# 		gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+		# 	}
+		# }
+
 
 		for (j in 1:nb.etas) {
 			phi_map2 <- phi_map
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			# if(Dargs$error.model=="exponential")
+			# 	fpred1<-log(cutoff(fpred1))
+			# gpred1<-error(fpred1,varList$pres)
+			# DYF[Uargs$ind.ioM] <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
+			DYF[Uargs$ind.ioM] <-fpred1
+			l1 <- colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			# if(Dargs$error.model=="exponential")
+			# 	fpred2<-log(cutoff(fpred2))
+			# gpred2<-error(fpred2,varList$pres)
+			DYF[Uargs$ind.ioM] <-fpred2
+			l2 <- colSums(DYF)
 			for (i in 1:(Dargs$NM)){
-				r = 1:sum(Dargs$IdM == i)
-                r = r+sum(as.matrix(gradf[,j]) != 0L)
-				gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+				# r = 1:sum(Dargs$IdM == i)
+    #             r = r+sum(as.matrix(gradf[,j]) != 0L)
+				gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
 			}
 		}
 
+
 		#calculation of the covariance matrix of the proposal
-	
+		
+		denom <- DYF
+		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+		# if(Dargs$error.model=="exponential")
+		# 	fpred<-log(cutoff(fpred))
+		# gpred<-error(fpred1,varList$pres)
+		DYF[Uargs$ind.ioM] <-fpred
+		denom <- colSums(DYF)
+
+		
 		Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
 			r = 1:sum(Dargs$IdM == i)
 			r <- r+sum(as.matrix(z) != 0L)
             z[r] <- gradf[r,1]
-			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+			# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+
+			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
 		}
-		# Gamma <- solve(t(gradf)%*%gradf/(varList$pres[1])^2+solve(omega.eta))
-		# sGamma <- solve(Gamma)
 		
-
-
+		# browser()
 		
 		for (u in 1:opt$nbiter.mcmc[7]) {
 
@@ -565,11 +600,10 @@ for (i in 1:(Dargs$NM)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
-				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-				DYF[Uargs$ind.ioM] <- fpred
+				if(Dargs$error.model=="exponential")
+					fpred<-log(cutoff(fpred))
+				gpred<-error(fpred,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 
@@ -601,6 +635,7 @@ for (i in 1:(Dargs$NM)){
 			}
 		}
 	}
+
 
 	
 		

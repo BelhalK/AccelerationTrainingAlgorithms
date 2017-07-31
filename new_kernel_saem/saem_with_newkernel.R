@@ -98,6 +98,11 @@ options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 
+
+options.foce<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
+theo_foce<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.foce))
+theo_foce <- cbind(iterations, theo_foce)
+
 graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
 
 

@@ -111,23 +111,31 @@ theo_gd_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.gd_mix))
 theo_gd_mix <- cbind(iteration, theo_gd_mix)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+
+#FOCE
+options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(3))
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iteration, theo_mix)
 
 
-theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
+#Hessian approx to zero
+options.mix2<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(3))
+theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix2))
 theo_mix2 <- cbind(iteration, theo_mix2)
+
+
+
 
 graphConvMC_threekernels(theo_ref,theo_mix,theo_mix2, title="ref vs GD")
 
 theo_ref$algo <- 'rwm'
 theo_new_ref$algo <- 'MAP'
 theo_mix$algo <- 'Mix'
+theo_mix2$algo <- 'Mix2'
 
 comparison <- 0
 comparison <- rbind(theo_ref,theo_mix)
-comparison <- rbind(theo_ref,theo_new_ref,theo_mix)
+comparison <- rbind(theo_ref,theo_mix2,theo_mix)
 var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=FALSE)
 

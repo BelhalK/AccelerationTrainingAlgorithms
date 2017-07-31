@@ -132,7 +132,8 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	}
 }
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	#New kernel
+	#New kernel with approx conditional
+
 		if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
@@ -259,6 +260,201 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 		}
 		for (u in 1:opt$nbiter.mcmc[4]) {
+			for(vk2 in 1:nb.etas) {
+				etaMc<-etaM
+				etaM <- eta_map
+				propc <- U.eta
+				prop <- U.eta
+				#generate candidate eta
+					
+				for (i in 1:(Dargs$NM)){
+					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
+					etaMc[i,]<- eta_map[i,] +M[i,]
+				}
+
+
+				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+				psiMc<-transphi(phiMc,Dargs$transform.par)
+				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred<-log(cutoff(fpred))
+				gpred<-error(fpred,varList$pres)
+				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+
+
+				for (i in 1:(Dargs$NM)){
+					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+				}
+
+
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				etaM[ind,]<-etaMc[ind,]
+				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+				U.eta[ind]<-Uc.eta[ind]
+				nbc2[vk2]<-nbc2[vk2]+length(ind)
+				nt2[vk2]<-nt2[vk2]+Dargs$NM
+
+
+				# #Or Use the output of VI as the posterior distrib we simulate from
+				# etaM[ind,]<-etaMc[ind,]
+				# for (i in 1:(nrow(phiM))) {
+				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+				# }
+
+			}
+		}
+	}
+
+
+#New kernel with approx that hessian is null
+	
+		if(opt$nbiter.mcmc[5]>0 & kiter %in% map_range) {
+		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+		nrs2<-1
+
+		#MAP calculation
+
+
+		saemix.options<-saemixObject["options"]
+	  	saemix.model<-saemixObject["model"]
+	  	saemix.data<-saemixObject["data"]
+	  	saemix.options$map <- TRUE
+	  	saemixObject["results"]["omega"] <- omega.eta
+	  	saemixObject["results"]["mean.phi"] <- mean.phi
+	  	saemixObject["results"]["phi"] <- phiM
+	  	saemixObject["results"]["respar"] <- varList$pres
+
+	  	i1.omega2<-saemixObject["model"]["indx.omega"]
+	    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+	  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
+	  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
+	  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
+	  	id.list<-unique(id)
+	  	phi.map<-saemixObject["results"]["phi"]
+
+
+		K1 <- saemix.options$nbiter.saemix[1]
+		K2 <- saemix.options$nbiter.saemix[2]
+		K_gd <- 1
+		gd_step <- saemix.options$step.gd
+		if (kiter %in% map_range){
+		  	for(i in 1:Dargs$NM) {
+			    isuj<-id.list[i]
+			    xi<-xind[id==isuj,,drop=FALSE]
+			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+			    yi<-yobs[id==isuj]
+			    idi<-rep(1,length(yi))
+			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+			    phii<-saemixObject["results"]["phi"][i,]
+			    phi1<-phii[i1.omega2]
+			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
+			    phi.map[i,i1.omega2]<-phi1.opti$par
+			  }
+			 }
+		else{
+			map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+			map.psi<-data.frame(id=id.list,map.psi)
+			map.phi<-data.frame(id=id.list,phi.map)
+
+			psi_map <- as.matrix(map.psi[,-c(1)])
+			phi_map <- as.matrix(map.phi[,-c(1)])
+			eta_map <- phi_map - mean.phiM
+			
+
+			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred1<-log(cutoff(fpred1))
+			gpred1<-error(fpred1,varList$pres)
+			DYF[Uargs$ind.ioM]<-1/sqrt(2*pi*gpred1)*exp(-0.5*((Dargs$yM-fpred1)/gpred1)**2)
+			P.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+			P.eta<-0.5*rowSums(exp(-eta_map*(eta_map%*%somega)))
+
+
+			for (k in 1:K_gd){
+				gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+			for(kj in 1:nb.etas){
+				phi_map2 <- phi_map
+				phi_map2[,kj] <- phi_map[,kj]+phi_map[,kj]/100
+				psi_map2 <- transphi(phi_map2,Dargs$transform.par)
+				eta_map2 <- phi_map2 - mean.phiM
+				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+				if(Dargs$error.model=="exponential")
+					fpred2<-log(cutoff(fpred2))
+				gpred2<-error(fpred2,varList$pres)
+				DYF[Uargs$ind.ioM]<-1/sqrt(2*pi*gpred2)*exp(-0.5*((Dargs$yM-fpred2)/gpred2)**2)
+				P2.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				P2.eta<-0.5*rowSums(exp(-eta_map2*(eta_map2%*%somega)))
+
+				for (i in 1:Dargs$NM){
+					gradp[i,kj] <- (P2.y[i]*P2.eta[i]-P.y[i]*P.eta[i])/(phi_map[i,kj]/100)
+				}
+			}
+			phi.map <- phi.map + gd_step*gradp
+			}
+			
+		}
+	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+		map.psi<-data.frame(id=id.list,map.psi)
+		map.phi<-data.frame(id=id.list,phi.map)
+
+		psi_map <- as.matrix(map.psi[,-c(1)])
+		phi_map <- as.matrix(map.phi[,-c(1)])
+		eta_map <- phi_map - mean.phiM
+		
+		#gradient at the map estimation
+		# gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
+		gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+
+		for (j in 1:nb.etas) {
+			phi_map2 <- phi_map
+			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred1<-log(cutoff(fpred1))
+			gpred1<-error(fpred1,varList$pres)
+			# DYF[Uargs$ind.ioM] <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
+			DYF[Uargs$ind.ioM] <-1/(sqrt(2*pi*gpred1^2))*exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2))
+			l1 <- colSums(DYF)
+			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+			if(Dargs$error.model=="exponential")
+				fpred2<-log(cutoff(fpred2))
+			gpred2<-error(fpred2,varList$pres)
+			DYF[Uargs$ind.ioM] <-1/(sqrt(2*pi*gpred2^2))*exp(-(0.5*((Dargs$yM-fpred2)/gpred2)**2))
+			l2 <- colSums(DYF)
+			for (i in 1:(Dargs$NM)){
+				# r = 1:sum(Dargs$IdM == i)
+    #             r = r+sum(as.matrix(gradf[,j]) != 0L)
+				gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
+			}
+		}
+		
+		denom <- DYF
+		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+		if(Dargs$error.model=="exponential")
+			fpred<-log(cutoff(fpred))
+		gpred<-error(fpred1,varList$pres)
+		DYF[Uargs$ind.ioM] <-1/(sqrt(2*pi*gpred^2))*exp(-(0.5*((Dargs$yM-fpred)/gpred)**2))
+		denom <- colSums(DYF)
+		#calculation of the covariance matrix of the proposal
+	
+		Gamma <- list(omega.eta,omega.eta)
+		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
+		for (i in 1:(Dargs$NM)){
+			# r = 1:sum(Dargs$IdM == i)
+			# r <- r+sum(as.matrix(z) != 0L)
+   #          z[r] <- gradf[r,1]
+			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+		}
+		
+		
+
+		
+		for (u in 1:opt$nbiter.mcmc[5]) {
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
 				etaM <- eta_map
