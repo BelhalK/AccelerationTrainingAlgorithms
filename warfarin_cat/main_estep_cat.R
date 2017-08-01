@@ -78,6 +78,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		# 	fpred<-log(cutoff(fpred))
 		# gpred<-error(fpred,varList$pres)
 		# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+		browser()
 		DYF[Uargs$ind.ioM] <- fpred
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
