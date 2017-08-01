@@ -78,7 +78,7 @@ post_laplace<-saemix_laplace(saemix.model,saemix.data,saemix.laplace)$post_newke
 post_fo2<-saemix_laplace(saemix.model,saemix.data,saemix.fo2)$post_newkernel
 
 
-index = 2
+index = 4
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 # # graphConvMC_twokernels(post_rwm[[index]],post_fo[[index]], title="rwm vs fo")
 # graphConvMC_twokernels(post_rwm[[index]],post_fo2[[index]], title="rwm vs fo2")

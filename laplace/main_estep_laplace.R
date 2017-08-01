@@ -575,12 +575,12 @@ for (i in 1:(Dargs$NM)){
 		}
 		
 		# browser()
-		
+		etaM <- eta_map
 		for (u in 1:opt$nbiter.mcmc[7]) {
 
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
-				etaM <- eta_map
+				
 				propc <- U.eta
 				prop <- U.eta
 				#generate candidate eta

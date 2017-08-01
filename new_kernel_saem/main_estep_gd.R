@@ -275,10 +275,10 @@ estep_gd<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList
 		
 
 		}
+		etaM <- eta_map
 		for (u in 1:opt$nbiter.mcmc[4]) {
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
-				etaM <- eta_map
 				propc <- U.eta
 				prop <- U.eta
 				#generate candidate eta
