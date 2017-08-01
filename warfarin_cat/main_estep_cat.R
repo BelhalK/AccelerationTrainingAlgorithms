@@ -78,8 +78,8 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		# 	fpred<-log(cutoff(fpred))
 		# gpred<-error(fpred,varList$pres)
 		# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-		browser()
-		DYF[Uargs$ind.ioM] <- fpred
+		# browser()
+		DYF[Uargs$ind.ioM] <- -log(fpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
@@ -100,7 +100,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				# 	fpred<-log(cutoff(fpred))
 				# gpred<-error(fpred,varList$pres)
 				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-				DYF[Uargs$ind.ioM] <- fpred
+				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 
@@ -138,7 +138,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				# 	fpred<-log(cutoff(fpred))
 				# gpred<-error(fpred,varList$pres)
 				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-				DYF[Uargs$ind.ioM] <- fpred
+				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
@@ -290,10 +290,11 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+				# if(Dargs$error.model=="exponential")
+				# 	fpred<-log(cutoff(fpred))
+				# gpred<-error(fpred,varList$pres)
+				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 

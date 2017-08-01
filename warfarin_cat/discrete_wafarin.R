@@ -69,19 +69,8 @@ P1 <- Pcum1 - P0
 P2 <- Pcum2 - Pcum1
 P3 <- 1 - Pcum2
 
+P.obs = (level==0)*P0+(level==1)*P1+(level==2)*P2+(level==3)*P3
 
-P.obs <- P0
-for (i in 1:length(level)) {
-  if(level[i]==0){
-    P.obs[i] <- P0[i]  
-  } else if(level[i]==1){
-        P.obs[i] <- P1[i]
-  } else if(level[i]==2){
-        P.obs[i] <- P2[i]
-  } else {
-      P.obs[i] <- P3[i]
-  }
-}
 
 return(P.obs)
 }

@@ -42,28 +42,8 @@ P1 <- Pcum1 - P0
 P2 <- Pcum2 - Pcum1
 P3 <- 1 - Pcum2
 
+P.obs = (level==0)*P0+(level==1)*P1+(level==2)*P2+(level==3)*P3
 
-P.obs <- P1
-
-
-
-for (i in 1:length(level)) {
-  if(level[i]==0){
-    P.obs[i] <- P0[i]  
-  } else if(level[i]==1){
-      
-        P.obs[i] <- P1[i]
-      
-  } else if(level[i]==2){
-    
-        P.obs[i] <- P2[i]
-      
-  } else {
-    
-      P.obs[i] <- P3[i]
-    
-  }
-}
 
 return(P.obs)
 }
@@ -104,15 +84,15 @@ Pop.CondInit 0.5 0.5 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] th1       -4.1e+00
-[2,] th2        1.1e+00
-[3,] th3        1.6e-06
-[4,] a          5.1e-01
+[1,] th1       2.3e+00 
+[2,] th2       1.0e-63 
+[3,] th3       1.2e-14 
+[4,] a         1.0e+00 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
     Parameter  Estimate
-th1 omega2.th1 0.09    
+th1 omega2.th1 0.33    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

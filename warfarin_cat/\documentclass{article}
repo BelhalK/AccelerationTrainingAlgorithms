@@ -1,0 +1,1140 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{makecell}
+\usepackage{algorithm} 
+\usepackage{algorithmicx}
+\usepackage{enumitem} 
+\usepackage{algpseudocode}
+\usepackage[colorlinks=true,citecolor=green,urlcolor=green]{hyperref}%
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[round]{natbib} 
+\usepackage{titling} % Customizing the title section
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multirow}
+%% The amsthm package provides extended theorem environments
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{fancyvrb}
+\usepackage{dsfont}
+\usepackage[utf8]{inputenc}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{stackengine}
+\usepackage[toc,page]{appendix}
+\usepackage{amsmath}           
+\usepackage{hyperref}% http://ctan.org/pkg/hyperref
+\usepackage{cleveref}% http://ctan.org/pkg/cleveref
+\usepackage{lipsum}%
+  {
+      \theoremstyle{plain}
+      \newtheorem{assumption}{M}
+      \newtheorem{lemma}{Lemma}
+      \newtheorem{remark}{Remark}
+      \newtheorem{prop}{Proposition}
+      \newtheorem{assumption_saem}{ISAEM}
+  }
+\crefname{lemma}{Lemma}{Lemmas}
+\usepackage{amssymb,amsthm,mathrsfs,amsfonts,dsfont}
+\usepackage{mathtools}
+\renewcommand\appendixpagename{Proofs}
+\DeclarePairedDelimiterX{\infdivx}[2]{}{}{%
+  #1\;\delimsize\|\;#2%
+}
+
+
+
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\DeclareMathOperator*{\St}{\tilde{S}}
+\DeclareMathOperator*{\s}{\barbelow{s}}
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{exmp}[thm]{Example} % same for example numbers
+\newcommand{\Pt}{\~P}
+
+\newcommand{\infdiv}{D_{KL}\infdivx}
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand\barbelow[1]{\stackunder[1.2pt]{$#1$}{\rule{.8ex}{.075ex}}}
+\bibliographystyle{plainnat}
+
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyhead{} % Blank out the default header
+\fancyfoot{} % Blank out the default footer
+\setlength{\droptitle}{-12\baselineskip} % Move the title up
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} 
+
+\font\myfont=cmr12 at 20pt
+\title{\line(1,0){350}\\\myfont Convergence of Incremental Stochastic Versions of the EM Algorithm\\\line(1,0){350}}
+\author{%
+\textsc{Belhal Karimi, Marc Lavielle, Eric Moulines}\\
+\normalsize  CMAP, Ecole Polytechnique, Universite Paris-Saclay, 91128 Palaiseau, France\\ % Your institution
+\normalsize \href{mailto:belhal.karimi@polytechnique.edu}{belhal.karimi@polytechnique.edu} % Your email address
+%\and % Uncomment if 2 authors are required, duplicate these 4 lines if more
+%\textsc{Jane Smith}\thanks{Corresponding author} \\[1ex] % Second author's name
+%\normalsize University of Utah \\ % Second author's institution
+%\normalsize \href{mailto:jane@smith.com}{jane@smith.com} % Second author's email address
+}
+\date{\today} % Leave empty to omit a date
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+\begin{abstract}
+\noindent The Expectation Maximization (EM), The Monte Carlo EM (MCEM) and the Stochastic Approximation EM (SAEM) are powerful inference algorithms in the context of missing data models. We introduce variants of those algorithms that justifies incremental versions where only one, or a batch of individuals, are considered at each iteration. Since Generalized EM framework can not be used in this case where the E-step is not computed exactly, we'll use the Generalized Alternative Minimization Framework to study the deterministic Incremental EM mapping in the context of continuous random variables and use this result for the different stochastic mappings considered under the constraint of selecting a single data at each iteration. In all those cases we'll prove almost-sure convergence and give experimental results on simple cases and on more complicated Pharmacokinetics models showing the effectiveness of our technique.
+\end{abstract}
+
+\section{Introduction}
+We consider a complete model (Y,Z) where the realizations of Y are observed and Z is the missing data. When the complete model $p(y,z,\theta)$ is parametric, the goal is to do maximum likelihood (ML) estimation:
+\begin{equation}
+\theta^{ML} = \arg\max \limits_{\theta} p(y,\theta)
+\end{equation}
+When the direct derivation of this expression is hard, several methods use the complete model to iteratively find the quantity of interest.
+The EM algorithm has been the object of considerable interest since its presentation by Dempster, Laird and Rubin in 1977. It has been relatively effective in context of maximum likelihood estimation of parameters of incomplete model (unobserved or more). This algorithm is monotonic in likelihood making it a stable tool to work with.
+
+Many improvements have been provided since the birth of this algorithm. In particular, \citep{neal} proposed an incremental version where a single data is handled at each iteration. It showed faster convergence accompanied by a lost of monotonic convergence in likelihood.\\
+In terms of efficiency of computation, \citep{fort, cappe} introduced an online version where the whole dataset is not analyzed at each iteration but a growing batch of it only.
+
+Yet, when the quantity computed at the E-step involves infeasible computations, new methods have been developed in order to by-pass the issue. The stochastic EM algorithm \citep{diebolt} has been proposed in the context of mixture problem and involves splitting the E-step in a first simulation of the latent variables step and then a direct evaluation of the complete log model. The MCEM follows the SEM principle but does not evaluate directly the complete model with the simulated hidden variables but instead compute an Monte Carlo estimate of the latter quantity. A Robbins Monroe type approximation can be used to evaluate that latter quantity after the simulation step, that is the SAEM algorithm \citep{lavielle2,moulines}.
+Based on that last derivation of the EM algorithm, we are presenting a view that justifies an incremental variant of the MCEM and the SAEM algorithms. We'll present theoretical convergence properties, application to several types of models and finish with a discussion on optimal batch size and batch selection.
+
+The recent development of incremental techniques involves faster gradient descent algorithms. The original full gradient descent combined with the stochastic version to propose an averaged gradient solution \citep{bach, roux} for the strongly convex sum of a finite set of smooth functions. It incorporates a memory of previous gradients at each iteration to reach a faster convergence rate. The different variants of this Gradient Descent type algorithm also motivated this work.
+
+The paper is composed of two main parts corresponding to the convergence properties of the Incremental EM (IEM) and Incremental MCEM (IMCEM). Each section provides the executed algorithm and the convergence theorem. A final part highlights those results through application on different datasets.
+
+%------------------------------------------------
+
+
+\section{Model and notations}
+\begin{assumption}
+$\Theta \subseteq \mathbb{R}^p$ a compact parameter space, $ \mathcal{Y} \subseteq \mathbb{R}^l$ and $\mathcal{Z} \subseteq \mathbb{R}^l$ where $p$ and $l$ are strictly positive integers.\\
+\end{assumption}
+
+
+Let the complete data $(y,z) \in \mathcal{Y} \times \mathcal{Z}$, where $y = (y_i, 1\leq i \leq N) \in \mathcal{Y}$ is observed and $z = (z_i, 1\leq i \leq N) \in \mathcal{Z}$ is latent. Let $\mu$ be a $\sigma$-finite positive Borel measure on $\mathbb{R}^l$ and let $\mathcal{F} = \{p(y,z,\theta), \theta \in \Theta \}$ be a family of positive integrable Borel functions on $\mathbb{R}^{l} \times \mathbb{R}^{l}$ associated with a nonempty family of probability measures $\mathcal{P} = \{P_{y,z,\theta}, \theta \in \Theta \}$. This defines our statistical model $((\mathcal{Y},\mathcal{Z}),\mathcal{P})$ dominated by the measure $\mu$.\\
+In the sequel, the complete-data likelihood is noted $p(y,z,\theta)$ and the incomplete-data likelihood (the likelihood of the observed data $y$) is defined for all $\theta \in \Theta$ by:
+
+\begin{equation}
+p(y,\theta) \overset{\Delta}{=} \int{p(y,z,\theta) \mu(\dz)}
+\end{equation}
+Likewise, the conditional distribution $p(z|y,\theta)$ of the missing data $z$ given the observed data $y$ is defined as:
+
+\begin{equation}
+p(z|y,\theta) \overset{\Delta}{=} \left\{
+    \begin{array}{ll}
+        \frac{p(y,z,\theta)}{p(y,\theta)} & \mbox{if } p(y,\theta) \neq 0 \\
+        0 & \mbox{otherwise}
+    \end{array}
+\right.
+\end{equation}
+
+We define, for $(\theta, \theta') \in \Theta^2$ and for all $y \in \mathcal{Y}$ the Kullback-Leibler Divergence from $P_{z|y,\theta'}$ to $P_{z|y,\theta}$ as:
+\begin{equation}
+\infdiv{\left(P_{z|y,\theta}}{P_{z|y,\theta'}\right)} \overset{\Delta}{=} \int_{\mathcal{Z}}{\log\frac{p(z|y, \theta)}{p(z|y, \theta')}p(z|y, \theta) \mu(\dz)}
+\end{equation}
+
+
+Following assumptions are needed in order to deal with the convergence properties of the different algorithms:
+
+\begin{assumption}
+The incomplete log-likelihood is continuous on the parameter space $\Theta$ and for any $M > 0$ the level set $\{\theta \in \Theta, p(y,\theta) > M\}$ is compact
+\end{assumption}
+
+\begin{assumption}
+$\forall \theta \in \Theta$, the conditional distribution $p(z|y,\theta)$ is finite and continuous on $\Theta$
+\end{assumption}
+
+
+\begin{defn}
+\textbf{Identification of a parameter value.} A parameter value $\theta \in \Theta$ is identifiable if there is no other value $\theta' \in \Theta$ such that $P_{z|y,\theta}=P_{z|y,\theta'}$ 
+\end{defn}
+
+\begin{defn}
+\textbf{Identification of a model.} A statistical model $(\mathcal{Z}, \mathcal{A}, \mathcal{P})$, with $\mathcal{Z}$ a set of possible observations, $\mathcal{A}$ a $\sigma$-algebra of events in $\mathcal{Z}$ and $\mathcal{P}$ a family of probability measures, is identifiable if all elements of $\Theta$ are.
+\end{defn}
+
+\begin{defn}
+\textbf{Identification of a parametric function.} Let $\psi \colon \theta \to \delta$ be a function of $\theta$. The function $\psi$ is identifiable if for all $(\theta, \theta') \in \Theta^2$:
+\begin{equation}
+P_{z|y,\theta}=P_{z|y,\theta'} \Rightarrow \psi(\theta) = \psi(\theta')
+\end{equation}
+\end{defn}
+
+
+\begin{assumption}\label{identifiability}
+Identifiability assumption: for all $y$ in $\mathcal{Y}$:
+\begin{equation}
+\infdiv{\left(P_{z|y,\theta}}{P_{z|y,\theta'}\right)} = 0
+\end{equation}
+if and only if $\theta = \theta'$
+\end{assumption}
+
+We denote the stationary points of the EM algorithm as $\mathcal{L}$ defined as
+\begin{equation}
+\mathcal{L} = \{\theta \in \Theta; \partial_{\theta} \log p(y,\theta) = 0 \}
+\end{equation}
+
+
+%------------------------------------------------
+
+\section{Maximum likelihood estimation}
+Our problem joins a familiar class of problem in computational statistics that consists in maximizing the following quantity:
+\begin{equation}
+p(y,\theta) \overset{\Delta}{=} \int{p(y,z,\theta) \mu(\dz)}
+\end{equation}
+When this quantity can not be computed in closed form, many algorithms use iterative procedure to find the maximum likelihood parameter estimate. Among those techniques, the EM algorithm \citep{dempster}. These two steps algorithm consists in maximizing an auxiliary quantity that is the expectation of the complete log-likelihood with respect to the conditional distribution over the missing variable conditioned on the current parameter estimate (also called the posterior distribution).\\
+Several alternatives have been developed throughout the past decades. Most of them alleviate the computation of the expectation using approximates. The MCEM algorithm \citep{diebolt} approximates this quantity by a Monte Carlo integration, the SAEM algorithm \citep{lavielle} uses a stochastic approximation of this quantity.\\
+In this paper we'll deal with the incremental versions of those three algorithms (EM, MCEM and SAEM) noted IEM, IMCEM and ISAEM.
+\\
+First let's explain how the incremental version of the EM algorithm can be shown to converge.\\
+Following \citep{byrne} and \citep{gunawardana}, it is important to introduce the framework in which this algorithm belongs. This framework can be seen as an iteration of two minimizations over two different spaces (first of all, the parameter space where each individual conditional distribution takes their parameter value in and then the parameter space $\Theta$ where the resulting parameter estimate takes its value in).
+
+\section{IEM as a Generalized Alternating Minimization framework}
+It is now well known (\citep{csiszar}, \citep{tibshirani} and \citep{gunawardana}) that the EM algorithm can be seen as a double minimization process.\\
+Same framework can be used for the Incremental EM in order to prove its convergence.\\
+In the sequel we'll use the vector $(\theta, \delta_1,..,\delta_N) \in \Theta^{N+1}$ as an argument of the criteria we minimize at each iteration. $\theta$ corresponds to the model parameter estimate and $(\delta_i)_{i=1}^{N}$ will be quantities belonging to the same parameter space $\Theta$ and defined by the algorithm.\\
+
+\noindent The criteria that we will be minimizing alternatively is, for all $\theta \in \Theta$ and $(\delta_i)_{i=1}^N \in \Theta^N$:
+\begin{align*}
+  A \colon & \Theta^{N+1} \to \mathbb{R}\\
+  & (\theta, \delta_1,\dots,\delta_N) \mapsto A(\theta, \delta_1,\dots,\delta_N).
+\end{align*}
+
+
+With:
+
+\begin{equation}
+A(\theta, \delta_1,...,\delta_N) = \infdiv{\left(\prod_{i=1}^{N}{P_{z_i|y_i,\delta_i}}}{\prod_{i=1}^{N}{P_{z_i|y_i,\theta}}\right)} - \sum_{i=1}^{N}{\log p(y_i,\theta)}
+\end{equation}
+Where each $\delta_i$ takes the value of the current parameter estimate calculated while picking the individual $i$.
+Since the variables y and z are independent, the criteria can be written as a sum of $N$ terms:
+\begin{equation}
+\begin{split}
+A(\theta, \delta_1,...,\delta_N) & = \sum_{i=1}^{N}{A_i(\theta,\delta_i)}\\
+& = \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i}}{P_{z_i|y_i,\theta}\right)} - \log p(y_i,\theta)}
+\end{split}
+\end{equation}
+\newpage
+The Incremental EM (IEM) algorithm is defined as follow:
+
+\begin{algorithm}
+\caption{IEM Algorithm}
+\label{pseudoIEM}
+\begin{algorithmic}[1]
+\State Initial value $\theta^{(0)}$
+\State $\theta \gets \theta^{(0)}$
+\State Initial values $(\delta_1^{(0)},...,\delta_N^{(0)})$
+\For{$k \gets 1 \textrm{ to } K$}
+\State $I_{k} \sim \mathcal{U}([\![1,N]\!])$
+	\If{$i \neq I_{k}$}
+      \State $\delta_i^{(k)} \gets \delta_i^{(k-1)}$
+       \Else
+                \State $\delta_{I_{k}}^{(k)} \gets \theta^{(k-1)}$
+        \EndIf
+      \State $\theta^{(k)} \gets \arg \min \limits_{\theta \in \Theta} \infdiv{\left(\prod_{i=1}^{N}{P_{z_i|y_i,\delta_i^{(k)}}}}{\prod_{i=1}^{N}{P_{z_i|y_i,\theta}}\right)} - \sum_{i=1}^{N}{\log p(y_i,\theta)}$
+\EndFor  
+\State \Return $(\theta^{(K)},\delta_1^{(K)},\dots,\delta_N^{(K)})$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{exmp}
+
+
+Let's consider the case when all the variables of interest are Gaussian.
+\begin{equation}
+Y_i = Z_i + \epsilon_i
+\end{equation}
+Where $Z_i \sim \mathcal{N}(\theta,\omega^2)$ and $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$.
+Since the $Z_i$ and $\epsilon_i$ are i.i.d we have that $Y_i \sim \mathcal{N}(\theta,\sigma^2 + \omega^2)$ and $Y_i|Z_i \sim \mathcal{N}(Z_i,\sigma^2)$.\\
+The goal is to find an estimate of the mean $\theta$ that maximizes the likelihood $p(y,\theta)$ considering that $\sigma^2$ and $\epsilon^2$ are known. The maximum likelihood is easy to compute in this case since $Y_i \sim \mathcal{N}(\theta,\sigma^2 + \omega^2)$:
+\begin{equation}
+\theta_{ML} = \frac{1}{N}\sum_{i=1}^{N}{y_i}
+\end{equation}\\
+
+We can rewrite the complete log likelihood $\log p(y,z,\theta)$ as part of the exponential family:
+\begin{equation}
+\begin{split}
+\log p(y,z,\theta) & = \sum_{i=1}^{N}{(\log p(y_i|z_i,\theta) + \log p(z_i,\theta))}\\
+& = \sum_{i=1}^{N}{-\frac{1}{2}\log(2\pi\sigma^2) -\frac{(y_i - z_i)^2}{2\sigma^2} -\frac{1}{2}\log(2\pi\omega^2) -\frac{(z_i - \theta)^2}{2\omega^2}}
+\end{split}
+\end{equation}
+The resulting statistics are: $S_1(y,z) = \sum_{i=1}^{N}{z_i} $, $S_2(y,z) = \sum_{i=1}^{N}{z_iy_i} $,$S_3(y,z) = \sum_{i=1}^{N}{z_i^2} $
+Let's define the quantity of interest $p(z_i|y_i,\theta)$ using Bayes rule.
+We find that $z_i|y_i \sim \mathcal{N}(\alpha\theta+(1-\alpha)\bar{y}, \Gamma^2)$ with $\alpha = \frac{\sigma^2}{\sigma^2+\omega^2}$ and $\Gamma^2 = \frac{\sigma^2\omega^2}{\sigma^2+\omega^2}$
+
+
+\noindent \textbf{IEM algorithm.}
+
+It is necessary that one pass over the data has already been done. We are then dealing with any iterations $N+j$ where we pick individual $j$ only.
+
+\begin{equation}
+\barbelow{S}(y,z) = 
+\left(
+\begin{array}{c}
+S(y_1,z_1) =z_1^{(N+j)}= z_1^{(N+1)}\\
+..\\
+S(y_j,z_j) =z_j^{(N+j)}= z_j^{(N+j)}\\
+..\\
+S(y_N,z_N) =z_N^{(N+j)}= z_N^{(N)}\\
+\end{array}
+\right)
+\end{equation}
+\noindent The Forward mapping gives us the expression of the expectation of each component of the sufficient statistic:
+\begin{equation}
+\begin{matrix} 
+\E_{p(z_1|y_1,\theta^{(N)})}(z_1^{(N+1)}) = \alpha \theta^{(N)} + (1-\alpha)y_1\\
+..\\
+\E_{p(z_j|y_j,\theta^{(N+j-1)} )}(z_j^{(N+j)})= \alpha \theta^{(N+j-1)} + (1-\alpha)y_j\\
+..\\
+\E_{p(z_N|y_N,\theta^{(N-1)})}(z_N^{(N)}) = \alpha \theta^{(N-1)} + (1-\alpha)y_N
+\end{matrix}
+\end{equation}
+
+\noindent We can now apply our maximization step:
+\begin{equation}
+\begin{split}
+\theta^{(N+j)} & = \arg \min \limits_{\theta \in \Theta} \infdiv{\left(\prod_{i=1}^{N}{P_{z_i|y_i,\delta_i^{(k)}}}}{\prod_{i=1}^{N}{P_{z_i|y_i,\theta}}\right)} - \sum_{i=1}^{N}{\log p(y_i,\theta)}\\
+& = \arg \max \limits_{\theta \in \Theta} \sum_{i=1}^{N}{\int{p(z_i|y_i,\delta_i^{(k)}) \log p(z_i|y_i,\theta)}}- \sum_{i=1}^{N}{\log p(y_i,\theta)}\\
+& = \arg \max \limits_{\theta \in \Theta} \sum_{i=1}^{N}{\int{p(z_i|y_i,\delta_i^{(k)}) \log p(y_i,z_i,\theta)}}\\
+& = \frac{\sum_{i=1}^{N}{\E{(S(y_i,z_i)|y_i,\theta^{(N+j-i)})}}}{N}
+\end{split}
+\end{equation}
+Which results in:
+\begin{equation}
+\theta^{(N+j)} = \frac{\alpha}{N} \sum_{i=1}^{N}{\theta^{(N+j-i)}} + (1-\alpha)\bar{y}
+\end{equation}
+If we define the vector of parameter as follow (with $k=N+j$):
+
+\begin{equation}
+\barbelow{\theta}^{(k)} = 
+\left(
+\begin{array}{c}
+\theta^{(k)}\\
+..\\
+\theta^{(k-N+1)}\\
+\end{array}
+\right) = \rho \barbelow{\theta}^{(k-1)} + (1-\alpha)\bar{y}e_1 
+\end{equation}
+
+Where:
+\begin{equation}
+\rho = \begin{pmatrix} 
+\frac{\alpha}{N} & .. & .. & \frac{\alpha}{N} \\
+1 & 0 & .. & 0\\
+0 & 1 & .. & 0\\
+.. & .. & .. & ..\\
+.. & .. & .. & 0\\
+\end{pmatrix}
+\end{equation}
+And:
+\begin{equation}
+e_1 = \begin{pmatrix} 
+1\\
+0\\
+..\\
+0\
+\end{pmatrix} 
+\end{equation}
+
+We can easily show that the eigenvalues of $\rho$ are strictly inferior to $1$ and thus conclude on the convergence of the algorithm. \\
+\end{exmp}
+
+
+Unlike the EM algorithm, the IEM is an iterative algorithm, which iteratively maximizes the quantity $Q(\theta, \delta_1,\dots, \delta_N)$, for all $(\theta, \delta_1,\dots, \delta_N) \in \Theta^{N+1}$ defined by:
+\begin{equation}
+Q(\theta, \delta_1,\dots, \delta_N) = \sum_{i=1}^{N}{\int{\log p(y_i, z_i, \theta) p(z_i|y_i,\delta_i)}\mu(\dz_i)}
+\end{equation}
+This last expression shows the relation between the quantity that is maximized at each iteration and the complete log-likelihood. The iteration $\theta^{(k-1)} \mapsto \theta^{(k)}$ of the IEM algorithm is defined as:
+\begin{equation}
+(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) = T_{I_k}(\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)})
+\end{equation}
+
+$T_i: \Theta^{N+1} \to \Theta^{N+1}$ denotes the deterministic mapping that consists in one incremental EM iteration while picking individual $i$. This notation will be useful when dealing with stochastic versions of the algorithm.
+
+\begin{remark}\label{remark2}
+Unlike the EM, this mapping does not ensure the increase in the incomplete log-likelihood. In other words, the algorithm is non-monotonic in incomplete likelihood.\\
+\end{remark}
+\begin{proof}
+See section \ref{appendix:nonmonotone}
+\end{proof}
+
+\noindent At iteration $k$ we pick individual $I_{k}$ sampled from a uniform distribution on $[\![1,N]\!]$ and the algorithm consists in the following two steps:\\
+\\
+\textbf{A Forward mapping $\mathbf{F_{I_k,k}}$:}
+\begin{align*}
+  F_{I_k,k} \colon & \Theta^{N+1} \to \Theta^{N+1}\\
+  & (\theta, \delta_1,\dots,\delta_N) \mapsto F_{I_k,k}(\theta, \delta_1,\dots,\delta_N).
+\end{align*}
+$\mathbf{F_{I_k,k}}$ is the mapping that minimizes the criteria A with respect to the quantity $\delta_{I_{k}}$:
+\begin{equation}
+\begin{split}
+\delta_{I_k}^{(k)}  & = \arg \min \limits_{\delta_{I_k} \in \Theta} A(\theta^{(k-1)} , \delta_1, \dots, \delta_N)\\
+& = \arg \min \limits_{\delta_{I_k} \in \Theta} A_{I_{k}}(\theta^{(k-1)}, \delta_{I_{k}})\\
+& = \arg \min \limits_{\delta_{I_k} \in \Theta}  \infdiv{\left(P_{z_{I_{k}}|y_{I_{k}},\delta_{I_k}}}{P_{z_{I_{k}}|y_{I_{k}},\theta^{(k-1)}}\right)}
+\end{split}
+\end{equation}
+
+
+Using Assumption ~\ref{identifiability} and the fact that the function: $\theta' \to \infdiv{\left(P_{z_i|y_i,\theta'}}{P_{z_i|y_i,\theta}\right)}$ is minimum when $\theta' = \theta$, the resulting parameter we are looking for is:
+\begin{equation}
+\delta_{I_k}^{(k)} = \theta^{(k-1)}
+\end{equation}
+
+Finally the Forward mapping, consists in replacing the components $\delta_i^{(k)}$ for all $i \in [\![1,N]\!]$ as follows:
+\begin{equation}
+\delta_i^{(k)} = \left\{
+    \begin{array}{ll}
+       \theta^{(k-1)} \textbf{ if $ i = I_{k}$}\\
+        \delta^{(k-1)}_i \textbf{ otherwise}
+    \end{array}
+\right.
+\end{equation}
+
+
+\noindent \textbf{A Backward mapping B:}
+\begin{align*}
+  B \colon & \Theta^{N+1} \to \Theta^{N+1}\\
+  & (\theta, \delta_1,\dots,\delta_N) \mapsto B(\theta, \delta_1,\dots,\delta_N).
+\end{align*}
+This mapping is closely related to the M step in the EM algorithm and consists in finding the parameter estimate that minimizes the criteria A while fixing the components $\delta_i$ to their current values $\delta_i^{(k)}$:
+
+\begin{equation}
+\begin{split}
+\theta^{(k)} & = \arg \min\limits_{\theta \in \Theta}A(\theta,\delta_1^{(k)},\dots, \delta_N^{(k)}) \\
+& = \arg \min\limits_{\theta \in \Theta}\infdiv{\left(\prod_{i=1}^{N}{P_{z_i|y_i,\delta_i^{(k)}}}}{\prod_{i=1}^{N}{P_{z_i|y_i,\theta}}\right)} - \sum_{i=1}^{N}{\log p(y_i,\theta)}
+\end{split}
+\end{equation}
+
+\begin{defn}
+Given two sets, X and Y, a point-to-set mapping defined on X with range in Y is a map $\phi$ which assigns to each $x \in X$ a subset $\phi(x)$ included in Y
+\end{defn}
+
+\begin{defn}
+Let X be a set and $x_0 \in x$ a given point. Then an iterative algorithm $A$ with initial point $x_0$ is a point-to-set mapping $A \colon X \to X$ which generates a sequence $\{x_n\}_{n=1}^{\infty}$ according to 
+\begin{equation}
+x_{n+1} \in A(x_n)
+\end{equation}
+\end{defn}
+\noindent The iteration $k$ of the IEM algorithm is thus written as the iterative application of the point-to-set map $B \circ F_{i,k}$:
+\begin{equation}\label{iterative_iem}
+(\theta^{(k)}, \delta_1^{(k)},\dots, \delta_N^{(k)}) = B \circ F_{i,k}(\theta^{(k-1)}, \delta_1^{(k-1)},\dots, \delta_N^{(k-1)})
+\end{equation}
+
+\newpage
+\subsection{Convergence Theorem}
+
+
+\begin{assumption}\label{assumption5}
+Assume that for all $k \geq 0$, $\theta^{(k)}$ is in the interior of $\Theta$
+\end{assumption}
+\begin{remark}
+This condition was suggested by Wu in \citep{wu}.
+\end{remark}
+
+\noindent We define the solution set $\Gamma$ of the algorithm as defined above as:
+\begin{equation}
+\begin{split}
+\Gamma =  \{(\theta^*, \delta_1^*,\dots,\delta_N^*) \in \Theta^{N+1}, & \theta^* \in \arg \min \limits_{\theta \in \Theta} A(\theta, \delta_1^*,\dots, \delta_N^*) \\
+& \forall i \in [\![1,N]\!] \quad \delta_i^* = \arg \min \limits_{\delta_i \in \Theta} A_i(\theta^*, \delta_i) \\
+& \textrm{and } \theta^* = \delta_1^* = \dots = \delta_N^*, \theta^* \in \mathcal{L}\}
+\end{split}
+\end{equation}
+
+
+The IEM convergence theorem can then be written as:
+\begin{thm}
+Assume \textbf{M1-M5}.\\ 
+
+Let $\{(\theta^{(k)}, \delta_1^{(k)},\dots, \delta_N^{(k)})\}_{k=0}^{\infty}$ be a sequence generated from a tuple $(\theta^{(0)}, \delta_1^{(0)},\dots, \delta_N^{(0)})$ by the iterative algorithm ~\ref{iterative_iem}\\
+
+Then:
+\begin{enumerate}[label=(\roman*)]
+\item The mapping $B \circ F_{i,k}$ is closed on $\Theta^{N+1}$ and $B \circ F_{i,k}(\Theta^{N+1}) \subseteq \Theta^{N+1}$
+\item All accumulation points of the sequence $\{(\theta^{(k)}, \delta_1^{(k)},\dots, \delta_N^{(k)})\}_{k=0}^{\infty}$ lie in the solution set $\Gamma$
+\item The sequence $\{\theta^{(k)}\}_{k=0}^{\infty}$ converges to stationary points of the incomplete data likelihood, i.e. all the accumulation points of this sequence are in  $\mathcal{L} = \{\theta \in \Theta, \partial_{\theta}l(\theta) = 0 \}$
+\end{enumerate}
+
+\end{thm}
+
+\begin{proof}
+See proof in  \ref{appendix:IEM}
+\end{proof}
+\newpage
+\begin{remark}\label{rm1}
+In the particular case where the complete model belongs to the curved exponential family, i.e.:
+\begin{assumption}
+$\Theta \subseteq \mathbb{R}^l$ the parameter space, $ \mathcal{Y} \subseteq \mathbb{R}^d$ and $\mathcal{Z} \subseteq \mathbb{R}^d$.\\
+Denote by $\langle . { , }. \rangle$ the scalar product. The complete log-likelihood is given by:
+\begin{equation}
+\log p(y,z,\theta) = -\psi(\theta) + \langle \St(y,z), \phi(\theta)\rangle
+\end{equation}
+\end{assumption}
+Where $\psi$ and $\phi$ are continuous function of $\theta$ and $\St$ is a sufficient statistic of the complete model which takes its values in an open subset $\mathcal{S}$ of $\mathbb{R}^m$.
+
+In this case, using Definition 2.3.1. and Theorem 2.3.1. of \citep{robert}, there exists a function $\Phi: \Theta \mapsto \mathcal{S}$ such that:
+\begin{equation}
+\forall \theta \in \Theta, \theta = \Phi^{-1}(S)
+\end{equation}
+
+This function is:
+\begin{itemize}
+\item Continuous on $\Theta$
+\item Differentiable on $\Theta$
+\item Invertible with its inverse, $\Phi^{-1}$, being continuous and differentiable
+\item Bijective i.e.
+\begin{equation}
+\forall S \in \mathcal{S}, \exists! \theta \in \Theta, \textrm{ such that } \theta = \Phi^{-1}(S)
+\end{equation}
+\end{itemize}
+As a result, all of the above can be applied while handling the individual statistics $(S_i)_{i=1}^N$ instead of the parameter estimates $(\delta_i)_{i=1}^N$.
+\end{remark}
+
+
+\newpage
+\section{Incremental MCEM convergence}
+
+Let's consider now the stochastic version of the IEM algorithm called the Incremental MCEM algorithm.\\
+As a reminder, the Monte Carlo EM (MCEM) was initially introduced by \citep{wei} in order to replace the E-step of the EM that consists in evaluating the expectation of the complete log-likelihood under the posterior distribution. The E-step, at iteration $k$ of the MCEM, approximates that quantity by its Monte Carlo integration:
+\begin{equation}
+Q_k(\theta,\theta^{(k-1)}) = \frac{1}{M_k}\sum_{m=1}^{M_k}{\log p(y,(z^{(k)})^m,\theta)}
+\end{equation}
+Where $(z^{(k)})^m \sim p(z|y,\theta^{(k-1)})$ $M_k$ times, where $\{M_k\}_{k>0}$ is a sequence of positive integers.\\
+One obvious difference with the deterministic algorithm is that this simulation step involves a noise that does not guarantee the boundedness of the sequence of resulting parameters $\{\theta^{(k)}\}_{k>0} \subset \Theta$. In order to ensure this boundedness we restrict the parameter space $\Theta$ to be compact.\\ 
+
+
+The Incremental version differs in the sense that during the simulation step only the latent variable whose index has been picked will be simulated. All of the others remain unchanged. The incremental version of the algorithm can thus be described as:
+\begin{algorithm}
+\caption{IMCEM Algorithm}
+\label{pseudoIMCEM}
+\begin{algorithmic}[1]
+\State Initial value $\theta^{(0)}$
+\State Initial values $(\delta_1^{(0)},...,\delta_N^{(0)})$
+\State $M_k$ an increasing sequence of integers
+\State $\theta \gets \theta^{(0)}$
+\For{$k \gets 1 \textrm{ to } K$}
+\State $I_{k} \in [\![1,N]\!]$
+      \If{$i \neq I_{k}$}
+      	\State $\delta_i^{(k)} \gets \delta_i^{(k-1)}$
+      	\State $z_i^{(k)} \gets z_i^{(k-1)}$
+      \Else
+      	\State $\delta_{I_k}^{(k)} \gets \theta^{(k-1)}$
+        \For{$m \gets 1 \textrm{ to } M_k$}
+        	\State $(z_{I_{k}}^{(k)})^m \sim p(z_{I_{k}}|y_{I_{k}}; \theta^{(k-1)})$
+        \EndFor
+      \EndIf
+        \State $\theta^{(k)} \gets \arg \max \limits_{\theta \in \Theta}\frac{1}{M_k}\sum_{m=1}^{M_k}{\sum_{i=1}^{N}{\log p(y_i,(z_i^{(k)})^m,\theta)}}$
+\EndFor  
+\State \Return $(\theta^{(K)},\delta_1^{(K)},\dots,\delta_N^{(K)})$
+\end{algorithmic}
+\end{algorithm}
+\\
+
+
+
+Likewise, the Forward mapping remains unchanged and consists in assigning the parameter $\delta_{I_k}^{(k)}$ to the current model parameter estimate $\theta^{(k-1)}$.\\
+Yet the Backward mapping at iteration $k$, approximates the quantity $A(\theta,\delta_1^{(k)},\dots,\delta_N^{(k)})$ by its Monte Carlo integration:
+\begin{equation}
+\hat{A}(\theta,\delta_1^{(k)},\dots,\delta_N^{(k)}) = \frac{1}{M_k}\sum_{m=1}^{M_k}{\sum_{i = 1}^{N}{\log \frac{p((z_i^{(k)})^m|y_i,\delta_i^{(k)})}{p((z_i^{(k)})^m|y_i,\theta)}}} - \sum_{i = 1}^{N}{\log p(y_i, \theta)}
+\end{equation}
+Where $(z_i^{(k)})^m \sim p(z_i|y_i,\delta_i^{(k)})$ $M_k$ times and minimizes it over $\theta \in \Theta$ such that:
+
+\begin{equation}
+\begin{split}
+\theta^{(k)} & = \arg \min \limits_{\theta \in \Theta} \hat{A}(\theta,\delta_1^{(k)},\dots,\delta_N^{(k)})\\
+& = \arg \min \limits_{\theta \in \Theta} - \frac{1}{M_k}\sum_{m=1}^{M_k}{\sum_{i = 1}^{N}{\log p((z_i^{(k)})^m|y_i,\theta)}} - \sum_{i = 1}^{N}{\log p(y_i, \theta)}\\
+& = \arg \max \limits_{\theta \in \Theta} \frac{1}{M_k}\sum_{m=1}^{M_k}{\left[\sum_{i = 1}^{N}{\log p((z_i^{(k)})^m|y_i,\theta)} + \sum_{i = 1}^{N}{\log p(y_i, \theta)}\right]}\\
+& = \arg \max \limits_{\theta \in \Theta}\frac{1}{M_k}\sum_{m=1}^{M_k}{\sum_{i=1}^{N}{\log p(y_i,(z_i^{(k)})^m,\theta)}}
+\end{split}
+\end{equation}
+
+
+As we said above, the simulation step, whether we use MCMC or direct simulation, induces a noise, i.e. an error between the Monte Carlo approximation $\hat{L}_k$ and the exact conditional expectation of the complete log-likelihood $\bar{L}_k$ with $\hat{L}_k$ defined for all $\theta \in \Theta$ as follow:
+\begin{equation}\label{eq:hatl}
+\hat{L}_{k}(\theta) = \frac{1}{M_{k}}\sum_{m=1}^{M_{k}}{\sum_{i=1}^{N}{\log p(y,(z_i^{(k)})^m, \theta)}} \textrm{ where } (z_i^{(k)})^m \sim p(z_i|y_i, \delta_i^{(k)})
+\end{equation}
+and $\bar{L}_k$ for all $\theta \in \Theta$ defined as:
+\begin{equation}\label{eq:barl}
+\bar{L}_k(\theta) = \E\left[\sum_{i=1}^{N}{\log p(y,z_i, \theta)}|y_i, \delta_i^{(k)} \right]
+\end{equation}
+
+We also need to assume that, at each iteration, the number of simulation $M_k$ increases to ensure almost-sure convergence and that:
+\begin{assumption}\label{assumptiondecreasing}
+$\{M_{k}\}_{k>0}$ is a sequence of integers that increases at each iteration $k$ such that $\sum_{k}{M_k^{-1}} < \infty$
+\end{assumption}
+If we refer to the IEM algorithm by the mapping $T_{i}$ that corresponds to the iteration where the individual i is picked such that \\ 
+$(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) = T_{i}(\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)})$ ($T_i$ as a composition of a backward and a forward step, $T_i(\theta,\delta_1,\dots,\delta_N) = B \circ F_{i,k}(\theta,\delta_1,\dots,\delta_N)$ ), then as shown priorly, $\{\theta^{(k)}\}_{k = 0}^{\infty}$ converges to a connected component of $\mathcal{L}$.\\
+We'll note the random iterative mappings that approximate the deterministic iterative one $T_i$, used in the stochastic version algorithm $\{P_{i,k}\}_{k \geq 0}$. Moreover, if there exists a criteria A, as defined in the section dealing with the deterministic algorithm, relative to $(T_{i},\mathcal{L})$ such that:
+
+\begin{equation}
+\begin{split}
+& \textrm{for all } (\theta, \delta_1,\dots,\delta_N) \in \Theta^{N+1}, A \circ T_i(\theta, \delta_1,\dots,\delta_N) - A(\theta, \delta_1,\dots,\delta_N) \geq 0\\
+& \textrm{for all } \mathcal{K} \subseteq \Theta \setminus \mathcal{L}, \inf\limits_{(\theta, \delta_1,\dots,\delta_N) \in \mathcal{K}^{N+1}}\{A \circ T_i(\theta, \delta_1,\dots,\delta_N) - A(\theta, \delta_1,\dots,\delta_N)\} > 0
+\end{split}
+\end{equation}
+
+Then the convergence of $\{P_{i,k}\}_{k \geq 0}$ is addressed under the weak assumption, suggested by \citep{fort} that $w.p.1$ :
+\begin{assumption}
+For all $(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) \in \Theta^{N+1}$ :
+\begin{equation}
+\lim\limits_{k} |A \circ P_{i,k}(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)})| = 0
+\end{equation}
+
+\end{assumption}
+
+Finally, we need to control the the fluctuations of the Monte Carlo approximation of $\bar{L}_k(\theta)$ by $\hat{L}_k(\theta)$:
+\begin{assumption}\label{assumptioncontrol}
+\begin{equation}
+\sup \limits_{\theta \in \Theta} \sup \limits_{k} \E_{\theta}\left[\left|\sum_{m=1}^{M_{k}}{\sum_{i=1}^{N}{\log p(y,(z_i^{(k)})^m, \theta)}} - \E[\log p(y,z_i, \theta)|y_i, \delta_i^{(k)} ]\right|\right] < \infty
+\end{equation}
+\end{assumption}
+
+
+\begin{thm}
+Assuming {\normalfont \textbf{M1-M5}}, {\normalfont \textbf{M7-M9}}.Let $\{\theta^{(k)}\}$ be a sequence of outputs of the IMCEM algorithm.\\
+Then:
+\begin{enumerate}[label=(\roman*)]
+  \item if $A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$ has an empty interior, then the accumulation points of $\{\theta^{(k)}\}_{k \geq 0}$ are in $\mathcal{L}$
+\end{enumerate}
+\end{thm}
+
+
+\begin{proof}
+See section \ref{appendix:IMCEM}
+\end{proof}
+
+\newpage
+
+\begin{exmp}
+On the same gaussian example:
+At iteration $N+j$, the vector of sufficient statistics remains the same as in the IEM.
+
+\begin{equation}
+S(y,z) = 
+\left(
+\begin{array}{c}
+S(y_1,z_1) =z_1^{(N+j)}= z_1^{(N+1)}\\
+..\\
+S(y_j,z_j) =z_j^{(N+j)}= z_j^{(N+j)}\\
+..\\
+S(y_N,z_N) =z_N^{(N+j)}= z_N^{(N)}\\
+\end{array}
+\right)
+\end{equation}
+
+In the IMCEM, only the latent variable whose index has been picked will be simulated. Moreover, it will be simulated by the posterior distribution under the latest model parameter estimate. This distribution is the solution to the optimization problem induced by the Forward mapping. As a result we have:
+
+\begin{equation}
+z_j^{(N+j)} \sim p(z_j|y_j,\theta^{(N+j-1)})
+\end{equation}
+When i<j, each iteration N+i consisted in simulating the latent variable following:
+\begin{equation}
+z_i^{(N+i)} \sim p(z_i|y_i,\theta^{(N+i-1)})
+\end{equation}
+And when i>j, i.e. the individuals that are being picked afterwards (in the context of a sequential sampling of the individuals indices), the latent variables were simulated at the previous pass:
+\begin{equation}
+z_i^{(i)} \sim p(z_i|y_i,\theta^{(i-1)})
+\end{equation}
+
+In this case the posterior distribution being a Gaussian distribution we can write each latent variable as:
+\begin{equation}
+z_j = \alpha \theta^{(N+j-1)} + (1-\alpha)y_j + e_{j,(N+j-1)}
+\end{equation}
+Where $e_{j,(N+j-1)} \sim \mathcal{N}(0, \gamma^2)$.\\
+
+\noindent We can now apply our maximization step:
+\begin{equation}
+\begin{split}
+& \theta^{(N+j)} =  \frac{\sum_{i=1}^{N}{\sum_{m=1}^{M_(N+j)}{\left[S(y_i,(z_i)^m)\right]}}}{M_(N+j)N}\\
+& = \frac{\alpha}{N} \sum_{i=1}^{N}{\theta^{(N+j-i)}} + (1-\alpha)\bar{y} + \bar{e}_{N+j}\\
+\end{split}
+\end{equation}
+Where $\bar{e} \sim \mathcal{N}(0, \frac{\gamma^2}{M_(N+j)N})$
+
+If we define the vector of parameter as follow (with $k=N+j$):
+
+\begin{equation}
+\theta^{(k)} = 
+\left(
+\begin{array}{c}
+\theta^{(k)}\\
+..\\
+\theta^{(k-N+1)}\\
+\end{array}
+\right) = \rho \theta^{(k-1)} + (1-\alpha)\bar{y}e_1 + \bar{e}_k e_1
+\end{equation}
+
+Where:
+\begin{equation}
+\rho = \begin{pmatrix} 
+\frac{\alpha}{N} & .. & .. & \frac{\alpha}{N} \\
+1 & 0 & .. & 0\\
+0 & 1 & .. & 0\\
+.. & .. & .. & ..\\
+.. & .. & .. & 0\\
+\end{pmatrix}
+\end{equation}
+And:
+\begin{equation}
+e_1 = \begin{pmatrix} 
+1\\
+0\\
+..\\
+0\
+\end{pmatrix} 
+\end{equation}
+
+\noindent Now if we consider a scheme where not only one individual is picked at each iteration but a batch pN (where p is a percentage). In that case we can write in scalar (to facilitate the notation we'll consider M=1 and $\bar{y} = 0$):
+\begin{equation}
+\begin{split}
+\theta^{(k)} & = \rho^{1/p} \theta^{(k-1/p)} + \sum_{i=0}^{\rho^{i}}\bar{e}_k\\
+& =  \rho^{1/p} \theta^{(k-1/p)} + \frac{1-\rho^{1/p}}{1-\rho}\bar{e}_k
+\end{split}
+\end{equation}
+In that case we can calculate the expectation and the variance of our estimator $\theta^{(k)}$ in the stationary regime:
+\begin{equation}
+\begin{split}
+& \E \theta^{(k)} = \rho^{k/p}\theta^{(0)}\\
+& \textrm{Var } \theta^{(k)} = \frac{\gamma^2}{N(1-\rho)^2}\frac{1-\rho^{1/p}}{1+\rho^{1/p}}
+\end{split}
+\end{equation}
+
+With these two expressions we understand what strategy is best for the choice of the batch size at each iteration. Indeed the bias is small when p is small so one should start with picking one individual first to kill the bias and the variance is decreasing when p is increasing. So once the bias is killed one should increase the size of the batch to kill the variance of the estimator.\\
+\\
+This result implies as well that the Online EM algorithm introduced by \citep{cappe} is the best strategy to follow even when all the data is initially available. In other words, even though one has access to the whole observed dataset, one should consider increasing batch of individuals at each iteration.
+\end{exmp}
+\newpage
+
+
+%----------------------------------------------------------------------------------------
+%   REFERENCE LIST
+%----------------------------------------------------------------------------------------
+
+\newpage
+\bibliography{ref.bib}
+\newpage
+\begin{appendices}
+\section{Proof of Theorem 1}\label{appendix:IEM}
+\begin{thm}
+(Zangwill's Global Convergence Theorem in \citep{zangwill})\\
+Let $T_i:\Theta^{N+1} \mapsto \Theta^{N+1}$ be an algorithm on a set $\Theta^{N+1}$, and suppose that, given $(\theta^{(0)},\delta_1^{(0)}, \dots, \delta_N^{(0)}) \in \Theta^{N+1}$, the sequence $\{(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})\}_{k=1}^{\infty}$ is generated and satisfies:
+\begin{equation}
+(\theta^{(k+1)},\delta_1^{(k+1)}, \dots, \delta_N^{(k+1)})\in T_i(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})
+\end{equation}
+Let a solution set $\Gamma \subset \Theta^{N+1}$ be given and assume that:
+
+\begin{enumerate}
+	\item The sequence $\{(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})\}_{k=1}^{\infty} \subset S$ for $S \subset \Theta^{N+1}$ a compact set 
+      \item For all $(\theta', \delta_1',\dots,\delta_N') \in T_i(\theta, \delta_1,\dots,\delta_N)$, there is a continuous function $A:\Theta^{N+1} \mapsto \mathbb{R}$ such that:
+    \begin{enumerate}
+      \item if $(\theta, \delta_1,\dots,\delta_N) \notin \Gamma, A(\theta', \delta_1',\dots,\delta_N') < \alpha(\theta, \delta_1,\dots,\delta_N)$
+      \item if $(\theta, \delta_1,\dots,\delta_N) \in \Gamma, A(\theta', \delta_1',\dots,\delta_N') \leq \alpha(\theta, \delta_1,\dots,\delta_N)$
+    \end{enumerate}
+    \item $T_i$ is closed at $(\theta, \delta_1,\dots,\delta_N)$ if $(\theta, \delta_1,\dots,\delta_N) \notin \Gamma$
+\end{enumerate}
+Then the limit of any convergent subsequence of $\{(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})\}_{k=0}^{\infty}$ is in a connected subset of the solution set $\Gamma$. That is, accumulation points of the sequence $\{(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})\}_{k=0}^{\infty}$ lie in the solution set $\Gamma$.\\
+Moreover, $\{A(\theta^{(k)},\delta_1^{(k)}, \dots, \delta_N^{(k)})\}_{k=0}^{\infty}$ converges to $A^*$, and $A(\theta^*,\delta_1^*,\dots,\delta_N^*) = (\theta^*,\delta_1^*,\dots,\delta_N^*)$ for all accumulations points $(\theta^*,\delta_1^*,\dots,\delta_N^*)$.
+\end{thm}
+
+\begin{prop}\label{proposition1}
+Given a real-valued continuous function f on $A \times B$ where $A$ and $B$ are subsets of $\mathbb{R}$, define the point-to-set map $F: A \mapsto B$ for all $a \in A$ by
+\begin{equation}
+\begin{split}
+F(a) & = \arg \min \limits_{b' \in B} f(a,b')\\
+& = \{b \in B: f(a,b) \leq f(a,b') \; \forall b' \in B \}
+\end{split}
+\end{equation}
+Then the point-to-set map F is closed at a if F(a) is nonempty.
+\end{prop}
+\begin{proof}
+See Proposition 7 of \citep{gunawardana}\\
+Let $\{a^{(k)}\}_{k=0}^{\infty}$ and $\{b^{(k)}\}_{k=0}^{\infty}$ be sequences in A and B respectively such that $a^{(k)} \to  a$ and $b^{(k)} \to b$ when $k \to \infty$. We also suppose that for all $k>0$
+\begin{equation}
+b^{(k)} \in \arg \min \limits_{b' \in B} f(a^{(k)},b')
+\end{equation}
+so $b^{(k)} \in F(a^{(k)})$.\\
+By contradiction, we consider that $b \notin \arg \min \limits_{b' \in B} f(a,b')$. We assumed that $F(a)$ is nonempty, therefore there exoists $\hat{b} \in \arg \min \limits_{b' \in B} f(a,b')$. There exists $\epsilon > 0$ such that:
+\begin{equation}\label{bhat}
+f(a,b) > f(a,\hat{b}) +2\epsilon
+\end{equation}
+
+By continuity of the function $(a,b) \to f(a,b)$ and the $f$-monotonicity of the sequence $(a^{(k)},b^{(k)})$, there exists $K1$ such that for all $k > K1$:
+\begin{equation}
+f(a^{(k)},b^{(k)}) + \epsilon > f(a,b)
+\end{equation}
+And by equation ~\ref{bhat},
+\begin{equation}
+f(a^{(k)},b^{(k)})  > f(a,\hat{b}) + \epsilon
+\end{equation}
+By continuity of $a \to f(a,\hat{b})$ and the $f$-monotonicity of the sequence $(a^{(k)},b^{(k)})$, there exists $K1$ such that for all $k > K1$:
+\begin{equation}
+f(a,\hat{b}) +\epsilon > f(a^{(k)},\hat{b})
+\end{equation}
+
+As a result, for all $k> K1 \vee K2$:
+\begin{equation}
+f(a^{(k)},b^{(k)}) + \epsilon > f(a^{(k)},\hat{b})
+\end{equation}
+which is in contradiction with the fact that for all $k>0$, $b^{(k)} \in \arg \min \limits_{b' \in B} f(a^{(k)},b')$.\\
+This proves that $b \in \arg \min \limits_{b' \in B} f(a,b')$ ($b \in F(a)$) and thus that if $F(a)$ is nonempty, the mapping is closed at a.
+\end{proof}
+
+\subsection{Proof of Theorem 1.(i)}
+
+
+First of all, using Proposition \ref{proposition1}, we can show that the point-to-set maps $B$ and $F_{i,k}$ are closed.\\ 
+Moreover, by construction (minimizer search in a compact parameter space $\Theta$ for the mappings $B$ and  $F_{i,k}$):
+\begin{equation}
+\begin{split}
+& B(\Theta^{N+1}) \subseteq \Theta^{N+1}\\
+& F_{i,k}(\Theta^{N+1}) \subseteq \Theta^{N+1}
+\end{split}
+\end{equation}
+If the point-to-set maps $F: A \mapsto B$ and $G: B \mapsto C$ are closed on $A$ and $B$ respectively, their composition $G \circ F$ is closed on $A$.\\
+Since $B$ and $F_{i,k}$ are closed on $\Theta^{N+1}$, which compactness follows from the compactness of $\Theta$, it follows that $B \circ F_{i,k}$ is closed on $\Theta_{N+1}$.\\
+$B \circ F_{i,k}(\Theta^{N+1}) \subseteq \Theta^{N+1}$ follows from above.
+
+
+\subsection{Proof of Theorem 1.(ii)}
+The mapping applied iteratively in the algorithm is closed on $\Theta^{N+1}$. The compactness of $\Theta^{N+1}$ follows from the compactness of $\Theta$. The stability of the sequence $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k=0}^{\infty}$ is assumed by construction of the closed mapping and Theorem $1.1$. \\
+For all $(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \in \Theta^{N+1}$ the backward step ensures by construction:
+\begin{equation}
+\begin{split}
+& A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \\
+& \leq A(\theta^{(k-1)},\delta_1^{(k)},\dots,\delta_N^{(k)})\\
+& = \sum_{i \neq I_{k}}{A_i(\theta^{(k-1)},\delta_i^{(k)})} + A_{I_{k}}(\theta^{(k-1)},\delta_{I_{k}}^k)
+\end{split}
+\end{equation}
+The right hand side of the inequality is composed of $N-1$ terms that do not change at this iteration so:
+\begin{equation}
+\sum_{i \neq I_{k}}{A_i(\theta^{(k-1)},\delta_i^{(k)})}  = \sum_{i \neq I_{k}}{A_i(\theta^{(k-1)},\delta_i^{(k-1)})}
+\end{equation}
+\noindent And the $I_{k}^{th}$ term of the sum can be upper bounded as a result of the forward mapping:
+\begin{equation}
+A_{I_{k}}(\theta^{(k-1)},\delta_{I_{k}}^k) = \underbrace{A_{I_{k}}(\theta^{(k-1)},\theta^{(k-1)})}_{= \infdiv{\left(P_{z_{I_{k}}|y_{I_{k}},\theta^{(k-1)}}}{P_{y_{I_{k}},z_{I_{k}},\theta^{(k-1)}}\right)}}  < A_{I_{k}}(\theta^{(k-1)},\delta_{I_k}^{k-1})
+\end{equation}
+
+\noindent And finally we get:
+\begin{equation}
+\begin{split}
+A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) & \leq A(\theta^{(k-1)},\delta_1^{(k)},\dots,\delta_N^{(k)})\\
+& = \sum_{i \neq I_{k}}{A_i(\theta^{(k-1)},\delta_i^{(k)})} + A_{I_{k}}(\theta^{(k-1)},\delta_{I_{k}}^k)\\
+& < \sum_{i \neq I_{k}}{A_i(\theta^{(k-1)},\delta_i^{(k-1)})} + A_{I_{k}}(\theta^{(k-1)},\delta_{I_{k}}^{k-1})\\
+& < A(\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)})
+\end{split}
+\end{equation}
+
+\noindent In order to apply Zangwill's convergence theorem, we still need to show:
+\begin{equation}\label{equivalence}
+\begin{split}
+& A(B \circ F_{i,k}(\theta^{(k-1)},\delta_1^{k-1},\dots,\delta_N^{k-1})) = A(\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)})\\
+& \iff (\theta^{(k-1)},\delta_1^{(k-1)},\dots,\delta_N^{(k-1)}) \in \Gamma
+\end{split}
+\end{equation}
+
+%\begin{prop}
+%Let P1 and P2 be two statements:
+%\begin{equation}
+%P1 \iff P2 \quad \equiv \quad ![(!P1 \& P2)\cup(!P2 \& P1)]
+%\end{equation}
+%\end{prop}
+
+\textbf{Proving the equality condition:}\\
+We'll prove the equality condition ~\ref{equivalence} by contradiction. This amounts to show that:
+\begin{enumerate}
+\item Having an unchanged criteria A for a tuple that does not belong to the solution set is not possible \item The mapping of a tuple that is in the solution set can not change the criteria.
+\end{enumerate}
+To prove $1)$ we consider a tuple $(\theta,\delta_1,\dots,\delta_N)$  outside of the solution  set such that for all $i \in [\![1,N]\!]$, $A \circ T_i(\theta,\delta_1,\dots,\delta_N) = A(\theta,\delta_1,\dots,\delta_N)$. Since the tuple we consider is not in the solution set, there exists an index $I$ such that $\delta_I \neq \arg \min \limits_{\delta_I \in \Theta} A_I(\theta, \delta_I)$. Then, we consider the forward mapping $F_I$ that assigns:
+\begin{equation}
+\delta_I' = \arg \min \limits_{\delta_I \in \Theta}A_I(\theta, \delta_I) = \theta
+\end{equation}
+
+And the Backward mapping that finds a new parameter $\theta'$ such that:
+\begin{equation}
+\theta' = \arg \min \limits_{\theta \in \Theta}A(\theta,\delta_1,\dots,\delta_I',\dots,\delta_N)
+\end{equation}
+By construction we have:
+\begin{equation}
+A_I(\theta,\delta_I') < A_I(\theta,\delta_I)
+\end{equation}
+and,
+\begin{equation}
+A(\theta',\delta_1,\dots,\delta_I',\dots,\delta_N) \leq A(\theta,\delta_1,\dots,\delta_I',\dots,\delta_N)
+\end{equation}
+And thus 
+
+\begin{equation}
+A \circ T_I(\theta,\delta_1,\dots,\delta_N) < A(\theta,\delta_1,\dots,\delta_N)
+\end{equation}
+Which is in contradiction with the assumption.\\
+To prove $2)$, we consider a tuple $(\theta,\delta_1,\dots,\delta_N)$  in the solution  set such that for all $i \in [\![1,N]\!]$, $A \circ T_i(\theta,\delta_1,\dots,\delta_N) \neq A(\theta,\delta_1,\dots,\delta_N)$. Directly, we see that if this tuple is in the solution set, $\theta = \delta_1 = \dots = \delta_N$ and thus for all $i \in [\![1,N]\!]$, 
+$T_i(\theta,\delta_1,\dots,\delta_N) = (\theta,\delta_1,\dots,\delta_N)$. as a result $A \circ T_i(\theta,\delta_1,\dots,\delta_N) = A(\theta,\delta_1,\dots,\delta_N)$ which is in contradiction with the assumption.\\
+
+Those two elements proves the equality condition ~\ref{equivalence} needed and as a consequence that the criteria $A$ decreases strictly if its argument is outside the set of solution.
+
+\textbf{Applying Zangwill's convergence theorem:}\\
+We can apply Zangwill's convergence theorem on the tuple $(\theta^{(k)}, \delta_1^k, \dots, \delta_N^k)$ using the solution set $\Gamma$,the mapping $B \circ F_{i,k}$, the compact $\Theta^{N+1}$ and the decreasing criteria A to conclude that accumulation points $(\theta^*, \delta_1^*, \dots, \delta_N^*)$ of the sequence $\{(\theta^{(k)}, \delta_1^k, \dots, \delta_N^k)\}_{k=0}^{\infty}$ lie in the set $\Gamma$.
+
+\subsection{Proof of Theorem 1.(iii)}
+We consider the accumulation point $(\theta^*, \delta_1^*, \dots, \delta_N^*)$ such that:
+\begin{equation}
+\forall i \in [\![1,N]\!] \quad \delta_i^* = \arg \min \limits_{\delta_i \in \Theta} A_i(\theta^*, \delta_i^*)
+\end{equation}
+
+The divergence term can be expanded as:
+\begin{equation}
+\forall \delta_i \in \Theta, D_{KL}\left(P_{z_i|y_i, \delta_i}||P_{y_i, z_i, \theta^*}\right) = -\log p(y_i,\theta^*) + D_{KL}\left(P_{z_i|y_i, \delta_i}||P_{z_i| y_i, \theta^*}\right) 
+\end{equation}
+Deriving this expression and evaluating when $\delta_i = \delta_i^*$:
+\begin{equation}
+-\partial_{\theta} \log p(y_i,\theta^*) + \partial_{\theta}D_{KL}\left(P_{z_i|y_i, \delta_i^*}||P_{z_i| y_i, \theta^*}\right) = 0
+\end{equation}
+We have proven that $\forall i, \delta_i^* = \theta^*$ then it is known that $D_{KL}\left(P_{z_i|y_i, \delta_i^*}||P_{z_i| y_i, \theta^*}\right)$ is minimum (and is equal to $0$), thus:
+\begin{equation}
+\forall i \in [\![1,N]\!] \quad \partial_{\theta} \log p(y_i,\theta^*) = 0
+\end{equation}
+This proves $1.3$.
+
+\newpage
+\section{Proof of Theorem 2}\label{appendix:IMCEM}
+\begin{prop}\label{prop1}
+Let $\Theta \subseteq \mathbb{R}^l$ be a compact subset and a set of solutions point $\mathcal{L}$ such that $\mathcal{L}\cap \Theta$ is a compact and that $A(\mathcal{L}\cap \Theta, \dots, \mathcal{L}\cap \Theta)$ is compact too. $A: \Theta^{N+1} \to \mathbb{R}$ being a continuous function relative to $(T_i, \mathcal{L})$. Assume that:
+\begin{enumerate}
+\item There exists a $\Theta$-valued sequence $\{\theta^{(k)}\}_{k>0}$ and $\{\delta_i^{(k)}\}_{i=1}^{N} \in \Theta^N$ such that:
+\begin{equation}
+\lim \limits_{k} |A\circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})| = 0
+\end{equation}
+\end{enumerate}
+
+Then:
+\begin{enumerate}
+\item $A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})$ converges to a connected component of $A(\mathcal{L}\cap \Theta, \dots, \mathcal{L}\cap \Theta)$
+\item if $A(\mathcal{L}\cap \Theta, \dots, \mathcal{L}\cap \Theta)$ has an empty interior, $\{A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ converges to $A^*$ and the accumulation points of the sequence $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ are in the set $\mathcal{L}_{A^*} \cap \Theta$, where \\ 
+$\mathcal{L}_{A^*} = \{(\theta,\delta_1,\dots,\delta_N) \in \mathcal{L}^{N+1}, A(\theta,\delta_1,\dots,\delta_N) = A^*\}$
+\end{enumerate}
+\end{prop}
+
+\begin{proof}
+\textbf{Proof of (1)}\\
+Define $\mathcal{D} = A(\mathcal{L}\cap \Theta, \dots, \mathcal{L}\cap \Theta)$. By definition of the sets $\mathcal{L}$ and $\Theta$, $\mathcal{D}$ is compact. Let $\mathcal{D}_{\alpha} = \{x \in \mathbb{R}, d(x, \mathcal{D}) < \alpha \}$ be its $\alpha$ neighborhood (with $d$ any distance of a metric space). $\mathcal{D}$ as a compact is the infinite intersection of those neighborhoods: $\mathcal{D} = \cap_{\alpha} \mathcal{D}_{\alpha}$ and $\mathcal{D}_{\alpha}$ is a finite union of $n_{\alpha}$ increasingly large intervals $[a_{\alpha}(k),b_{\alpha}(k)]_{k=1}^{n_{\alpha}}$, $\mathcal{D}_{\alpha} = \cup_{k} [a_{\alpha}(k),b_{\alpha}(k)]$.\\
+$A^{-1}(\mathcal{D}_{\alpha/2})$ is an open neighborhood of $(\mathcal{L}\cap \Theta)^{N+1}$.
+We define the two following positive quantities:
+\begin{equation}
+\epsilon_{\alpha} = \inf \limits_{(\theta, \delta_1,\dots,\delta_N) \in \Theta^{N+1} \backslash A^{-1}(\mathcal{D}_{\alpha/2})} A \circ T_{i,k}(\theta,\delta_1,\dots,\delta_N) - A(\theta,\delta_1,\dots,\delta_N)
+\end{equation}
+and 
+\begin{equation}
+\rho_{\alpha} = \epsilon_{\alpha} \wedge \alpha
+\end{equation}
+
+Let $\eta_{k+1} = A \circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_{i} (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})$. Assumption 1 ensures the existence of a threshold $K_{\alpha} \geq 0$ such that for any iteration $k \geq K_{\alpha}$:
+\begin{equation}
+|\eta_{k+1}| \leq \rho_{\alpha}/2
+\end{equation}
+Thus, if $k \geq K_{\alpha}$ and $(\theta,\delta_1,\dots,\delta_N) \in \Theta^{N+1} \backslash A^{-1}(\mathcal{D}_{\alpha/2})$, then
+\begin{equation}
+\begin{split}
+& A \circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\\ 
+& = A (\theta^{(k+1)},\delta_1^{k+1},\dots,\delta_N^{k+1}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\\ 
+& = A \circ T_{i} (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) + \eta_{k+1}  \geq \epsilon_{\alpha} + \eta_{k+1} \geq \rho_{\alpha} - \rho_{\alpha}/2  \geq \rho_{\alpha}/2
+\end{split}
+\end{equation}
+
+This equation shows that the sequence $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ is infinitely often in $\mathcal{D}_{\alpha/2}$. Since $\mathcal{D}_{\alpha/2} \subset \mathcal{D}_{\alpha}$ that is a finite union of intervals, then the sequence if infinitely often in one of those intervals.\\
+We denote $k^*_{\alpha}$ the index of the interval that contains the superior limit of this sequence:
+\begin{equation}
+k^*_{\alpha} = \min \{1 \leq k \leq n_{\alpha}, \lim \sup \limits_{n} A (\theta_n,\delta_1^n,\dots,\delta_N^n) < b_{\alpha}(k)  \}
+\end{equation}
+and denote $I(\alpha) = [a_{\alpha}(k_{\alpha}^*),b_{\alpha}(k_{\alpha}^*)]$ this interval. There exists $n \geq K_{\alpha}$ such that $A (\theta_n,\delta_1^n,\dots,\delta_N^n) \in I(\alpha)$.\\
+Assume that for $k \geq n$, $A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \in I(\alpha)$:
+\begin{itemize}
+\item if $A (\theta_n,\delta_1^n,\dots,\delta_N^n) \in \mathcal{D}_{\alpha/2}$, then $A (\theta_n,\delta_1^n,\dots,\delta_N^n) \geq a_{\alpha}(k_{\alpha}^*) + \alpha/2$ and so: $A (\theta_{n+1},\delta_1^{n+1},\dots,\delta_N^{n+1}) \geq A (\theta_n,\delta_1^n,\dots,\delta_N^n) + \eta_{n+1} \geq  a_{\alpha}(k_{\alpha}^*) + \alpha/2 + \rho_{\alpha/2} \geq a_{\alpha}(k_{\alpha}^*)$
+\item if $A (\theta_n,\delta_1^n,\dots,\delta_N^n) \in \mathcal{D}_{\alpha} \backslash \mathcal{D}_{\alpha/2}$, then $A \circ T_i(\theta_n,\delta_1^n,\dots,\delta_N^n) - A (\theta_n,\delta_1^n,\dots,\delta_N^n) \geq \rho_{\alpha}$ and since $\eta_{n+1} \leq \rho_{\alpha}/2$ we have that $ A (\theta_{n+1},\delta_1^{n+1},\dots,\delta_N^{n+1}) \geq a_{\alpha}(k_{\alpha}^*) + \rho_{\alpha/2} \geq a_{\alpha}(k_{\alpha}^*)$
+\end{itemize}
+
+In both cases, we've shown that the sequence stays in the interval $I(\alpha)$. Then the set of the accumulation points of the sequence $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}$ is nonempty and are included in the interval $I(\alpha)$. Now if we consider a decreasing sequence $\{\alpha_k\})$, such that $\lim \limits_{k}\alpha_k = 0 $, defining decreasing sized neighborhood of $\mathcal{D}$ and decreasing sequence of intervals $\{I(\alpha_k)\}$, then $\cap_{k} I(\alpha_k)$ is an interval and $\cap_{k} I(\alpha_k) \subset A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$.\\
+
+As a result, $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ converges to this interval. Within this interval, only a connected component of $A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$ can be reached by the accumulation points of $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ since:
+\begin{equation}
+\lim \limits_{k \to \infty} \eta_{k+1} = \lim \limits_{k \to \infty} A \circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_{i} (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) = 0
+\end{equation}
+
+
+\textbf{Proof of (2)}\\
+We assume that $A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$ has an empty interior. Since, $\cap_{k} I(\alpha_k) \subset A(\mathcal{L}\cap\Theta,\dots,\mathcal{L}\cap\Theta)$ and $\mathcal{L}\cap\Theta$ is the intersection of two compacts, then the connected component of the interval $\cap_{k} I(\alpha_k)$ towards which the sequence $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ converges consists in a single point noted $A^*$. Saying that $\{A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ converges to $A^*$ implies that all the accumulation points of the sequence $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ are in the set $\mathcal{L}_{A^*} \cap \Theta$, where:
+\begin{equation}
+\mathcal{L}_{A^*} = \{(\theta,\delta_1,\dots,\delta_N) \in \mathcal{L}^{N+1}, A(\theta,\delta_1,\dots,\delta_N) = A^*\}
+\end{equation}
+\end{proof}
+
+\subsection{Proof of Theorem 2.(i)}
+
+Before using Proposition ~\ref{prop1}, we still need to prove that for all $(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) \in \Theta^{N+1}$ and $w.p.1$:
+\begin{equation}
+\lim\limits_{k} |A \circ P_{i,k}(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)})| = 0
+\end{equation}
+This comes down to proving the almost-sure convergence of the random series:
+\begin{equation}
+\mathbb{P}\left(|A \circ P_{i,k}(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon | \mathcal{F}_{k-1}\right)
+\end{equation}
+Where $\mathcal{F}_{k-1}$ denotes the filtration until iteration $k$.
+\begin{equation}
+\begin{split}
+& \mathbb{P}\left(|A \circ P_{i,k}(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon | \mathcal{F}_{k-1}\right)\\
+& = \mathbb{P}\left(|A (\hat{\theta}(\hat{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)}) - A (\hat{\theta}(\bar{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon | \mathcal{F}_{k-1}\right)
+\end{split}
+\end{equation}
+With $\hat{L}_k$ and $\bar{L}_k$ defined by \ref{eq:hatl} and \ref{eq:barl}. Also, we can define the compact set for $\delta > 0$, $\mathcal{K} = \{k \in \mathbb{R}^d, \inf \limits_{t \in \Theta} |k - t|\leq \delta \}$. Then there exists a threshold value $\eta$ such that for any $(x,y) \in \mathcal{K}$ and $(\delta_1, \dots, \delta_N) \in \Theta^N$:
+\begin{equation}
+|x - y| \leq \eta \Rightarrow |A(\hat{\theta}(x), \delta_1^{(k)},\dots,\delta_N^{(k)})-A(\hat{\theta}(y), \delta_1^{(k)},\dots,\delta_N^{(k)})|\leq \epsilon
+\end{equation}
+Thus,
+
+\begin{equation}
+\begin{split}
+& \mathbb{P}\left(|A(\hat{\theta}(\hat{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)}) - A(\hat{\theta}(\bar{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon | \mathcal{F}_{k-1}\right)\\
+& = \mathbb{P}\left(|A(\hat{\theta}(\hat{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)}) - A(\hat{\theta}(\bar{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon, |\hat{L}_k(\theta) - \bar{L}_k(\theta)| \leq \delta | \mathcal{F}_{k-1}\right)\\
+& + \mathbb{P}\left(|A(\hat{\theta}(\hat{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)}) - A(\hat{\theta}(\bar{L}_k(\theta)), \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon , |\hat{L}_k(\theta) - \bar{L}_k(\theta)| > \delta| \mathcal{F}_{k-1}\right)\\
+& \leq 2\mathbb{P}\left(|\hat{L}_k(\theta) - \bar{L}_k(\theta)| \geq \delta \wedge \eta| \mathcal{F}_{k-1}\right)
+\end{split}
+\end{equation}
+
+
+Using concentration inequality (Bienayme Tchebychev) and defining $\alpha = \delta \wedge \eta$ we have:
+
+\begin{equation}
+\begin{split}
+& \mathbb{P}\left(|A \circ P_{i,k}(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)}, \delta_1^{(k)},\dots,\delta_N^{(k)})| > \epsilon | \mathcal{F}_{k-1}\right)\\
+& \leq 2 \alpha^{-1} \E_{\theta}\left[|\hat{L}_k(\theta) - \bar{L}_k(\theta)|\right]\\
+& \leq 2 \alpha^{-1} M_k^{-1} \E_{\theta}\left[|\sum_{m=1}^{M_{k}}{\sum_{i=1}^{N}{\log p(y,(z_i^{(k)})^m, \theta)}} - \E\left[\log p(y,z_i, \theta)|y_i, \delta_i^{(k)} \right]|\right]
+\end{split}
+\end{equation}
+
+Finally, using assumption ~\ref{assumptiondecreasing} and ~\ref{assumptioncontrol}, we conclude the convergence of the random series.
+
+We can now use Proposition ~\ref{prop1} to prove the convergence of the sequence $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}$ to the set $\mathcal{L}_{A^*} \cap \Theta$ that is included in $\mathcal{L}$ by definition of $\mathcal{L}_{A^*}$.\\
+Basically, we have proven that the sequence of IMCEM output parameters converges to a subset of the solution set $\mathcal{L}$ characterized by the fact that the criteria $A(\theta, \delta_1,\dots,\delta_N)$ remains constant to a value $A^*$.
+
+\begin{remark}\label{remarkcompact}
+The compactness assumption of the sequence of parameters can be relaxed using Proposition ~\ref{propcompact}.
+\end{remark}
+
+
+\subsection{Relaxing compactness assumption of the sequence of parameters}
+
+\begin{prop}\label{propcompact}
+Let $\Theta \subseteq \mathbb{R}^l$, and $T_i$ and $\{P_{i,k}\}_{k>0}$ be point-to-set maps onto $\Theta$. Consider the sequence $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}$ given by the IMCEM algorithm. Assume there exists a function A relative to $(T_i, \mathcal{L})$ such that for all $M > 0$, the level set $\{(\theta,\delta_1,\dots, \delta_N) \in \Theta^{N+1},\, A(\theta,\delta_1,\dots, \delta_N) \geq M\}$ is compact , $\Theta^{N+1} = \cup_{M \geq 1}  \{(\theta, \delta_1,\dots, \delta_N) \in \Theta^{N+1}, A(\theta, \delta_1,\dots, \delta_N) > M\}$ and that $A(\mathcal{L},\dots, \mathcal{L})$ is compact. Also for any compact $\mathcal{K} \subseteq \Theta$, $\lim \limits_{k} |A \circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})|\mathbb{1}_{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \in \mathcal{K}^{N+1}} = 0$.\\
+Then $\{(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})\}_{k>0}$ is a compact sequence.
+\end{prop}
+
+\begin{proof}
+Let $\mathcal{L}_{\alpha}$ be the $\alpha$ neighborhood of the EM stationary points set $\mathcal{L}$.
+Under those assumptions, there exists $M >0$ such that:
+\begin{equation}
+\Theta \cup \mathcal{L}_{\alpha} \subset \{(\theta, \delta_1,\dots, \delta_N) \in \Theta^{N+1}, A(\theta, \delta_1,\dots, \delta_N) > M\}
+\end{equation}
+
+Define:
+\begin{equation}
+\epsilon = \inf \limits_{\{(\theta, \delta_1,\dots, \delta_N) \in \Theta^{N+1}, A(\theta, \delta_1,\dots, \delta_N) > M\} \backslash \mathcal{L}_{\alpha}} A \circ T_i(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})
+\end{equation}
+and 
+\begin{equation}
+\rho = \epsilon \wedge 1
+\end{equation}
+
+Let
+\begin{equation}
+\begin{split}
+\eta_{k=1} & = A \circ P_{i,k}(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) - A \circ T_i (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \\
+& = A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) - A \circ T_i (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})
+\end{split}
+\end{equation}
+
+We have that :
+\begin{equation}
+\begin{split}
+A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) & = A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) \\
+& - A \circ T_i (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) + \eta_{k+1}
+\end{split}
+\end{equation}
+Since $(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})$ is infinitely often in the compact $\Theta^{N+1}$, there exists $p \geq M$ such that $A(\theta_p,\delta_1^{(p)},\dots, \delta_N^{(p)}) \geq M-1$ and that obviously for all $k\geq p$, $A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \geq M-1$.\\
+Now, if $(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \in \{(\theta,\delta_1,\dots, \delta_N) \in \Theta^{N+1}, A(\theta,\delta_1,\dots, \delta_N) \geq M\}$, then:
+
+\begin{equation}
+\begin{split}
+& A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) - A (\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) = \eta_{k+1}\\
+& A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) \geq \underbrace{A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})}_{\geq M}  -\underbrace{\rho/2}_{\geq 1/2} \geq M-1
+\end{split}
+\end{equation}
+
+And if,  $(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)}) \in \{(\theta,\delta_1,\dots, \delta_N) \in \Theta^{N+1}, A(\theta,\delta_1,\dots, \delta_N) \geq M-1\}\backslash \mathcal{L}_{\alpha}$, then: 
+\begin{equation}
+A (\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) \geq \underbrace{A(\theta^{(k)},\delta_1^{(k)},\dots,\delta_N^{(k)})}_{\geq M-1}  +\underbrace{\epsilon - \rho/2}_{\geq 0} \geq M-1
+\end{equation}
+
+As a result, for any $n \geq k$, $(\theta_n,\delta_1^{(n)},\dots, \delta_N^{(n)})$ is the compact $\{(\theta,\delta_1,\dots, \delta_N) \in \Theta^{N+1},A(\theta,\delta_1,\dots, \delta_N) \geq M - 1 \}$
+
+\end{proof}
+
+
+\newpage
+\section{Proof of Remark \ref{remark2} }\label{appendix:nonmonotone}
+Let's consider the $(k+1)$th iteration of the IEM algorithm:
+\begin{equation}
+(\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) = T_{I_{k+1},k}(\theta^{(k)},\delta_1^{(k)},\dots, \delta_N^{(k)})
+\end{equation}
+The backward step gives that:
+\begin{equation}
+A(\theta^{(k+1)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)}) \leq A(\theta^{(k)},\delta_1^{(k+1)},\dots, \delta_N^{(k+1)})
+\end{equation}
+Replacing the criteria by their definition and considering that:
+\begin{equation}
+\infdiv{P_{z_i|y_i,\delta_i^{(k)}}}{P_{y_i,z_i,\theta^{(k)}}} = \infdiv{P_{z_i|y_i,\delta_i^{(k)}}}{P_{z_i|y_i,\theta^{(k)}}} - \log p(y_i,\theta^{(k)})
+\end{equation} 
+We obtain:
+
+\begin{equation}
+\begin{split}
+& \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{y_i,z_i,\theta^{(k+1)}}\right)}} \leq \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{y_i,z_i,\theta^{(k)}}\right)}} \\
+& \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k+1)}}\right)}} - \log p(y,\theta^{(k+1)}) \leq \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k)}}\right)}} - \log p(y,\theta^{(k)})
+\end{split}
+\end{equation}
+Which yields to:
+
+\begin{equation}
+\begin{split}
+\log p(y,\theta^{(k+1)}) \geq & \log p(y,\theta^{(k)}) \\
+& + \underbrace{ \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k+1)}}\right)}} - \sum_{i=1}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k)}}\right)}}}_{\Delta}\\
+\end{split}
+\end{equation}
+
+The term $\Delta$ can be decomposed as:
+\begin{equation}
+\begin{split}
+\Delta = & \sum_{i \neq I_{k+1}}^{N}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k+1)}}\right)}} - \sum_{i \neq I_{k+1}}^{}{\infdiv{\left(P_{z_i|y_i,\delta_i^{(k+1)}}}{P_{z_i|y_i,\theta^{(k)}}\right)}}\\
+& + \infdiv{\left(P_{z_{I_{k+1}}|y_{I_{k+1}},\delta_{I_{k+1}}^{(k+1)}}}{P_{z_{I_{k+1}}|y_{I_{k+1}},\theta^{(k+1)}}\right)} - \infdiv{\left(P_{z_{I_{k+1}}|y_{I_{k+1}},\delta_{I_{k+1}}^{(k+1)}}}{P_{z_{I_{k+1}}|y_{I_{k+1}},\theta^{(k)}}\right)}
+\end{split}
+\end{equation}
+
+Yet, $\delta_{I_{k+1}}^{(k+1)} = \theta^{(k)}$ which gives $\infdiv{\left(P_{z_{I_{k+1}}|y_{I_{k+1}},\delta_{I_{k+1}}^{(k+1)}}}{P_{z_{I_{k+1}}|y_{I_{k+1}},\theta^{(k)}}\right)}=0$. So the second part of $\Delta$ is positive but the first part composed of the sum of $N-1$ terms can not be said to be always positive or null. Hence the algorithm can be non-monotonic in likelihood.
+\end{appendices}
+\end{document}
