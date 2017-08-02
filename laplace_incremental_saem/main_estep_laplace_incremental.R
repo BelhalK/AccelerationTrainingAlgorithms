@@ -39,6 +39,9 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 	map_range <- saemix.options$map.range
 	# map_range <- c(15,25,35)
 
+	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
+	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+
 	if (!(kiter %in% map_range)){
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
@@ -51,6 +54,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 		DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
+		deltau[ind_rand] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -76,6 +80,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				deltu[ind_rand] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -114,6 +119,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				deltu[ind_rand] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
@@ -164,7 +170,9 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 		K_gd <- 1
 		gd_step <- saemix.options$step.gd
 		if (kiter %in% map_range){
-		  	for(i in 1:Dargs$NM) {
+
+			if(kiter == 1){
+				for(i in 1:Dargs$NM) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
 			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
@@ -176,6 +184,24 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 			  }
+
+			} else {
+
+
+				for(i in ((1:Dargs$NM)-ind_rand)) {
+			    isuj<-id.list[i]
+			    xi<-xind[id==isuj,,drop=FALSE]
+			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+			    yi<-yobs[id==isuj]
+			    idi<-rep(1,length(yi))
+			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+			    phii<-saemixObject["results"]["phi"][i,]
+			    phi1<-phii[i1.omega2]
+			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
+			    phi.map[i,i1.omega2]<-phi1.opti$par
+
+			}
+		  	
 			 }
 		else{
 			map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
@@ -291,6 +317,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				deltu[ind_rand] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -311,7 +338,10 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 
 
 #New kernel with approx that hessian is null
-	
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+	phiMold<-phiM
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,]
+	phiM[ind_rand,varList$ind.eta] <- phiMold[ind_rand,varList$ind.eta]
+
+	# phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post))
 }
