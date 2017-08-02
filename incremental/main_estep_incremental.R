@@ -41,6 +41,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 
 	
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
+
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -52,6 +53,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
 		deltau[ind_rand] = 1000000
+		print(ind_rand)
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -74,7 +76,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				if(Dargs$error.model=="exponential")
 					fpred<-log(cutoff(fpred))
 				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+				DYF[Uargs$ind.ioM] <- 0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
