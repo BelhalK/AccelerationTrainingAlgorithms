@@ -57,18 +57,18 @@ return(P.obs)
   Variance-covariance matrix:
     th1 th2 th3
 th1   1   0   0
-th2   0   0   0
-th3   0   0   0
+th2   0   1   0
+th3   0   0   1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
              th1 th2 th3
-Pop.CondInit 0.5 0.5 0.5
+Pop.CondInit 0.5 0.4 0.3
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=100, K2=20 
+    Number of iterations:  K1=150, K2=50 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -84,17 +84,21 @@ Pop.CondInit 0.5 0.5 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] th1       2.3e+00 
-[2,] th2       1.0e-63 
-[3,] th3       1.2e-14 
-[4,] a         1.0e+00 
+[1,] th1       2.21    
+[2,] th2       0.72    
+[3,] th3       0.47    
+[4,] a         0.00    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
     Parameter  Estimate
-th1 omega2.th1 0.33    
+th1 omega2.th1 0.107   
+th2 omega2.th2 0.058   
+th3 omega2.th3 0.056   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-           omega2.th1
-omega2.th1 1         
+           omega2.th1 omega2.th2 omega2.th3
+omega2.th1 1          0          0         
+omega2.th2 0          1          0         
+omega2.th3 0          0          1         

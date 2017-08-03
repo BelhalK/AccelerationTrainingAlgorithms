@@ -28,7 +28,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('zzz.R') 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat")
 source('post_cat.R')
-source('main_cat.R')
+# source('main_cat.R')
+source('main_cat_test.R')
 source('main_estep_cat.R')
 source("mixtureFunctions.R")
 
@@ -77,9 +78,9 @@ return(P.obs)
 
 
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(0.5,0.5,0.5,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(0.5,0.4,0.3,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
 
@@ -92,8 +93,8 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 100
-K2 = 20
+K1 = 150
+K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
