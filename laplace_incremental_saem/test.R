@@ -19,30 +19,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 	Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
-	psiM<-transphi(phiM,Dargs$transform.par)
-	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	if(Dargs$error.model=="exponential")
-		fpred<-log(cutoff(fpred))
-	gpred<-error(fpred,varList$pres)
-	DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-	U.y<-colSums(DYF)
-	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
-	for (i in 1:(nrow(phiM))) {
-		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
-	}
-
-	
-	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-
-	phiMc<-phiM
-	# map_range <- c(1:3)
-	map_range <- saemix.options$map.range
-	# map_range <- c(15,25,35)
-
-	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
-
-	if (!(kiter %in% map_range)){
+map_range)){
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
