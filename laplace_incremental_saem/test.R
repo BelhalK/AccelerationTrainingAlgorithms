@@ -22,22 +22,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 map_range)){
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
-		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-		psiMc<-transphi(phiMc,Dargs$transform.par)
-		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-		if(Dargs$error.model=="exponential")
-			fpred<-log(cutoff(fpred))
-		gpred<-error(fpred,varList$pres)
-		DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-		Uc.y<-colSums(DYF)
-		deltau<-Uc.y-U.y
-		deltau[ind_rand] = 1000000
-		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-		etaM[ind,]<-etaMc[ind,]
-		U.y[ind]<-Uc.y[ind]
-	}
-	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	
+		
 	# Second stage
 	if(opt$nbiter.mcmc[2]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
