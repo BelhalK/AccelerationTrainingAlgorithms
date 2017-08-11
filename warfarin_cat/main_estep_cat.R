@@ -159,11 +159,11 @@ if (!(kiter %in% map_range)){
 
 	}
 }
-
+U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 ###############################################################################################
 ############   NEW KERNEl														############
 ###############################################################################################
-				if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
+if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 

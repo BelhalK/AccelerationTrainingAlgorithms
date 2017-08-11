@@ -93,13 +93,14 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 150
+K1 = 100
 K2 = 50
+
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
 theo_ref<-data.frame(saemix_cat(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
