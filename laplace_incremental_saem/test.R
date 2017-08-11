@@ -3,28 +3,8 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
-	
-	# Function to perform MCMC simulation
 
-	nb.etas<-length(varList$ind.eta)
-	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
-	omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]
-	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
-	chol.omega<-try(chol(omega.eta))
-	somega<-solve(omega.eta)
-	saemix.options<-saemixObject["options"]
-	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
-	
-	VK<-rep(c(1:nb.etas),2)
-	Uargs$nchains = 1
-	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
-	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
-map_range)){
-	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
-		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
-		
-	# Second stage
-	if(opt$nbiter.mcmc[2]>0) {
+
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 		for (u in 1:opt$nbiter.mcmc[2]) {
