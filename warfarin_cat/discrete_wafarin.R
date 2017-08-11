@@ -106,7 +106,7 @@ theo_ref <- cbind(iterations, theo_ref)
 graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE)
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(3))
 cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

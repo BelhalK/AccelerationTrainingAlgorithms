@@ -12,6 +12,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
+	saemix.options<-saemixObject["options"]
 	
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
@@ -28,7 +29,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 	DYF[Uargs$ind.ioM] <- fpred
 	U.y<-colSums(DYF)
-	
+	map_range <- saemix.options$map.range
 
 
 	post_rwm <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
@@ -67,7 +68,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
 	phiMc<-phiM
-
+if (!(kiter %in% map_range)){
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 		
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
@@ -157,12 +158,12 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 
 	}
-
+}
 
 ###############################################################################################
 ############   NEW KERNEl														############
 ###############################################################################################
-				if(opt$nbiter.mcmc[4]>0) {
+				if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -184,6 +185,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	  	id.list<-unique(id)
 	  	phi.map<-saemixObject["results"]["phi"]
 
+	  	if (kiter %in% map_range){
 	  	for(i in 1:Dargs$NM) {
 		    isuj<-id.list[i]
 		    xi<-xind[id==isuj,,drop=FALSE]
@@ -197,7 +199,7 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		  }
-
+		 }
 	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
 		map.psi<-data.frame(id=id.list,map.psi)
 		map.phi<-data.frame(id=id.list,phi.map)
@@ -233,13 +235,13 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 			# 	fpred1<-log(cutoff(fpred1))
 			# gpred1<-error(fpred1,varList$pres)
 			# DYF[Uargs$ind.ioM] <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
-			DYF[Uargs$ind.ioM] <-fpred1
+			DYF[Uargs$ind.ioM] <- -log(fpred1)
 			l1 <- colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
 			# if(Dargs$error.model=="exponential")
 			# 	fpred2<-log(cutoff(fpred2))
 			# gpred2<-error(fpred2,varList$pres)
-			DYF[Uargs$ind.ioM] <-fpred2
+			DYF[Uargs$ind.ioM] <- -log(fpred2)
 			l2 <- colSums(DYF)
 			for (i in 1:(Dargs$NM)){
 				# r = 1:sum(Dargs$IdM == i)
@@ -251,12 +253,12 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 		#calculation of the covariance matrix of the proposal
 		
-		denom <- DYF
+		# denom <- DYF
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
 		# if(Dargs$error.model=="exponential")
 		# 	fpred<-log(cutoff(fpred))
 		# gpred<-error(fpred1,varList$pres)
-		DYF[Uargs$ind.ioM] <-fpred
+		DYF[Uargs$ind.ioM] <- -log(fpred)
 		denom <- colSums(DYF)
 
 		
