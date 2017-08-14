@@ -81,7 +81,7 @@ K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-replicate = 50
+replicate = 5
 seed0 = 39546
 
 
@@ -160,4 +160,35 @@ final <- final[c(1,4,2,3)]
 
 perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 ggsave('percentile_mamyula.png', perc)
+
+
+prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+
+for(i in 2:7){
+  final_rwm1 <- final_rwm[c(9,1,i)]
+  final_mala1 <- final_mala[c(9,1,i)]
+  
+
+
+  final_rwm1['group'] <- 1
+  final_mala1['group'] <- 2
+  final_mala1$id <- final_mala1$id +1
+  
+  
+
+
+  final <- 0
+  final <- rbind(final_rwm1[-1,],final_mala1[-1,])
+
+
+
+  labels <- c("rwm","mala")
+  final <- final[c(1,4,2,3)]
+  perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
+  ggsave(plot = perc, file = paste("file",i,".pdf",sep=""))
+}
+
+
+
+
 

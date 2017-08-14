@@ -90,7 +90,7 @@ gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),displayProgress=FALSE)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
