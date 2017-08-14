@@ -59,7 +59,7 @@ library("Matrix")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-library(saemix)
+
 PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
 PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
@@ -114,7 +114,7 @@ theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data2,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(0))
+options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(5))
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data2,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 
