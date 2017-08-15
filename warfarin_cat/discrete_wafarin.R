@@ -100,9 +100,9 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-# options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
-# theo_ref<-data.frame(saemix_cat(saemix.model,saemix.data,options))
-# theo_ref <- cbind(iterations, theo_ref)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
+theo_ref<-data.frame(saemix_cat(saemix.model,saemix.data,options))
+theo_ref <- cbind(iterations, theo_ref)
 
 graphConvMC_saem(theo_ref, title="new kernel")
 
