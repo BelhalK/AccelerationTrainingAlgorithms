@@ -64,7 +64,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		deltau<-Uc.y-U.y
 		
 		deltau[ind_rand] = 1000000
-		# print(ind_rand)
+		print(ind_rand)
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
