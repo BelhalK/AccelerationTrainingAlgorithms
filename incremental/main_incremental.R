@@ -224,153 +224,153 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 }
 
 
-etaM<-xmcmc$etaM # only need etaM here (re-created in estep otherwise)
-cat("\n    Minimisation finished\n")
-print(date())
+# etaM<-xmcmc$etaM # only need etaM here (re-created in estep otherwise)
+# cat("\n    Minimisation finished\n")
+# print(date())
 
-############# After end of iterations
-fixed.effects<-0*betas
-fixed.effects[Uargs$indx.betaI]<-fixed.psi
-fixed.effects[Uargs$indx.betaC]<-betaC
-varList$omega[Uargs$i0.omega2,]<-0
-varList$omega[,Uargs$i0.omega2]<-0
+# ############# After end of iterations
+# fixed.effects<-0*betas
+# fixed.effects[Uargs$indx.betaI]<-fixed.psi
+# fixed.effects[Uargs$indx.betaC]<-betaC
+# varList$omega[Uargs$i0.omega2,]<-0
+# varList$omega[,Uargs$i0.omega2]<-0
 
-##### Compute the individual parameters (MAP)
-phi[,Uargs$i0.omega2,1:saemix.options$nb.chains]<-mean.phi[,Uargs$i0.omega2]
-phi.samp<-phi
-phi<-apply(phi,c(1,2),mean)
+# ##### Compute the individual parameters (MAP)
+# phi[,Uargs$i0.omega2,1:saemix.options$nb.chains]<-mean.phi[,Uargs$i0.omega2]
+# phi.samp<-phi
+# phi<-apply(phi,c(1,2),mean)
 
-##### Conditional means and variances used for the estimation of the log-likelihood via Importance Sampling
-cond.mean.phi<-phi
-sphi1<-phi
-sphi1[,varList$ind.eta]<-suffStat$statphi1
-cond.mean.phi[,Uargs$i1.omega2]<-sphi1[,Uargs$i1.omega2]
-cond.var.phi<-array(data=0,dim=dim(phi))
-cond.var.phi[,Uargs$i1.omega2]<-suffStat$statphi3[,Uargs$i1.omega2]-cond.mean.phi[,Uargs$i1.omega2]**2
-cond.mean.psi<-transphi(cond.mean.phi,saemixObject["model"]["transform.par"])
+# ##### Conditional means and variances used for the estimation of the log-likelihood via Importance Sampling
+# cond.mean.phi<-phi
+# sphi1<-phi
+# sphi1[,varList$ind.eta]<-suffStat$statphi1
+# cond.mean.phi[,Uargs$i1.omega2]<-sphi1[,Uargs$i1.omega2]
+# cond.var.phi<-array(data=0,dim=dim(phi))
+# cond.var.phi[,Uargs$i1.omega2]<-suffStat$statphi3[,Uargs$i1.omega2]-cond.mean.phi[,Uargs$i1.omega2]**2
+# cond.mean.psi<-transphi(cond.mean.phi,saemixObject["model"]["transform.par"])
 
-cond.mean.eta<-matrix(0,nrow=dim(etaM)[1],ncol=Uargs$nb.parameters)
-cond.mean.eta[,varList$ind.eta]<-etaM
-cond.mean.eta<-array(t(cond.mean.eta),dim=c(Uargs$nb.parameters, Dargs$N, saemix.options$nb.chains))
-cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
+# cond.mean.eta<-matrix(0,nrow=dim(etaM)[1],ncol=Uargs$nb.parameters)
+# cond.mean.eta[,varList$ind.eta]<-etaM
+# cond.mean.eta<-array(t(cond.mean.eta),dim=c(Uargs$nb.parameters, Dargs$N, saemix.options$nb.chains))
+# cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
-# Updating objects
-  saemix.model["Mcovariates"]<-Uargs$Mcovariates
-  saemix.model["indx.res"]<-Uargs$ind.res
-  saemix.model["indx.fix"]<-Uargs$indx.betaI
-  saemix.model["indx.cov"]<-Uargs$indx.betaC
-  saemix.model["indx.omega"]<-Uargs$i1.omega2
+# # Updating objects
+#   saemix.model["Mcovariates"]<-Uargs$Mcovariates
+#   saemix.model["indx.res"]<-Uargs$ind.res
+#   saemix.model["indx.fix"]<-Uargs$indx.betaI
+#   saemix.model["indx.cov"]<-Uargs$indx.betaC
+#   saemix.model["indx.omega"]<-Uargs$i1.omega2
 
-# Filling in result object
-    saemix.res<-new(Class="SaemixRes",name.fixed=saemix.model["name.fixed"], name.random=saemix.model["name.random"],name.res=saemix.model["name.res"], fixed.effects=c(fixed.effects),fixed.psi=c(fixed.psi),betas=betas,betaC=betaC, omega=varList$omega,respar=varList$pres,cond.mean.phi=cond.mean.phi,cond.var.phi=cond.var.phi, mean.phi=mean.phi, phi=phi,phi.samp=phi.samp,parpop=parpop,allpar=allpar,MCOV=varList$MCOV)
-  saemix.res["indx.res"]<-Uargs$ind.res
-  saemix.res["indx.fix"]<-Uargs$indx.betaI
-  saemix.res["indx.cov"]<-Uargs$indx.betaC
-  saemix.res["indx.omega"]<-Uargs$i1.omega2
-  saemix.res["npar.est"]<-Uargs$nb.parest
-  saemix.res["cond.mean.psi"]<-cond.mean.psi
-  saemix.res["cond.mean.eta"]<-cond.mean.eta
+# # Filling in result object
+#     saemix.res<-new(Class="SaemixRes",name.fixed=saemix.model["name.fixed"], name.random=saemix.model["name.random"],name.res=saemix.model["name.res"], fixed.effects=c(fixed.effects),fixed.psi=c(fixed.psi),betas=betas,betaC=betaC, omega=varList$omega,respar=varList$pres,cond.mean.phi=cond.mean.phi,cond.var.phi=cond.var.phi, mean.phi=mean.phi, phi=phi,phi.samp=phi.samp,parpop=parpop,allpar=allpar,MCOV=varList$MCOV)
+#   saemix.res["indx.res"]<-Uargs$ind.res
+#   saemix.res["indx.fix"]<-Uargs$indx.betaI
+#   saemix.res["indx.cov"]<-Uargs$indx.betaC
+#   saemix.res["indx.omega"]<-Uargs$i1.omega2
+#   saemix.res["npar.est"]<-Uargs$nb.parest
+#   saemix.res["cond.mean.psi"]<-cond.mean.psi
+#   saemix.res["cond.mean.eta"]<-cond.mean.eta
 
-# Updating elements of saemixObject
-  saemixObject["model"]<-saemix.model
-  saemixObject["results"]<-saemix.res
-  saemixObject["options"]<-saemix.options
-#  saemixObject["rep.data"]<-chdat # Utile ? maybe remove rep.data
+# # Updating elements of saemixObject
+#   saemixObject["model"]<-saemix.model
+#   saemixObject["results"]<-saemix.res
+#   saemixObject["options"]<-saemix.options
+# #  saemixObject["rep.data"]<-chdat # Utile ? maybe remove rep.data
 
-# ECO TODO check
-# a la fin: mais verifier, pe pb de distribution ??? ie allpar sur l'echelle des betas et pas parpop ? a verifier
-# saemix.res["allpar"]<-allpar
-# saemix.res["parpop"]<-allpar[,-c(indx.betaC)]
+# # ECO TODO check
+# # a la fin: mais verifier, pe pb de distribution ??? ie allpar sur l'echelle des betas et pas parpop ? a verifier
+# # saemix.res["allpar"]<-allpar
+# # saemix.res["parpop"]<-allpar[,-c(indx.betaC)]
 
-#### Final computations
-# Compute the MAP estimates of the PSI_i's 
-  if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
+# #### Final computations
+# # Compute the MAP estimates of the PSI_i's 
+#   if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
 
-# Compute the Fisher Information Matrix & update saemix.res
-  if(saemix.options$fim) saemixObject<-fim.saemix(saemixObject)
+# # Compute the Fisher Information Matrix & update saemix.res
+#   if(saemix.options$fim) saemixObject<-fim.saemix(saemixObject)
 
-# Estimate the log-likelihood via importance Sampling/Gaussian quadrature
-  if(saemix.options$ll.is) saemixObject<-llis.saemix(saemixObject)
-  if(saemix.options$ll.gq) saemixObject<-llgq.saemix(saemixObject)
+# # Estimate the log-likelihood via importance Sampling/Gaussian quadrature
+#   if(saemix.options$ll.is) saemixObject<-llis.saemix(saemixObject)
+#   if(saemix.options$ll.gq) saemixObject<-llgq.saemix(saemixObject)
   
-#### Pretty printing the results (TODO finish in particular cov2cor)
-  if(saemix.options$print) print(saemixObject,digits=2)
+# #### Pretty printing the results (TODO finish in particular cov2cor)
+#   if(saemix.options$print) print(saemixObject,digits=2)
 
-#### Save the results to a file
-  if(saemix.options$save | saemix.options$save.graphs) {
-# create directory to save the results
-     if(saemix.options$directory!="") xsave<-dir.create(saemix.options$directory)
-     if(!xsave) {
-# Check that we're not trying to create a directory with the same name as a file
-       if(!file_test("-d",saemix.options$directory)) {
-         cat("Unable to create directory",saemix.options$directory)
-         saemix.options$directory<-"newdir"
-         dir.create(saemix.options$directory)         
-         xsave<-file_test("-d",saemix.options$directory)
-         if(!xsave) {
-           saemix.options$directory<-""
-           xsave<-TRUE
-           cat(", saving in current directory.\n")
-         } else cat(", saving results in newdir instead.\n")
-       } else {
-       xsave<-TRUE
-       cat("Overwriting files in directory",saemix.options$directory,"\n")
-       }
-     }
-   }
-  if(saemix.options$save) {
-    namres<-ifelse(saemix.options$directory=="","pop_parameters.txt", file.path(saemix.options$directory,"pop_parameters.txt"))
-    xtry<-try(sink(namres))
-    if(class(xtry)!="try-error") {
-    print(saemixObject)
-    sink()
-    namres<-ifelse(saemix.options$directory=="","indiv_parameters.txt", file.path(saemix.options$directory,"indiv_parameters.txt"))
-    if(length(saemixObject["results"]["map.psi"])>0)
-       write.table(saemixObject["results"]["map.psi"],namres,quote=FALSE, row.names=FALSE)
-     } else {
-       cat("Unable to save results, check writing permissions and/or path to directory.\n")
-     }
-  }
+# #### Save the results to a file
+#   if(saemix.options$save | saemix.options$save.graphs) {
+# # create directory to save the results
+#      if(saemix.options$directory!="") xsave<-dir.create(saemix.options$directory)
+#      if(!xsave) {
+# # Check that we're not trying to create a directory with the same name as a file
+#        if(!file_test("-d",saemix.options$directory)) {
+#          cat("Unable to create directory",saemix.options$directory)
+#          saemix.options$directory<-"newdir"
+#          dir.create(saemix.options$directory)         
+#          xsave<-file_test("-d",saemix.options$directory)
+#          if(!xsave) {
+#            saemix.options$directory<-""
+#            xsave<-TRUE
+#            cat(", saving in current directory.\n")
+#          } else cat(", saving results in newdir instead.\n")
+#        } else {
+#        xsave<-TRUE
+#        cat("Overwriting files in directory",saemix.options$directory,"\n")
+#        }
+#      }
+#    }
+#   if(saemix.options$save) {
+#     namres<-ifelse(saemix.options$directory=="","pop_parameters.txt", file.path(saemix.options$directory,"pop_parameters.txt"))
+#     xtry<-try(sink(namres))
+#     if(class(xtry)!="try-error") {
+#     print(saemixObject)
+#     sink()
+#     namres<-ifelse(saemix.options$directory=="","indiv_parameters.txt", file.path(saemix.options$directory,"indiv_parameters.txt"))
+#     if(length(saemixObject["results"]["map.psi"])>0)
+#        write.table(saemixObject["results"]["map.psi"],namres,quote=FALSE, row.names=FALSE)
+#      } else {
+#        cat("Unable to save results, check writing permissions and/or path to directory.\n")
+#      }
+#   }
 
-# ECO TODO finish, adding all
-  if(saemix.options$save.graphs) {
-    saemixObject<-saemix.predict(saemixObject)
-    if(saemix.options$directory=="") namgr<-"diagnostic_graphs.ps" else
-      namgr<-file.path(saemix.options$directory,"diagnostic_graphs.ps")
-    xtry<-try(postscript(namgr,horizontal=TRUE))
-    if(class(xtry)!="try-error") {
-    par(mfrow=c(1,1))
-    try(plot(saemixObject,plot.type="data"))
+# # ECO TODO finish, adding all
+#   if(saemix.options$save.graphs) {
+#     saemixObject<-saemix.predict(saemixObject)
+#     if(saemix.options$directory=="") namgr<-"diagnostic_graphs.ps" else
+#       namgr<-file.path(saemix.options$directory,"diagnostic_graphs.ps")
+#     xtry<-try(postscript(namgr,horizontal=TRUE))
+#     if(class(xtry)!="try-error") {
+#     par(mfrow=c(1,1))
+#     try(plot(saemixObject,plot.type="data"))
 
-    try(plot(saemixObject,plot.type="convergence"))
+#     try(plot(saemixObject,plot.type="convergence"))
 
-    if(length(saemixObject["results"]["ll.is"])>0) {
-      par(mfrow=c(1,1))
-      try(plot(saemixObject, plot.type="likelihood"))
-    }
+#     if(length(saemixObject["results"]["ll.is"])>0) {
+#       par(mfrow=c(1,1))
+#       try(plot(saemixObject, plot.type="likelihood"))
+#     }
 
-    try(plot(saemixObject,plot.type="observations.vs.predictions"))
+#     try(plot(saemixObject,plot.type="observations.vs.predictions"))
 
-    try(plot(saemixObject,plot.type="random.effects"))
+#     try(plot(saemixObject,plot.type="random.effects"))
 
-    try(plot(saemixObject,plot.type="correlations"))
+#     try(plot(saemixObject,plot.type="correlations"))
 
-# Note: can replace all this by:
-#    default.saemix.plots(saemixObject)
+# # Note: can replace all this by:
+# #    default.saemix.plots(saemixObject)
 
-    dev.off()
+#     dev.off()
     
-    if(saemix.options$directory=="") namgr<-"individual_fits.ps" else
-      namgr<-file.path(saemix.options$directory,"individual_fits.ps")
-    postscript(namgr,horizontal=FALSE)
-    try(plot(saemixObject,plot.type="individual.fit"))
-    dev.off()
-    } else {
-       cat("Unable to save results, check writing permissions and/or path to directory.\n")
-     }
-  }
+#     if(saemix.options$directory=="") namgr<-"individual_fits.ps" else
+#       namgr<-file.path(saemix.options$directory,"individual_fits.ps")
+#     postscript(namgr,horizontal=FALSE)
+#     try(plot(saemixObject,plot.type="individual.fit"))
+#     dev.off()
+#     } else {
+#        cat("Unable to save results, check writing permissions and/or path to directory.\n")
+#      }
+#   }
 
-  options(warn=opt.warn)
+#   options(warn=opt.warn)
 
   return(parpop)
 }

@@ -37,7 +37,17 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	phiMc<-phiM
 	
 	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+	# browser()
+
+
+	# ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+
+
+	if (kiter%%2 == 0){
+		ind_rand = 1:18
+	} else {
+		ind_rand = 19:37
+	}
 
 	
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
@@ -52,8 +62,9 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
+		
 		deltau[ind_rand] = 1000000
-		print(ind_rand)
+		# print(ind_rand)
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -80,6 +91,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				
 				deltu[ind_rand] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
@@ -119,6 +131,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+
 				deltu[ind_rand] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]

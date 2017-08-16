@@ -71,7 +71,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 
-K1 = 200
+K1 = 300
 K2 = 50
 iteration = 1:(K1+K2+1)
 
@@ -85,7 +85,7 @@ theo_ref <- cbind(iteration, theo_ref)
 
 
 #ref (map always)
-options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=97,displayProgress=FALSE)
+options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),nb.replacement=50,displayProgress=FALSE)
 theo_incremental<-data.frame(incremental_saemix(saemix.model,saemix.data,options.incremental))
 theo_incremental <- cbind(iteration, theo_incremental)
 
