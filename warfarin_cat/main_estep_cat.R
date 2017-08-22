@@ -270,7 +270,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
    #          z[r] <- gradf[r,1]
 			# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
 
-			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+			# Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2)
 		}
 		
 		# browser()

@@ -27,10 +27,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat")
-source('post_cat.R')
-# source('main_cat.R')
-source('main_cat_test.R')
-source('main_estep_cat.R')
+source('main_cat2.R')
+source('main_estep_cat2.R')
 source("mixtureFunctions.R")
 
 library("mlxR")
@@ -58,6 +56,7 @@ saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, nam
 
 cat_data.model<-function(psi,id,xidep) {
 level<-xidep[,1]
+
 th1 <- psi[id,1]
 th2 <- psi[id,2]
 th3 <- psi[id,3]
@@ -72,15 +71,14 @@ P3 <- 1 - Pcum2
 
 P.obs = (level==0)*P0+(level==1)*P1+(level==2)*P2+(level==3)*P3
 
-
 return(P.obs)
 }
 
 
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(0.5,0.4,0.3,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(0.5,0.4,0.3),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
   byrow=TRUE),error.model="constant")
 
 
@@ -100,56 +98,8 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE, map.range=c(0))
-theo_ref<-data.frame(saemix_cat(saemix.model,saemix.data,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE)
+theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 graphConvMC_saem(theo_ref, title="new kernel")
-
-#ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(3))
-cat_saem<-data.frame(saemix_cat(saemix.model,saemix.data,options.cat))
-cat_saem <- cbind(iterations, cat_saem)
-
-graphConvMC_saem(cat_saem, title="new kernel")
-graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
-
-
-index = 1
-graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
-graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
-
-
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
-}
-
-
-final_foce <- post_foce[[1]]
-for (i in 2:length(post_foce)) {
-  final_foce <- rbind(final_foce, post_foce[[i]])
-}
-
-
-
-graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
-graphConvMC_twokernels(final_rwm,final_foce, title="EM")
-
-
-#Autocorrelation
-rwm.obj <- as.mcmc(post_rwm[[1]])
-corr_rwm <- autocorr(rwm.obj[,2])
-autocorr.plot(rwm.obj[,2])
-
-foce.obj <- as.mcmc(post_foce[[1]])
-corr_foce <- autocorr(foce.obj[,2])
-autocorr.plot(foce.obj[,2])
-
-
-#MSJD
-mssd(post_rwm[[index]][,2])
-mssd(post_foce[[index]][,2])
-
-
-
