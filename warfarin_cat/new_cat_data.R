@@ -17,7 +17,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('main_estep.R')
   source('main_estep_mcmc.R') 
   source('main_estep_morekernels.R') 
-  source('main_initialiseMainAlgo.R') 
+  # source('main_initialiseMainAlgo.R') 
   source('main_mstep.R') 
   source('SaemixData.R')
   source('plots_ggplot2.R') 
@@ -29,6 +29,9 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat")
 source('main_cat2.R')
 source('main_estep_cat2.R')
+source('main_mstep_cat.R') 
+source('func_aux_cat.R') 
+source('main_initialiseMainAlgo_cat.R') 
 source("mixtureFunctions.R")
 
 library("mlxR")
@@ -51,6 +54,7 @@ iter_mcmc = 200
 
 
 cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
@@ -91,7 +95,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 100
+K1 = 200
 K2 = 50
 
 iterations = 1:(K1+K2+1)
@@ -103,5 +107,52 @@ theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 graphConvMC_saem(theo_ref, title="new kernel")
+
+#ref (map always)
+cat_saem <- NULL
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
+cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+cat_saem <- cbind(iterations, cat_saem)
+
+graphConvMC_saem(cat_saem, title="new kernel")
+graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
+
+
+index = 1
+graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
+graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
+
+
+final_rwm <- post_rwm[[1]]
+for (i in 2:length(post_rwm)) {
+  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+}
+
+
+final_foce <- post_foce[[1]]
+for (i in 2:length(post_foce)) {
+  final_foce <- rbind(final_foce, post_foce[[i]])
+}
+
+
+
+graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
+graphConvMC_twokernels(final_rwm,final_foce, title="EM")
+
+
+#Autocorrelation
+rwm.obj <- as.mcmc(post_rwm[[1]])
+corr_rwm <- autocorr(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2])
+
+foce.obj <- as.mcmc(post_foce[[1]])
+corr_foce <- autocorr(foce.obj[,2])
+autocorr.plot(foce.obj[,2])
+
+
+#MSJD
+mssd(post_rwm[[index]][,2])
+mssd(post_foce[[index]][,2])
+
 
 

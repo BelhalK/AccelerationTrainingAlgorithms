@@ -122,7 +122,8 @@ saemix_cat2<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
+# browser()
 
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
@@ -143,7 +144,7 @@ xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
   colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"])
   
   parpop[1,]<-theta0
-  allpar[1,]<-xinit$allpar0[-length(xinit$allpar0)]
+  allpar[1,]<-xinit$allpar0
 
   
 
@@ -192,7 +193,8 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
-  xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
+  xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  # if(kiter>49) browser()
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
@@ -202,8 +204,8 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    if(kiter>49) browser()
-    xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
+    
+    xstoch<-mstep_cat(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
     varList<-xstoch$varList
     mean.phi<-xstoch$mean.phi
     phi<-xstoch$phi
@@ -222,8 +224,9 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   } else { #end of loop on if (stepsize[kiter]>0)
     allpar[(kiter+1),]<-allpar[kiter,]
   }
+
   theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
-  
+  # if(kiter>59) browser()
   parpop[(kiter+1),]<-theta
 
 # End of loop on kiter

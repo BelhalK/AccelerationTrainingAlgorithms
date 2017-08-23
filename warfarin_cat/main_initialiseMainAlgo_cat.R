@@ -43,7 +43,7 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 	#   combined            y = f + (a+b*f)*e
 	#   exponential         y = f*exp(a*e)    ( <=>  log(y) = log(f) + a*e )
 	# error models are a + bf described by [a b], [1]=constant coefficient, [2]= proportional coefficient
-	pres<-c(saemix.model["error.init"][1],saemix.model["error.init"][2])
+	# pres<-c(saemix.model["error.init"][1],saemix.model["error.init"][2])
 	
 	# ECO TODO: integrate all this section in the object creation ?
 	# Initialisation: 
@@ -237,15 +237,15 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 	}
 
 	var.eta<-mydiag(saemix.model["omega.init"])
-	theta0<-c(fixedpsi.ini,var.eta[i1.omega2],pres[saemix.model["indx.res"]])
+	theta0<-c(fixedpsi.ini,var.eta[i1.omega2])
 	l1<-betas.ini
 	l1[indx.betaI]<-transphi(matrix(l1[indx.betaI],nrow=1),saemix.model["transform.par"])
-	allpar0<-c(l1,var.eta[i1.omega2],pres[ind.res])
+	allpar0<-c(l1,var.eta[i1.omega2])
 	
 	# Data - passed on to functions, unchanged
 	Dargs<-list(IdM=IdM, XM=XM, yM=yM, NM=NM, N=N, nobs=saemix.data["ntot.obs"],
 							yobs=saemix.data["data"][,saemix.data["name.response"]],transform.par=saemix.model["transform.par"],
-							error.model=saemix.model["error.model"],structural.model=structural.model)
+							structural.model=structural.model)
 	
 	# List of indices and variables (fixed) - passed on to functions, unchanged
 	nb.parest<-sum(covariate.estim)+ sum(saemix.model["covariance.model"][upper.tri(saemix.model["covariance.model"], diag=TRUE)])+1+as.integer(saemix.model["error.model"]=="combined")
@@ -259,7 +259,7 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 				Mcovariates=Mcovariates, ind.ioM=ind.ioM)
 	# Variability-related elements
 	omega.eta<-omega[ind.eta,ind.eta] # IIV matrix for estimated parameters
-	varList<-list(pres=pres,ind0.eta=ind0.eta,ind.eta=ind.eta,omega=omega, MCOV=MCOV,
+	varList<-list(ind0.eta=ind0.eta,ind.eta=ind.eta,omega=omega, MCOV=MCOV,
 								domega2=do.call(cbind,rep(list((sqrt(mydiag(omega.eta)))*saemix.options$rw.ini),nb.etas)),diag.omega=mydiag(omega))
 
 
