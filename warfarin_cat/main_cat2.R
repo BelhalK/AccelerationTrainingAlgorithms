@@ -202,6 +202,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
+    if(kiter>49) browser()
     xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
     varList<-xstoch$varList
     mean.phi<-xstoch$mean.phi
@@ -222,7 +223,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     allpar[(kiter+1),]<-allpar[kiter,]
   }
   theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
-  if(kiter>50) browser()
+  
   parpop[(kiter+1),]<-theta
 
 # End of loop on kiter
