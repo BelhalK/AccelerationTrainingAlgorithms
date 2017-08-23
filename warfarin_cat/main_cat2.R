@@ -222,7 +222,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     allpar[(kiter+1),]<-allpar[kiter,]
   }
   theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
-  # if(kiter>49) browser()
+  if(kiter>50) browser()
   parpop[(kiter+1),]<-theta
 
 # End of loop on kiter
