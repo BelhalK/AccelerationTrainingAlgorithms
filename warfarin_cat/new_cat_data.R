@@ -151,7 +151,7 @@ autocorr.plot(foce.obj[,2])
 
 
 #MSJD
-mssd(post_rwm[[index]][,2])
+<mssd(post_rwm[[index]][,2])
 mssd(post_foce[[index]][,2])
 
 
