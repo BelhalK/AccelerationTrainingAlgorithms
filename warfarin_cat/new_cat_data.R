@@ -102,7 +102,8 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,, map.range=c(0))
+theo_ref <- NULL
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE, map.range=c(0))
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -111,7 +112,7 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
 cat_saem <- NULL
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:30))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:50))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
