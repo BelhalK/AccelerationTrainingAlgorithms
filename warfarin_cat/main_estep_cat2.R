@@ -21,9 +21,7 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	# if(Dargs$error.model=="exponential")
-	# 	fpred<-log(cutoff(fpred))
-	# gpred<-error(fpred,varList$pres)
+	
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
 	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
