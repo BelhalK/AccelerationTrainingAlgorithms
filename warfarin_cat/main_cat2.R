@@ -146,7 +146,6 @@ xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
   parpop[1,]<-theta0
   allpar[1,]<-xinit$allpar0
 
-
 # List of sufficient statistics - change during call to stochasticApprox
   suffStat<-list(statphi1=0,statphi2=0,statphi3=0,statrese=0)
   phi<-array(data=0,dim=c(Dargs$N, Uargs$nb.parameters, saemix.options$nb.chains))
