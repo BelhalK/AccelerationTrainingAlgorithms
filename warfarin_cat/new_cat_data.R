@@ -69,6 +69,7 @@ P0 <- 1/(1+exp(-th1))
 Pcum1 <- 1/(1+exp(-th1-th2))
 Pcum2 <- 1/(1+exp(-th1-th2-th3))
 
+
 P1 <- Pcum1 - P0
 P2 <- Pcum2 - Pcum1
 P3 <- 1 - Pcum2
@@ -112,7 +113,7 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
 cat_saem <- NULL
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:50))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:75))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

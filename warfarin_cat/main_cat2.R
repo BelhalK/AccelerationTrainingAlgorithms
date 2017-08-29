@@ -147,9 +147,6 @@ xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
   allpar[1,]<-xinit$allpar0
 
   
-
-
-  
   # using several Markov chains - only useful if passed back to main routine...
   #   chdat<-new(Class="SaemixRepData",data=saemix.data, nb.chains=saemix.options$nb.chains)
   #   NM<-chdat["NM"]
