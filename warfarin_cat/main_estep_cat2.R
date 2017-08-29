@@ -45,9 +45,6 @@ if (!(kiter %in% map_range)){
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
 		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-		# if(Dargs$error.model=="exponential")
-		# 	fpred<-log(cutoff(fpred))
-		# gpred<-error(fpred,varList$pres)
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
@@ -70,9 +67,6 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
@@ -108,9 +102,6 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))

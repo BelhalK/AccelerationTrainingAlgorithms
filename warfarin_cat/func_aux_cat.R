@@ -331,10 +331,7 @@ compute.Uy_cat<-function(b0,phiM,pres,args,Dargs,DYF) {
   phiM[,args$i0.omega2]<-do.call(rbind,rep(list(phi0),args$nchains))
   psiM<-transphi(phiM,Dargs$transform.par)
   fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
-  # if(Dargs$error.model=="exponential")
-  #    fpred<-log(cutoff(fpred))
-  # gpred<-error(fpred,pres)
-  DYF[args$ind.ioM]<- -log(fpred)
+  DYF[args$ind.ioM] <- -log(fpred)
   U<-sum(DYF)
   return(U)
 }
