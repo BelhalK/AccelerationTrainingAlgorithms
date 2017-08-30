@@ -21,7 +21,7 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	
+
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
 	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
@@ -198,16 +198,9 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			# if(Dargs$error.model=="exponential")
-			# 	fpred1<-log(cutoff(fpred1))
-			# gpred1<-error(fpred1,varList$pres)
-			# DYF[Uargs$ind.ioM] <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
 			DYF[Uargs$ind.ioM] <- -log(fpred1)
 			l1 <- colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			# if(Dargs$error.model=="exponential")
-			# 	fpred2<-log(cutoff(fpred2))
-			# gpred2<-error(fpred2,varList$pres)
 			DYF[Uargs$ind.ioM] <- -log(fpred2)
 			l2 <- colSums(DYF)
 			for (i in 1:(Dargs$NM)){
@@ -222,9 +215,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		
 		# denom <- DYF
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		# if(Dargs$error.model=="exponential")
-		# 	fpred<-log(cutoff(fpred))
-		# gpred<-error(fpred1,varList$pres)
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		denom <- colSums(DYF)
 
@@ -232,16 +222,14 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
-			# r = 1:sum(Dargs$IdM == i)
-			# r <- r+sum(as.matrix(z) != 0L)
-   #          z[r] <- gradf[r,1]
-			# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+			r = 1:sum(Dargs$IdM == i)
+			r <- r+sum(as.matrix(z) != 0L)
+            z[r] <- fpred[r]
 
-			# Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
-			Gamma[[i]] <- omega.eta
+			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+			# Gamma[[i]] <- omega.eta
 		}
 		
-		# browser()
 		etaM <- eta_map
 		for (u in 1:opt$nbiter.mcmc[4]) {
 
