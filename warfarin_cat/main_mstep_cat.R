@@ -73,7 +73,8 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	varList$omega[Uargs$indest.omega]<-omega.full[Uargs$indest.omega]
 	
 	# Simulated annealing (applied to the diagonal elements of omega)
-	if (kiter<=0) {
+	#if (kiter<=0) cancel the simulated annealing
+	if (kiter<=opt$nbiter.sa) {
 		diag.omega.full<-mydiag(omega.full)
 		vec1<-diag.omega.full[Uargs$i1.omega2]
 		vec2<-varList$diag.omega[Uargs$i1.omega2]*opt$alpha1.sa
