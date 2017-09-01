@@ -121,7 +121,6 @@ cat_saem <- cbind(iterations, cat_saem)
 graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-
 index = 1
 graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
 graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
