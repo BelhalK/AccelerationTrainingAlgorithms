@@ -86,8 +86,8 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 
-K1 = 100
-K2 = 50
+K1 = 50
+K2 = 20
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
 replicate = 10
@@ -108,14 +108,14 @@ for (j in 1:replicate){
 
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
-final_rwm1 <- final_rwm[c(9,1,2)]
-prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+final_rwm1 <- final_rwm[c(9,1,3)]
+# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
 for (j in 1:replicate){
   print(j)
-  options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+  options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(1:3))
   theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
@@ -126,47 +126,47 @@ for (j in 1:replicate){
 
 names(final_mix)[1]<-paste("time")
 names(final_mix)[9]<-paste("id")
-final_mix1 <- final_mix[c(9,1,2)]
-prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
+final_mix1 <- final_mix[c(9,1,3)]
+# prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
 
-#map always 
-final_map <- 0
-for (j in 1:replicate){
-  print(j)
-  options.new<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-  theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
-  theo_new_ref <- cbind(iterations, theo_new_ref)
-  theo_new_ref['individual'] <- j
-  final_map <- rbind(final_map,theo_new_ref)
-}
+# #map always 
+# final_map <- 0
+# for (j in 1:replicate){
+#   print(j)
+#   options.new<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+#   theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+#   theo_new_ref <- cbind(iterations, theo_new_ref)
+#   theo_new_ref['individual'] <- j
+#   final_map <- rbind(final_map,theo_new_ref)
+# }
 
 
-names(final_map)[1]<-paste("time")
-names(final_map)[9]<-paste("id")
-final_map1 <- final_map[c(9,1,2)]
-prctilemlx(final_map1[-1,],band = list(number = 8, level = 80)) + ggtitle("map")
+# names(final_map)[1]<-paste("time")
+# names(final_map)[9]<-paste("id")
+# final_map1 <- final_map[c(9,1,3)]
+# prctilemlx(final_map1[-1,],band = list(number = 8, level = 80)) + ggtitle("map")
 
-for(i in 2:7){
-  final_rwm1 <- final_rwm[c(9,1,i)]
-  final_map1 <- final_map[c(9,1,i)]
+# for(i in 2:7){
+#   final_rwm1 <- final_rwm[c(9,1,i)]
+#   final_map1 <- final_map[c(9,1,i)]
   
 
 
- final_rwm1['group'] <- 1
-final_map1['group'] <- 2
-final_map1$id <- final_map1$id +2
+#  final_rwm1['group'] <- 1
+# final_map1['group'] <- 2
+# final_map1$id <- final_map1$id +2
 
 
-  final <- 0
-  final <- rbind(final_rwm1[-1,],final_map1[-1,])
+#   final <- 0
+#   final <- rbind(final_rwm1[-1,],final_map1[-1,])
 
 
 
-  labels <- c("rwm","MAP")
-  final <- final[c(1,4,2,3)]
-  perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
-  ggsave(plot = perc, file = paste("file_map_yield",i,".pdf",sep=""))
-}
+#   labels <- c("rwm","MAP")
+#   final <- final[c(1,4,2,3)]
+#   perc <- prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")+ ggtitle(colnames(final)[4])
+#   ggsave(plot = perc, file = paste("file_map_yield",i,".pdf",sep=""))
+# }
 
 
 
@@ -174,17 +174,17 @@ final_map1$id <- final_map1$id +2
 final_rwm1['group'] <- 1
 final_mix1['group'] <- 2
 final_mix1$id <- final_mix1$id +1
-final_map1['group'] <- 2
-final_map1$id <- final_map1$id +2
+# final_map1['group'] <- 2
+# final_map1$id <- final_map1$id +2
 
 final <- 0
 final <- rbind(final_rwm1[-1,],final_mix1[-1,])
-final <- rbind(final_rwm1[-1,],final_mix1[-1,],final_map1[-1,])
+# final <- rbind(final_rwm1[-1,],final_mix1[-1,],final_map1[-1,])
 
 
 
 labels <- c("rwm","mix")
-labels <- c("rwm","mix","map")
+# labels <- c("rwm","mix","map")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 
