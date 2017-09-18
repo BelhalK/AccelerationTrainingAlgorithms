@@ -188,3 +188,47 @@ labels <- c("rwm","mix")
 final <- final[c(1,4,2,3)]
 prctilemlx(final, band = list(number = 2, level = 80),group='group', label = labels) + theme(legend.position = "none")
 
+plt <- prctilemlx(final, band = list(number = 4, level = 80),group='group', label = labels) 
+
+
+
+rownames(final) <- 1:nrow(final)
+
+plot.S1 <- plot.prediction.intervals(final, 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S <- plot.S1  + ylab("mu1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+print(plot.S1)
+
+plot.prediction.intervals <- function(r, plot.median=TRUE, level=90, labels=NULL, 
+                                      legend.title=NULL, colors=NULL) {
+  P <- prctilemlx(r, number=1, level=level, plot=FALSE)
+  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(legend.title))  legend.title <- "group"
+  names(P$y)[2:4] <- c("p.min","p50","p.max")
+  pp <- ggplot(data=P$y)+ylab(NULL)+ 
+    geom_ribbon(aes(x=time,ymin=p.min, ymax=p.max,fill=group),alpha=.5) 
+  if (plot.median)
+    pp <- pp + geom_line(aes(x=time,y=p50,colour=group))
+  
+  if (is.null(colors)) {
+    pp <- pp + scale_fill_discrete(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels)
+    pp <- pp + scale_colour_discrete(name=legend.title,
+                                     breaks=levels(r$group),
+                                     labels=labels, 
+                                     guide=FALSE)
+  } else {
+    pp <- pp + scale_fill_manual(name=legend.title,
+                                 breaks=levels(r$group),
+                                 labels=labels,
+                                 values=colors)
+    pp <- pp + scale_colour_manual(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels,
+                                   guide=FALSE,values=colors)
+  }  
+  return(pp)
+}
