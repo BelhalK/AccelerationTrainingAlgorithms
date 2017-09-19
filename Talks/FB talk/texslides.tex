@@ -8,7 +8,7 @@
 \usepackage{algpseudocode}
 \usepackage{cancel}
 \usepackage{booktabs}
-\usepackage{siunitx}
+
 
 \graphicspath{{figures/}} % Location of the graphics files
 \usetheme{CambridgeUS}
@@ -204,6 +204,22 @@ y_i \approx z_{i,MAP} + (z_i - z_{i,MAP})\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i 
 
 \end{frame}
 
+
+
+
+\section{Applications}
+
+\begin{frame}
+\frametitle{PK-PD datasets}
+
+\begin{itemize}
+\item The data comes from 37 winter wheat experiments carried out between 1990
+and 1996 on commercial farms near Paris, France. Each experiment was from a different site.
+\item Each experiment consisted of five to eight different nitrogen fertiliser rates, for a total of 224 nitrogen treatments. Nitrogen fertilizer was applied in two applications during the growing season. For each nitrogen treatment, grain yield (adjusted to 150 g.kg-1 grain moisture content) was measured.
+\item In this problem the sites are denoted by the index "i" and are the individuals in the dataset, the predictor is the dosage, the response is the grain yield and the covariate is the soil nitrogen
+\end{itemize}
+\end{frame}
+
 \begin{frame}
 \frametitle{Comparison}
 
@@ -224,8 +240,7 @@ y_i \approx z_{i,MAP} + (z_i - z_{i,MAP})\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i 
 \begin{center}
 \begin{tabular}{SSSSSSSS} \toprule
     {$m$} & {RWM} & {MALA} & {Laplace} \\ \midrule
-    JSSD  & 16.128 & +8.872 & 16.128 \\
-    AUTOCORR  & 0.641  & -0.466 & 0.641 \\
+    JSSD  & 0.02237 & 0.04297 & 0.14297 \\
     VAR & 0.45   & +0.421 & 0.45  \\ \bottomrule
 \end{tabular}
 \end{center}
@@ -233,18 +248,41 @@ y_i \approx z_{i,MAP} + (z_i - z_{i,MAP})\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i 
 \end{frame}
 
 
-\section{Applications}
-
 \begin{frame}
-\frametitle{PK-PD datasets}
+\frametitle{Comparison}
 
 \begin{itemize}
-\item The data comes from 37 winter wheat experiments carried out between 1990
-and 1996 on commercial farms near Paris, France. Each experiment was from a different site.
-\item Each experiment consisted of five to eight different nitrogen fertiliser rates, for a total of 224 nitrogen treatments. Nitrogen fertilizer was applied in two applications during the growing season. For each nitrogen treatment, grain yield (adjusted to 150 g.kg-1 grain moisture content) was measured.
-\item In this problem the sites are denoted by the index "i" and are the individuals in the dataset, the predictor is the dosage, the response is the grain yield and the covariate is the soil nitrogen
+  \item Autocorrelation plots
 \end{itemize}
+
+  \begin{columns}
+    \begin{column}{.30\textwidth} % Left column and width
+      
+      \includegraphics[scale=0.2]{rwm_autocorr.pdf}
+      \begin{center}
+      \caption{RWM}
+      \end{center}
+    \end{column}%
+    \hfill%
+    \begin{column}{.30 \textwidth} % Right column and width
+      
+      \includegraphics[scale=0.2]{mala_autocorr.pdf}
+      \begin{center}
+      \caption{MALA}
+      \end{center}
+    \end{column}
+
+    \begin{column}{.30 \textwidth} % Right column and width
+      
+      \includegraphics[scale=0.2]{laplace_autocorr.pdf}
+      \begin{center}
+      \caption{Laplace}
+      \end{center}
+    \end{column}
+  \end{columns}
+
 \end{frame}
+
 \begin{frame}
 \frametitle{PK-PD datasets}
 

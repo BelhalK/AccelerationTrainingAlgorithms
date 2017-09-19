@@ -165,11 +165,11 @@ graphConvMC_twokernels(post_rwm[[1]],post_mala[[1]], title="EM")
 index=4
 rwm.obj <- as.mcmc(post_rwm[[index]])
 corr_rwm <- autocorr(rwm.obj[,3])
-autocorr.plot(rwm.obj[,3])
+autocorr.plot(rwm.obj[,3]) + title("MALA SAEM Autocorrelation")
 
 mala.obj <- as.mcmc(post_mala[[index]])
 corr_mala <- autocorr(mala.obj[,3])
-autocorr.plot(mala.obj[,3])
+autocorr.plot(mala.obj[,3]) + title("RWM SAEM Autocorrelation")
 
 
 

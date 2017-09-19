@@ -32,7 +32,7 @@ graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") + ylab(names(df[j])) + theme_bw()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj

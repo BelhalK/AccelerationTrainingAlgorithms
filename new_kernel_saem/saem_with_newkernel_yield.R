@@ -78,16 +78,22 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 
-K1 = 100
+K1 = 200
 K2 = 50
 iteration = 1:(K1+K2+1)
 gd_step = 0.00001
-
+seed0 = 632545
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iteration, theo_ref)
+
+graphConvMC_twokernels(theo_ref,theo_ref, title="RWM vs Laplace SAEM")
+
+
+
+
 
 #ref (map always)
 options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
@@ -113,11 +119,11 @@ theo_gd_mix <- cbind(iteration, theo_gd_mix)
 #mix (RWM and MAP new kernel for liste of saem iterations)
 
 #FOCE
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(3))
+options.mix<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(1:3))
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iteration, theo_mix)
 
-
+graphConvMC_twokernels(theo_mix,theo_mix, title="RWM vs Laplace SAEM")
 #Hessian approx to zero
 options.mix2<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(3))
 theo_mix2<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix2))
@@ -125,7 +131,7 @@ theo_mix2 <- cbind(iteration, theo_mix2)
 
 
 
-
+graphConvMC_twokernels(theo_ref,theo_mix, title="RWM vs Laplace SAEM")
 graphConvMC_threekernels(theo_ref,theo_mix,theo_mix2, title="ref vs GD")
 
 theo_ref$algo <- 'rwm'

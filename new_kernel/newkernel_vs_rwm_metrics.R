@@ -49,7 +49,7 @@ require(reshape2)
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 iter_mcmc = 700
-replicate = 15
+replicate = 2
 seed0 = 39546
 indiv=4
 burn = 300
@@ -136,11 +136,11 @@ for (i in 2:length(post_new)) {
 #Autocorrelation
 rwm.obj <- as.mcmc(post_rwm[[1]])
 corr_rwm <- autocorr(rwm.obj[,2])
-autocorr.plot(rwm.obj[,2])
+autocorr.plot(rwm.obj[,2]) + title("RWM SAEM Autocorrelation")
 
 new.obj <- as.mcmc(post_new[[1]])
 corr_new <- autocorr(new.obj[,2])
-autocorr.plot(new.obj[,2])
+autocorr.plot(new.obj[,2]) + title("Laplace SAEM Autocorrelation")
 
 
 #MSJD

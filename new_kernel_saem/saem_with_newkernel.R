@@ -73,12 +73,12 @@ gd_step = 0.01
 
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
+options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 #ref (map always)
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
@@ -94,7 +94,7 @@ theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
 theo_gd <- cbind(iterations, theo_gd)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
+options.mix<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
 theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 

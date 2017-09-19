@@ -86,8 +86,8 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 
-K1 = 50
-K2 = 20
+K1 = 200
+K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
 replicate = 10
@@ -108,8 +108,8 @@ for (j in 1:replicate){
 
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
-final_rwm1 <- final_rwm[c(9,1,3)]
-# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+final_rwm1 <- final_rwm[c(9,1,6)]
+prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
@@ -127,7 +127,7 @@ for (j in 1:replicate){
 names(final_mix)[1]<-paste("time")
 names(final_mix)[9]<-paste("id")
 final_mix1 <- final_mix[c(9,1,3)]
-# prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
+prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("mix")
 
 # #map always 
 # final_map <- 0

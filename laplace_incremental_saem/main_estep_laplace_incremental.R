@@ -200,7 +200,7 @@ estep_laplace_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, 
 			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 
-			}
+				}
 		  	
 			 }
 		else{
