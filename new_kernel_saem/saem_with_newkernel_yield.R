@@ -82,7 +82,7 @@ K1 = 200
 K2 = 50
 iteration = 1:(K1+K2+1)
 gd_step = 0.00001
-seed0 = 632545
+seed0 = 39546
 
 #RWM
 options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)

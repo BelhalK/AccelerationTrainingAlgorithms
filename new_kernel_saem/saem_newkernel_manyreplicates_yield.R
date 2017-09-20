@@ -90,8 +90,8 @@ K1 = 200
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
-replicate = 10
-seed0 = 39546
+replicate = 20
+seed0 = 632545
 
 #RWM
 final_rwm <- 0
@@ -108,7 +108,7 @@ for (j in 1:replicate){
 
 names(final_rwm)[1]<-paste("time")
 names(final_rwm)[9]<-paste("id")
-final_rwm1 <- final_rwm[c(9,1,6)]
+final_rwm1 <- final_rwm[c(9,1,3)]
 prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)

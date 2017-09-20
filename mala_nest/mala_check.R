@@ -52,10 +52,10 @@ iter_mcmc = 800
 burn = 400
 # Doc
 theo.saemix<-read.table( "data/theo.saemix.tab",header=T,na=".")
-l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
-for (i in 1:12){
-  theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
-}
+# l <- c(4.02,4.4,4.53,4.4,5.86,4,4.95,4.53,3.1,5.5,4.92,5.3)
+# for (i in 1:12){
+#   theo.saemix[(i*10-9):(i*10),'Dose'] = l[i]
+# }
 saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
@@ -72,10 +72,18 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 # saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(10,10,1.05),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
-saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0), sigma.val = 0.01)
+saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0), sigma.val = 0.01, gamma.val = 0.001)
 mala <- saemix_mala(saemix.model,saemix.data,saemix.options_mala)
 post_mala <- mala$post_mala
 rates_mala <- mala$rates
+
+
+final_mala <- post_mala[[1]]
+for (i in 2:length(post_mala)) {
+  final_mala <- rbind(final_mala, post_mala[[i]])
+}
+graphConvMC_new(final_mala, title="MALA")
+
 
 
 ### plot of average log rejection rate function og log stepsize
@@ -85,7 +93,7 @@ colnames(avg) <- c("log stepsize gamma","log rejection rate")
 i<-1
 for (sigma in sigmas){
   print(i)
-  saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0), sigma.val = sigma)
+  saemix.options_mala<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc,0,0,0), sigma.val = sigma, gamma.val = 0.001)
   mala <- saemix_mala(saemix.model,saemix.data,saemix.options_mala)
   rates_mala <- mala$rates
   avg[i,1] <- log(sigma)
