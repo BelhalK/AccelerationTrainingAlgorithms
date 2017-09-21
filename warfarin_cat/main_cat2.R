@@ -160,7 +160,6 @@ if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
-
 # SAEM convergence plots
   if(kiter%%saemix.options$nbdisplay==0) {
     cat(".")
@@ -183,7 +182,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
   # E-step
   xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
-  # if(kiter>49) browser()
+  # if(kiter>48) browser()
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
@@ -193,7 +192,6 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    
     xstoch<-mstep_cat(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
     varList<-xstoch$varList
     mean.phi<-xstoch$mean.phi
@@ -215,7 +213,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
-  # if(kiter>59) browser()
+  # if(kiter>49) browser()
   parpop[(kiter+1),]<-theta
 
 # End of loop on kiter

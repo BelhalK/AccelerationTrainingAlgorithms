@@ -173,7 +173,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 		psi_map <- as.matrix(map.psi[,-c(1)])
 		phi_map <- as.matrix(map.phi[,-c(1)])
-		eta_map <- phi_map - mean.phiM
+		eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
 		
 		#gradient at the map estimation
 		# gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas)
@@ -241,7 +241,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 					
 				for (i in 1:(Dargs$NM)){
 					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
-					etaMc[i,]<- eta_map[i,] +M[i,]
+					etaMc[i]<- eta_map[i] +M[i]
 				}
 
 
@@ -258,16 +258,16 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 
 				for (i in 1:(Dargs$NM)){
-					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
-					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%solve(Gamma[[i]]))
+					prop[i] <- 0.5*rowSums((etaM[i]-eta_map[i])*(etaM[i]-eta_map[i])%*%solve(Gamma[[i]]))
 				}
 
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				etaM[ind,]<-etaMc[ind,]
+				etaM[ind]<-etaMc[ind]
 				# for (i in 1:(nrow(phiM))) {
-				# 	post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i,]
+				# 	post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i]
 				# }
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
@@ -278,12 +278,13 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				# #Or Use the output of VI as the posterior distrib we simulate from
 				# etaM[ind,]<-etaMc[ind,]
 				# for (i in 1:(nrow(phiM))) {
-				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i]
 				# }
 
 			}
 		}
 	}
+
 
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM

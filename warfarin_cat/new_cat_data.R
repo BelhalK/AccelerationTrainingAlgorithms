@@ -24,13 +24,14 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('saemix-package.R') 
   source('SaemixModel.R') 
   source('SaemixRes.R') 
-  source('SaemixObject.R') 
+  # source('SaemixObject.R') 
   source('zzz.R') 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat")
 source('main_cat2.R')
 source('main_estep_cat2.R')
 source('main_mstep_cat.R') 
 source('func_aux_cat.R') 
+source('SaemixObject_cat.R') 
 source('main_initialiseMainAlgo_cat.R') 
 source("mixtureFunctions.R")
 
@@ -53,8 +54,8 @@ require(reshape2)
 iter_mcmc = 200
 
 
-cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
@@ -101,9 +102,10 @@ K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
+
 #RWM
 theo_ref <- NULL
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -114,7 +116,7 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
 cat_saem <- NULL
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

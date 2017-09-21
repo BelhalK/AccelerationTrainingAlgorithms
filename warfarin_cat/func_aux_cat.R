@@ -342,8 +342,8 @@ conditional.distribution_cat<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar
   if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)
   fi<-model(psii,idi,xi)
   Uy<-sum(-log(fi))
-  dphi<-phi1-mphi
-  Uphi<-0.5*sum(dphi*(dphi%*%iomega))
+  dphi<- phi1-mphi
+  Uphi<- 0.5*sum(dphi*(dphi%*%iomega))
   return(Uy+Uphi)
 }
 

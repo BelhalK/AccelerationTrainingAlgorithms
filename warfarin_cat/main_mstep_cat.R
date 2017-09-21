@@ -50,7 +50,6 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	
 	############# Maximisation
 	##### fixed effects
-	
 	if (opt$flag.fmin && kiter>=opt$nbiter.sa) {
 		temp<-d1.omega[Uargs$ind.fix11,]*(t(Uargs$COV1)%*%(suffStat$statphi1-Uargs$dstatCOV[,varList$ind.eta]))
 		betas[Uargs$ind.fix11]<-solve(comega[Uargs$ind.fix11,Uargs$ind.fix11],rowSums(temp)) 
@@ -72,8 +71,8 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	omega.full[varList$ind.eta,varList$ind.eta]<-suffStat$statphi2/Dargs$N + t(e1.phi)%*%e1.phi/Dargs$N - t(suffStat$statphi1)%*%e1.phi/Dargs$N - t(e1.phi)%*%suffStat$statphi1/Dargs$N
 	varList$omega[Uargs$indest.omega]<-omega.full[Uargs$indest.omega]
 	
+
 	# Simulated annealing (applied to the diagonal elements of omega)
-	#if (kiter<=0) cancel the simulated annealing
 	if (kiter<=opt$nbiter.sa) {
 		diag.omega.full<-mydiag(omega.full)
 		vec1<-diag.omega.full[Uargs$i1.omega2]
@@ -85,7 +84,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 		varList$diag.omega<-mydiag(varList$omega)
 	}
 	varList$omega<-varList$omega-mydiag(mydiag(varList$omega))+mydiag(varList$diag.omega)
-	
+
 	# Residual error
 	# if (Dargs$error.model=="constant" | Dargs$error.model=="exponential") {
 	# 	sig2<-suffStat$statrese/Dargs$nobs
