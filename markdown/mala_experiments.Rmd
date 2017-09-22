@@ -94,7 +94,7 @@ Here again, in our implementation the adaptive stepsize $\gamma$ updates consist
 
 $$\gamma = \gamma (1+\delta(\alpha(\eta_i^{k},\eta_i^{k-1})-\alpha^{*}))$$
 
-The stationnary distribution of that Markov Chain is the conditional distribution we intended to sample from.
+The stationary distribution of that Markov Chain is the conditional distribution we intended to sample from.
 
 ###Theophylline (12 individuals 10 observations per individual)
 

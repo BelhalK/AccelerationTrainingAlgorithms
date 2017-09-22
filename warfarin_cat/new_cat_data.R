@@ -54,8 +54,8 @@ require(reshape2)
 iter_mcmc = 200
 
 
-# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
