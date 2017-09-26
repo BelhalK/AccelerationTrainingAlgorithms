@@ -12,9 +12,13 @@
 
 \graphicspath{{figures/}} % Location of the graphics files
 \usetheme{CambridgeUS}
+% \usetheme{Frankfurt}
 \usecolortheme{dolphin}
 \usefonttheme{structuresmallcapsserif}
 \setbeamertemplate{blocks}[rounded][shadow=false]
+
+\definecolor{LightBlue}{RGB}{220,220,255}
+\setbeamercolor{block body}{bg=LightBlue}
 \addtobeamertemplate{navigation symbols}{}{%
     \usebeamerfont{footline}%
     \usebeamercolor[fg]{footline}%
@@ -82,10 +86,10 @@
 % \newcommand{\Norm}{\mathcal{N}}
 
 \title{Facebook}
-\subtitle{Mixed effects models: Inference and Maximum Likelihood\\~\\
+\subtitle{Mixed effects models: Maximum Likelihood and Inference\\~\\
 \includegraphics[height=1.5cm]{logo_x}
 \includegraphics[height=1.5cm]{logo_inria}}
-\institute{CMAP, Ecole Polytechnique}
+\institute[]{Belhal Karimi, Marc Lavielle, Eric Moulines}
 \date{September 27th, 2017}
 
 \begin{document}
@@ -95,7 +99,7 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Plan}
+\frametitle{Program}
 \tableofcontents
 \end{frame}
 
@@ -115,7 +119,7 @@
   \item $z_i$ is the individual parameter
   \item $\theta$ is the population parameter
 \end{itemize}
-\item Continuous, non linear and mixed effects models:
+\item \textcolor{purple}{Continuous}, \textcolor{blue}{non linear} and \textcolor{red}{mixed effects} \textcolor{brown}{population} models:
 \begin{equation}
 y_{i} = f(z_{i}) + \epsilon_i
 \end{equation}
@@ -123,10 +127,10 @@ Where:
 \begin{itemize}
   \item The structural model $f: \Theta \to \mathbb{R}$ is non linear and twice differentiable
   \item $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$ and $\sigma \in \mathbb{R}$
-  \item $z_i \sim \mathcal{N}(z_{pop},w^2)$ such that $z_i = z_{pop} + \eta_i$ with $\eta_i \sim \mathcal{N}(0,\omega^2)$
+  \item $z_i \sim \mathcal{N}(z_{pop},\Omega)$ such that $z_i = z_{pop} + \eta_i$ with $\eta_i \sim \mathcal{N}(0,\Omega)$
   \item $y_i | z_i \sim \mathcal{N}(f(z_i),\sigma^2)$
 \end{itemize}
-\item In our case $\theta = (z_{pop}, \omega, \sigma )$
+\item In our case $\theta = (z_{pop}, \Omega, \sigma )$
 
 \end{itemize}
 
@@ -142,7 +146,7 @@ The goal is to compute the maximum likelihood estimate
 
 The EM algorithm (Dempster, Laird and Rubin) is an iterative algorithm that computes this quantity by maximizing an auxialiary quandity $Q: \Theta^2 \to \mathbb{R}$ at a given parameter estimate $\theta'$:
 \begin{equation}
-Q(\theta, \theta) = \mathbb{E}_{p(z|y,\theta')}\left[ \log p(y, z, \theta) \right]
+Q(\theta, \theta') = \mathbb{E}_{p(z|y,\theta')}\left[ \log p(y, z, \theta) \right]
 \end{equation}
 
 Unfortunately, in the framework of nonlinear mixed effects models, there is no explicit expression for the E-step since the relationship between observations y and individual parameters z is nonlinear so the expectation cannot be computed in closed form. Thus, we use a stochastic version of the EM.
@@ -156,7 +160,7 @@ Unfortunately, in the framework of nonlinear mixed effects models, there is no e
 \frametitle{SAEM}
 At a given $\theta^{k-1}$:
 \begin{enumerate}
-  \item $z_i^k \sim p(z_i|y_i,\theta^{k-1})$
+  \item \textcolor{red}{$z_i^k \sim p(z_i|y_i,\theta^{k-1})$ \quad (MCMC)}
   \item $Q^k(\theta) = Q^{k-1}(\theta)+ \gamma_k(\log p(y_i, z_i^k, \theta) - Q^{k-1}(\theta))$
   \item $\theta ^k = \arg \max \limits_{\theta \in \Theta} Q^k(\theta)$
 \end{enumerate}
@@ -165,7 +169,7 @@ At a given $\theta^{k-1}$:
 My goal being to accelerate this algorithm, three approaches have been taken yet:
 \begin{itemize}
   \item Incremental/mini-batch strategies (see Neal $\&$ Hinton on the EM or F.Bach on the SGD)
-  \item Faster MCMC dynamics (SG-MCMC based on an ITO diffusion, see for instance MALA based on a Langevin diffusion)
+  \item Faster MCMC dynamics (SG-MCMC based on an Itô diffusion, see for instance MALA based on a Langevin diffusion)
   \item Efficient proposal for a Metropolis Hastings algorithm based on a Laplace Approximation of the incomplete log likelihood $\log p(y,\theta)$
 \end{itemize}
 
@@ -180,7 +184,7 @@ My goal being to accelerate this algorithm, three approaches have been taken yet
 \frametitle{Inference: MCMC}
 
 \begin{itemize}
-\item First Order Conditional Estimation Method
+\item Laplacian Method
   \begin{enumerate}
     \item Laplace Approximation of the incomplete likelihood around the MAP ($z_{i,MAP} = \arg \max \limits_{z} p(z_i|y_i,\theta)$)
     \begin{align}
@@ -189,13 +193,13 @@ My goal being to accelerate this algorithm, three approaches have been taken yet
     \end{align}
     \item Approximation of the posterior
     \begin{align}
-    -2 \log p(y_i,\theta) = & \underbrace{-p \log(2\pi) +\log(|-\nabla^2\log p(y_i,z_{i,MAP},\theta)|)}_{\approx -2\log p(z_{i,MAP}|y_i,\theta)} \\
+    -2 \log p(y_i,\theta) = & \underbrace{-p \log(2\pi) +\log(|-\nabla^2\log p(y_i,z_{i,MAP},\theta)|)}_{\approx +2\log p(z_{i,MAP}|y_i,\theta)} \\
     & -2\log p(y_i,z_{i,MAP},\theta)
     \end{align}
   \end{enumerate} 
 \item Equivalent to linearizing the structural model $f$ around the MAP:
 \begin{align}
-y_i \approx z_{i,MAP} + (z_i - z_{i,MAP})\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i \implies z_i|y_i \sim \mathcal{N}(\mu, \Gamma)
+y_i \approx z_{i,MAP} + ^{t}(z_i - z_{i,MAP}).\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i \implies z_i|y_i \sim \mathcal{N}(\mu, \Gamma)
 \end{align}
 
 
@@ -213,10 +217,26 @@ y_i \approx z_{i,MAP} + (z_i - z_{i,MAP})\nabla_{z_i} f(z_{i,MAP}) + \epsilon_i 
 \frametitle{PK-PD datasets}
 
 \begin{itemize}
-\item The data comes from 37 winter wheat experiments carried out between 1990
-and 1996 on commercial farms near Paris, France. Each experiment was from a different site.
-\item Each experiment consisted of five to eight different nitrogen fertiliser rates, for a total of 224 nitrogen treatments. Nitrogen fertilizer was applied in two applications during the growing season. For each nitrogen treatment, grain yield (adjusted to 150 g.kg-1 grain moisture content) was measured.
+\item 37 winter wheat experiments consisting in five to eight different nitrogen fertiliser rates, for a total of 224 nitrogen treatments. Nitrogen fertilizer was applied in two applications during the growing season. For each nitrogen treatment, grain yield (adjusted to 150 g.kg-1 grain moisture content) was measured.
 \item In this problem the sites are denoted by the index "i" and are the individuals in the dataset, the predictor is the dosage, the response is the grain yield and the covariate is the soil nitrogen
+
+\item We use a Quadratic Plateau model here and the structural model is:
+
+
+
+
+\begin{block}{}
+\begin{equation}
+    f(z_i)= 
+\begin{cases}
+    (Y_{max})_i + B_i*(t_i-(X_{max})_i)^2 ,& \text{if } t\geq (X_{max})_i\\
+    (Y_{max})_i,              & \text{otherwise}
+\end{cases}
+\end{equation}
+\end{block}
+Where $z_i=((X_{max})_i,(Y_{max})_i,B_i)$.
+
+
 \end{itemize}
 \end{frame}
 
@@ -227,8 +247,12 @@ and 1996 on commercial farms near Paris, France. Each experiment was from a diff
 \item New independent proposal. At a given iteration $k$:
 
   \begin{equation}
-  z_i^k \sim \mathcal{N}(z_{i,MAP}, |-\nabla^2\log p(y_i,z_{i,MAP},\theta)|)
+  z_i^k \sim \mathcal{N}(z_{i,MAP}, [-\nabla^2\log p(y_i,z_{i,MAP},\theta)]^{-1})
   \end{equation}
+With:
+\begin{equation}
+\nabla^2\log p(y_i,z_{i,MAP},\theta) = - \frac{\nabla p(y_i|z_i,\theta)^t \nabla p(y_i|z_i,\theta)}{p(y_i|z_i,\theta)^2} - \Omega^{-1}
+\end{equation}
 \item Comparison of the MCMC properties with:
 \begin{itemize}
   \item Random Walk Metropolis (proposal $\mathcal{N}(z_i^k , \Omega)$)
@@ -239,9 +263,8 @@ and 1996 on commercial farms near Paris, France. Each experiment was from a diff
 
 \begin{center}
 \begin{tabular}{SSSSSSSS} \toprule
-    {$m$} & {RWM} & {MALA} & {Laplace} \\ \midrule
-    JSSD  & 0.02237 & 0.04297 & 0.14297 \\
-    VAR & 0.45   & +0.421 & 0.45  \\ \bottomrule
+    {$$} & {RWM} & {MALA} & {Laplace} \\ \midrule
+    MJSD  & 0.02237 & 0.04297 & 0.14297  \\ \bottomrule
 \end{tabular}
 \end{center}
 
@@ -268,7 +291,7 @@ and 1996 on commercial farms near Paris, France. Each experiment was from a diff
       
       \includegraphics[scale=0.2]{mala_autocorr.pdf}
       \begin{center}
-      \caption{MALA}fa
+      \caption{MALA}
       \end{center}
     \end{column}
 
@@ -284,24 +307,15 @@ and 1996 on commercial farms near Paris, France. Each experiment was from a diff
 \end{frame}
 
 \begin{frame}
-\frametitle{PK-PD datasets}
-
-We use a Linear Plateau model here and the the structural model is:
-\begin{equation}
-    f(z_i)= 
-\begin{cases}
-    (Y_{max})_i + B_i*(t_i-(X_{max})_i) ,& \text{if } t\geq (X_{max})_i\\
-    (Y_{max})_i,              & \text{otherwise}
-\end{cases}
-\end{equation}
-Where $z_i=((X_{max})_i,(Y_{max})_i,B_i)$.
+\frametitle{SAEM Parameter estimates}
 
 
+Estimates of the population parameters and the random effects using RWM SAEM vs Laplace SAEM
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.3]{map.pdf}
 \end{center}
-\caption{Estimate of $X_{Max}$ for 100 replicates}
+\caption{Estimates for 100 replicates}
 \end{figure}
 
 \end{frame}

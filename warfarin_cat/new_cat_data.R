@@ -114,6 +114,10 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 
 
+
+
+
+
 #MAP then RWM
 cat_saem <- NULL
 options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:50))

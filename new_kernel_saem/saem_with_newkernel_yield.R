@@ -78,7 +78,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 
-K1 = 200
+K1 = 100
 K2 = 50
 iteration = 1:(K1+K2+1)
 gd_step = 0.00001
@@ -100,6 +100,8 @@ options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iteration, theo_new_ref)
 
+
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="RWM vs Laplace SAEM")
 # #MAP once and  NO GD
 # options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
 # theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
