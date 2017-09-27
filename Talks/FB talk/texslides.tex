@@ -128,7 +128,7 @@ Where:
   \item The structural model $f: \Theta \to \mathbb{R}$ is non linear and twice differentiable
   \item $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$ and $\sigma \in \mathbb{R}$
   \item $z_i \sim \mathcal{N}(z_{pop},\Omega)$ such that $z_i = z_{pop} + \eta_i$ with $\eta_i \sim \mathcal{N}(0,\Omega)$
-  \item $y_i | z_i \sim \mathcal{N}(f(z_i),\sigma^2)$
+  \item $y_i | z_i \sim \mathcal{N}(f(z_i),\sigma^2)$ (hierarchical model)
 \end{itemize}
 \item In our case $\theta = (z_{pop}, \Omega, \sigma )$
 
@@ -166,7 +166,7 @@ At a given $\theta^{k-1}$:
 \end{enumerate}
 
 
-My goal being to accelerate this algorithm, three approaches have been taken yet:
+How to accelerate the algorithm?
 \begin{itemize}
   \item Incremental/mini-batch strategies (see Neal $\&$ Hinton on the EM or F.Bach on the SGD)
   \item Faster MCMC dynamics (SG-MCMC based on an Itô diffusion, see for instance MALA based on a Langevin diffusion)
@@ -193,7 +193,7 @@ My goal being to accelerate this algorithm, three approaches have been taken yet
     \end{align}
     \item Approximation of the posterior
     \begin{align}
-    -2 \log p(y_i,\theta) = & \underbrace{-p \log(2\pi) +\log(|-\nabla^2\log p(y_i,z_{i,MAP},\theta)|)}_{\approx +2\log p(z_{i,MAP}|y_i,\theta)} \\
+    -2 \log p(y_i,\theta) = & \underbrace{\textcolor{red}{-p \log(2\pi) +\log(|-\nabla^2\log p(y_i,z_{i,MAP},\theta)|)}}_{\approx +2\log p(z_{i,MAP}|y_i,\theta)} \\
     & -2\log p(y_i,z_{i,MAP},\theta)
     \end{align}
   \end{enumerate} 
@@ -263,8 +263,9 @@ With:
 
 \begin{center}
 \begin{tabular}{SSSSSSSS} \toprule
-    {$$} & {RWM} & {MALA} & {Laplace} \\ \midrule
-    MJSD  & 0.02237 & 0.04297 & 0.14297  \\ \bottomrule
+    {$Y_{max}$} & {RWM} & {MALA} & {Laplace} \\ \midrule
+    MJSD  & 0.02237 & 0.04297 & 0.14297  \\ 
+    Var($\frac{1}{K}\sum_{k=1}^{K}{z^k_i}$)  & 0.007 & 0.018 & 0.006  \\ \bottomrule
 \end{tabular}
 \end{center}
 

@@ -54,8 +54,9 @@ require(reshape2)
 iter_mcmc = 200
 
 
-cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
@@ -120,7 +121,7 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:50))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
