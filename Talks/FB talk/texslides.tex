@@ -161,7 +161,7 @@ Unfortunately, in the framework of nonlinear mixed effects models, there is no e
 At a given $\theta^{k-1}$:
 \begin{enumerate}
   \item \textcolor{red}{$z_i^k \sim p(z_i|y_i,\theta^{k-1})$ \quad (MCMC)}
-  \item $Q^k(\theta) = Q^{k-1}(\theta)+ \gamma_k(\log p(y_i, z_i^k, \theta) - Q^{k-1}(\theta))$
+  \item $Q^k(\theta) = Q^{k-1}(\theta)+ \gamma_k(\sum_{i=1}^{N}{\log p(y_i, z_i^k, \theta)} - Q^{k-1}(\theta))$
   \item $\theta ^k = \arg \max \limits_{\theta \in \Theta} Q^k(\theta)$
 \end{enumerate}
 
@@ -214,7 +214,7 @@ y_i \approx z_{i,MAP} + ^{t}(z_i - z_{i,MAP}).\nabla_{z_i} f(z_{i,MAP}) + \epsil
 \section{Applications}
 
 \begin{frame}
-\frametitle{PK-PD datasets}
+\frametitle{}
 
 \begin{itemize}
 \item 37 winter wheat experiments consisting in five to eight different nitrogen fertiliser rates, for a total of 224 nitrogen treatments. Nitrogen fertilizer was applied in two applications during the growing season. For each nitrogen treatment, grain yield (adjusted to 150 g.kg-1 grain moisture content) was measured.

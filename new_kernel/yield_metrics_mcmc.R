@@ -43,7 +43,6 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1000
 
 
 
@@ -76,12 +75,70 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+
+
+
+
+
+
+indiv = 1
+seed0 = 1
+replicate = 5
+iter_mcmc = 3000
+burn = 400
+
+
+
+saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
 
 
 post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_newkernel
+
+
+#expectations
+expec_rwm <- post_rwm[[indiv]]
+var_rwm <- post_rwm[[indiv]]
+for (j in 1:replicate){
+  print(j)
+  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+  post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+  # print(post_rwm[[indiv]][44,2:4])
+  post_rwm[[indiv]]['individual'] <- j
+  expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
+  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2] - mean(post_rwm[[indiv]][burn:iter_mcmc,2]))^2
+  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3] - mean(post_rwm[[indiv]][burn:iter_mcmc,3]))^2
+  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4] - mean(post_rwm[[indiv]][burn:iter_mcmc,4]))^2
+}
+expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
+var_rwm[,2:4] <- var_rwm[,2:4]/replicate
+
+graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
+graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+
+
+
+expec_new <- post_newkernel[[indiv]]
+var_new <- post_newkernel[[indiv]]
+for (j in 1:replicate){
+  print(j)
+  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+  post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_newkernel)$post_newkernel
+  post_newkernel[[indiv]]['individual'] <- j
+  expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
+  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2] - mean(post_newkernel[[indiv]][burn:iter_mcmc,2]))^2
+  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3] - mean(post_newkernel[[indiv]][burn:iter_mcmc,3]))^2
+  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4] - mean(post_newkernel[[indiv]][burn:iter_mcmc,4]))^2
+}
+expec_new[,2:4] <- expec_new[,2:4]/replicate
+var_new[,2:4] <- var_new[,2:4]/replicate
+
+
+graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+graphConvMC_twokernels(var_rwm,var_new, title="Variances")
+
+
 
 
 
@@ -97,14 +154,17 @@ for (i in 2:length(post_newkernel)) {
 }
 
 
-#ALl individual posteriors
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_newkernel, title="VB Linear case")
+
+
 #first individual posteriors
 graphConvMC_new(post_rwm[[1]], title="EM")
 
+graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
+graphConvMC_twokernels(final_new,final_new, title="EM")
+
 graphConvMC_twokernels(final_rwm,final_newkernel, title="EM")
 graphConvMC_twokernels(post_rwm[[1]],post_newkernel[[1]], title="EM")
+graphConvMC_twokernels(post_rwm[[1]],post_rwm[[1]], title="EM")
 
 
 

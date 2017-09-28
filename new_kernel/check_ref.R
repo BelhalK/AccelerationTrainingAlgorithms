@@ -43,7 +43,6 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 1000
 
 
 
@@ -76,41 +75,27 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.options_linear<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
-
-
-post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_newkernel
-
-
-
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
-}
-
-
-final_newkernel <- post_newkernel[[1]]
-for (i in 2:length(post_newkernel)) {
-  final_newkernel <- rbind(final_newkernel, post_newkernel[[i]])
-}
-
-
-#ALl individual posteriors
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_new(final_newkernel, title="VB Linear case")
-#first individual posteriors
-graphConvMC_new(post_rwm[[1]], title="EM")
-
-graphConvMC_twokernels(final_rwm,final_newkernel, title="EM")
-graphConvMC_twokernels(post_rwm[[1]],post_newkernel[[1]], title="EM")
 
 
 
 
-# theo.onlypop<-saemix(saemix.model,saemix.data,saemix.options)
 
-# saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
-# plot(saemix.fit,plot.type="individual")
+
+indiv = 1
+seed0 = 1
+replicate = 5
+iter_mcmc = 3000
+burn = 400
+
+
+
+saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+
+
+post_rwm<-saemix_ref(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
+
+indiv = 1
+graphConvMC_twokernels(post_rwm[[indiv]],post_rwm[[indiv]], title="EM")
+
 
