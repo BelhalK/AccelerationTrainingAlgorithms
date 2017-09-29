@@ -64,7 +64,7 @@
 #' 
 #' 
 #' @export saemix
-saemix_newkernel<-function(model,data,control=list()) {
+saemix_ref<-function(model,data,control=list()) {
 
  if(class(model)!="SaemixModel") {
     cat("Please provide a valid model object (see the help page for SaemixModel)\n")
@@ -133,16 +133,13 @@ saemix_newkernel<-function(model,data,control=list()) {
   structural.model<-saemix.model["model"]
   #  nb.parameters<-saemix.model["nb.parameters"]
 
-  xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM, saemixObject)
+  xmcmc<-estep_check(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
   # xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
-  post_rwm<-xmcmc$post_rwm
-  post_newkernel<-xmcmc$post_newkernel
-  dens_rwm<-xmcmc$dens_rwm
-  dens_newkernel<-xmcmc$dens_newkernel
-  map<-xmcmc$map
-  return(list(post_rwm = post_rwm,post_newkernel = post_newkernel,dens_rwm = dens_rwm,dens_newkernel = dens_newkernel, map = map))
+  post_rwm<-xmcmc$post
+
+  return(list(post_rwm = post_rwm))
 
 }

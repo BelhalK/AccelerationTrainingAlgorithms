@@ -30,7 +30,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel")
 source('newkernel_main.R')
 source('main_estep_newkernel.R')
-
+source('check_main.R')
+source('main_estep_check.R')
 
 require(ggplot2)
 require(gridExtra)
@@ -48,6 +49,7 @@ require(reshape2)
 
 # Doc
 data(yield.saemix)
+yield.saemix_less <- yield.saemix[1:22,]
 saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
   name.predictors=c("dose"),name.response=c("yield"),
   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
@@ -69,6 +71,8 @@ yield.LP<-function(psi,id,xidep) {
   f[x>xmax]<-ymax[x>xmax]
   return(f)
 }
+
+
 saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
@@ -82,20 +86,44 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 indiv = 1
-seed0 = 1
+seed0 = 39546
 replicate = 5
-iter_mcmc = 3000
+iter_mcmc = 5000
 burn = 400
 
 
 
-saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc))
+
 
 
 post_rwm<-saemix_ref(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
 
-indiv = 1
-graphConvMC_twokernels(post_rwm[[indiv]],post_rwm[[indiv]], title="EM")
+final_rwm <- post_rwm[[1]]
+for (i in 2:length(post_rwm)) {
+  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+}
+
+
+indiv = 2
+graphConvMC_twokernels(post_rwm[[indiv]],post_rwm[[indiv]], title="posterior samples")
+
+
+graphConvMC_twokernels(final_rwm,final_rwm, title="posterior samples")
+
+
+# K1=200
+# K2=50
+# iteration = K1 +K2
+# options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+# theo_ref<-data.frame(saemix(saemix.model,saemix.data,options)$parpop)
+# theo_ref <- cbind(iteration, theo_ref)
+
+
+# graphConvMC_twokernels(theo_ref,theo_ref, title="RWM vs Laplace SAEM")
+
+
+
+
 
 

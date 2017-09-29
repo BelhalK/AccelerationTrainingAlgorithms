@@ -48,11 +48,11 @@ require(reshape2)
 
 # Doc
 data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
+yield.saemix_less <- yield.saemix[1:22,]
+saemix.data<-saemixData(name.data=yield.saemix_less,header=TRUE,name.group=c("site"),
   name.predictors=c("dose"),name.response=c("yield"),
   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
   covariates=c("kg/ha")))
-
 yield.LP<-function(psi,id,xidep) {
 # input:
 #   psi : matrix of parameters (3 columns, ymax, xmax, slope)
@@ -82,7 +82,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 indiv = 1
-seed0 = 1
+seed0 = 356
 replicate = 5
 iter_mcmc = 3000
 burn = 400
@@ -90,11 +90,44 @@ burn = 400
 
 
 saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
 
 
-post_rwm<-saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)$post_newkernel
+ref <- saemix_newkernel(saemix.model,saemix.data,saemix.options_rwm)
+new<-saemix_newkernel(saemix.model,saemix.data,saemix.options_linear)
+
+post_rwm<-ref$post_rwm
+post_newkernel<-new$post_newkernel
+
+dens_rwm<-ref$dens_rwm
+dens_newkernel<-new$dens_newkernel
+
+indiv = 1
+
+U.y <- dens_rwm[[indiv]][20:iter_mcmc,]
+U.eta <- dens_rwm[[indiv]][20:iter_mcmc,]
+
+
+graphConvMC_twokernels(post_rwm[[indiv]],post_rwm[[indiv]], title="post")
+graphConvMC_twokernels(post_rwm[[indiv]],post_newkernel[[indiv]], title="post")
+
+graphConvMC_twokernels(dens_rwm[[indiv]][1:iter_mcmc,],dens_newkernel[[indiv]][1:iter_mcmc,], title="Uy")
+graphConvMC_twokernels(dens_rwm[[indiv]][20:iter_mcmc,],dens_newkernel[[indiv]][20:iter_mcmc,], title="dens both methods")
+
+
+graphConvMC_twokernels(post_rwm[[indiv]][20:iter_mcmc,c(1,4,5)],U.y, title="Uy and post")
+graphConvMC_twokernels(post_rwm[[indiv]][20:iter_mcmc,c(1,4,5)],U.eta, title="Ueta and post")
+
+
+
+
+graphConvMC_twokernels(U.y,U.y, title="Uy")
+graphConvMC_twokernels(U.eta,U.eta, title="Ueta")
+graphConvMC_twokernels(dens_rwm[[indiv]][20:iter_mcmc,],dens_rwm[[indiv]][20:iter_mcmc,], title="sum")
+
+graphConvMC_twokernels(U.eta,U.y, title="Uy Ueta")
+
+
 
 
 #expectations
@@ -107,9 +140,9 @@ for (j in 1:replicate){
   # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
   expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
-  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2] - mean(post_rwm[[indiv]][burn:iter_mcmc,2]))^2
-  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3] - mean(post_rwm[[indiv]][burn:iter_mcmc,3]))^2
-  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4] - mean(post_rwm[[indiv]][burn:iter_mcmc,4]))^2
+  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
+  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
+  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4])^2
 }
 expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
 var_rwm[,2:4] <- var_rwm[,2:4]/replicate
@@ -127,9 +160,9 @@ for (j in 1:replicate){
   post_newkernel<-saemix_newkernel(saemix.model,saemix.data,saemix.options_newkernel)$post_newkernel
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
-  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2] - mean(post_newkernel[[indiv]][burn:iter_mcmc,2]))^2
-  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3] - mean(post_newkernel[[indiv]][burn:iter_mcmc,3]))^2
-  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4] - mean(post_newkernel[[indiv]][burn:iter_mcmc,4]))^2
+  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
+  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
+  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4])^2
 }
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
