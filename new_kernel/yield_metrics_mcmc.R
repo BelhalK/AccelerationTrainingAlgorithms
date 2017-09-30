@@ -60,6 +60,7 @@ yield.LP<-function(psi,id,xidep) {
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
+  # browser()
   x<-xidep[,1]
   ymax<-psi[id,1]
   xmax<-psi[id,2]
@@ -82,7 +83,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 
 
 indiv = 1
-seed0 = 356
+seed0 = 35644
 replicate = 5
 iter_mcmc = 3000
 burn = 400
@@ -100,18 +101,40 @@ post_rwm<-ref$post_rwm
 post_newkernel<-new$post_newkernel
 
 dens_rwm<-ref$dens_rwm
+dens_Ueta<-ref$dens_Ueta
 dens_newkernel<-new$dens_newkernel
 
 indiv = 1
 
-U.y <- dens_rwm[[indiv]][20:iter_mcmc,]
-U.eta <- dens_rwm[[indiv]][20:iter_mcmc,]
+# U.y <- dens_rwm[[indiv]][20:iter_mcmc,]
+# U.eta <- dens_rwm[[indiv]][20:iter_mcmc,]
+
+
+graphConvMC_twokernels(post_rwm[[indiv]][301:350,],post_rwm[[indiv]][301:350,], title="post")
+graphConvMC_twokernels(dens_rwm[[indiv]][301:350,],dens_rwm[[indiv]][301:350,], title="Uy")
+graphConvMC_twokernels(dens_Ueta[[indiv]][301:350,],dens_Ueta[[indiv]][301:350,], title="Ueta")
+
+graphConvMC_twokernels(post_rwm[[indiv]][501:550,],post_rwm[[indiv]][501:550,], title="post")
+graphConvMC_twokernels(dens_rwm[[indiv]][501:550,],dens_rwm[[indiv]][501:550,], title="Uy")
+graphConvMC_twokernels(dens_Ueta[[indiv]][501:550,],dens_Ueta[[indiv]][501:550,], title="Ueta")
+
+graphConvMC_twokernels(post_rwm[[indiv]][301:350,],post_rwm[[indiv]][501:550,], title="post")
+graphConvMC_twokernels(dens_Ueta[[indiv]][301:350,],dens_Ueta[[indiv]][501:550,], title="Ueta")
+graphConvMC_twokernels(dens_rwm[[indiv]][301:350,],dens_rwm[[indiv]][501:550,], title="Ueta")
+
+
+graphConvMC_twokernels(post_rwm[[indiv]][301:650,],post_rwm[[indiv]][301:650,], title="post")
+graphConvMC_twokernels(dens_rwm[[indiv]][301:650,],dens_rwm[[indiv]][301:650,], title="Uy")
+graphConvMC_twokernels(dens_Ueta[[indiv]][301:650,],dens_Ueta[[indiv]][301:650,], title="Ueta")
+
+
 
 
 graphConvMC_twokernels(post_rwm[[indiv]],post_rwm[[indiv]], title="post")
 graphConvMC_twokernels(post_rwm[[indiv]],post_newkernel[[indiv]], title="post")
 
 graphConvMC_twokernels(dens_rwm[[indiv]][1:iter_mcmc,],dens_newkernel[[indiv]][1:iter_mcmc,], title="Uy")
+
 graphConvMC_twokernels(dens_rwm[[indiv]][20:iter_mcmc,],dens_newkernel[[indiv]][20:iter_mcmc,], title="dens both methods")
 
 
@@ -123,9 +146,11 @@ graphConvMC_twokernels(post_rwm[[indiv]][20:iter_mcmc,c(1,4,5)],U.eta, title="Ue
 
 graphConvMC_twokernels(U.y,U.y, title="Uy")
 graphConvMC_twokernels(U.eta,U.eta, title="Ueta")
-graphConvMC_twokernels(dens_rwm[[indiv]][20:iter_mcmc,],dens_rwm[[indiv]][20:iter_mcmc,], title="sum")
+graphConvMC_twokernels(dens_rwm[[indiv]][,],dens_newkernel[[indiv]][,], title="sum")
+graphConvMC_twokernels(dens_rwm[[indiv]][,],dens_rwm[[indiv]][,], title="sum")
 
 graphConvMC_twokernels(U.eta,U.y, title="Uy Ueta")
+graphConvMC_twokernels(U.eta+U.y,U.y+U.eta, title="Uy Ueta")
 
 
 

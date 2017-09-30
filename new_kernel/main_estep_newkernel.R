@@ -45,10 +45,13 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 	    phii<-saemixObject["results"]["phi"][i,]
 	    phi1<-phii[i1.omega2]
+	
 	    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 	    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 	    phi.map[i,i1.omega2]<-phi1.opti$par
 	  }
+
+
 
   	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
 	map.psi<-data.frame(id=id.list,map.psi)
@@ -72,6 +75,10 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 
 
+
+	
+
+
 	post_rwm <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
 	for (i in 1:(nrow(phiM))) {
 		post_rwm[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
@@ -90,6 +97,14 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 		dens_rwm[[i]][,ncol(dens_rwm[[i]])] <- i
 	}
 
+	dens_Ueta <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = 3)))
+	for (i in 1:(nrow(phiM))) {
+		dens_Ueta[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = 3))
+		names(dens_Ueta[[i]])[1] <- "iteration" 
+		names(dens_Ueta[[i]])[ncol(dens_Ueta[[i]])] <- "individual"
+		dens_Ueta[[i]][,1] <- 1:max(opt$nbiter.mcmc)
+		dens_Ueta[[i]][,ncol(dens_Ueta[[i]])] <- i
+	}
 	
 
 	post_newkernel <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
@@ -120,9 +135,16 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 
 
 		for (i in 1:(nrow(phiM))) {
-			dens_rwm[[i]][u,2] <- U.y[i]+U.eta[i]
+			dens_rwm[[i]][u,2] <- U.y[i]
 		}
 
+		for (i in 1:(nrow(phiM))) {
+			dens_Ueta[[i]][u,2] <- U.eta[i]
+		}
+
+		for (i in 1:(nrow(phiM))) {
+			post_rwm[[i]][u,2:(ncol(post_rwm[[i]]) - 1)] <- etaM[i,]
+		}
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -140,7 +162,51 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 		U.eta[ind]<-Uc.eta[ind]
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
-		
+
+		if(u>350){
+			browser()
+		}
+
+
+		for(i in 1:Dargs$NM) {
+	    isuj<-id.list[i]
+	    xi<-xind[id==isuj,,drop=FALSE]
+	#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+	    yi<-yobs[id==isuj]
+	    idi<-rep(1,length(yi))
+	    mean.phi1<-mean.phiM[i,]
+	    phii<-phiM[i,]
+	    phi1<-phii[i1.omega2]
+	
+	    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
+	    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
+	    phi.map[i,i1.omega2]<-phi1.opti$par
+	  }
+
+	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+	map.psi<-data.frame(id=id.list,map.psi)
+	map.phi<-data.frame(id=id.list,phi.map)
+
+	psi_map <- as.matrix(map.psi[,-c(1)])
+	phi_map <- as.matrix(map.phi[,-c(1)])
+	new_map <- phi_map - mean.phiM
+
+		# psiM<-transphi(phiM,Dargs$transform.par)
+		# fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+		# if(Dargs$error.model=="exponential")
+		# 	fpred<-log(cutoff(fpred))
+		# gpred<-error(fpred,varList$pres)
+		# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+		# U.y<-colSums(DYF)
+		# U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+
+		# U.y + U.eta
+		# conditional.distribution(phiM[1,],phiM[1,],Dargs$IdM[1:6],Dargs$XM[1:6,,drop=FALSE],Dargs$yM[1:6],mean.phiM[1,],i1.omega2,somega,Dargs$transform.par,structural.model,varList$pres,Dargs$error.model)
+		# U.y
+		# U.eta
+
+	
 		
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
@@ -195,9 +261,7 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
-				for (i in 1:(nrow(phiM))) {
-					post_rwm[[i]][u,2:(ncol(post_rwm[[i]]) - 1)] <- etaM[i,]
-				}
+				
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 
@@ -343,6 +407,6 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	
 		
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_newkernel = post_newkernel, dens_rwm = dens_rwm,dens_newkernel = dens_newkernel, map = eta_map))
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_newkernel = post_newkernel, dens_rwm = dens_rwm,dens_Ueta = dens_Ueta,dens_newkernel = dens_newkernel, map = eta_map))
 }
 

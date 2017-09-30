@@ -141,8 +141,9 @@ saemix_newkernel<-function(model,data,control=list()) {
   post_rwm<-xmcmc$post_rwm
   post_newkernel<-xmcmc$post_newkernel
   dens_rwm<-xmcmc$dens_rwm
+  dens_Ueta<-xmcmc$dens_Ueta
   dens_newkernel<-xmcmc$dens_newkernel
   map<-xmcmc$map
-  return(list(post_rwm = post_rwm,post_newkernel = post_newkernel,dens_rwm = dens_rwm,dens_newkernel = dens_newkernel, map = map))
+  return(list(post_rwm = post_rwm,post_newkernel = post_newkernel,dens_rwm = dens_rwm,dens_Ueta=dens_Ueta,dens_newkernel = dens_newkernel, map = map))
 
 }
