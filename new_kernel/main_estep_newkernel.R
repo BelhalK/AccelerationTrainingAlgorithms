@@ -163,9 +163,6 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
-		if(u>350){
-			browser()
-		}
 
 
 		for(i in 1:Dargs$NM) {
@@ -247,6 +244,7 @@ mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 			for(k2 in 1:nb.iter2) {
 				vk2<-VK[k2+vk]
 				etaMc<-etaM
+				
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)

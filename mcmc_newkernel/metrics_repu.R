@@ -1,5 +1,5 @@
 #library(rstan)
-setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+setwd("/home/belhal.karimi/Desktop/Belhal/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -27,7 +27,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
   source("mixtureFunctions.R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+setwd("/home/belhal.karimi/Desktop/Belhal/mcmc_newkernel")
 source('mcmc.R')
 
 
@@ -56,6 +56,7 @@ yield.LP<-function(psi,id,xidep) {
   return(f)
 }
 
+
 saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
@@ -63,10 +64,11 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
   byrow=TRUE),error.model="constant")
 
 
+
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 1000
+iter_mcmc = 100000
 burn = 400
 
 
@@ -76,8 +78,12 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
+  
+eta <- graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
+ggsave(plot = eta, file = paste("eta.pdf"))
 
-graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
-graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
+Uy <- graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
+ggsave(plot = Uy, file = paste("densy.pdf"))
 
+Ueta <- graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
+ggsave(plot = Ueta, file = paste("denseta.pdf"))
