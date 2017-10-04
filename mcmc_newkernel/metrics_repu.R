@@ -87,3 +87,6 @@ ggsave(plot = Uy, file = paste("densy.pdf"))
 
 Ueta <- graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 ggsave(plot = Ueta, file = paste("denseta.pdf"))
+
+
+

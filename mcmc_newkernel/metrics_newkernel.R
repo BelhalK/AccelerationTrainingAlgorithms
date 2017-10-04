@@ -29,6 +29,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source("mixtureFunctions.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
 source('mcmc.R')
+source('mcmc_mix.R')
 
 
 
@@ -66,7 +67,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 1000
+iter_mcmc = 3000
 burn = 400
 
 
@@ -76,10 +77,19 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
+saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
+
+
+
+
+graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
+graphConvMC_twokernels(new_mix$densy[[indiv]],new$densy[[indiv]], title="Uy")
+graphConvMC_twokernels(new_mix$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 
 
 pack1 <- 100:150
