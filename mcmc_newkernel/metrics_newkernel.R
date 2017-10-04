@@ -81,3 +81,9 @@ graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 
+
+pack1 <- 100:150
+pack2 <- 450:500
+graphConvMC_twokernels(ref$densy[[indiv]][pack1,],ref$densy[[indiv]][pack2,], title="Uy")
+graphConvMC_twokernels(ref$eta[[indiv]][pack1,],ref$eta[[indiv]][pack2,], title="eta")
+
