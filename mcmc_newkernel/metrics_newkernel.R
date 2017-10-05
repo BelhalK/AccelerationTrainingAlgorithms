@@ -68,7 +68,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 1000
+iter_mcmc = 3000
 burn = 400
 
 
@@ -92,6 +92,8 @@ graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 
+graphConvMC_twokernels(new$denseta[[indiv]]+new$densy[[indiv]],ref$denseta[[indiv]]+ref$densy[[indiv]], title="Ueta")
+
 graphConvMC_twokernels(new_sum$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 
 
@@ -113,4 +115,53 @@ graphConvMC_twokernels(new$eta[[indiv]][pack1,],new$eta[[indiv]][pack2,], title=
 
 graphConvMC_twokernels(new_mix$densy[[indiv]][pack1,],new_mix$densy[[indiv]][pack2,], title="Uy")
 graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,], title="eta")
+
+
+
+
+
+
+#expectations
+expec_rwm <- ref$eta[[indiv]]
+var_rwm <- ref$eta[[indiv]]
+for (j in 1:replicate){
+  print(j)
+  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+  post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
+  # print(post_rwm[[indiv]][44,2:4])
+  post_rwm[[indiv]]['individual'] <- j
+  expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
+  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
+  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
+  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4])^2
+}
+expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
+var_rwm[,2:4] <- var_rwm[,2:4]/replicate
+
+graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
+graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+
+
+
+expec_new <- new$eta[[indiv]]
+var_new <- new$eta[[indiv]]
+for (j in 1:replicate){
+  print(j)
+  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+  post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
+  post_newkernel[[indiv]]['individual'] <- j
+  expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
+  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
+  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
+  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4])^2
+}
+expec_new[,2:4] <- expec_new[,2:4]/replicate
+var_new[,2:4] <- var_new[,2:4]/replicate
+
+
+graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+graphConvMC_twokernels(var_rwm,var_new, title="Variances")
+
+
+
 
