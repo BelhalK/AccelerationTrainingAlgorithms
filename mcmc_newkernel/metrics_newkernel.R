@@ -67,7 +67,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 3000
+iter_mcmc = 1000
 burn = 400
 
 
@@ -77,13 +77,15 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
 new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 
+graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="truevar")
+graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="largevar")
 
 
 
@@ -92,8 +94,15 @@ graphConvMC_twokernels(new_mix$densy[[indiv]],new$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new_mix$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 
 
-pack1 <- 100:150
-pack2 <- 450:500
+pack1 <- 100:230
+pack2 <- 450:580
 graphConvMC_twokernels(ref$densy[[indiv]][pack1,],ref$densy[[indiv]][pack2,], title="Uy")
 graphConvMC_twokernels(ref$eta[[indiv]][pack1,],ref$eta[[indiv]][pack2,], title="eta")
+
+graphConvMC_twokernels(new$densy[[indiv]][pack1,],new$densy[[indiv]][pack2,], title="Uy")
+graphConvMC_twokernels(new$eta[[indiv]][pack1,],new$eta[[indiv]][pack2,], title="eta")
+
+graphConvMC_twokernels(new_mix$densy[[indiv]][pack1,],new_mix$densy[[indiv]][pack2,], title="Uy")
+graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,], title="eta")
+
 

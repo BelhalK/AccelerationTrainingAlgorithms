@@ -172,7 +172,7 @@ pb <- txtProgressBar(min = 0, max = iter, style = 1)
 for(u in 1:opt$nbiter.mcmc[4]) {
 
 
-	if(u%%100<3){
+	if(u%%100<35){
 		print(u)
 		print("rwm")
 		for (m in 1:10){

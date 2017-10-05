@@ -68,7 +68,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 100000
+iter_mcmc = 1000
 burn = 400
 
 
