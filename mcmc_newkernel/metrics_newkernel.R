@@ -30,6 +30,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
 source('mcmc.R')
 source('mcmc_mix.R')
+source('mcmc_sum.R')
 
 
 
@@ -80,19 +81,25 @@ new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
 new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
+
+saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
+
+
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 
-graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="truevar")
-graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="largevar")
+graphConvMC_twokernels(new_sum$densy[[indiv]],ref$densy[[indiv]], title="Uy")
+
 
 
 
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new_mix$densy[[indiv]],new$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new_mix$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-
+graphConvMC_twokernels(new_mix$eta[[indiv]],ref$eta[[indiv]], title="eta")
+graphConvMC_twokernels(new_mix$eta[[indiv]],new$eta[[indiv]], title="eta")
 
 pack1 <- 100:230
 pack2 <- 450:580
@@ -104,5 +111,4 @@ graphConvMC_twokernels(new$eta[[indiv]][pack1,],new$eta[[indiv]][pack2,], title=
 
 graphConvMC_twokernels(new_mix$densy[[indiv]][pack1,],new_mix$densy[[indiv]][pack2,], title="Uy")
 graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,], title="eta")
-
 
