@@ -68,25 +68,56 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 1000
+iter_mcmc = 1000000
 burn = 400
 
 
 saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
 saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
 
-ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
+# ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
   
-eta <- graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
-ggsave(plot = eta, file = paste("eta.pdf"))
+# eta <- graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
+# ggsave(plot = eta, file = paste("eta.pdf"))
 
-Uy <- graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-ggsave(plot = Uy, file = paste("densy.pdf"))
+pack1 <- 10000:20000
+pack2 <- 100000:110000
+pack3 <- 200000:210000
+pack4 <- 300000:310000
+pack5 <- 400000:410000
+pack6 <- 500000:510000
+pack7 <- 600000:610000
+pack8 <- 700000:710000
+pack9 <- 800000:810000
+pack10 <- 900000:910000
 
-Ueta <- graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
-ggsave(plot = Ueta, file = paste("denseta.pdf"))
+
+Uy1 <- graphConvMC_twokernels(new$densy[[indiv]][pack1,],new$densy[[indiv]][pack1,], title="Uy")
+ggsave(plot = Uy1, file = paste("densy1.pdf"))
+Uy2 <- graphConvMC_twokernels(new$densy[[indiv]][pack2,],new$densy[[indiv]][pack2,], title="Uy")
+ggsave(plot = Uy2, file = paste("densy2.pdf"))
+Uy3 <- graphConvMC_twokernels(new$densy[[indiv]][pack3,],new$densy[[indiv]][pack3,], title="Uy")
+ggsave(plot = Uy3, file = paste("densy3.pdf"))
+Uy4 <- graphConvMC_twokernels(new$densy[[indiv]][pack4,],new$densy[[indiv]][pack4,], title="Uy")
+ggsave(plot = Uy4, file = paste("densy4.pdf"))
+Uy5 <- graphConvMC_twokernels(new$densy[[indiv]][pack5,],new$densy[[indiv]][pack5,], title="Uy")
+ggsave(plot = Uy5, file = paste("densy5.pdf"))
+Uy6 <- graphConvMC_twokernels(new$densy[[indiv]][pack6,],new$densy[[indiv]][pack6,], title="Uy")
+ggsave(plot = Uy6, file = paste("densy6.pdf"))
+Uy7 <- graphConvMC_twokernels(new$densy[[indiv]][pack7,],new$densy[[indiv]][pack7,], title="Uy")
+ggsave(plot = Uy7, file = paste("densy7.pdf"))
+Uy8 <- graphConvMC_twokernels(new$densy[[indiv]][pack8,],new$densy[[indiv]][pack8,], title="Uy")
+ggsave(plot = Uy8, file = paste("densy8.pdf"))
+Uy9 <- graphConvMC_twokernels(new$densy[[indiv]][pack9,],new$densy[[indiv]][pack9,], title="Uy")
+ggsave(plot = Uy9, file = paste("densy9.pdf"))
+Uy10 <- graphConvMC_twokernels(new$densy[[indiv]][pack10,],new$densy[[indiv]][pack10,], title="Uy")
+ggsave(plot = Uy10, file = paste("densy10.pdf"))
+
+
+# Ueta <- graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
+# ggsave(plot = Ueta, file = paste("denseta.pdf"))
 
 
 
