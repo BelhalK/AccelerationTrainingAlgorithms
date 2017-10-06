@@ -162,6 +162,5 @@ var_new[,2:4] <- var_new[,2:4]/replicate
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
 graphConvMC_twokernels(var_rwm,var_new, title="Variances")
 
-
-
-
+#target is N(0,1)
+#proposal is N(0,.01)
