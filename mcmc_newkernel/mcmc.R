@@ -7,7 +7,7 @@ mcmc<-function(model,data,control=list(),iter) {
 
 
 # create progress bar
-pb <- txtProgressBar(min = 0, max = iter, style = 1)
+
 
 
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
@@ -138,10 +138,12 @@ pb <- txtProgressBar(min = 0, max = iter, style = 1)
 
 for(u in 1:opt$nbiter.mcmc[1]) {
 
-
-		Sys.sleep(0.0001)
-   			# update progress bar
-			setTxtProgressBar(pb,u)
+		if(u%%100==0){
+			print(u)
+		}
+		# Sys.sleep(0.0001)
+  #  			# update progress bar
+		# 	setTxtProgressBar(pb,u)
 
 			for (i in 1:(nrow(phiM))) {
 				eta_list[[i]][u,2:(nb.etas+2 - 1)] <- etaM[i,]
@@ -285,10 +287,9 @@ if(opt$nbiter.mcmc[3]>0) {
 		propc <- U.eta
 		prop <- U.eta
 		for (u in 1:opt$nbiter.mcmc[4]) {
-			Sys.sleep(0.0001)
-   			# update progress bar
-			setTxtProgressBar(pb,u)
-
+			if(u%%100==0){
+				print(u)
+			}
 			for (i in 1:(nrow(phiM))) {
 				eta_list[[i]][u,2:(nb.etas+2 - 1)] <- etaM[i,]
 			}
@@ -329,7 +330,6 @@ if(opt$nbiter.mcmc[3]>0) {
 	}
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	close(pb)
 	return(list(eta = eta_list,denseta = dens_Ueta,densy = densy))
 }
 
