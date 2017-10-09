@@ -50,8 +50,10 @@ library(sgd)
 
 
 # Doc
-theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
-saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+data(theo.saemix)
+theo.saemix_less <- theo.saemix[1:120,]
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=theo.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 model1cpt<-function(psi,id,xidep) { 
 	dose<-xidep[,1]
@@ -77,21 +79,21 @@ options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2
 theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-#ref (map always)
-options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
-theo_new_ref <- cbind(iterations, theo_new_ref)
+# #ref (map always)
+# options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+# theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+# theo_new_ref <- cbind(iterations, theo_new_ref)
 
-#MAP once and  NO GD
-options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
-theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
-theo_nogd <- cbind(iterations, theo_nogd)
+# #MAP once and  NO GD
+# options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
+# theo_nogd<-data.frame(saemix_gd(saemix.model,saemix.data,options.nogd))
+# theo_nogd <- cbind(iterations, theo_nogd)
 
 
-#MAP once and GD
-options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
-theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
-theo_gd <- cbind(iterations, theo_gd)
+# #MAP once and GD
+# options.gd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd=gd_step)
+# theo_gd<-data.frame(saemix_gd(saemix.model,saemix.data,options.gd))
+# theo_gd <- cbind(iterations, theo_gd)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 options.mix<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
@@ -99,9 +101,9 @@ theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
 theo_mix <- cbind(iterations, theo_mix)
 
 
-options.foce<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
-theo_foce<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.foce))
-theo_foce <- cbind(iterations, theo_foce)
+# options.foce<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
+# theo_foce<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.foce))
+# theo_foce <- cbind(iterations, theo_foce)
 
 graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
 
