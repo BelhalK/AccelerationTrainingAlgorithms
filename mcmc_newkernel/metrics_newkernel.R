@@ -125,6 +125,8 @@ graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,]
 #expectations
 expec_rwm <- ref$eta[[indiv]]
 var_rwm <- ref$eta[[indiv]]
+expec_rwm[,2:4] <- 0 
+var_rwm[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
@@ -146,6 +148,8 @@ graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
 
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
+expec_new[,2:4] <- 0 
+var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))

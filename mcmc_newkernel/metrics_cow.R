@@ -79,7 +79,7 @@ saemix.model<-saemixModel(model=growthcow,
 indiv = 1
 seed0 = 35644
 replicate = 50
-iter_mcmc = 20000
+iter_mcmc = 500
 burn = 400
 
 
@@ -136,10 +136,14 @@ graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,]
 
 
 
-
 #expectations
 expec_rwm <- ref$eta[[indiv]]
 var_rwm <- ref$eta[[indiv]]
+
+expec_rwm[,2:4] <- 0 
+var_rwm[,2:4] <- 0
+
+
 for (j in 1:replicate){
   print(j)
   saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
@@ -147,9 +151,9 @@ for (j in 1:replicate){
   # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
   expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
-  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
-  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
-  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4])^2
+  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2] - post_rwm[[indiv]][iter_mcmc,2])^2
+  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3] - post_rwm[[indiv]][iter_mcmc,3])^2
+  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4] - post_rwm[[indiv]][iter_mcmc,4])^2
 }
 expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
 var_rwm[,2:4] <- var_rwm[,2:4]/replicate
@@ -161,21 +165,23 @@ var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
+expec_new[,2:4] <- 0 
+var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
-  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
-  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
-  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4])^2
+  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2]-post_newkernel[[indiv]][iter_mcmc,2])^2
+  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3]-post_newkernel[[indiv]][iter_mcmc,3])^2
+  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4]-post_newkernel[[indiv]][iter_mcmc,4])^2
 }
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
 
 
-graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
+# graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
 graphConvMC_twokernels(var_rwm,var_new, title="Variances")
