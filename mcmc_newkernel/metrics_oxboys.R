@@ -42,8 +42,8 @@ require(reshape2)
 
 
 # Doc
-oxboys.saemix<-read.table( "oxboys.saemix.tab",header=T,na=".")
-oxboys.saemix_less <- yield.saemix[1:6,]
+oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
+oxboys.saemix_less <- oxboys.saemix[1:9,]
 saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
   name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
   units=list(x="yr",y="cm"))
@@ -71,7 +71,7 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 3000
+iter_mcmc = 30000
 burn = 400
 
 
@@ -82,13 +82,13 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-#mix map and rwm
-saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
-new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
+# #mix map and rwm
+# saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
+# new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
-#Sum of two proposals
-saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
+# #Sum of two proposals
+# saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+# new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
 
 
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
@@ -136,13 +136,13 @@ for (j in 1:replicate){
   expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
   var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
   var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
-  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4])^2
+  
 }
 expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
 var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
-graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
-graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+# graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
+# graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
 
 
 
@@ -156,7 +156,7 @@ for (j in 1:replicate){
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
   var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
   var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
-  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4])^2
+  
 }
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate

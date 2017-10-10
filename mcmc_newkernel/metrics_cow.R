@@ -43,8 +43,9 @@ require(reshape2)
 
 
 data(cow.saemix)
-cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980")
-saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
+# cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980")
+cow.saemix_less <- cow.saemix[1:10,]
+saemix.data<-saemixData(name.data=cow.saemix_less,header=TRUE,name.group=c("cow"), 
   name.predictors=c("time"),name.response=c("weight"), 
   name.covariates=c("birthyear","twin","birthrank"), 
   units=list(x="days",y="kg",covariates=c("yr","-","-")))
@@ -77,8 +78,8 @@ saemix.model<-saemixModel(model=growthcow,
 
 indiv = 1
 seed0 = 35644
-replicate = 5
-iter_mcmc = 3000
+replicate = 50
+iter_mcmc = 20000
 burn = 400
 
 
@@ -89,16 +90,21 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-#mix map and rwm
-saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
-new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
+# #mix map and rwm
+# saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
+# new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
-#Sum of two proposals
-saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
+# #Sum of two proposals
+# saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+# new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
 
 
+graphConvMC_twokernels(ref$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
+graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
+
+graphConvMC_twokernels(new$eta[[indiv]],new$eta[[indiv]], title="Uy")
+graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
 
@@ -136,7 +142,7 @@ expec_rwm <- ref$eta[[indiv]]
 var_rwm <- ref$eta[[indiv]]
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
   post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
   # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
@@ -148,8 +154,8 @@ for (j in 1:replicate){
 expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
 var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
-graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
-graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+# graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
+# graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
 
 
 
@@ -157,7 +163,7 @@ expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
 for (j in 1:replicate){
   print(j)
-  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
@@ -168,6 +174,8 @@ for (j in 1:replicate){
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
 
+
+graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
 graphConvMC_twokernels(var_rwm,var_new, title="Variances")

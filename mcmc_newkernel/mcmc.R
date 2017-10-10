@@ -96,8 +96,10 @@ mcmc<-function(model,data,control=list(),iter) {
 
 
 
-	etaM <- eta_map
-	phiM <- phi_map
+	# etaM <- eta_map
+	# phiM <- phi_map
+
+	etaM<-phiM-mean.phiM
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	gpred<-error(fpred,varList$pres)
@@ -249,6 +251,15 @@ if(opt$nbiter.mcmc[3]>0) {
 
 		#New kernel
 	if(opt$nbiter.mcmc[4]>0) {
+		etaM <- eta_map
+		phiM <- phi_map
+		psiM<-transphi(phiM,Dargs$transform.par)
+		fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+		gpred<-error(fpred,varList$pres)
+		DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
+		U.y<-colSums(DYF)
+		U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+		phiMc<-phiM
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -277,6 +288,7 @@ if(opt$nbiter.mcmc[3]>0) {
 			r = 1:sum(Dargs$IdM == i)
 			r <- r+sum(as.matrix(z) != 0L)
             z[r] <- gradf[r,1]
+            # browser()
 			Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
 			chol.Gamma[[i]] <- chol(Gamma[[i]])
 			inv.Gamma[[i]] <- solve(Gamma[[i]])

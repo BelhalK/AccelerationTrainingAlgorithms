@@ -42,12 +42,12 @@ require(reshape2)
 
 
 
-PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
-PD1.saemix <- subset(PD1.saemix, dose!="90")
+PD1.saemix<-read.table( "data/PD1.saemix.tab",header=T,na=".")
+# PD1.saemix <- subset(PD1.saemix, dose!="90")
 
-
-PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
-saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
+PD1.saemix_less <- PD1.saemix[295:297,]
+PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
+saemix.data<-saemixData(name.data=PD1.saemix_less,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
 saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
@@ -80,8 +80,8 @@ byrow=TRUE),error.model="constant")
 
 indiv = 1
 seed0 = 35644
-replicate = 5
-iter_mcmc = 3000
+replicate = 50
+iter_mcmc = 20000
 burn = 400
 
 
@@ -92,15 +92,16 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-#mix map and rwm
-saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
-new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
+# #mix map and rwm
+# saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
+# new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
 
-#Sum of two proposals
-saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
+# #Sum of two proposals
+# saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+# new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
 
 
+graphConvMC_twokernels(ref$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
 graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
@@ -151,8 +152,8 @@ for (j in 1:replicate){
 expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
 var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
-graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
-graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+# graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
+# graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
 
 
 
@@ -172,7 +173,7 @@ expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
 
 
-graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+graphConvMC_twokernels(expec_new,expec_rwm, title="Expectations")
 graphConvMC_twokernels(var_rwm,var_new, title="Variances")
 
 #target is N(0,1)
