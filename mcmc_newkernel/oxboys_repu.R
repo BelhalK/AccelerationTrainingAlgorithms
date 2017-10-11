@@ -1,5 +1,4 @@
-#library(rstan)
-setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+setwd("/home/belhal.karimi/Desktop/Belhal/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -27,10 +26,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixObject.R') 
   source('zzz.R') 
   source("mixtureFunctions.R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+setwd("/home/belhal.karimi/Desktop/Belhal/mcmc_newkernel")
 source('mcmc.R')
-source('mcmc_mix.R')
-source('mcmc_sum.R')
 
 
 
@@ -70,8 +67,8 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
 
 indiv = 1
 seed0 = 35644
-replicate = 5
-iter_mcmc = 10000
+replicate = 20
+iter_mcmc = 100000
 burn = 400
 
 
@@ -81,46 +78,6 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 #reference rwm
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
-
-# #mix map and rwm
-# saemix.options_mix<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,1,1,iter_mcmc))
-# new_mix<-mcmc_mix(saemix.model,saemix.data,saemix.options_mix,iter_mcmc)
-
-# #Sum of two proposals
-# saemix.options_sum<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-# new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
-
-
-graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
-graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-graphConvMC_twokernels(new$denseta[[indiv]],ref$denseta[[indiv]], title="Ueta")
-
-graphConvMC_twokernels(new$denseta[[indiv]]+new$densy[[indiv]],ref$denseta[[indiv]]+ref$densy[[indiv]], title="Ueta")
-
-graphConvMC_twokernels(new_sum$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-
-
-
-
-graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-graphConvMC_twokernels(new_mix$densy[[indiv]],new$densy[[indiv]], title="Uy")
-graphConvMC_twokernels(new_mix$densy[[indiv]],ref$densy[[indiv]], title="Uy")
-graphConvMC_twokernels(new_mix$eta[[indiv]],ref$eta[[indiv]], title="eta")
-graphConvMC_twokernels(new_mix$eta[[indiv]],new$eta[[indiv]], title="eta")
-
-pack1 <- 100:230
-pack2 <- 450:580
-graphConvMC_twokernels(ref$densy[[indiv]][pack1,],ref$densy[[indiv]][pack2,], title="Uy")
-graphConvMC_twokernels(ref$eta[[indiv]][pack1,],ref$eta[[indiv]][pack2,], title="eta")
-
-graphConvMC_twokernels(new$densy[[indiv]][pack1,],new$densy[[indiv]][pack2,], title="Uy")
-graphConvMC_twokernels(new$eta[[indiv]][pack1,],new$eta[[indiv]][pack2,], title="eta")
-
-graphConvMC_twokernels(new_mix$densy[[indiv]][pack1,],new_mix$densy[[indiv]][pack2,], title="Uy")
-graphConvMC_twokernels(new_mix$eta[[indiv]][pack1,],new_mix$eta[[indiv]][pack2,], title="eta")
-
-
-
 
 
 
@@ -166,8 +123,14 @@ expec_new[,2:3] <- expec_new[,2:3]/replicate
 var_new[,2:3] <- var_new[,2:3]/replicate
 
 
-graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
-graphConvMC_twokernels(var_rwm,var_new, title="Variances")
+Uy1 <- graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+ggsave(plot = Uy1, file = paste("expec.pdf"))
+Uy2 <- graphConvMC_twokernels(var_rwm,var_new, title="Variances")
+ggsave(plot = Uy2, file = paste("var.pdf"))
+
+
+
+
 
 #target is N(0,1)
 #proposal is N(0,.01)
