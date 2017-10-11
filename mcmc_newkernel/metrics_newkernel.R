@@ -42,7 +42,8 @@ require(reshape2)
 
 # Doc
 data(yield.saemix)
-yield.saemix_less <- yield.saemix[28:33,]
+# yield.saemix_less <- yield.saemix[28:33,]
+yield.saemix_less <- yield.saemix[1:5,]
 saemix.data<-saemixData(name.data=yield.saemix_less,header=TRUE,name.group=c("site"),
   name.predictors=c("dose"),name.response=c("yield"),
   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
@@ -68,7 +69,7 @@ saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model"
 indiv = 1
 seed0 = 35644
 replicate = 5
-iter_mcmc = 200
+iter_mcmc = 1000
 burn = 400
 
 
@@ -129,7 +130,7 @@ expec_rwm[,2:4] <- 0
 var_rwm[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
   post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
   # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
@@ -152,7 +153,7 @@ expec_new[,2:4] <- 0
 var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]

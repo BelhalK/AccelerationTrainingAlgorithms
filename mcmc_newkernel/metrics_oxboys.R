@@ -131,7 +131,7 @@ expec_rwm[,2:3] <- 0
 var_rwm[,2:3] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
+  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
   post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
   # print(post_rwm[[indiv]][44,2:3])
   post_rwm[[indiv]]['individual'] <- j
@@ -154,7 +154,7 @@ expec_new[,2:3] <- 0
 var_new[,2:3] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
+  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:3] <- expec_new[,2:3] + post_newkernel[[indiv]][,2:3]

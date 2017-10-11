@@ -36,39 +36,47 @@ require(gridExtra)
 require(reshape2)
 
 #####################################################################################
-
-
 # Doc
-oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
-oxboys.saemix_less <- oxboys.saemix[1:9,]
-saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
-  name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
-  units=list(x="yr",y="cm"))
 
 
-growth.linear<-function(psi,id,xidep) {
+data(cow.saemix)
+# cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980")
+cow.saemix_less <- cow.saemix[1:10,]
+saemix.data<-saemixData(name.data=cow.saemix_less,header=TRUE,name.group=c("cow"), 
+  name.predictors=c("time"),name.response=c("weight"), 
+  name.covariates=c("birthyear","twin","birthrank"), 
+  units=list(x="days",y="kg",covariates=c("yr","-","-")))
+
+
+
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+growthcow<-function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (2 columns, base and slope)
+#   psi : matrix of parameters (3 columns, a, b, k)
 #   id : vector of indices 
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
+  a<-psi[id,1]
+  b<-psi[id,2]
+  k<-psi[id,3]
+  f<-a*(1-b*exp(-k*x))
   return(f)
 }
-saemix.model<-saemixModel(model=growth.linear,description="Linear model",
-  psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
-  transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
-  error.model="constant")
+saemix.model<-saemixModel(model=growthcow,
+  description="Exponential growth model", 
+  psi0=matrix(c(700,0.9,0.02,0,0,0),ncol=3,byrow=TRUE, 
+  dimnames=list(NULL,c("A","B","k"))),transform.par=c(1,1,1),fixed.estim=c(1,1,1), 
+  covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
+  omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
 
 indiv = 1
 seed0 = 35644
 replicate = 50
-iter_mcmc = 1000
+iter_mcmc = 500
 burn = 400
 
 
@@ -80,25 +88,27 @@ ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
 
-
 #expectations
 expec_rwm <- ref$eta[[indiv]]
 var_rwm <- ref$eta[[indiv]]
-expec_rwm[,2:3] <- 0 
-var_rwm[,2:3] <- 0
+
+expec_rwm[,2:4] <- 0 
+var_rwm[,2:4] <- 0
+
+
 for (j in 1:replicate){
   print(j)
   saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
   post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
-  # print(post_rwm[[indiv]][44,2:3])
+  # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
-  expec_rwm[,2:3] <- expec_rwm[,2:3] + post_rwm[[indiv]][,2:3]
-  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
-  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
-  
+  expec_rwm[,2:4] <- expec_rwm[,2:4] + post_rwm[[indiv]][,2:4]
+  var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2] - post_rwm[[indiv]][iter_mcmc,2])^2
+  var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3] - post_rwm[[indiv]][iter_mcmc,3])^2
+  var_rwm[,4] <- var_rwm[,4] + (post_rwm[[indiv]][,4] - post_rwm[[indiv]][iter_mcmc,4])^2
 }
-expec_rwm[,2:3] <- expec_rwm[,2:3]/replicate
-var_rwm[,2:3] <- var_rwm[,2:3]/replicate
+expec_rwm[,2:4] <- expec_rwm[,2:4]/replicate
+var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
 # graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
 # graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
@@ -107,28 +117,28 @@ var_rwm[,2:3] <- var_rwm[,2:3]/replicate
 
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
-expec_new[,2:3] <- 0 
-var_new[,2:3] <- 0
+expec_new[,2:4] <- 0 
+var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   post_newkernel[[indiv]]['individual'] <- j
-  expec_new[,2:3] <- expec_new[,2:3] + post_newkernel[[indiv]][,2:3]
-  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
-  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
-  
+  expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
+  var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2]-post_newkernel[[indiv]][iter_mcmc,2])^2
+  var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3]-post_newkernel[[indiv]][iter_mcmc,3])^2
+  var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4]-post_newkernel[[indiv]][iter_mcmc,4])^2
 }
-expec_new[,2:3] <- expec_new[,2:3]/replicate
-var_new[,2:3] <- var_new[,2:3]/replicate
+expec_new[,2:4] <- expec_new[,2:4]/replicate
+var_new[,2:4] <- var_new[,2:4]/replicate
 
+
+# graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
 Uy1 <- graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
-ggsave(plot = Uy1, file = paste("expec_ox.png"))
+ggsave(plot = Uy1, file = paste("expec_cow.png"))
 Uy2 <- graphConvMC_twokernels(var_rwm,var_new, title="Variances")
-ggsave(plot = Uy2, file = paste("var_ox.png"))
-
-
+ggsave(plot = Uy2, file = paste("var_cow.png"))
 
 
 

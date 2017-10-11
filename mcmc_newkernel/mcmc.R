@@ -95,7 +95,7 @@ mcmc<-function(model,data,control=list(),iter) {
 	eta_map <- phi_map - mean.phiM
 
 
-
+	
 	# etaM <- eta_map
 	# phiM <- phi_map
 
