@@ -79,7 +79,7 @@ saemix.model<-saemixModel(model=growthcow,
 indiv = 1
 seed0 = 35644
 replicate = 50
-iter_mcmc = 500
+iter_mcmc = 100000
 burn = 400
 
 
@@ -99,9 +99,12 @@ new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 # new_sum<-mcmc_sum(saemix.model,saemix.data,saemix.options_sum,iter_mcmc)
 
 
-graphConvMC_twokernels(ref$eta[[indiv]],ref$eta[[indiv]], title="eta")
+
+# graphConvMC_twokernels(ref$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 graphConvMC_twokernels(new$densy[[indiv]],ref$densy[[indiv]], title="Uy")
+
+
 
 graphConvMC_twokernels(new$eta[[indiv]],new$eta[[indiv]], title="Uy")
 graphConvMC_twokernels(new$densy[[indiv]],new$densy[[indiv]], title="Uy")
@@ -165,25 +168,38 @@ var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
+dens <- new$densy[[indiv]]
+denseta <- new$denseta[[indiv]]
 expec_new[,2:4] <- 0 
+dens[,2] <- 0 
+denseta[,2] <- 0 
 var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
+  density<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$densy[[indiv]]
+  density_eta<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$denseta[[indiv]]
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
   var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2]-post_newkernel[[indiv]][iter_mcmc,2])^2
   var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3]-post_newkernel[[indiv]][iter_mcmc,3])^2
   var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4]-post_newkernel[[indiv]][iter_mcmc,4])^2
+  dens[,2] <- dens[,2] + density[,2]
+  denseta[,2] <- denseta[,2] + density_eta[,2]
 }
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
-
+dens[,2] <- dens[,2]/replicate
+denseta[,2] <- denseta[,2]/replicate
 
 # graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
+graphConvMC_twokernels(expec_rwm[100:400,],expec_new[100:400,], title="Expectations")
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+graphConvMC_twokernels(dens,dens, title="densy")
+graphConvMC_twokernels(denseta,denseta, title="densy")
+graphConvMC_twokernels(dens+denseta,dens+denseta, title="sum dens")
 graphConvMC_twokernels(var_rwm,var_new, title="Variances")
 
 #target is N(0,1)
