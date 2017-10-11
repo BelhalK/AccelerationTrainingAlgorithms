@@ -76,7 +76,7 @@ saemix.model<-saemixModel(model=growthcow,
 indiv = 1
 seed0 = 35644
 replicate = 50
-iter_mcmc = 500
+iter_mcmc = 100000
 burn = 400
 
 
@@ -86,6 +86,10 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 #reference rwm
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
+
+
+
+
 
 
 #expectations
@@ -117,30 +121,42 @@ var_rwm[,2:4] <- var_rwm[,2:4]/replicate
 
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
+dens <- new$densy[[indiv]]
+denseta <- new$denseta[[indiv]]
 expec_new[,2:4] <- 0 
+dens[,2] <- 0 
+denseta[,2] <- 0 
 var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
   saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
+  density<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$densy[[indiv]]
+  density_eta<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$denseta[[indiv]]
   post_newkernel[[indiv]]['individual'] <- j
   expec_new[,2:4] <- expec_new[,2:4] + post_newkernel[[indiv]][,2:4]
   var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2]-post_newkernel[[indiv]][iter_mcmc,2])^2
   var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3]-post_newkernel[[indiv]][iter_mcmc,3])^2
   var_new[,4] <- var_new[,4] + (post_newkernel[[indiv]][,4]-post_newkernel[[indiv]][iter_mcmc,4])^2
+  dens[,2] <- dens[,2] + density[,2]
+  denseta[,2] <- denseta[,2] + density_eta[,2]
 }
 expec_new[,2:4] <- expec_new[,2:4]/replicate
 var_new[,2:4] <- var_new[,2:4]/replicate
-
+dens[,2] <- dens[,2]/replicate
+denseta[,2] <- denseta[,2]/replicate
 
 # graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
-Uy1 <- graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+
+Uy1 <- graphConvMC_twokernels(expec_rwm[,c(1,4,5)],expec_new[,c(1,4,5)], title="Expectations")
 ggsave(plot = Uy1, file = paste("expec_cow.png"))
-Uy2 <- graphConvMC_twokernels(var_rwm,var_new, title="Variances")
-ggsave(plot = Uy2, file = paste("var_cow.png"))
+
+Uy2 <- graphConvMC_twokernels(dens,dens, title="density")
+ggsave(plot = Uy2, file = paste("dens_cow.png"))
 
 
+graphConvMC_twokernels(dens,dens, title="densy")
 
 #target is N(0,1)
 #proposal is N(0,.01)
