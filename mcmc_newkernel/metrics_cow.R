@@ -77,9 +77,9 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 indiv = 1
-seed0 = 35644
+seed0 = 35644444
 replicate = 50
-iter_mcmc = 100000
+iter_mcmc = 1000
 burn = 400
 
 
@@ -149,7 +149,7 @@ var_rwm[,2:4] <- 0
 
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
   post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
   # print(post_rwm[[indiv]][44,2:4])
   post_rwm[[indiv]]['individual'] <- j
@@ -176,7 +176,7 @@ denseta[,2] <- 0
 var_new[,2:4] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+  saemix.options_newkernel<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
   post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
   density<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$densy[[indiv]]
   density_eta<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$denseta[[indiv]]
@@ -195,8 +195,9 @@ denseta[,2] <- denseta[,2]/replicate
 
 # graphConvMC_twokernels(expec_new,expec_new, title="Expectations")
 
-graphConvMC_twokernels(expec_rwm[100:400,],expec_new[100:400,], title="Expectations")
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")
+graphConvMC_twokernels(expec_rwm[,c(1,4,5)],expec_new[,c(1,4,5)], title="Expectations")
+graphConvMC_twokernels(expec_rwm[50:1000,],expec_new[50:1000,], title="Expectations")
 graphConvMC_twokernels(dens,dens, title="densy")
 graphConvMC_twokernels(denseta,denseta, title="densy")
 graphConvMC_twokernels(dens+denseta,dens+denseta, title="sum dens")
