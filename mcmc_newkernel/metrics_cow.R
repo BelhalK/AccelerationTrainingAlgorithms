@@ -77,7 +77,7 @@ saemix.model<-saemixModel(model=growthcow,
 
 
 indiv = 1
-seed0 = 35644444
+seed0 = 356444443
 replicate = 50
 iter_mcmc = 1000
 burn = 400
