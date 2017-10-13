@@ -32,6 +32,8 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
+
+
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
@@ -168,7 +170,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		    yi<-yobs[id==isuj]
 		    idi<-rep(1,length(yi))
 		    
-		    
+
 		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
