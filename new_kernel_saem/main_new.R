@@ -107,6 +107,7 @@ saemix_new<-function(model,data,control=list()) {
   if(!saemixObject["options"]$warnings) options(warn=-1)
 
   saemix.options<-saemixObject["options"]
+  saemix.options$nb.chains <- control$nb.chains
   saemix.model<-saemixObject["model"]
   saemix.data<-saemixObject["data"]
   saemix.data@ocov<-saemix.data@ocov[saemix.data@data[,"mdv"]==0,,drop=FALSE]
@@ -124,6 +125,7 @@ saemix_new<-function(model,data,control=list()) {
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
   xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+  
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs

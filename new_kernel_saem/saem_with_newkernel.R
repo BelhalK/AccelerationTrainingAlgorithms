@@ -60,13 +60,14 @@ model1cpt<-function(psi,id,xidep) {
 	tim<-xidep[,2]  
 	ka<-psi[id,1]
 	V<-psi[id,2]
-	CL<-psi[id,3]
-	k<-CL/V
+	k<-psi[id,3]
+	CL<-k*V
 	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
 	return(ypred)
 }
 # Default model, no covariate
-saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption",psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption"
+  ,psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 K1 = 100
 K2 = 50
@@ -75,14 +76,20 @@ gd_step = 0.01
 
 
 #RWM
-options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-# #ref (map always)
-# options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
-# theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
-# theo_new_ref <- cbind(iterations, theo_new_ref)
+
+ref <- theo_ref[250,]
+#ref (map always)
+options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2))
+theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iterations, theo_new_ref)
+
+
+new <- theo_new_ref[(K1+K2+1),]
+
 
 # #MAP once and  NO GD
 # options.nogd<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),step.gd = 0)
@@ -96,14 +103,16 @@ theo_ref <- cbind(iterations, theo_ref)
 # theo_gd <- cbind(iterations, theo_gd)
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-options.mix<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
-theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
-theo_mix <- cbind(iterations, theo_mix)
+# options.mix<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
+# theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
+# theo_mix <- cbind(iterations, theo_mix)
 
 
 # options.foce<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,4),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
 # theo_foce<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.foce))
 # theo_foce <- cbind(iterations, theo_foce)
+
+graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 
 graphConvMC_twokernels(theo_ref,theo_mix, title="new kernel")
 

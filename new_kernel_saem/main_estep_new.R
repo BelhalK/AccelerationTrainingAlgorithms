@@ -12,11 +12,12 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
+	saemix.options<-saemixObject["options"]
 	
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
-	Uargs$nchains = 1
+	# Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
@@ -61,6 +62,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
 				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
+				# browser()
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
@@ -143,7 +145,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	  	saemix.data<-saemixObject["data"]
 	  	saemix.options$map <- TRUE
 	  	saemixObject["results"]["omega"] <- omega.eta
-	  	saemixObject["results"]["mean.phi"] <- mean.phi
+	  	saemixObject["results"]["mean.phi"] <- mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	  	saemixObject["results"]["phi"] <- phiM
 	  	saemixObject["results"]["respar"] <- varList$pres
 
@@ -165,6 +167,8 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
 		    yi<-yobs[id==isuj]
 		    idi<-rep(1,length(yi))
+		    
+		    
 		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
@@ -285,7 +289,7 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				print(length(ind))
+				# print(length(ind))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]

@@ -10,8 +10,8 @@ Dataset theo.saemix_less
     covariates: Weight (kg), Sex (-) 
       reference class for covariate Sex :  0 
 Dataset characteristics:
-    number of subjects:     11 
-    number of observations: 110 
+    number of subjects:     12 
+    number of observations: 120 
     average/min/max nb obs: 10.00  /  10  /  10 
 First 10 lines of data:
    Id    Dose  Time Concentration Weight Sex mdv cens occ ytype
@@ -35,8 +35,8 @@ dose<-xidep[,1]
 tim<-xidep[,2]  
 ka<-psi[id,1]
 V<-psi[id,2]
-CL<-psi[id,3]
-k<-CL/V
+k<-psi[id,3]
+CL<-k*V
 ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
 return(ypred)
 }
@@ -62,7 +62,7 @@ Pop.CondInit  1 20 0.5
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
-    Number of chains:  5 
+    Number of chains:  1 
     Seed:  395246 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -77,17 +77,17 @@ Pop.CondInit  1 20 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         1.61   
-[2,] V         31.81   
-[3,] CL         2.78   
-[4,] a          0.81   
+[1,] ka         1.536  
+[2,] V         30.883  
+[3,] CL         0.094  
+[4,] a          0.776  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 3.7e-01 
-V  omega2.V  3.0e-07 
-CL omega2.CL 1.3e-01 
+ka omega2.ka 4.1e-01 
+V  omega2.V  2.9e-02 
+CL omega2.CL 9.1e-08 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
