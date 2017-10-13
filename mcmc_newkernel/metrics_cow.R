@@ -17,7 +17,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('main_estep.R')
   source('main_estep_mcmc.R') 
   source('main_estep_morekernels.R') 
-  source('main_initialiseMainAlgo.R') 
+  # source('main_initialiseMainAlgo.R') 
   source('main_mstep.R') 
   source('SaemixData.R')
   source('plots_ggplot2.R') 
@@ -31,7 +31,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
 source('mcmc.R')
 source('mcmc_mix.R')
 source('mcmc_sum.R')
-
+source('initalgo.R') 
 
 
 require(ggplot2)

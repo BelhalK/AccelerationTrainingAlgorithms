@@ -313,6 +313,7 @@ if(opt$nbiter.mcmc[3]>0) {
 			}
 				#generate candidate eta
 				for (i in 1:(Dargs$NM)){
+					
 					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
 					etaMc[i,]<- eta_map[i,] +Mi
 				}
