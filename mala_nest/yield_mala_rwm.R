@@ -140,6 +140,7 @@ graphConvMC_twokernels(post_rwm[[1]],post_mala[[1]], title="EM")
 
 
 
+
 # theo.onlypop<-saemix(saemix.model,saemix.data,saemix.options)
 
 # saemix.fit<-saemix(saemix.model,saemix.data,saemix.options)
