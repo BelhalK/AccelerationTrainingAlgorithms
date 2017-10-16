@@ -66,7 +66,7 @@ Pop.CondInit    8  100   0.2
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=100, K2=50 
+    Number of iterations:  K1=70, K2=50 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -82,17 +82,17 @@ Pop.CondInit    8  100   0.2
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] Ymax        9.180 
-[2,] Xmax      118.711 
+[1,] Ymax        9.178 
+[2,] Xmax      119.799 
 [3,] slope       0.027 
-[4,] a           0.310 
+[4,] a           0.316 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-Ymax  omega2.Ymax  1.3e+00 
+Ymax  omega2.Ymax  1.4e+00 
 Xmax  omega2.Xmax  2.3e+03 
-slope omega2.slope 2.1e-05 
+slope omega2.slope 2.9e-05 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

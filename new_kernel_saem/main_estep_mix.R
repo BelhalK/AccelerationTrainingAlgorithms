@@ -31,9 +31,9 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
-	
-	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-
+	# browser()
+	# etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
+	etaM <- phiM - mean.phiM
 	phiMc<-phiM
 	# map_range <- c(1:3)
 	map_range <- saemix.options$map.range
