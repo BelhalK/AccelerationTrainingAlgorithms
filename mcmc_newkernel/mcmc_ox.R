@@ -32,12 +32,14 @@ source('mcmc.R')
 source('mcmc_mix.R')
 source('mcmc_sum.R')
 source('initalgo.R') 
+source("mixtureFunctions.R")
 
 
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
-
+library(grid)
+library(lattice)
 #####################################################################################
 
 
@@ -75,6 +77,9 @@ iter_mcmc = 10000
 burn = 400
 
 
+
+
+
 saemix.options_rwm<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
 saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
 
@@ -83,48 +88,106 @@ ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
 
-graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 
-#expectations
+final_rwm <- 0
 expec_rwm <- ref$eta[[indiv]]
 var_rwm <- ref$eta[[indiv]]
 expec_rwm[,2:3] <- 0 
 var_rwm[,2:3] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_rwm<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
-  post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)$eta
-  # print(post_rwm[[indiv]][44,2:3])
-  post_rwm[[indiv]]['individual'] <- j
+  saemix.options_rwm<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
+  post_rwm<-mcmc(saemix.model,saemix.data,saemix.options_rwm)$eta[[indiv]]
+  post_rwm['individual'] <- j
   expec_rwm[,2:3] <- expec_rwm[,2:3] + post_rwm[[indiv]][,2:3]
   var_rwm[,2] <- var_rwm[,2] + (post_rwm[[indiv]][,2])^2
   var_rwm[,3] <- var_rwm[,3] + (post_rwm[[indiv]][,3])^2
-  
+  final_rwm <- rbind(final_rwm,post_rwm)
 }
 expec_rwm[,2:3] <- expec_rwm[,2:3]/replicate
 var_rwm[,2:3] <- var_rwm[,2:3]/replicate
 
-# graphConvMC_twokernels(expec_rwm,expec_rwm, title="Expectations")
-# graphConvMC_twokernels(var_rwm,var_rwm, title="Variances")
+
+
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[5]<-paste("id")
+final_rwm1 <- final_rwm[c(5,1,2)]
+final_rwm2 <- final_rwm[c(5,1,3)]
 
 
 
+# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80))
+# prctilemlx(final_rwm2[-1,],band = list(number = 8, level = 80))
+# prctilemlx(final_rwm3[-1,],band = list(number = 8, level = 80))
+
+final_new <- 0
 expec_new <- new$eta[[indiv]]
 var_new <- new$eta[[indiv]]
 expec_new[,2:3] <- 0 
 var_new[,2:3] <- 0
 for (j in 1:replicate){
   print(j)
-  saemix.options_newkernel<-list(seed=j+seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-  post_newkernel<-mcmc(saemix.model,saemix.data,saemix.options_newkernel,iter_mcmc)$eta
-  post_newkernel[[indiv]]['individual'] <- j
+  saemix.options_linear<-list(seed=j*seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
+  post_new<-mcmc(saemix.model,saemix.data,saemix.options_linear)$eta[[indiv]]
+  post_new['individual'] <- j
   expec_new[,2:3] <- expec_new[,2:3] + post_newkernel[[indiv]][,2:3]
   var_new[,2] <- var_new[,2] + (post_newkernel[[indiv]][,2])^2
   var_new[,3] <- var_new[,3] + (post_newkernel[[indiv]][,3])^2
-  
+  final_new <- rbind(final_new,post_new)
 }
 expec_new[,2:3] <- expec_new[,2:3]/replicate
 var_new[,2:3] <- var_new[,2:3]/replicate
+
+
+
+
+names(final_new)[1]<-paste("time")
+names(final_new)[5]<-paste("id")
+final_new1 <- final_new[c(5,1,2)]
+final_new2 <- final_new[c(5,1,3)]
+
+
+
+final_rwm1['group'] <- 1
+final_new1['group'] <- 2
+final_new1$id <- final_new1$id +1
+
+
+final1 <- rbind(final_rwm1[-1,],final_new1[-1,])
+labels <- c("ref","new")
+# prctilemlx(final1[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S <- plot.S1  + ylab("ka")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+# print(plot.S1)
+
+
+
+final_rwm2['group'] <- 1
+final_new2['group'] <- 2
+final_new2$id <- final_new2$id +1
+
+
+final2 <- rbind(final_rwm2[-1,],final_new2[-1,])
+labels <- c("ref","new")
+# prctilemlx(final2[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S2 <- plot.S2  + ylab("V")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+grid.arrange(plot.S, plot.S2,ncol=3)
 
 
 graphConvMC_twokernels(expec_rwm,expec_new, title="Expectations")

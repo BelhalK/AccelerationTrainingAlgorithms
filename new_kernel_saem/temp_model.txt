@@ -1,0 +1,17 @@
+
+                      [LONGITUDINAL]
+                      input = {ka, V, k, a}
+                      EQUATION:
+                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
+                      
+                      DEFINITION:
+                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      
+                      [INDIVIDUAL]
+                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
+                      
+                      DEFINITION:
+                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
+                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
+                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
+                      
