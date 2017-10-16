@@ -1,22 +1,17 @@
 
                       [LONGITUDINAL]
-                      input = {A1, A2, A3, alpha1, alpha2, alpha3, a}
-                      
+                      input = {ka, V, k, a}
                       EQUATION:
-                      Cc = A1*exp(-alpha1*t)+A2*exp(-alpha2*t)+A3*exp(-alpha3*t)
+                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
                       
                       DEFINITION:
                       y1 ={distribution=lognormal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={A1_pop, o_A1,A2_pop, o_A2,A3_pop, o_A3,alpha1_pop, o_alpha1,alpha2_pop, o_alpha2,alpha3_pop, o_alpha3}
+                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
                       
                       DEFINITION:
-                      A1  ={distribution=lognormal, prediction=A1_pop,  sd=o_A1}
-                      A2  ={distribution=lognormal, prediction=A2_pop,  sd=o_A2}
-                      A3  ={distribution=lognormal, prediction=A3_pop,  sd=o_A3}
-                      alpha1  ={distribution=lognormal, prediction=alpha1_pop,  sd=o_alpha1}
-                      alpha2  ={distribution=lognormal, prediction=alpha2_pop,  sd=o_alpha2}
-                      alpha3  ={distribution=lognormal, prediction=alpha3_pop,  sd=o_alpha3}
-                      
+                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
+                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
+                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       

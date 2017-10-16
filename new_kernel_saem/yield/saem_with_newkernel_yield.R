@@ -28,6 +28,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 source('newkernel_main.R')
+# source('initalgo.R')
 source('main_new.R')
 source('main_estep_new.R')
 source('main_gd.R')
@@ -85,14 +86,11 @@ gd_step = 0.00001
 seed0 = 39546
 
 #RWM
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0)
-theo_ref<-data.frame(saemix(saemix.model,saemix.data,options))
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iteration, theo_ref)
 
 graphConvMC_twokernels(theo_ref,theo_ref, title="RWM vs Laplace SAEM")
-
-
-
 
 
 #ref (map always)

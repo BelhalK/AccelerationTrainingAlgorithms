@@ -1,50 +1,43 @@
 library(mlxR)
 
+
 model2 <- inlineModel("
                       [LONGITUDINAL]
-                      input = {A1, A2, A3, alpha1, alpha2, alpha3, a}
-                      
+                      input = {ka, V, k, a}
                       EQUATION:
-                      Cc = A1*exp(-alpha1*t)+A2*exp(-alpha2*t)+A3*exp(-alpha3*t)
+                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
                       
                       DEFINITION:
                       y1 ={distribution=lognormal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={A1_pop, o_A1,A2_pop, o_A2,A3_pop, o_A3,alpha1_pop, o_alpha1,alpha2_pop, o_alpha2,alpha3_pop, o_alpha3}
+                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
                       
                       DEFINITION:
-                      A1  ={distribution=lognormal, prediction=A1_pop,  sd=o_A1}
-                      A2  ={distribution=lognormal, prediction=A2_pop,  sd=o_A2}
-                      A3  ={distribution=lognormal, prediction=A3_pop,  sd=o_A3}
-                      alpha1  ={distribution=lognormal, prediction=alpha1_pop,  sd=o_alpha1}
-                      alpha2  ={distribution=lognormal, prediction=alpha2_pop,  sd=o_alpha2}
-                      alpha3  ={distribution=lognormal, prediction=alpha3_pop,  sd=o_alpha3}
-                      
+                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
+                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
+                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       ")
 
-adm  <- list(amount=1, time=seq(0,50,by=50))
-p <- c(A1_pop=60, o_A1=0.5,
-       A2_pop=1, o_A2=1, 
-       A3_pop=100, o_A3=0.1,  
-       alpha1_pop=0.6,  o_alpha1=0,
-       alpha2_pop=10,  o_alpha2=0.3,
-       alpha3_pop=0.1,  o_alpha3=0,
+adm  <- list(amount=320, time=seq(0,100,by=1))
+p <- c(ka_pop=1, o_ka=0.5,
+       V_pop=20, o_V=1, 
+       k_pop=2, o_k=0.1,  
        a=0.1)
-y1 <- list(name='y1', time=seq(1,to=50,by=2))
+y1 <- list(name='y1', time=seq(1,to=100,by=10))
 
 
 res2a2 <- simulx(model = model2,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=500, level="individual"),
+                 group = list(size=10, level="individual"),
                  output = y1)
 
 
-writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theo.csv")
-head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theo.csv", header=T, sep=","))
+writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv")
+head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=","))
 
 #modification for mlxsaem dataread function
-obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theo.csv", header=T, sep=";")
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theo_synth.csv", header=T, sep=";")
 obj <- obj[obj$amount !=1,]
 write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theonew.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)

@@ -4,66 +4,71 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset theo.saemix_less 
-    Structured data: Concentration ~ Dose + Time | Id 
-    X variable for graphs: Time (hr) 
-    covariates: Weight (kg), Sex (-) 
-      reference class for covariate Sex :  0 
+Dataset yield.saemix 
+    Structured data: yield ~ dose | site 
+    Predictor: dose (kg/ha) 
+    covariates: soil.nitrogen (kg/ha) 
 Dataset characteristics:
-    number of subjects:     12 
-    number of observations: 120 
-    average/min/max nb obs: 10.00  /  10  /  10 
+    number of subjects:     37 
+    number of observations: 224 
+    average/min/max nb obs: 6.05  /  5  /  8 
 First 10 lines of data:
-   Id    Dose  Time Concentration Weight Sex mdv cens occ ytype
-1   1 319.992  0.25          2.84   79.6   1   0    0   1     1
-2   1 319.992  0.57          6.57   79.6   1   0    0   1     1
-3   1 319.992  1.12         10.50   79.6   1   0    0   1     1
-4   1 319.992  2.02          9.66   79.6   1   0    0   1     1
-5   1 319.992  3.82          8.58   79.6   1   0    0   1     1
-6   1 319.992  5.10          8.36   79.6   1   0    0   1     1
-7   1 319.992  7.03          7.47   79.6   1   0    0   1     1
-8   1 319.992  9.05          6.89   79.6   1   0    0   1     1
-9   1 319.992 12.12          5.94   79.6   1   0    0   1     1
-10  1 319.992 24.37          3.28   79.6   1   0    0   1     1
+   site dose yield soil.nitrogen mdv cens occ ytype
+1  1901    0  6.70            70   0    0   1     1
+2  1901   70  8.58            70   0    0   1     1
+3  1901  120 10.56            70   0    0   1     1
+4  1901  170 11.54            70   0    0   1     1
+5  1901  220 10.63            70   0    0   1     1
+6  1901  270 11.54            70   0    0   1     1
+7  1902    0  6.98            80   0    0   1     1
+8  1902   70  9.94            80   0    0   1     1
+9  1902  120 10.56            80   0    0   1     1
+10 1902  170 11.07            80   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  One-compartment model with first-order absorption
-function(psi,id,xidep) { 
-dose<-xidep[,1]
-tim<-xidep[,2]  
-ka<-psi[id,1]
-V<-psi[id,2]
-k<-psi[id,3]
-CL<-k*V
-ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-return(ypred)
+  Model function:  Linear plus plateau model
+function(psi,id,xidep) {
+# input:
+#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
+#   id : vector of indices 
+#   xidep : dependent variables (same nb of rows as length of id)
+# returns:
+#   a vector of predictions of length equal to length of id
+  x<-xidep[,1]
+  ymax<-psi[id,1]
+  xmax<-psi[id,2]
+  slope<-psi[id,3]
+  f<-ymax+slope*(x-xmax)
+#  cat(length(f),"  ",length(ymax),"\n")
+  f[x>xmax]<-ymax[x>xmax]
+  return(f)
 }
   Nb of parameters: 3 
-      parameter names:  ka V CL 
+      parameter names:  Ymax Xmax slope 
       distribution:
      Parameter Distribution Estimated
-[1,] ka        log-normal   Estimated
-[2,] V         log-normal   Estimated
-[3,] CL        log-normal   Estimated
+[1,] Ymax      normal       Estimated
+[2,] Xmax      normal       Estimated
+[3,] slope     normal       Estimated
   Variance-covariance matrix:
-   ka V CL
-ka  1 0  0
-V   0 1  0
-CL  0 0  1
+      Ymax Xmax slope
+Ymax     1    0     0
+Xmax     0    1     0
+slope    0    0     1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka  V  CL
-Pop.CondInit  1 20 0.5
+             Ymax Xmax slope
+Pop.CondInit    8  100   0.2
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
     Number of chains:  1 
-    Seed:  395246 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -77,21 +82,21 @@ Pop.CondInit  1 20 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         1.536  
-[2,] V         30.883  
-[3,] CL         0.094  
-[4,] a          0.776  
+[1,] Ymax        9.180 
+[2,] Xmax      118.711 
+[3,] slope       0.027 
+[4,] a           0.310 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-   Parameter Estimate
-ka omega2.ka 4.1e-01 
-V  omega2.V  2.9e-02 
-CL omega2.CL 9.1e-08 
+      Parameter    Estimate
+Ymax  omega2.Ymax  1.3e+00 
+Xmax  omega2.Xmax  2.3e+03 
+slope omega2.slope 2.1e-05 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.CL
-omega2.ka 1         0        0        
-omega2.V  0         1        0        
-omega2.CL 0         0        1        
+             omega2.Ymax omega2.Xmax omega2.slope
+omega2.Ymax  1           0           0           
+omega2.Xmax  0           1           0           
+omega2.slope 0           0           1           
