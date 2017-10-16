@@ -19,7 +19,7 @@ model2 <- inlineModel("
                       k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       ")
 
-adm  <- list(amount=320, time=seq(0,100,by=1))
+adm  <- list(amount=300, time=seq(0,100,by=1))
 p <- c(ka_pop=1, o_ka=0.5,
        V_pop=20, o_V=1, 
        k_pop=2, o_k=0.1,  

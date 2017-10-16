@@ -168,7 +168,7 @@ final_mix1$id <- final_mix1$id +1
 
 final1 <- rbind(final_rwm1[-1,],final_mix1[-1,])
 labels <- c("ref","new")
-prctilemlx(final1[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# prctilemlx(final1[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
 # plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
 
 # rownames(final1) <- 1:nrow(final1)
@@ -288,18 +288,40 @@ grid.arrange(plot.S, plot.S2,plot.S3,plot.S4, plot.S5,plot.S6,ncol=3)
 
 
 #values table
+
+#values table
+sample_mean_rwm <- 0
+var_rwm <- 0
+error_rwm <- 0
+true_param <- c(1.5,32,0.1,0.4,0.01,0.8)
+for (j in 1:replicate){
+  sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,8)])
+}
+sample_mean_rwm = 1/replicate*sample_mean_rwm
+
+for (j in 1:replicate){
+  var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,8)]-sample_mean_rwm)^2
+  error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,8)]-true_param)^2
+}
+
+error_rwm = 1/replicate*error_rwm
+var_rwm = 1/replicate*var_rwm
+
+
+
+
 sample_mean_mix <- 0
 var_mix <- 0
 error_mix <- 0
-true_param <- c(148,6,0.1,3,0.5)
+true_param <- c(1.5,32,0.1,0.4,0.01,0.8)
 for (j in 1:replicate){
-  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),2:8])
+  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,8)])
 }
 sample_mean_mix = 1/replicate*sample_mean_mix
 
 for (j in 1:replicate){
-  var_mix <- var_mix + (final_mix[(j*(K1+K2)),2:8]-sample_mean_mix)^2
-  error_mix <- error_mix + (final_mix[(j*(K1+K2)),2:8]-true_param)^2
+  var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,8)]-sample_mean_mix)^2
+  error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,8)]-true_param)^2
 }
 
 error_mix = 1/replicate*error_mix
