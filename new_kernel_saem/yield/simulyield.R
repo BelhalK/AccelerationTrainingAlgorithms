@@ -48,3 +48,27 @@ head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkerne
 obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/yield.csv", header=T, sep=";")
 obj <- obj[obj$amount !=1,]
 write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/theonew.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+
+
+yield.LP<-function(psi,id,xidep) {
+# input:
+#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
+#   id : vector of indices 
+#   xidep : dependent variables (same nb of rows as length of id)
+# returns:
+#   a vector of predictions of length equal to length of id
+  x<-xidep[,1]
+  ymax<-psi[id,1]
+  xmax<-psi[id,2]
+  slope<-psi[id,3]
+  f<-ymax+slope*(x-xmax)
+#  cat(length(f),"  ",length(ymax),"\n")
+  f[x>xmax]<-ymax[x>xmax]
+  return(f)
+}
+
+saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
+  psi0=matrix(c(8,10,1,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")

@@ -68,7 +68,7 @@ Pop.CondInit    8   10     1
     Algorithms: estimation only
     Number of iterations:  K1=70, K2=50 
     Number of chains:  1 
-    Seed:  711828 
+    Seed:  790920 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -82,17 +82,17 @@ Pop.CondInit    8   10     1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] Ymax      8.88    
-[2,] Xmax      4.19    
-[3,] slope     0.71    
-[4,] a         0.71    
+[1,] Ymax      8.87    
+[2,] Xmax      4.76    
+[3,] slope     0.62    
+[4,] a         0.70    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
 Ymax  omega2.Ymax  1.0e+00 
-Xmax  omega2.Xmax  3.0e+00 
-slope omega2.slope 6.5e-13 
+Xmax  omega2.Xmax  4.0e+00 
+slope omega2.slope 8.7e-12 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
