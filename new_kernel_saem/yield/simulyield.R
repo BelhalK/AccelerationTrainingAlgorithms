@@ -2,34 +2,28 @@ library(mlxR)
 
 model2 <- inlineModel("
                       [LONGITUDINAL]
-                      input = {A1, A2, A3, alpha1, alpha2, alpha3, a}
+                      input = {ymax, xmax, slope, a}
                       
                       EQUATION:
-                      Cc = A1*exp(-alpha1*t)+A2*exp(-alpha2*t)+A3*exp(-alpha3*t)
+                      Cc = ymax+slope*(t-xmax)
                       
                       DEFINITION:
                       y1 ={distribution=lognormal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={A1_pop, o_A1,A2_pop, o_A2,A3_pop, o_A3,alpha1_pop, o_alpha1,alpha2_pop, o_alpha2,alpha3_pop, o_alpha3}
+                      input={ymax_pop, o_ymax,xmax_pop, o_xmax,slope_pop, o_slope}
                       
                       DEFINITION:
-                      A1  ={distribution=lognormal, prediction=A1_pop,  sd=o_A1}
-                      A2  ={distribution=lognormal, prediction=A2_pop,  sd=o_A2}
-                      A3  ={distribution=lognormal, prediction=A3_pop,  sd=o_A3}
-                      alpha1  ={distribution=lognormal, prediction=alpha1_pop,  sd=o_alpha1}
-                      alpha2  ={distribution=lognormal, prediction=alpha2_pop,  sd=o_alpha2}
-                      alpha3  ={distribution=lognormal, prediction=alpha3_pop,  sd=o_alpha3}
+                      ymax  ={distribution=normal, prediction=ymax_pop,  sd=o_ymax}
+                      xmax  ={distribution=normal, prediction=xmax_pop,  sd=o_xmax}
+                      slope  ={distribution=normal, prediction=slope_pop,  sd=o_slope}
                       
                       ")
 
 adm  <- list(amount=1, time=seq(0,50,by=50))
-p <- c(A1_pop=60, o_A1=0.5,
-       A2_pop=1, o_A2=1, 
-       A3_pop=100, o_A3=0.1,  
-       alpha1_pop=0.6,  o_alpha1=0,
-       alpha2_pop=10,  o_alpha2=0.3,
-       alpha3_pop=0.1,  o_alpha3=0,
+p <- c(ymax_pop=10, o_ymax=0.5,
+       xmax_pop=1, o_xmax=1, 
+       slope_pop=2, o_slope=0.1,
        a=0.1)
 y1 <- list(name='y1', time=seq(1,to=50,by=2))
 
@@ -41,34 +35,14 @@ res2a2 <- simulx(model = model2,
                  output = y1)
 
 
-writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/yield.csv")
-head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/yield.csv", header=T, sep=","))
+writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/yield/yield_synth.csv")
+table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/yield/yield_synth.csv", header=T, sep=",")
+head(table)
+table[1:45,]
+
 
 #modification for mlxsaem dataread function
-obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/yield.csv", header=T, sep=";")
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/yield/yield_synth.csv", header=T, sep=",")
 obj <- obj[obj$amount !=1,]
-write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/yield/theonew.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
-
-
-yield.LP<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
-}
-
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
-  psi0=matrix(c(8,10,1,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE),error.model="constant")
+obj[,4] <- 1
+write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/yield/yield_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)

@@ -18,13 +18,12 @@ model2 <- inlineModel("
                       V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
                       k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       ")
-
-adm  <- list(amount=300, time=seq(0,10,by=1))
+adm  <- list(amount=1000, time=seq(0,50,by=50))
 p <- c(ka_pop=1, o_ka=0.5,
-       V_pop=20, o_V=1, 
+       V_pop=20, o_V=0.2, 
        k_pop=2, o_k=0.1,  
        a=0.1)
-y1 <- list(name='y1', time=seq(0,to=10,by=1))
+y1 <- list(name='y1', time=seq(1,to=50,by=5))
 
 
 res2a2 <- simulx(model = model2,
@@ -35,12 +34,15 @@ res2a2 <- simulx(model = model2,
 
 
 writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv")
-
 table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=",")
 head(table)
-table[1:25,]
+table[1:45,]
+
 
 #modification for mlxsaem dataread function
-obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theo_synth.csv", header=T, sep=";")
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=",")
 obj <- obj[obj$amount !=1,]
-write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel_saem/theo/theonew.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+obj[,4] <- 1000
+write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+
+

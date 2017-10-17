@@ -70,10 +70,18 @@ library("mlxR")
 
 
 
-oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
-oxboys.saemix_less <- oxboys.saemix
-saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
-  name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
+# oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
+# oxboys.saemix_less <- oxboys.saemix
+# saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
+#   name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
+#   units=list(x="yr",y="cm"))
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys")
+oxboys.saemix<-read.table( "ox_synth.csv",header=T,na=".",sep=",")
+oxboys.saemix_less <- oxboys.saemix[1:10,1:3]
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+saemix.data<-saemixData(name.data=oxboys.saemix,header=TRUE,
+  name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
   units=list(x="yr",y="cm"))
 
 
@@ -91,7 +99,7 @@ growth.linear<-function(psi,id,xidep) {
   return(f)
 }
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",
-  psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
+  psi0=matrix(c(1,20),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
@@ -103,14 +111,14 @@ iter_mcmc = 10000
 burn = 400
 
 
-K1 = 70
+K1 = 50
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
 seed0 = 39546
 
 # #RWM
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 10, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
 theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -121,6 +129,8 @@ theo_ref <- cbind(iterations, theo_ref)
 options.new<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5),nbiter.saemix = c(K1,K2),nbiter.sa=0)
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
+
+
 
 
 graphConvMC_twokernels(theo_ref,theo_new_ref, title="RWM vs Laplace SAEM")

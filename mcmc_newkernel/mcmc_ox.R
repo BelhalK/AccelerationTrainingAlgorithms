@@ -44,10 +44,13 @@ library(lattice)
 
 
 # Doc
-oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
-oxboys.saemix_less <- oxboys.saemix[1:9,]
+# oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys")
+oxboys.saemix<-read.table( "ox_synth.csv",header=T,na=".",sep=",")
+oxboys.saemix_less <- oxboys.saemix[1:10,1:3]
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
 saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
-  name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
+  name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
   units=list(x="yr",y="cm"))
 
 
@@ -70,6 +73,8 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   error.model="constant")
 
 
+
+
 indiv = 1
 seed0 = 35644
 replicate = 50
@@ -84,7 +89,7 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-# graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
+graphConvMC_twokernels(new$eta[[indiv]],ref$eta[[indiv]], title="eta")
 
 final_rwm <- 0
 expec_rwm <- ref$eta[[indiv]]
