@@ -111,7 +111,7 @@ iter_mcmc = 10000
 burn = 400
 
 
-K1 = 50
+K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.00001
