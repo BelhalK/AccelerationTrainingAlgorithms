@@ -64,9 +64,9 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 
 
 indiv = 1
-seed0 = 35644
+seed0 = 35
 replicate = 20
-iter_mcmc = 1000
+iter_mcmc = 10000
 burn = 400
 
 
@@ -77,12 +77,6 @@ saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbite
 ref <- mcmc(saemix.model,saemix.data,saemix.options_rwm,iter_mcmc)
 new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
 
-saemix.options_linear<-list(seed=seed0,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-new<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
-
-saemix.options_linear<-list(seed=seed0+44,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(0,0,0,iter_mcmc))
-new2<-mcmc(saemix.model,saemix.data,saemix.options_linear,iter_mcmc)
-graphConvMC_twokernels(new$eta[[indiv]],new2$eta[[indiv]], title="eta")
 
 
 graphConvMC_twokernels(ref$eta[[indiv]],ref$eta[[indiv]], title="eta")

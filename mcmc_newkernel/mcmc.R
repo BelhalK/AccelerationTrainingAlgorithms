@@ -22,7 +22,8 @@ mcmc<-function(model,data,control=list(),iter) {
   OLDRAND<-TRUE
   set.seed(saemix.options$seed)
 	#intitialisation
-	xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+	# xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
 	saemix.model<-xinit$saemix.model
   	Dargs<-xinit$Dargs
   	Uargs<-xinit$Uargs
