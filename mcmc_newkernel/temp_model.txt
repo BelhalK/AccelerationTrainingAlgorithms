@@ -1,19 +1,16 @@
 
                       [LONGITUDINAL]
-                      input = {ymax, xmax, slope, a}
-                      
+                      input = {base, slope,a}
                       EQUATION:
-                      Cc = ymax+slope*(t-xmax)
-                      
+                      Cc = base+slope*t
+
                       DEFINITION:
                       y1 ={distribution=lognormal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={ymax_pop, o_ymax,xmax_pop, o_xmax,slope_pop, o_slope}
+                      input={base_pop,o_base, slope_pop,o_slope}
                       
                       DEFINITION:
-                      ymax  ={distribution=normal, prediction=ymax_pop,  sd=o_ymax}
-                      xmax  ={distribution=normal, prediction=xmax_pop,  sd=o_xmax}
+                      base  ={distribution=lognormal, prediction=base_pop,  sd=o_base}
                       slope  ={distribution=normal, prediction=slope_pop,  sd=o_slope}
-                      
                       
