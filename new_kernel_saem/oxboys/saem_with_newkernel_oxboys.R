@@ -99,7 +99,7 @@ growth.linear<-function(psi,id,xidep) {
   return(f)
 }
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",
-  psi0=matrix(c(1,20),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
+  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
@@ -114,6 +114,7 @@ burn = 400
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
+end = K1+K2
 gd_step = 0.00001
 seed0 = 39546
 
@@ -170,7 +171,7 @@ final_rwm1 <- final_rwm[c(7,1,2)]
 final_rwm2 <- final_rwm[c(7,1,3)]
 final_rwm3 <- final_rwm[c(7,1,4)]
 final_rwm4 <- final_rwm[c(7,1,5)]
-final_rwm5 <- final_rwm[c(7,1,6)]
+
 
 # prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
@@ -192,7 +193,7 @@ final_mix1 <- final_mix[c(7,1,2)]
 final_mix2 <- final_mix[c(7,1,3)]
 final_mix3 <- final_mix[c(7,1,4)]
 final_mix4 <- final_mix[c(7,1,5)]
-final_mix5 <- final_mix[c(7,1,6)]
+
 
 
 # prctilemlx(final_mix1[-1,1:3],band = list(number = 8, level = 80)) + ggtitle("mix")

@@ -21,7 +21,7 @@ model2 <- inlineModel("
 adm  <- list(amount=1, time=seq(0,50,by=50))
 p <- c(base_pop=100, o_base=2,
        slope_pop=1, o_slope=1,  
-       a=0.1)
+       a=1)
 y1 <- list(name='y1', time=seq(1,to=50,by=5))
 
 
