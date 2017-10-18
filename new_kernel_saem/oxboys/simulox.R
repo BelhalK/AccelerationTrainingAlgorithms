@@ -8,7 +8,7 @@ model2 <- inlineModel("
                       Cc = base+slope*t
 
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
                       input={base_pop,o_base, slope_pop,o_slope}
@@ -19,8 +19,8 @@ model2 <- inlineModel("
                       ")
 
 adm  <- list(amount=1, time=seq(0,50,by=50))
-p <- c(base_pop=100, o_base=2,
-       slope_pop=1, o_slope=1,  
+p <- c(base_pop=1, o_base=0.8,
+       slope_pop=1.5, o_slope=0.5,  
        a=1)
 y1 <- list(name='y1', time=seq(1,to=50,by=5))
 

@@ -5,7 +5,6 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	# Output: varList, DYF, phiM (changed)
 	
 	# Function to perform MCMC simulation
-
 	nb.etas<-length(varList$ind.eta)
 	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
 	omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]
@@ -32,49 +31,6 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
-
-
-	saemix.options<-saemixObject["options"]
-  	saemix.model<-saemixObject["model"]
-  	saemix.data<-saemixObject["data"]
-  	saemix.options$map <- TRUE
-  	saemixObject["results"]["omega"] <- omega.eta
-  	saemixObject["results"]["mean.phi"] <- mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
-  	saemixObject["results"]["phi"] <- phiM
-  	saemixObject["results"]["respar"] <- varList$pres
-
-  	i1.omega2<-saemixObject["model"]["indx.omega"]
-    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
-  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
-  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
-  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
-  	id.list<-unique(id)
-  	phi.map<-saemixObject["results"]["phi"]
-  	if(opt$nbiter.mcmc[4]>0) {
-	  	for(i in 1:Dargs$NM) {
-		    isuj<-id.list[i]
-		    xi<-xind[id==isuj,,drop=FALSE]
-		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
-		    yi<-yobs[id==isuj]
-		    idi<-rep(1,length(yi))
-		    mean.phi1<-mean.phi
-		    phii<-phiM[i,]
-		    phi1<-phii[i1.omega2]
-		    # browser()
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
-		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 50))
-		    phi.map[i,i1.omega2]<-phi1.opti$par
-		  }
-
-	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-		map.psi<-data.frame(id=id.list,map.psi)
-		map.phi<-data.frame(id=id.list,phi.map)
-
-		psi_map <- as.matrix(map.psi[,-c(1)])
-		phi_map <- as.matrix(map.phi[,-c(1)])
-		eta_map <- phi_map - mean.phiM
-
-	}
 
 
 	
@@ -161,9 +117,7 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
-				for (i in 1:(nrow(phiM))) {
-					# post[[i]][u,] <- etaM[i,]
-				}
+			
 
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
 				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
@@ -178,24 +132,63 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	}
 
-
-		#New kernel
-	if(opt$nbiter.mcmc[4]>0) {
-		etaM <- eta_map
-		phiM <- phi_map
-		psiM<-transphi(phiM,Dargs$transform.par)
-		fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-		gpred<-error(fpred,varList$pres)
-		DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-		U.y<-colSums(DYF)
-		U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-		phiMc<-phiM
+	#New kernel
+		if(opt$nbiter.mcmc[4]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
+		#MAP calculation
+
+
+		saemix.options<-saemixObject["options"]
+	  	saemix.model<-saemixObject["model"]
+	  	saemix.data<-saemixObject["data"]
+	  	saemix.options$map <- TRUE
+	  	saemixObject["results"]["omega"] <- omega.eta
+	  	saemixObject["results"]["mean.phi"] <- mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
+	  	saemixObject["results"]["phi"] <- phiM
+	  	saemixObject["results"]["respar"] <- varList$pres
+
+	  	i1.omega2<-saemixObject["model"]["indx.omega"]
+	    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+	  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
+	  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
+	  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
+	  	id.list<-unique(id)
+	  	phi.map<-saemixObject["results"]["phi"]
+
+
+
+		K1 <- saemix.options$nbiter.saemix[1]
+		K2 <- saemix.options$nbiter.saemix[2]
+	
+	  	for(i in 1:Dargs$N) {
+		    isuj<-id.list[i]
+		    xi<-xind[id==isuj,,drop=FALSE]
+		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+		    yi<-yobs[id==isuj]
+		    idi<-rep(1,length(yi))
+		    
+
+		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
+		    phii<-saemixObject["results"]["phi"][i,]
+		    phi1<-phii[i1.omega2]
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"], control=list(maxiter = 2))
+		    phi.map[i,i1.omega2]<-phi1.opti$par
+		  }
+		  phi.map <- do.call(rbind, replicate(Uargs$nchains, phi.map[1:Dargs$N,], simplify=FALSE))
+
+	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+		map.psi<-data.frame(id=id.list,map.psi)
+		map.phi<-data.frame(id=id.list,phi.map)
+
+		psi_map <- as.matrix(map.psi[,-c(1)])
+		phi_map <- as.matrix(map.phi[,-c(1)])
+		eta_map <- phi_map - mean.phiM
 		
 		#gradient at the map estimation
 		gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas) 
+
 
 		for (j in 1:nb.etas) {
 			phi_map2 <- phi_map
@@ -209,9 +202,11 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
 			}
 		}
+		
 
 		#calculation of the covariance matrix of the proposal
 	
+
 		Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
@@ -223,16 +218,16 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			chol.Gamma[[i]] <- chol(Gamma[[i]])
 			inv.Gamma[[i]] <- solve(Gamma[[i]])
 		}
-		
-		etaMc<-etaM
-		etaM <- eta_map
-		propc <- U.eta
-		prop <- U.eta
+
 		for (u in 1:opt$nbiter.mcmc[4]) {
-			
+			for(vk2 in 1:nb.etas) {
+				etaMc<-etaM
+				etaM <- eta_map
+				propc <- U.eta
+				prop <- U.eta
 				#generate candidate eta
-				for (i in 1:(Dargs$NM)){
 					
+				for (i in 1:(Dargs$NM)){
 					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
 					etaMc[i,]<- eta_map[i,] +Mi
 				}
@@ -255,10 +250,9 @@ estep_new2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind]
 				U.eta[ind]<-Uc.eta[ind]
-				
 
 			}
-		
+		}
 	}
 
 

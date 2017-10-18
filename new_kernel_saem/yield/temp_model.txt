@@ -1,17 +1,19 @@
 
                       [LONGITUDINAL]
-                      input = {ka, V, k, a}
+                      input = {ymax, xmax, slope, a}
+                      
                       EQUATION:
-                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
+                      Cc = ymax+slope*(t-xmax)
                       
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
+                      input={ymax_pop, o_ymax,xmax_pop, o_xmax,slope_pop, o_slope}
                       
                       DEFINITION:
-                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
-                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
-                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
+                      ymax  ={distribution=normal, prediction=ymax_pop,  sd=o_ymax}
+                      xmax  ={distribution=normal, prediction=xmax_pop,  sd=o_xmax}
+                      slope  ={distribution=normal, prediction=slope_pop,  sd=o_slope}
+                      
                       

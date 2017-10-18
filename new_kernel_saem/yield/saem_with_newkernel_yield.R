@@ -50,11 +50,22 @@ library("mlxR")
 
 
 # Doc
-data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
-  name.predictors=c("dose"),name.response=c("yield"),
-  name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
-  covariates=c("kg/ha")))
+# data(yield.saemix)
+# saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
+#   name.predictors=c("dose"),name.response=c("yield"),
+#   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
+#   covariates=c("kg/ha")))
+
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/yield")
+oxboys.saemix<-read.table( "yield_synth.csv",header=T,na=".",sep=",")
+oxboys.saemix_less <- oxboys.saemix[1:10,1:3]
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+saemix.data<-saemixData(name.data=oxboys.saemix,header=TRUE,
+  name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
+  units=list(x="yr",y="cm"))
+
+
 
 yield.LP<-function(psi,id,xidep) {
 # input:
@@ -74,7 +85,7 @@ yield.LP<-function(psi,id,xidep) {
 }
 
 saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
-  psi0=matrix(c(8,10,1,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(8,1,1,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")

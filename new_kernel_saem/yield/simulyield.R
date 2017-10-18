@@ -8,7 +8,7 @@ model2 <- inlineModel("
                       Cc = ymax+slope*(t-xmax)
                       
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
                       input={ymax_pop, o_ymax,xmax_pop, o_xmax,slope_pop, o_slope}
@@ -25,13 +25,13 @@ p <- c(ymax_pop=10, o_ymax=0.5,
        xmax_pop=1, o_xmax=1, 
        slope_pop=2, o_slope=0.1,
        a=0.1)
-y1 <- list(name='y1', time=seq(1,to=50,by=2))
+y1 <- list(name='y1', time=seq(1,to=50,by=10))
 
 
 res2a2 <- simulx(model = model2,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=500, level="individual"),
+                 group = list(size=20, level="individual"),
                  output = y1)
 
 

@@ -8,7 +8,7 @@ model2 <- inlineModel("
                       Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
                       
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
                       input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
