@@ -18,7 +18,7 @@ model2 <- inlineModel("
                       V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
                       k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       ")
-adm  <- list(amount=1000, time=seq(0,50,by=50))
+adm  <- list(amount=100, time=seq(0,50,by=50))
 p <- c(ka_pop=1, o_ka=0.5,
        V_pop=20, o_V=0.2, 
        k_pop=2, o_k=0.1,  
@@ -41,8 +41,9 @@ table[1:45,]
 
 #modification for mlxsaem dataread function
 obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=",")
-obj <- obj[obj$amount !=1,]
-obj[,4] <- 1000
+obj <- obj[obj$time !=0,]
+obj <- obj[obj$time !=50,]
+obj[,4] <- 100
 write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
 
 

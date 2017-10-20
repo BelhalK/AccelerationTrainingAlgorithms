@@ -22,7 +22,7 @@ adm  <- list(amount=1, time=seq(0,50,by=50))
 p <- c(base_pop=1, o_base=0.8,
        slope_pop=1.5, o_slope=0.5,  
        a=1)
-y1 <- list(name='y1', time=seq(1,to=50,by=5))
+y1 <- list(name='y1', time=seq(1,to=50,by=10))
 
 
 res2a2 <- simulx(model = model2,
