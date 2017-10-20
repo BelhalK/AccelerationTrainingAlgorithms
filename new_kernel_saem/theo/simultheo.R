@@ -20,8 +20,8 @@ model2 <- inlineModel("
                       ")
 adm  <- list(amount=100, time=seq(0,50,by=50))
 p <- c(ka_pop=1, o_ka=0.5,
-       V_pop=20, o_V=0.2, 
-       k_pop=2, o_k=0.1,  
+       V_pop=20, o_V=1.2, 
+       k_pop=2, o_k=1.1,  
        a=0.1)
 y1 <- list(name='y1', time=seq(1,to=50,by=5))
 

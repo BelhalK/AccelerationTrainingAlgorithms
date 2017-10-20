@@ -5,7 +5,7 @@
                       Cc = base+slope*t
 
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
                       input={base_pop,o_base, slope_pop,o_slope}

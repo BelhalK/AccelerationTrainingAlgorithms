@@ -4,58 +4,63 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset oxboys.saemix_less 
-    Structured data: height ~ age | Subject 
-    Predictor: age (yr) 
+Dataset cow.saemix 
+    Structured data: weight ~ time | cow 
+    Predictor: time (days) 
+    covariates: birthyear (yr), twin (-), birthrank (-) 
+      reference class for covariate twin :  1 
 Dataset characteristics:
-    number of subjects:     26 
-    number of observations: 234 
-    average/min/max nb obs: 9.00  /  9  /  9 
+    number of subjects:     560 
+    number of observations: 5455 
+    average/min/max nb obs: 9.74  /  7  /  10 
 First 10 lines of data:
-   Subject     age height mdv cens occ ytype
-1        1 -1.0000  140.5   0    0   1     1
-2        1 -0.7479  143.4   0    0   1     1
-3        1 -0.4630  144.8   0    0   1     1
-4        1 -0.1643  147.1   0    0   1     1
-5        1 -0.0027  147.7   0    0   1     1
-6        1  0.2466  150.2   0    0   1     1
-7        1  0.5562  151.7   0    0   1     1
-8        1  0.7781  153.3   0    0   1     1
-9        1  0.9945  155.8   0    0   1     1
-10       2 -1.0000  136.9   0    0   1     1
+       cow time weight birthyear twin birthrank mdv cens occ ytype
+1  1988005    0   44.0      1988    1         3   0    0   1     1
+2  1988005  112  173.4      1988    1         3   0    0   1     1
+3  1988005  224  292.8      1988    1         3   0    0   1     1
+4  1988005  364  364.6      1988    1         3   0    0   1     1
+5  1988005  540  490.4      1988    1         3   0    0   1     1
+6  1988005  720  522.0      1988    1         3   0    0   1     1
+7  1988005  900  601.1      1988    1         3   0    0   1     1
+8  1988005 1260  698.1      1988    1         3   0    0   1     1
+9  1988005 1620  657.7      1988    1         3   0    0   1     1
+10 1988005 1980  776.7      1988    1         3   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear model
+  Model function:  Exponential growth model
 function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (2 columns, base and slope)
+#   psi : matrix of parameters (3 columns, a, b, k)
 #   id : vector of indices 
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
+  a<-psi[id,1]
+  b<-psi[id,2]
+  k<-psi[id,3]
+  f<-a*(1-b*exp(-k*x))
   return(f)
 }
-  Nb of parameters: 2 
-      parameter names:  base slope 
+  Nb of parameters: 3 
+      parameter names:  A B k 
       distribution:
      Parameter Distribution Estimated
-[1,] base      log-normal   Estimated
-[2,] slope     normal       Estimated
+[1,] A         log-normal   Estimated
+[2,] B         log-normal   Estimated
+[3,] k         log-normal   Estimated
   Variance-covariance matrix:
-      base slope
-base     1     1
-slope    1     1
+  A B k
+A 1 0 0
+B 0 1 0
+k 0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             base slope
-Pop.CondInit  140     1
+               A   B    k
+Pop.CondInit 700 0.9 0.02
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -76,18 +81,21 @@ Pop.CondInit  140     1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] base      149.16  
-[2,] slope       6.52  
-[3,] a           0.66  
+[1,] A         7.5e+02 
+[2,] B         9.4e-01 
+[3,] k         1.6e-03 
+[4,] a         2.7e+01 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-      Parameter    Estimate
-base  omega2.base  0.0029  
-slope omega2.slope 2.6903  
+  Parameter Estimate
+A omega2.A  6.5e-03 
+B omega2.B  3.6e-05 
+k omega2.k  1.5e-02 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.base omega2.slope
-omega2.base  1.00        0.65        
-omega2.slope 0.65        1.00        
+         omega2.A omega2.B omega2.k
+omega2.A 1        0        0       
+omega2.B 0        1        0       
+omega2.k 0        0        1       

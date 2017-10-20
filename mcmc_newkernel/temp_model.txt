@@ -1,16 +1,17 @@
 
                       [LONGITUDINAL]
-                      input = {base, slope,a}
+                      input = {ka, V, k, a}
                       EQUATION:
-                      Cc = base+slope*t
-
+                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
+                      
                       DEFINITION:
                       y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={base_pop,o_base, slope_pop,o_slope}
+                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
                       
                       DEFINITION:
-                      base  ={distribution=lognormal, prediction=base_pop,  sd=o_base}
-                      slope  ={distribution=normal, prediction=slope_pop,  sd=o_slope}
+                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
+                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
+                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       

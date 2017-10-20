@@ -43,12 +43,12 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
+  setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 source('newkernel_main.R')
 # source('initalgo.R')
 source('main_new.R')
 source('main_estep_new.R')
+source('main_estep_new2.R')
 source('main_gd.R')
 source('main_estep_gd.R')
 source('main_gd_mix.R')
@@ -69,32 +69,43 @@ library("mlxR")
 # Doc
 
 
+data(cow.saemix)
+saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
+  name.predictors=c("time"),name.response=c("weight"), 
+  name.covariates=c("birthyear","twin","birthrank"), 
+  units=list(x="days",y="kg",covariates=c("yr","-","-")))
 
-oxboys.saemix<-read.table( "data/oxboys.saemix.tab",header=T,na=".")
-oxboys.saemix_less <- oxboys.saemix
-saemix.data<-saemixData(name.data=oxboys.saemix_less,header=TRUE,
-  name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
-  units=list(x="yr",y="cm"))
+
+# setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow")
+# cow.saemix<-read.table( "cow_synth.csv",header=T,na=".",sep=",")
+# cow.saemix_less <- cow.saemix[1:10,1:3]
+# setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+# saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,
+#   name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
+#   units=list(x="yr",y="cm"))
 
 
-growth.linear<-function(psi,id,xidep) {
+growthcow<-function(psi,id,xidep) {
 # input:
-#   psi : matrix of parameters (2 columns, base and slope)
+#   psi : matrix of parameters (3 columns, a, b, k)
 #   id : vector of indices 
 #   xidep : dependent variables (same nb of rows as length of id)
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
+  a<-psi[id,1]
+  b<-psi[id,2]
+  k<-psi[id,3]
+  f<-a*(1-b*exp(-k*x))
   return(f)
 }
-saemix.model<-saemixModel(model=growth.linear,description="Linear model",
-  psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
-  transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
-  error.model="constant")
-
+saemix.model<-saemixModel(model=growthcow,
+  description="Exponential growth model", 
+  psi0=matrix(c(700,0.9,0.02,0,0,0),ncol=3,byrow=TRUE, 
+  dimnames=list(NULL,c("A","B","k"))),transform.par=c(1,1,1),fixed.estim=c(1,1,1), 
+  covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
+  omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
 indiv = 1
 seed0 = 35644
@@ -114,7 +125,7 @@ options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 10, nbiter.mcmc = c(2,2
 theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-# graphConvMC_twokernels(theo_ref,theo_ref, title="RWM vs Laplace SAEM")
+graphConvMC_twokernels(theo_ref,theo_ref, title="RWM vs Laplace SAEM")
 
 
 #ref (map always)

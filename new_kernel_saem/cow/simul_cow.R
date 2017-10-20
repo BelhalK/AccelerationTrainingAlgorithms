@@ -32,16 +32,16 @@ res2a2 <- simulx(model = model2,
                  output = y1)
 
 
-writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys/ox_synth.csv")
-table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys/ox_synth.csv", header=T, sep=",")
+writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow/cow_synth.csv")
+table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow/cow_synth.csv", header=T, sep=",")
 head(table)
 table[1:45,]
 
 
 #modification for mlxsaem dataread function
-obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys/ox_synth.csv", header=T, sep=",")
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow/cow_synth.csv", header=T, sep=",")
 obj <- obj[obj$amount !=1,]
 obj[,4] <- 1
-write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys/ox_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow/cow_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
 
 
