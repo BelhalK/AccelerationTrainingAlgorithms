@@ -57,7 +57,6 @@ estep_new<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 	
 	# Second stage
-	
 	if(opt$nbiter.mcmc[2]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1

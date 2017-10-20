@@ -1,0 +1,95 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset warfarin.saemix 
+    Structured data: y1 ~ amount + time | id 
+    X variable for graphs: time () 
+Dataset characteristics:
+    number of subjects:     32 
+    number of observations: 252 
+    average/min/max nb obs: 7.88  /  6  /  17 
+First 10 lines of data:
+   id amount time         y1 mdv cens occ ytype
+1   1    100  0.0  0.0000000   0    0   1     1
+2   1    100 24.0  8.2414060   0    0   1     1
+3   1    100 36.0  6.0471531   0    0   1     1
+4   1    100 48.0  4.5084781   0    0   1     1
+5   1    100 72.0  3.7102288   0    0   1     1
+6   1    100 96.0  2.3913874   0    0   1     1
+7   2    100  0.0  0.0000000   0    0   1     1
+8   2    100  0.5  0.1826322   0    0   1     1
+9   2    100  2.0  9.4493436   0    0   1     1
+10  2    100  3.0 10.0457825   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  warfarin
+function(psi,id,xidep) { 
+dose<-xidep[,1]
+tim<-xidep[,2]  
+ka<-psi[id,1]
+V<-psi[id,2]
+k<-psi[id,3]
+CL<-k*V
+ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+return(ypred)
+}
+  Nb of parameters: 3 
+      parameter names:  ka V CL 
+      distribution:
+     Parameter Distribution Estimated
+[1,] ka        log-normal   Estimated
+[2,] V         log-normal   Estimated
+[3,] CL        log-normal   Estimated
+  Variance-covariance matrix:
+   ka V CL
+ka  1 0  0
+V   0 1  0
+CL  0 0  1
+  Error model: constant , initial values: a=1 
+    No covariate in the model.
+    Initial values
+             ka V CL
+Pop.CondInit  1 7  1
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=100, K2=50 
+    Number of chains:  20 
+    Seed:  2371476 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter Estimate
+[1,] ka        0.45    
+[2,] V         7.81    
+[3,] CL        0.02    
+[4,] a         1.01    
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+   Parameter Estimate
+ka omega2.ka 0.080   
+V  omega2.V  0.020   
+CL omega2.CL 0.058   
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+          omega2.ka omega2.V omega2.CL
+omega2.ka 1         0        0        
+omega2.V  0         1        0        
+omega2.CL 0         0        1        
