@@ -33,7 +33,7 @@ p <- c(th1_pop=1, o_th1=0.5,
        th3_pop=10, o_th3=0.1)
 
 
-y1 <- list(name='y1', time=seq(1,to=50,by=2))
+y1 <- list(name='level', time=seq(1,to=50,by=10))
 
 
 res2a2 <- simulx(model = model2,
@@ -43,10 +43,7 @@ res2a2 <- simulx(model = model2,
 
 
 
-writeDatamlx(res2a2, result.file = "~/Documents/GitHub/saem/warfarin_cat/data/res2a2.csv")
-head(read.table("~/Desktop/variationalBayes/new_kernel/data/res2a2.csv", header=T, sep=","))
+writeDatamlx(res2a2, result.file = "/Users/belhalkarimi/Desktop/saem/warfarin_cat/data/cat.csv")
+head(read.table("/Users/belhalkarimi/Desktop/saem/warfarin_cat/data/cat.csv", header=T, sep=","))
 
-#modification for mlxsaem dataread function
-obj <- read.table("~/Desktop/variationalBayes/new_kernel/data/res2a2.csv", header=T, sep=";")
-obj <- obj[obj$amount !=1,]
-write.table(obj, "~/Desktop/variationalBayes/new_kernel/data/new", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+
