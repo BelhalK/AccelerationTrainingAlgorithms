@@ -1,17 +1,21 @@
 
-                      [LONGITUDINAL]
-                      input = {ka, V, k, a}
-                      EQUATION:
-                      Cc = ka/(V*(ka-k))*(exp(-k*t)-exp(-ka*t))
-                      
-                      DEFINITION:
-                      y1 ={distribution=normal, prediction=Cc, sd=a}
-                      
-                      [INDIVIDUAL]
-                      input={ka_pop,o_ka, V_pop,o_V, k_pop,o_k}
-                      
-                      DEFINITION:
-                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
-                      V  ={distribution=lognormal, prediction=V_pop,  sd=o_V}
-                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
-                      
+                       [LONGITUDINAL] 
+                        input = {Ntt, ka, kEhc, Fent, Cl, V, tg}
+
+                        PK:
+                        compartment(cmt=1, amount=Ehc)
+                        compartment(cmt=2, amount=Ak)
+                        iv(cmt=1, p=-1/amtDose)
+                        iv(cmt=1, Tlag=tg, p=1/amtDose)
+                        oral(cmt=2, Mtt=Ntt/ka, Ktr=ka, ka)
+
+                        EQUATION:
+                        kb = Cl/V
+                        t0 = 0
+                        Ehc_0 = 1
+                        ddt_Ehc=0 
+                        ddt_Ak = Ehc*kEhc*Agb - ka*Ak
+                        ddt_Acc = ka*Ak - kb*Acc 
+                        ddt_Agb = Fent*kb*Acc - Ehc*kEhc*Agb
+                        Cc = Acc/V
+                             

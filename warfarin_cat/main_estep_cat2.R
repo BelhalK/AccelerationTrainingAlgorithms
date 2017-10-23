@@ -22,6 +22,7 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 
+
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
 	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))

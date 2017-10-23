@@ -55,9 +55,9 @@ iter_mcmc = 200
 
 
 # cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
-# cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y","TIME"), name.X=c("TIME"))
 
 
 cat_data.model<-function(psi,id,xidep) {
@@ -128,41 +128,174 @@ cat_saem <- cbind(iterations, cat_saem)
 graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-index = 1
-graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
-graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 
 
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+
+replicate = 20
+seed0 = 39546
+
+#RWM
+final_rwm <- 0
+for (j in 3:replicate){
+  print(j)
+  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
+theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+  theo_ref <- cbind(iterations, theo_ref)
+  theo_ref['individual'] <- j
+  final_rwm <- rbind(final_rwm,theo_ref)
 }
 
 
-final_foce <- post_foce[[1]]
-for (i in 2:length(post_foce)) {
-  final_foce <- rbind(final_foce, post_foce[[i]])
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[6]<-paste("id")
+final_rwm1 <- final_rwm[c(6,1,2)]
+final_rwm2 <- final_rwm[c(6,1,3)]
+final_rwm3 <- final_rwm[c(6,1,4)]
+final_rwm4 <- final_rwm[c(6,1,5)]
+
+
+prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+
+#mix (RWM and MAP new kernel for liste of saem iterations)
+final_mix <- 0
+for (j in 3:replicate){
+  print(j)
+  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+  theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
 }
 
 
-
-graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
-graphConvMC_twokernels(final_rwm,final_foce, title="EM")
-
-
-#Autocorrelation
-rwm.obj <- as.mcmc(post_rwm[[1]])
-corr_rwm <- autocorr(rwm.obj[,2])
-autocorr.plot(rwm.obj[,2])
-
-foce.obj <- as.mcmc(post_foce[[1]])
-corr_foce <- autocorr(foce.obj[,2])
-autocorr.plot(foce.obj[,2])
+names(final_mix)[1]<-paste("time")
+names(final_mix)[6]<-paste("id")
+final_mix1 <- final_mix[c(6,1,2)]
+final_mix2 <- final_mix[c(6,1,3)]
+final_mix3 <- final_mix[c(6,1,4)]
+final_mix4 <- final_mix[c(6,1,5)]
 
 
-#MSJD
-<mssd(post_rwm[[index]][,2])
-mssd(post_foce[[index]][,2])
+
+
+final_rwm1['group'] <- 1
+final_mix1['group'] <- 2
+final_mix1$id <- final_mix1$id +1
+
+
+final1 <- rbind(final_rwm1[-1,],final_mix1[-1,])
+labels <- c("ref","new")
+# prctilemlx(final1[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S <- plot.S1  + ylab("th1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+# print(plot.S1)
+
+
+
+final_rwm2['group'] <- 1
+final_mix2['group'] <- 2
+final_mix2$id <- final_mix2$id +1
+final2 <- rbind(final_rwm2[-1,],final_mix2[-1,])
+labels <- c("ref","new")
+# prctilemlx(final2[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S2 <- plot.S2  + ylab("th2")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+final_rwm3['group'] <- 1
+final_mix3['group'] <- 2
+final_mix3$id <- final_mix3$id +1
+
+
+final3 <- rbind(final_rwm3[-1,],final_mix3[-1,])
+labels <- c("ref","new")
+# prctilemlx(final3[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S3 <- plot.prediction.intervals(final3[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S3 <- plot.S3  + ylab("th3")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+
+
+final_rwm4['group'] <- 1
+final_mix4['group'] <- 2
+final_mix4$id <- final_mix4$id +1
+
+
+final4 <- rbind(final_rwm4[-1,],final_mix4[-1,])
+labels <- c("ref","new")
+# prctilemlx(final4[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S4 <- plot.prediction.intervals(final4[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+
+
+
+grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+
+# index = 1
+# graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
+# graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
+
+
+# final_rwm <- post_rwm[[1]]
+# for (i in 2:length(post_rwm)) {
+#   final_rwm <- rbind(final_rwm, post_rwm[[i]])
+# }
+
+
+# final_foce <- post_foce[[1]]
+# for (i in 2:length(post_foce)) {
+#   final_foce <- rbind(final_foce, post_foce[[i]])
+# }
+
+
+
+# graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
+# graphConvMC_twokernels(final_rwm,final_foce, title="EM")
+
+
+# #Autocorrelation
+# rwm.obj <- as.mcmc(post_rwm[[1]])
+# corr_rwm <- autocorr(rwm.obj[,2])
+# autocorr.plot(rwm.obj[,2])
+
+# foce.obj <- as.mcmc(post_foce[[1]])
+# corr_foce <- autocorr(foce.obj[,2])
+# autocorr.plot(foce.obj[,2])
+
+
+# #MSJD
+# <mssd(post_rwm[[index]][,2])
+# mssd(post_foce[[index]][,2])
 
 
 

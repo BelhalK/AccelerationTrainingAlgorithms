@@ -4,7 +4,7 @@ library(mlxR)
 model2 <- inlineModel("
     [LONGITUDINAL] 
     input = {Ntt, ka, kEhc, Fent, Cl, V, tg, a, b}
-
+    
     PK:
     compartment(cmt=1, amount=Ehc)
     compartment(cmt=2, amount=Ak)

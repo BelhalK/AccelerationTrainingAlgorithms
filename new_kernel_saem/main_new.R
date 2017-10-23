@@ -75,6 +75,7 @@
 #' 
 #' @export saemix
 saemix_new<-function(model,data,control=list()) {
+library("mlxR")
 
 # Convergence plots during fit (special function, not user-level)
   convplot.infit<-function(allpar,K1,niter=0) {
@@ -100,8 +101,10 @@ saemix_new<-function(model,data,control=list()) {
     return()
   }
 
+
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
+  
   opt.warn<-getOption("warn")
 
   if(!saemixObject["options"]$warnings) options(warn=-1)

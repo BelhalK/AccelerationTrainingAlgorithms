@@ -149,12 +149,12 @@ model1cpt<-function(psi,id,xidep) {
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),transform.par=c(1,1,1))
 
 saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
-K1 = 100
+K1 = 200
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -165,7 +165,7 @@ options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2
 theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-
+graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #ref (map always)
 options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))

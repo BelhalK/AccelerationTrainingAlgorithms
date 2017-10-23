@@ -43,7 +43,8 @@ setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2"
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  
+  setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/enterohepatic")
+source('initentero.R')  
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
 source('newkernel_main.R')
 # source('initalgo.R')
@@ -84,36 +85,71 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
 saemix.data<-saemixData(name.data=entero.saemix,header=TRUE,
   name.group=c("id"),name.predictors=c("time"),name.response=c("y"))
 
-entero.model<-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (2 columns, base and slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ntt<-psi[id,1]
-  ka<-psi[id,2]
-  kEhc<-psi[id,3]
-  Fent<-psi[id,4]
-  Cl<-psi[id,5]
-  V<-psi[id,6]
-  tg<-psi[id,7]
+# entero.model<-function(psi,id,xidep) {
+# # input:
+# #   psi : matrix of parameters (2 columns, base and slope)
+# #   id : vector of indices 
+# #   xidep : dependent variables (same nb of rows as length of id)
+# # returns:
+# #   a vector of predictions of length equal to length of id
+#   x<-xidep[,1]
+#   ntt<-psi[id,1]
+#   ka<-psi[id,2]
+#   kEhc<-psi[id,3]
+#   Fent<-psi[id,4]
+#   Cl<-psi[id,5]
+#   V<-psi[id,6]
+#   tg<-psi[id,7]
 
-  kb <- Cl/V
-  t0 <- 0
-  Ehc_0 <- 1
-  ddt_Ehc <- 0 
-  ddt_Ak <- Ehc*kEhc*Agb - ka*Ak
-  ddt_Acc <- ka*Ak - kb*Acc 
-  ddt_Agb <- Fent*kb*Acc - Ehc*kEhc*Agb
-  f <- Acc/V
+#   kb <- Cl/V
+#   t0 <- 0
+#   Ehc_0 <- 1
+#   ddt_Ehc <- 0 
+#   ddt_Ak <- Ehc*kEhc*Agb - ka*Ak
+#   ddt_Acc <- ka*Ak - kb*Acc 
+#   ddt_Agb <- Fent*kb*Acc - Ehc*kEhc*Agb
+#   f <- Acc/V
 
-  return(f)
+#   return(f)
+# }
+
+
+entero.model<- function(psi, id, xidep){
+  Model <- inlineModel("
+                       [LONGITUDINAL] 
+                        input = {Ntt, ka, kEhc, Fent, Cl, V, tg}
+
+                        PK:
+                        compartment(cmt=1, amount=Ehc)
+                        compartment(cmt=2, amount=Ak)
+                        iv(cmt=1, p=-1/amtDose)
+                        iv(cmt=1, Tlag=tg, p=1/amtDose)
+                        oral(cmt=2, Mtt=Ntt/ka, Ktr=ka, ka)
+
+                        EQUATION:
+                        kb = Cl/V
+                        t0 = 0
+                        Ehc_0 = 1
+                        ddt_Ehc=0 
+                        ddt_Ak = Ehc*kEhc*Agb - ka*Ak
+                        ddt_Acc = ka*Ak - kb*Acc 
+                        ddt_Agb = Fent*kb*Acc - Ehc*kEhc*Agb
+                        Cc = Acc/V
+                             ")
+  time <- rep(0,length(id))
+  p <- data.frame(id=1:id[length(id)],tg=psi[,1],Cl=psi[,2],ka=psi[,3],V=psi[,4],kEhc=psi[,5],Fent=psi[,6],Ntt=psi[,7])
+  time <- xidep[,1]
+  design.f <- as.data.frame(cbind(id,time))
+  f <- list(name="f", time=design.f)
+  resList <- list("Model"=Model,"p"=p,"f"=f)
+  return(resList)
+  
 }
+
+
 saemix.model<-saemixModel(model=entero.model,description="Linear model",
-  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
-  transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
+  psi0=matrix(c(1,1,1,1,1,1,1),ncol=7,byrow=TRUE,dimnames=list(NULL,c("tg","Cl","ka","V","kEhc","Fent","Ntt"))),
+  transform.par=c(0,0,0,0,0,0,0), 
   error.model="constant")
 
 
