@@ -77,16 +77,14 @@ library("mlxR")
 #   name.group=c("Subject"),name.predictors=c("age"),name.response=c("height"),
 #   units=list(x="yr",y="cm"))
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/oxboys")
-oxboys.saemix<-read.table( "ox_synth.csv",header=T,na=".",sep=",")
-oxboys.saemix_less <- oxboys.saemix[1:10,1:3]
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/enterohepatic")
+entero.saemix<-read.table( "entero_synth.csv",header=T,na=".",sep=",")
+# entero.saemix_less <- entero.saemix[1:10,1:3]
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
-saemix.data<-saemixData(name.data=oxboys.saemix,header=TRUE,
-  name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
-  units=list(x="yr",y="cm"))
+saemix.data<-saemixData(name.data=entero.saemix,header=TRUE,
+  name.group=c("id"),name.predictors=c("time"),name.response=c("y"))
 
-
-growth.linear<-function(psi,id,xidep) {
+entero.model<-function(psi,id,xidep) {
 # input:
 #   psi : matrix of parameters (2 columns, base and slope)
 #   id : vector of indices 
@@ -94,12 +92,26 @@ growth.linear<-function(psi,id,xidep) {
 # returns:
 #   a vector of predictions of length equal to length of id
   x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
+  ntt<-psi[id,1]
+  ka<-psi[id,2]
+  kEhc<-psi[id,3]
+  Fent<-psi[id,4]
+  Cl<-psi[id,5]
+  V<-psi[id,6]
+  tg<-psi[id,7]
+
+  kb <- Cl/V
+  t0 <- 0
+  Ehc_0 <- 1
+  ddt_Ehc <- 0 
+  ddt_Ak <- Ehc*kEhc*Agb - ka*Ak
+  ddt_Acc <- ka*Ak - kb*Acc 
+  ddt_Agb <- Fent*kb*Acc - Ehc*kEhc*Agb
+  f <- Acc/V
+
   return(f)
 }
-saemix.model<-saemixModel(model=growth.linear,description="Linear model",
+saemix.model<-saemixModel(model=entero.model,description="Linear model",
   psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
   error.model="constant")

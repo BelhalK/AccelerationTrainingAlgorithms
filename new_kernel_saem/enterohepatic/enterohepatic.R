@@ -1,7 +1,7 @@
 library(mlxR)
 library(gridExtra)
 theme_set(theme_bw())
-
+library(dplyr)
 model_macros <- inlineModel("
 [LONGITUDINAL] 
 input = {Ntt, ka, kEhc, Fent, kb, Cl, V, tg}
@@ -31,6 +31,7 @@ res <- simulx(model=model_macros,
               output=out, 
               treatment=list(adm), 
               parameter=p)
+
 
 pl1 <- ggplot(res$Ehc) + geom_line(aes(time,Ehc))
 pl2 <- ggplot(res$Cc)  + geom_line(aes(x=time,y=Cc))
@@ -116,4 +117,17 @@ res <- simulx(model     = enterohepatic_model,
 ggplot() +  geom_point(data=res$y, aes(x=time, y=y, color=id)) + 
   geom_line(data=res$y, aes(time,y, color=id)) +  theme(legend.position="none")
 
+
 writeDatamlx(res, result.file="entero_data.csv")
+
+obj <- read.table("entero_data.csv", header=T, sep=",")
+df1 <- subset(obj , (obj$amount ==1000 & obj$time ==12) | (obj$amount ==1000 & obj$time ==48) | (obj$amount ==1000 & obj$time ==24)| (obj$amount ==1000 & obj$time ==36))
+obj_final <- anti_join(obj, df1)
+obj_final[,4] <- 1000
+
+obj_final <- obj_final[
+  with(obj_final, order(obj_final[,1],obj_final[,2])),
+]
+
+
+write.table(obj_final, "entero_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
