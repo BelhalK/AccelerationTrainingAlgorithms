@@ -183,7 +183,7 @@ for (j in 3:replicate){
 
 
 
-  writeDatamlx(res2a2, result.file = "/Users/belhalkarimi/Desktop/saem/warfarin_cat/data/cat.csv")
+  writeDatamlx(res2a2, result.file = "data/cat.csv")
   cat_data.saemix<-read.table("data/cat.csv",header=T,na=".")
   saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y","time"), name.X=c("time"))
   options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
