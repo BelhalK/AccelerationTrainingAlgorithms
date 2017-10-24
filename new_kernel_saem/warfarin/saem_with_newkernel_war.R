@@ -87,6 +87,13 @@ out<-list(out1,out2)
 # call the simulator 
 res <- simulx(model=model,treatment=trt,parameter=list.param,output=out)
 # warfarin.saemix <- data(res)
+
+# writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv")
+# table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv", header=T, sep=",")
+# table <- table[table$ytype==1,]
+
+# table[,5] <- 0
+
 warfarin.saemix <- res$y1
 warfarin.saemix["amount"] <- 0
 treat <- res$treatment
@@ -95,6 +102,19 @@ treat <- treat[c(1,2,4,3)]
 
 j <- 1
 l<-c()
+
+for (i in 1:nrow(warfarin.saemix)) {
+    
+    if(t(warfarin.saemix["id"])[i]==t(treat["id"])[j]){
+        print(i)
+        j <- j+1
+        print(j)
+      } else {
+        print('not in')
+      }
+
+}
+
 for (i in 1:nrow(warfarin.saemix)) {
     
     if(t(warfarin.saemix["id"])[i]==t(treat["id"])[j]){
@@ -114,7 +134,7 @@ for (i in l[-1]){
 }
 
 rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
-
+# warfarin.saemix <- table[c(1,2,3,5)]
 
 model1cpt<-function(psi,id,xidep) { 
 	dose<-xidep[,1]
@@ -152,7 +172,7 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin"
   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),transform.par=c(1,1,1))
 
 saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+  name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
 
 K1 = 200
 K2 = 50

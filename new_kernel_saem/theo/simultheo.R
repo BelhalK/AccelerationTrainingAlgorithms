@@ -21,9 +21,9 @@ model2 <- inlineModel("
 
 dose <- 100
 adm  <- list(amount=dose, time=seq(0,50,by=50))
-p <- c(ka_pop=1, o_ka=0.5,
-       V_pop=20, o_V=1.2, 
-       k_pop=2, o_k=1.1,  
+p <- c(ka_pop=1, o_ka=0.1,
+       V_pop=4, o_V=0.1, 
+       k_pop=2, o_k=0.5,  
        a=0.1)
 y1 <- list(name='y1', time=seq(1,to=50,by=5))
 
@@ -31,22 +31,22 @@ y1 <- list(name='y1', time=seq(1,to=50,by=5))
 res2a2 <- simulx(model = model2,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=10, level="individual"),
+                 group = list(size=100, level="individual"),
                  output = y1)
 
 
-writeDatamlx(res2a2, result.file = "~/theo_synth.csv")
-table <- read.table("~/theo_synth.csv", header=T, sep=",")
+writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv")
+table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=",")
 
 # head(table)
 # table[1:45,]
 
 
 #modification for mlxsaem dataread function
-obj <- read.table("~/theo_synth.csv", header=T, sep=",")
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", header=T, sep=",")
 obj <- obj[obj$time !=0,]
 obj <- obj[obj$time !=50,]
 obj[,4] <- dose
-write.table(obj, "~/theo_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
+write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/theo/theo_synth.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
 
 

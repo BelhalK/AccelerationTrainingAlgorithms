@@ -1,5 +1,5 @@
 ############################### Initialising main algorithm #############################
-initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
+initialiseMainAlgo_time<-function(saemix.data,saemix.model,saemix.options) {
 	# Function to reformat covariance structure and initialise lists used in the main algorithm
   # Input: data, model and options
   # Output:

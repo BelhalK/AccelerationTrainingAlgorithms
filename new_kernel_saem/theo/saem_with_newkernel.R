@@ -55,7 +55,7 @@ library(lattice)
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 
-# Doc
+
 # data(theo.saemix)
 # theo.saemix_less <- theo.saemix[1:120,]
 # # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
@@ -96,14 +96,14 @@ K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-
+end = K1+K2
 
 #RWM
 options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-
+theo_ref[end,]
 #ref (map always)
 options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))

@@ -324,7 +324,7 @@ dtransphi<-function(phi,tr) {
   return(dpsi)
 }
 
-compute.Uy_cat<-function(b0,phiM,pres,args,Dargs,DYF) {
+compute.Uy_time<-function(b0,phiM,pres,args,Dargs,DYF) {
 # Attention, DYF variable locale non modifiee en dehors
   args$MCOV0[args$j0.covariate]<-b0
   phi0<-args$COV0 %*% args$MCOV0
@@ -336,7 +336,7 @@ compute.Uy_cat<-function(b0,phiM,pres,args,Dargs,DYF) {
   return(U)
 }
 
-conditional.distribution_cat<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model) {
+conditional.distribution_time<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model) {
   phii[idx]<-phi1
   psii<-transphi(matrix(phii,nrow=1),trpar)
   if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)

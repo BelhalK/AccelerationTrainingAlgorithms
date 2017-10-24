@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
+estep_time<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -13,7 +13,6 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
 	saemix.options<-saemixObject["options"]
-	
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
@@ -21,90 +20,55 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
-	
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	# if(Dargs$error.model=="exponential")
-	# 	fpred<-log(cutoff(fpred))
-	# gpred<-error(fpred,varList$pres)
-	# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-	DYF[Uargs$ind.ioM] <- fpred
+
+
+	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
-	map_range <- saemix.options$map.range
-
-
-	post_rwm <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
+	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
 	for (i in 1:(nrow(phiM))) {
-		post_rwm[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
-		names(post_rwm[[i]])[1] <- "iteration" 
-		names(post_rwm[[i]])[ncol(post_rwm[[i]])] <- "individual"
-		post_rwm[[i]][,1] <- 1:max(opt$nbiter.mcmc)
-		post_rwm[[i]][,ncol(post_rwm[[i]])] <- i
-	}
-
-
-	
-
-	post_vb <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
-
-	for (i in 1:(nrow(phiM))) {
-		post_vb[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
-		names(post_vb[[i]])[1] <- "iteration" 
-		names(post_vb[[i]])[ncol(post_vb[[i]])] <- "individual"
-		post_vb[[i]][,1] <- 1:max(opt$nbiter.mcmc)
-		post_vb[[i]][,ncol(post_vb[[i]])] <- i
-	}
-
-	post_newkernel <- list(as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2)))
-
-	for (i in 1:(nrow(phiM))) {
-		post_newkernel[[i]] <- as.data.frame(matrix(nrow = max(opt$nbiter.mcmc),ncol = ncol(phiM)+2))
-		names(post_newkernel[[i]])[1] <- "iteration" 
-		names(post_newkernel[[i]])[ncol(post_newkernel[[i]])] <- "individual"
-		post_newkernel[[i]][,1] <- 1:max(opt$nbiter.mcmc)
-		post_newkernel[[i]][,ncol(post_newkernel[[i]])] <- i
+		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
 	phiMc<-phiM
+	map_range <- saemix.options$map.range
+
 if (!(kiter %in% map_range)){
+	print('not in map range')
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
-		
+
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
 		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-		# if(Dargs$error.model=="exponential")
-		# 	fpred<-log(cutoff(fpred))
-		# gpred<-error(fpred,varList$pres)
-		# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
-		# browser()
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
-
-		U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+	}
+	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+	
+	# Second stage
+	
+	if(opt$nbiter.mcmc[2]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
-		
+		for (u in 1:opt$nbiter.mcmc[2]) {
 			for(vk2 in 1:nb.etas) {
 				etaMc<-etaM
+				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
-				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
@@ -113,13 +77,15 @@ if (!(kiter %in% map_range)){
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
 			}
-		
+		}
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
-
+	}
+	
+	if(opt$nbiter.mcmc[3]>0) {
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-kiter%%(nb.etas-1)+2
 		if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
-		
+		for (u in 1:opt$nbiter.mcmc[3]) {
 			if(nrs2<nb.etas) {
 				vk<-c(0,sample(c(1:(nb.etas-1)),nrs2-1))
 				nb.iter2<-nb.etas
@@ -135,10 +101,6 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
-				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
@@ -147,23 +109,29 @@ if (!(kiter %in% map_range)){
 				etaM[ind,]<-etaMc[ind,]
 
 				for (i in 1:(nrow(phiM))) {
-					post_rwm[[i]][u,2:(ncol(post_rwm[[i]]) - 1)] <- etaM[i,]
+					post[[i]][u,] <- etaM[i,]
 				}
+
+				#        if(kiter<20 | (kiter>150 & kiter<170)) {
+				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
+				#        	print(head(etaMc))
+				#        }
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
 			}
-
+		}
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
-
 	}
 }
-U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-###############################################################################################
+	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+	###############################################################################################
 ############   NEW KERNEl														############
 ###############################################################################################
 if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
+	print('in map range')
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 
@@ -195,7 +163,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_time, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
 		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		  }
@@ -206,7 +174,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 		psi_map <- as.matrix(map.psi[,-c(1)])
 		phi_map <- as.matrix(map.phi[,-c(1)])
-		eta_map <- phi_map - mean.phiM
+		eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
 		
 		#gradient at the map estimation
 		# gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas)
@@ -231,16 +199,9 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			# if(Dargs$error.model=="exponential")
-			# 	fpred1<-log(cutoff(fpred1))
-			# gpred1<-error(fpred1,varList$pres)
-			# DYF[Uargs$ind.ioM] <-exp(-(0.5*((Dargs$yM-fpred1)/gpred1)**2+log(gpred1)))
 			DYF[Uargs$ind.ioM] <- -log(fpred1)
 			l1 <- colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			# if(Dargs$error.model=="exponential")
-			# 	fpred2<-log(cutoff(fpred2))
-			# gpred2<-error(fpred2,varList$pres)
 			DYF[Uargs$ind.ioM] <- -log(fpred2)
 			l2 <- colSums(DYF)
 			for (i in 1:(Dargs$NM)){
@@ -255,9 +216,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		
 		# denom <- DYF
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		# if(Dargs$error.model=="exponential")
-		# 	fpred<-log(cutoff(fpred))
-		# gpred<-error(fpred1,varList$pres)
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		denom <- colSums(DYF)
 
@@ -265,16 +223,14 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
-			# r = 1:sum(Dargs$IdM == i)
-			# r <- r+sum(as.matrix(z) != 0L)
-   #          z[r] <- gradf[r,1]
-			# Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+			r = 1:sum(Dargs$IdM == i)
+			r <- r+sum(as.matrix(z) != 0L)
+            z[r] <- fpred[r]
 
-			# Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
-			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2)
+			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+			# Gamma[[i]] <- omega.eta
 		}
 		
-		# browser()
 		etaM <- eta_map
 		for (u in 1:opt$nbiter.mcmc[4]) {
 
@@ -286,7 +242,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 					
 				for (i in 1:(Dargs$NM)){
 					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
-					etaMc[i,]<- eta_map[i,] +M[i,]
+					etaMc[i]<- eta_map[i] +M[i]
 				}
 
 
@@ -303,17 +259,17 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 
 				for (i in 1:(Dargs$NM)){
-					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
-					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%solve(Gamma[[i]]))
+					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%solve(Gamma[[i]]))
+					prop[i] <- 0.5*rowSums((etaM[i]-eta_map[i])*(etaM[i]-eta_map[i])%*%solve(Gamma[[i]]))
 				}
 
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				etaM[ind,]<-etaMc[ind,]
-				for (i in 1:(nrow(phiM))) {
-					post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i,]
-				}
+				etaM[ind]<-etaMc[ind]
+				# for (i in 1:(nrow(phiM))) {
+				# 	post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i]
+				# }
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
@@ -323,7 +279,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				# #Or Use the output of VI as the posterior distrib we simulate from
 				# etaM[ind,]<-etaMc[ind,]
 				# for (i in 1:(nrow(phiM))) {
-				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
+				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i]
 				# }
 
 			}
@@ -331,9 +287,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 	}
 
 
-	
-		
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post_rwm = post_rwm,post_vb = post_vb,post_newkernel = post_newkernel))
-}
 
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+	
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post))
+}

@@ -74,7 +74,7 @@
 #' 
 #' 
 #' @export saemix
-saemix_cat2<-function(model,data,control=list()) {
+saemix_time<-function(model,data,control=list()) {
 
 # Convergence plots during fit (special function, not user-level)
   convplot.infit<-function(allpar,K1,niter=0) {
@@ -122,7 +122,7 @@ saemix_cat2<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
+xinit<-initialiseMainAlgo_time(saemix.data,saemix.model,saemix.options)
 # browser()
 
   saemix.model<-xinit$saemix.model
@@ -181,7 +181,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
-  xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  xmcmc<-estep_time2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   # if(kiter>48) browser()
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
@@ -192,7 +192,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    xstoch<-mstep_cat(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
+    xstoch<-mstep_time(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
     varList<-xstoch$varList
     mean.phi<-xstoch$mean.phi
     phi<-xstoch$phi
