@@ -11,6 +11,7 @@
               logit(P(level<=1)) = th1 + th2
               logit(P(level<=2)) = th1 + th2 + th3
               }
+
               [INDIVIDUAL]
               input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
                       

@@ -57,10 +57,16 @@ iter_mcmc = 200
 # cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
+<<<<<<< HEAD
 # cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=",")
 cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
 # saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+=======
+cat_data.saemix<-read.table("data/cat.csv",header=T,na=".")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y","time"), name.X=c("time"))
+
+>>>>>>> 5bb7cd1d1943de3070bd3542ae4fd5a71554802a
 
 cat_data.model<-function(psi,id,xidep) {
 level<-xidep[,1]

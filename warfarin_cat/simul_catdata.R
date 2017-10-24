@@ -33,7 +33,9 @@ p <- c(th1_pop=3, o_th1=1,
        th3_pop=1, o_th3=0)
 
 
+
 y1 <- list(name='level', time=seq(1,to=50,by=5))
+
 
 
 res2a2 <- simulx(model = model2,
@@ -44,4 +46,5 @@ res2a2 <- simulx(model = model2,
 
 writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv")
 head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=","))
+
 
