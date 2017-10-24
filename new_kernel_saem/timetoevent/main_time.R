@@ -181,7 +181,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
-  xmcmc<-estep_time2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  xmcmc<-estep_time(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   # if(kiter>48) browser()
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF

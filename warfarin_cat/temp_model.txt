@@ -1,10 +1,13 @@
 
+
               [LONGITUDINAL]
               input = {th1, th2, th3}
+
               EQUATION:
               lgp0 = th1
               lgp1 = lgp0 + th2
               lgp2 = lgp1 + th3
+
               DEFINITION:
               level = { type = categorical,  categories = {0, 1, 2, 3},
               logit(P(level<=0)) = th1
@@ -15,6 +18,7 @@
               [INDIVIDUAL]
               input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
                       
+
               DEFINITION:
               th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
               th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}

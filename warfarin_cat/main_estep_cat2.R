@@ -154,6 +154,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 	  	phi.map<-saemixObject["results"]["phi"]
 
 	  	if (kiter %in% map_range){
+	  	# print('start')
 	  	for(i in 1:Dargs$NM) {
 		    isuj<-id.list[i]
 		    xi<-xind[id==isuj,,drop=FALSE]
@@ -167,6 +168,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		  }
+		  # print('stop')
 		 }
 	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
 		map.psi<-data.frame(id=id.list,map.psi)
@@ -220,7 +222,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		denom <- colSums(DYF)
 
 		
-		Gamma <- list(omega.eta,omega.eta)
+		Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
 		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
 		for (i in 1:(Dargs$NM)){
 			r = 1:sum(Dargs$IdM == i)
@@ -228,7 +230,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
             z[r] <- fpred[r]
 
 			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
-			# Gamma[[i]] <- omega.eta
+			chol.Gamma[[i]] <- chol(Gamma[[i]])
+			inv.Gamma[[i]] <- solve(Gamma[[i]])
 		}
 		
 		etaM <- eta_map
@@ -241,8 +244,9 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				#generate candidate eta
 					
 				for (i in 1:(Dargs$NM)){
-					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
-					etaMc[i]<- eta_map[i] +M[i]
+					
+					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
+					etaMc[i]<- eta_map[i] +Mi
 				}
 
 
@@ -259,8 +263,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 
 				for (i in 1:(Dargs$NM)){
-					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%solve(Gamma[[i]]))
-					prop[i] <- 0.5*rowSums((etaM[i]-eta_map[i])*(etaM[i]-eta_map[i])%*%solve(Gamma[[i]]))
+					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%inv.Gamma[[i]])
+					prop[i] <- 0.5*rowSums((etaM[i]-eta_map[i])*(etaM[i]-eta_map[i])%*%inv.Gamma[[i]])
 				}
 
 

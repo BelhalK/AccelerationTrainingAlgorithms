@@ -54,45 +54,34 @@ require(reshape2)
 iter_mcmc = 200
 
 
-cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/timeto.csv", header=T, sep=",")
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","ytype"), name.X=c("time"))
 
 
-cat_data.model<-function(psi,id,xidep) {
-level<-xidep[,1]
-th1 <- psi[id,1]
-th2 <- psi[id,2]
-th3 <- psi[id,3]
+timetoevent.model<-function(psi,id,xidep) {
+T<-xidep[,1]
+y<-xidep[,2]
 
-P0 <- 1/(1+exp(-th1))
-Pcum1 <- 1/(1+exp(-th1-th2))
-Pcum2 <- 1/(1+exp(-th1-th2-th3))
+lambda <- psi[id,1]
+beta <- psi[id,2]
 
-P1 <- Pcum1 - P0
-P2 <- Pcum2 - Pcum1
-P3 <- 1 - Pcum2
-
-P.obs = (level==0)*P0+(level==1)*P1+(level==2)*P2+(level==3)*P3
+browser()
+  for (i in 1:nrow(psi)) {
+    ji <- which(id==i)
+    ti <- T[ji]
+    yi <- y[ji]
+  }
 
 
-return(P.obs)
+return(Pdf)
 }
 
 
-saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(0.5,0.4,0.3,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
+saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
+  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  c("lambda","beta"))), 
+  transform.par=c(0,0),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE),error.model="constant")
-
-
-
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
-saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(1,0,0,iter_mcmc))
-
-
-# post_rwm<-saemix_post_cat(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-# post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
 K1 = 100

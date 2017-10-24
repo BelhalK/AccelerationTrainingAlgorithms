@@ -55,18 +55,17 @@ iter_mcmc = 200
 
 
 # cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+
+
+
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
-<<<<<<< HEAD
 # cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=",")
 cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
-# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
-=======
-cat_data.saemix<-read.table("data/cat.csv",header=T,na=".")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y","time"), name.X=c("time"))
 
->>>>>>> 5bb7cd1d1943de3070bd3542ae4fd5a71554802a
+
 
 cat_data.model<-function(psi,id,xidep) {
 level<-xidep[,1]
@@ -120,7 +119,7 @@ theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 
-graphConvMC_saem(theo_ref, title="new kernel")
+# graphConvMC_saem(theo_ref, title="new kernel")
 
 
 
@@ -128,7 +127,7 @@ theo_ref[end,]
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:250))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
@@ -162,13 +161,13 @@ final_rwm3 <- final_rwm[c(6,1,4)]
 final_rwm4 <- final_rwm[c(6,1,5)]
 
 
-prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
 for (j in 3:replicate){
   print(j)
-  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:220))
   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
@@ -184,7 +183,7 @@ final_mix3 <- final_mix[c(6,1,4)]
 final_mix4 <- final_mix[c(6,1,5)]
 
 
-
+# prctilemlx(final_mix1[-1,],band = list(number = 8, level = 1)) + ggtitle("mix")
 
 final_rwm1['group'] <- 1
 final_mix1['group'] <- 2
@@ -268,6 +267,46 @@ plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
 grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+
+
+
+plot.prediction.intervals <- function(r, plot.median=TRUE, level=1, labels=NULL, 
+                                      legend.title=NULL, colors=NULL) {
+  P <- prctilemlx(r, number=1, level=level, plot=FALSE)
+  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(legend.title))  legend.title <- "group"
+  names(P$y)[2:4] <- c("p.min","p50","p.max")
+  pp <- ggplot(data=P$y)+ylab(NULL)+ 
+    geom_ribbon(aes(x=time,ymin=p.min, ymax=p.max,fill=group),alpha=.5) 
+  if (plot.median)
+    pp <- pp + geom_line(aes(x=time,y=p50,colour=group))
+  
+  if (is.null(colors)) {
+    pp <- pp + scale_fill_discrete(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels)
+    pp <- pp + scale_colour_discrete(name=legend.title,
+                                     breaks=levels(r$group),
+                                     labels=labels, 
+                                     guide=FALSE)
+  } else {
+    pp <- pp + scale_fill_manual(name=legend.title,
+                                 breaks=levels(r$group),
+                                 labels=labels,
+                                 values=colors)
+    pp <- pp + scale_colour_manual(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels,
+                                   guide=FALSE,values=colors)
+  }  
+  return(pp)
+}
+
+
+
+
+
+
 
 # index = 1
 # graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")

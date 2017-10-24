@@ -19,19 +19,19 @@ model2 <- inlineModel("
                       k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}                      
                       ")
 
-dose <- 100
+dose <- 320
 adm  <- list(amount=dose, time=seq(0,50,by=50))
-p <- c(ka_pop=1, o_ka=0.1,
-       V_pop=4, o_V=0.1, 
-       k_pop=2, o_k=0.5,  
-       a=0.1)
+p <- c(ka_pop=1, o_ka=0.3,
+       V_pop=30, o_V=0.02, 
+       k_pop=0.01, o_k=0.01,  
+       a=0.8)
 y1 <- list(name='y1', time=seq(1,to=50,by=5))
 
 
 res2a2 <- simulx(model = model2,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=100, level="individual"),
+                 group = list(size=10, level="individual"),
                  output = y1)
 
 
