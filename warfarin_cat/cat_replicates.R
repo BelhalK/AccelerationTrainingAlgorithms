@@ -139,7 +139,7 @@ seed0 = 39546
 final_rwm <- 0
 final_mix <- 0
 for (j in 3:replicate){
-  print(j)
+  
   model2 <- inlineModel("
               [LONGITUDINAL]
               input = {th1, th2, th3}
@@ -186,7 +186,8 @@ saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, nam
   final_rwm <- rbind(final_rwm,theo_ref)
 
 
-  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:20))
+  print(j)
   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
@@ -223,7 +224,7 @@ final_mix2 <- final_mix[c(6,1,3)]
 final_mix3 <- final_mix[c(6,1,4)]
 final_mix4 <- final_mix[c(6,1,5)]
 
-
+prctilemlx(final_mix1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 
 final_rwm1['group'] <- 1
@@ -307,7 +308,7 @@ plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
 
-grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+grid.arrange(plot.S4,ncol=3)
 
 # index = 1
 # graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
