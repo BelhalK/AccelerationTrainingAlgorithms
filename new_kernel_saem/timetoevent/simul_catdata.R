@@ -28,12 +28,12 @@ model2 <- inlineModel("
                       
                       ")
 
-p <- c(th1_pop=3, o_th1=1,
-       th2_pop=2, o_th2=0, 
-       th3_pop=1, o_th3=0)
+p <- c(th1_pop=1, o_th1=0.5,
+       th2_pop=1, o_th2=1, 
+       th3_pop=1, o_th3=0.1)
 
 
-y1 <- list(name='level', time=seq(1,to=50,by=5))
+y1 <- list(name='y1', time=seq(1,to=50,by=2))
 
 
 res2a2 <- simulx(model = model2,
@@ -42,6 +42,12 @@ res2a2 <- simulx(model = model2,
                  output = y1)
 
 
-writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv")
-head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=","))
+
+writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv")
+head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=","))
+
+#modification for mlxsaem dataread function
+obj <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=";")
+obj <- obj[obj$amount !=1,]
+write.table(obj, "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", sep=",", row.names=FALSE,quote = FALSE, col.names=TRUE)
 

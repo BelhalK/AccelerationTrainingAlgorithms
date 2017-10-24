@@ -54,13 +54,12 @@ require(reshape2)
 iter_mcmc = 200
 
 
-# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
-# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=",")
-cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
+# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
-# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+
 
 cat_data.model<-function(psi,id,xidep) {
 level<-xidep[,1]
@@ -104,12 +103,11 @@ K2 = 50
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-end = K1+K2
-seed0 = 444
+
 
 #RWM
 theo_ref <- NULL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -118,18 +116,19 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 
 
-theo_ref[end,]
+
+
+
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:20))
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
+graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-
-cat_saem[end,]
 
 
 
@@ -138,13 +137,60 @@ seed0 = 39546
 
 #RWM
 final_rwm <- 0
+final_mix <- 0
 for (j in 3:replicate){
   print(j)
-  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
-theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+  model2 <- inlineModel("
+              [LONGITUDINAL]
+              input = {th1, th2, th3}
+              EQUATION:
+              lgp0 = th1
+              lgp1 = lgp0 + th2
+              lgp2 = lgp1 + th3
+              DEFINITION:
+              level = { type = categorical,  categories = {0, 1, 2, 3},
+              logit(P(level<=0)) = th1
+              logit(P(level<=1)) = th1 + th2
+              logit(P(level<=2)) = th1 + th2 + th3
+              }
+              [INDIVIDUAL]
+              input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
+                      
+              DEFINITION:
+              th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
+              th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
+              th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
+                      
+                      ")
+
+p <- c(th1_pop=3, o_th1=0.1,
+       th2_pop=2, o_th2=0, 
+       th3_pop=1, o_th3=0)
+
+
+y1 <- list(name='level', time=seq(1,to=50,by=10))
+
+
+res2a2 <- simulx(model = model2,
+                 parameter = p,
+                 group = list(size=100, level="individual"),
+                 output = y1)
+
+  writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv")
+  cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
+  theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
   final_rwm <- rbind(final_rwm,theo_ref)
+
+
+  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+  theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
 }
 
 
@@ -159,15 +205,15 @@ final_rwm4 <- final_rwm[c(6,1,5)]
 prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-final_mix <- 0
-for (j in 3:replicate){
-  print(j)
-  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
-  theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
-  theo_mix <- cbind(iterations, theo_mix)
-  theo_mix['individual'] <- j
-  final_mix <- rbind(final_mix,theo_mix)
-}
+# final_mix <- 0
+# for (j in 3:replicate){
+#   print(j)
+#   options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:200))
+#   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+#   theo_mix <- cbind(iterations, theo_mix)
+#   theo_mix['individual'] <- j
+#   final_mix <- rbind(final_mix,theo_mix)
+# }
 
 
 names(final_mix)[1]<-paste("time")
@@ -298,6 +344,3 @@ grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
 # #MSJD
 # <mssd(post_rwm[[index]][,2])
 # mssd(post_foce[[index]][,2])
-
-
-

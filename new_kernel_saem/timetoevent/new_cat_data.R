@@ -56,11 +56,9 @@ iter_mcmc = 200
 
 # cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
-# cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
-# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat.csv", header=T, sep=",")
-cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
-# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y","TIME"), name.X=c("TIME"))
+
 
 cat_data.model<-function(psi,id,xidep) {
 level<-xidep[,1]
@@ -99,12 +97,11 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 200
-K2 = 50
+K1 = 300
+K2 = 300
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-end = K1+K2
 seed0 = 444
 
 #RWM
@@ -118,7 +115,8 @@ graphConvMC_saem(theo_ref, title="new kernel")
 
 
 
-theo_ref[end,]
+
+
 
 #MAP then RWM
 cat_saem <- NULL
@@ -128,8 +126,6 @@ cat_saem <- cbind(iterations, cat_saem)
 
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-
-cat_saem[end,]
 
 
 
