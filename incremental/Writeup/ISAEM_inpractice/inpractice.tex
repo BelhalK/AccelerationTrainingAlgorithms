@@ -266,7 +266,7 @@ If we rewrite the recurrent relation between paramter estimates when we pick hal
 \begin{equation}
 \begin{split}
 \theta_{(k,j)} &  = \hat{\Theta}(S) = \frac{\sum_{i=1}^{N}{\E{(S(y_i,z_i)|y_i,\theta_{(k,j-1)})}}}{N}\\
-& =  \theta_{(k,j-1)} + \frac{\alpha}{2}(\theta_{(k,j-1)} - \theta_{(k-1,j)}) 
+& =  \theta_{(k,j-1)} + \frac{\alpha}{2}(\theta_{(k,j-1)} - \theta_{(k-1,j)})
 \end{split}
 \end{equation}
 
@@ -467,6 +467,7 @@ In that case we can calculate the expectation and the variance of our estimator 
 With these two expressions we understand what strategy is best for the choice of the batch size at each iteration. Indeed the bias is small when p is small so one should start with picking one individual first to kill the bias and the variance is decreasing when p is increasing. So once the bias is killed one should increase the size of the batch to kill the variance of the estimator.\\
 \\
 This result implies as well that the Online EM algorithm introduced by \citep{cappe} is the best strategy to follow even when all the data is initially available. In other words, even though one has access to the whole observed dataset, one should consider increasing batch of individuals at each iteration.
+
 
 \begin{figure}[H]
 \begin{center}

@@ -104,8 +104,8 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 200
-K2 = 50
+K1 = 300
+K2 = 100
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -119,7 +119,7 @@ theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 
-# graphConvMC_saem(theo_ref, title="new kernel")
+graphConvMC_saem(theo_ref, title="new kernel")
 
 
 
@@ -134,16 +134,18 @@ cat_saem <- cbind(iterations, cat_saem)
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
 
+
+
 cat_saem[end,]
 
 
 
-replicate = 20
+replicate = 10
 seed0 = 39546
 
 #RWM
 final_rwm <- 0
-for (j in 3:replicate){
+for (j in 1:replicate){
   print(j)
   options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
@@ -165,7 +167,7 @@ final_rwm4 <- final_rwm[c(6,1,5)]
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
-for (j in 3:replicate){
+for (j in 1:replicate){
   print(j)
   options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:220))
   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
@@ -181,7 +183,6 @@ final_mix1 <- final_mix[c(6,1,2)]
 final_mix2 <- final_mix[c(6,1,3)]
 final_mix3 <- final_mix[c(6,1,4)]
 final_mix4 <- final_mix[c(6,1,5)]
-
 
 # prctilemlx(final_mix1[-1,],band = list(number = 8, level = 1)) + ggtitle("mix")
 
@@ -200,7 +201,7 @@ labels <- c("ref","new")
 plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S <- plot.S1  + ylab("th1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 # print(plot.S1)
 
@@ -219,7 +220,7 @@ labels <- c("ref","new")
 plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S2 <- plot.S2  + ylab("th2")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -238,7 +239,7 @@ labels <- c("ref","new")
 plot.S3 <- plot.prediction.intervals(final3[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S3 <- plot.S3  + ylab("th3")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -259,7 +260,7 @@ labels <- c("ref","new")
 plot.S4 <- plot.prediction.intervals(final4[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 

@@ -14,9 +14,6 @@ e = {type               = event,
      intervalLength     = 5, 
      rightCensoringTime = 60,  
      hazard             = h}
-
-
-
                       ")
 
 

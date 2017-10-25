@@ -141,7 +141,7 @@ seed0 = 39546
 #RWM
 final_rwm <- 0
 final_mix <- 0
-for (j in 3:replicate){
+for (j in 1:replicate){
 
   model2 <- inlineModel("
 
@@ -177,21 +177,21 @@ p <- c(th1_pop=3, o_th1=0.8,
 
 
 
-y1 <- list(name='level', time=seq(1,to=50,by=5))
+  y1 <- list(name='level', time=seq(1,to=50,by=5))
 
 
 
-res2a2 <- simulx(model = model2,
+  res2a2 <- simulx(model = model2,
                  parameter = p,
                  group = list(size=200, level="individual"),
                  output = y1)
   writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat_rep.csv")
   cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat_rep.csv", header=T, sep=",")
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+  saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
 
 
   options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
-theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+  theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
   final_rwm <- rbind(final_rwm,theo_ref)
@@ -214,7 +214,7 @@ final_rwm3 <- final_rwm[c(6,1,4)]
 final_rwm4 <- final_rwm[c(6,1,5)]
 
 
-prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+prctilemlx(final_rwm4[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 
@@ -253,7 +253,7 @@ labels <- c("ref","new")
 plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S <- plot.S1  + ylab("th1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 # print(plot.S1)
 
@@ -272,7 +272,7 @@ labels <- c("ref","new")
 plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S2 <- plot.S2  + ylab("th2")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -291,7 +291,7 @@ labels <- c("ref","new")
 plot.S3 <- plot.prediction.intervals(final3[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S3 <- plot.S3  + ylab("th3")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -312,7 +312,7 @@ labels <- c("ref","new")
 plot.S4 <- plot.prediction.intervals(final4[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', '#c17b01'))
 plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -320,6 +320,46 @@ plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
 grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+
+
+
+
+
+plot.prediction.intervals <- function(r, plot.median=TRUE, level=1, labels=NULL, 
+                                      legend.title=NULL, colors=NULL) {
+  P <- prctilemlx(r, number=1, level=level, plot=FALSE)
+  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(legend.title))  legend.title <- "group"
+  names(P$y)[2:4] <- c("p.min","p50","p.max")
+  pp <- ggplot(data=P$y)+ylab(NULL)+ 
+    geom_ribbon(aes(x=time,ymin=p.min, ymax=p.max,fill=group),alpha=.5) 
+  if (plot.median)
+    pp <- pp + geom_line(aes(x=time,y=p50,colour=group))
+  
+  if (is.null(colors)) {
+    pp <- pp + scale_fill_discrete(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels)
+    pp <- pp + scale_colour_discrete(name=legend.title,
+                                     breaks=levels(r$group),
+                                     labels=labels, 
+                                     guide=FALSE)
+  } else {
+    pp <- pp + scale_fill_manual(name=legend.title,
+                                 breaks=levels(r$group),
+                                 labels=labels,
+                                 values=colors)
+    pp <- pp + scale_colour_manual(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels,
+                                   guide=FALSE,values=colors)
+  }  
+  return(pp)
+}
+
+
+
+
 
 # index = 1
 # graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")

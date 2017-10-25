@@ -72,9 +72,10 @@ browser()
     yi <- y[ji]
   }
 
-
 return(Pdf)
 }
+
+
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
