@@ -61,7 +61,7 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
 
 graphConvMC_twokernels <- function(df,df2, title=NULL, ylim=NULL)
 {
-  G <- (ncol(df)-2)/3
+  G <- (ncol(df))/3
   df$individual <- as.factor(df$individual)
   df2$individual <- as.factor(df2$individual)
   ylim <-rep(ylim,each=2)

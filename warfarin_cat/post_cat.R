@@ -98,7 +98,8 @@ saemix_post_cat<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+  xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
+  
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs
@@ -112,10 +113,11 @@ saemix_post_cat<-function(model,data,control=list()) {
   var.eta<-varList$diag.omega
   theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
 
-  parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
-  colnames(parpop)<-c(saemix.model["name.modpar"], saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
-  allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
-  colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
+  parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)))
+  colnames(parpop)<-c(saemix.model["name.modpar"], saemix.model["name.random"])
+  allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)))
+  colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"])
+  
   parpop[1,]<-theta0
   allpar[1,]<-xinit$allpar0
   
@@ -135,14 +137,15 @@ saemix_post_cat<-function(model,data,control=list()) {
   #  nb.parameters<-saemix.model["nb.parameters"]
 
   xmcmc<-estep_cat(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM, saemixObject)
+
   # xmcmc<-estep_newkernel(1, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM)
-  varList<-xmcmc$varList
+  # varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
-  post_rwm<-xmcmc$post_rwm
-  post_vb<-xmcmc$post_vb
-  post_newkernel<-xmcmc$post_newkernel
+  post_rwm<-xmcmc$post
 
-  return(list(post_rwm = post_rwm,post_vb = post_vb,post_newkernel = post_newkernel))
+  post_new<-xmcmc$post_new
+
+  return(list(post_rwm = post_rwm,post_new = post_new))
 
 }

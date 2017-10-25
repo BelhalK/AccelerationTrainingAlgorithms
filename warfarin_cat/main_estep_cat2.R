@@ -30,6 +30,11 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
+	post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
+	for (i in 1:(nrow(phiM))) {
+		post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
+	}
+
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
@@ -260,7 +265,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-
+				
 
 				for (i in 1:(Dargs$NM)){
 					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%inv.Gamma[[i]])
@@ -271,20 +276,16 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind]<-etaMc[ind]
-				# for (i in 1:(nrow(phiM))) {
-				# 	post_newkernel[[i]][u,2:(ncol(post_newkernel[[i]]) - 1)] <- etaM[i]
-				# }
+				
+
+
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
 
 
-				# #Or Use the output of VI as the posterior distrib we simulate from
-				# etaM[ind,]<-etaMc[ind,]
-				# for (i in 1:(nrow(phiM))) {
-				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i]
-				# }
+
 
 			}
 		}
@@ -294,5 +295,5 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post))
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post, post_new=post_new))
 }
