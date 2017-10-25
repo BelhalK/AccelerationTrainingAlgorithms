@@ -28,9 +28,9 @@ model2 <- inlineModel("
                       
                       ")
 
-p <- c(th1_pop=3, o_th1=0.1,
-       th2_pop=2, o_th2=0.5, 
-       th3_pop=1, o_th3=0.1)
+p <- c(th1_pop=3, o_th1=0.5,
+       th2_pop=2, o_th2=0, 
+       th3_pop=1, o_th3=0)
 
 
 
@@ -40,7 +40,7 @@ y1 <- list(name='level', time=seq(1,to=50,by=5))
 
 res2a2 <- simulx(model = model2,
                  parameter = p,
-                 group = list(size=100, level="individual"),
+                 group = list(size=50, level="individual"),
                  output = y1)
 
 
