@@ -55,16 +55,17 @@ iter_mcmc = 200
 
 
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/timeto.csv", header=T, sep=",")
-saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","ytype"), name.X=c("time"))
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","ytype","nb_events"), name.X=c("time"))
 
 
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
+nb<-xidep[,4]
 
 lambda <- psi[id,1]
 beta <- psi[id,2]
-
+censoringtime = 60
 browser()
   for (i in 1:nrow(psi)) {
     ji <- which(id==i)
@@ -72,10 +73,10 @@ browser()
     yi <- y[ji]
   }
 
-return(Pdf)
+pdf <- lambda^nb[1]*exp(-lambda*censoringtime)
+
+return(pdf)
 }
-
-
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   

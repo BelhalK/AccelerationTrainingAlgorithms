@@ -37,7 +37,9 @@ estep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 
 
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-
+	# for (i in 1:(nrow(etaM))) {
+	# 	etaM[i,] <- c(-2,-2,-2)
+	# }
 	phiMc<-phiM
 	map_range <- saemix.options$map.range
 
@@ -53,7 +55,11 @@ if (!(kiter %in% map_range)){
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+		for (i in 1:(nrow(phiM))) {
+					post[[i]][u,] <- etaM[i,]
+				}
 		etaM[ind,]<-etaMc[ind,]
+		
 		U.y[ind]<-Uc.y[ind]
 	}
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
@@ -113,9 +119,7 @@ if (!(kiter %in% map_range)){
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
-				for (i in 1:(nrow(phiM))) {
-					post[[i]][u,] <- etaM[i,]
-				}
+				
 
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
 				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")

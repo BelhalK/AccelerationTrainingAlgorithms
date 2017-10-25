@@ -63,8 +63,8 @@ iter_mcmc = 200
 
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
-cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
-# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
+# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
+cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
 
 
@@ -92,12 +92,10 @@ return(P.obs)
 
 
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(0.5,0.5,0.5),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(1,1,1),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,0),ncol=3, 
   byrow=TRUE),error.model="constant")
-
-
 
 
 
@@ -108,9 +106,11 @@ iter_mcmc = 2000
 
 #RWM
 theo_ref <- NULL
-saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,iter_mcmc,iter_mcmc,0))
+saemix.options_rwm<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c(iter_mcmc,0,0,0))
 theo_ref<-saemix_post_cat(saemix.model,saemix.data,saemix.options_rwm)$post_rwm
-
+indiv = 1
+matplot ((1:iter_mcmc), cbind (theo_ref[[indiv]][,1], theo_ref[[indiv]][,1]), pch = 19,type="l", col=c(2,4))
+legend("bottomleft", inset=.05, legend=c("ref", "new"), pch=1, col=c(2,4), horiz=TRUE)
 
 #MAP then RWM
 cat_saem <- NULL
@@ -118,7 +118,6 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 cat_saem<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_new
 
 
-
-indiv = 7
+indiv = 3
 matplot ((1:iter_mcmc), cbind (theo_ref[[indiv]][,1], cat_saem[[indiv]][,1]), pch = 19,type="l", col=c(2,4))
 legend("bottomleft", inset=.05, legend=c("ref", "new"), pch=1, col=c(2,4), horiz=TRUE)

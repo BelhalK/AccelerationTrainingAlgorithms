@@ -40,7 +40,7 @@ y1 <- list(name='level', time=seq(1,to=100,by=15))
 
 res2a2 <- simulx(model = model2,
                  parameter = p,
-                 group = list(size=100, level="individual"),
+                 group = list(size=10, level="individual"),
                  output = y1)
 
 
