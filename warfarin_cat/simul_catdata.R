@@ -28,9 +28,9 @@ model2 <- inlineModel("
                       
                       ")
 
-p <- c(th1_pop=3, o_th1=0.8,
-       th2_pop=2, o_th2=0.1, 
-       th3_pop=1, o_th3=0.1)
+p <- c(th1_pop=5, o_th1=0.8,
+       th2_pop=2, o_th2=0.5, 
+       th3_pop=3, o_th3=0.5)
 
 
 

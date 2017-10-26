@@ -19,7 +19,7 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	
-	fpred <- -log(fpred)
+	fpred <- -fpred
 	# if(Dargs$error.model=="exponential")
 	# 	fpred<-log(cutoff(fpred))
 	Uargs$nchains = 1
@@ -35,12 +35,6 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 		phik<-phi[,varList$ind.eta,k]
 		stat2<-stat2+t(phik)%*%phik
 		fk<-ff[,k]
-		# if(!is.na(match(Dargs$error.model,c("constant","exponential"))))
-		# 	resk<-sum((Dargs$yobs-fk)**2) else {
-		# 		if(Dargs$error.model=="proportional")
-		# 			resk<-sum((Dargs$yobs-fk)**2/cutoff(fk**2,.Machine$double.eps)) else resk<-0
-		# 	}
-		# statr<-statr+resk
 	}
 	# Update sufficient statistics
 	suffStat$statphi1<-suffStat$statphi1+opt$stepsize[kiter]*(stat1/Uargs$nchains-suffStat$statphi1)
@@ -50,7 +44,7 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 	
 	############# Maximisation
 	##### fixed effects
-	if (opt$flag.fmin && kiter>=opt$nbiter.sa) {
+	if (opt$flag.fmin && kiter>=0) {
 		temp<-d1.omega[Uargs$ind.fix11,]*(t(Uargs$COV1)%*%(suffStat$statphi1-Uargs$dstatCOV[,varList$ind.eta]))
 		betas[Uargs$ind.fix11]<-solve(comega[Uargs$ind.fix11,Uargs$ind.fix11],rowSums(temp)) 
 		# ECO TODO: utiliser optimise dans le cas de la dimension 1
@@ -73,7 +67,7 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 	
 
 	# Simulated annealing (applied to the diagonal elements of omega)
-	if (kiter<=opt$nbiter.sa) {
+	if (kiter<=0) {
 		diag.omega.full<-mydiag(omega.full)
 		vec1<-diag.omega.full[Uargs$i1.omega2]
 		vec2<-varList$diag.omega[Uargs$i1.omega2]*opt$alpha1.sa
@@ -84,27 +78,6 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 		varList$diag.omega<-mydiag(varList$omega)
 	}
 	varList$omega<-varList$omega-mydiag(mydiag(varList$omega))+mydiag(varList$diag.omega)
-
-	# Residual error
-	# if (Dargs$error.model=="constant" | Dargs$error.model=="exponential") {
-	# 	sig2<-suffStat$statrese/Dargs$nobs
-	# 	varList$pres[1]<-sqrt(sig2)
-	# }
-	# if (Dargs$error.model=="proportional") {
-	# 	sig2<-suffStat$statrese/Dargs$nobs
-	# 	varList$pres[2]<-sqrt(sig2)
-	# }
-	# if (Dargs$error.model=="combined") {
-	# 	# ECO TODO: check and secure (when fpred<0 => NaN, & what happens if bres<0 ???)
-	# 	ABres<-optim(par=varList$pres,fn=ssq,y=Dargs$yM,f=fpred)$par
-	# 	if (kiter<=opt$nbiter.saemix[1]) {
-	# 		varList$pres[1]<-max(varList$pres[1]*opt$alpha1.sa,ABres[1])
-	# 		varList$pres[2]<-max(varList$pres[2]*opt$alpha1.sa,ABres[2])
-	# 	} else {
-	# 		varList$pres[1]<-varList$pres[1]+opt$stepsize[kiter]*(ABres[1]-varList$pres[1])
-	# 		varList$pres[2]<-varList$pres[2]+opt$stepsize[kiter]*(ABres[2]-varList$pres[2])
-	# 	}
-	# }
 
 	return(list(varList=varList,mean.phi=mean.phi,phi=phi,betas=betas,suffStat=suffStat))
 }

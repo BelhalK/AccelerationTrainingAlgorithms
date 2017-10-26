@@ -83,6 +83,7 @@ if (!(kiter %in% map_range)){
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
 			}
 		}
+
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	}
 	
@@ -169,6 +170,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
+		    
 		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_cat, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
 		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 		    phi.map[i,i1.omega2]<-phi1.opti$par
@@ -182,23 +184,12 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		psi_map <- as.matrix(map.psi[,-c(1)])
 		phi_map <- as.matrix(map.phi[,-c(1)])
 		eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
-		
+		# eta_map <- phi_map - mean.phiM
+
 		#gradient at the map estimation
 		# gradf <- matrix(0L, nrow = length(fpred), ncol = nb.etas)
 		gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
 
-		# for (j in 1:nb.etas) {
-		# 	phi_map2 <- phi_map
-		# 	phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
-		# 	psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-		# 	fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		# 	fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-		# 	for (i in 1:(Dargs$NM)){
-		# 		r = 1:sum(Dargs$IdM == i)
-  #               r = r+sum(as.matrix(gradf[,j]) != 0L)
-		# 		gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
-		# 	}
-		# }
 
 
 		for (j in 1:nb.etas) {
@@ -218,7 +209,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			}
 		}
 
-
 		#calculation of the covariance matrix of the proposal
 		
 		# denom <- DYF
@@ -235,10 +225,12 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
             z[r] <- fpred[r]
 
 			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+			# Gamma[[i]] <- omega.eta
 			chol.Gamma[[i]] <- chol(Gamma[[i]])
 			inv.Gamma[[i]] <- solve(Gamma[[i]])
 		}
 		
+
 		etaM <- eta_map
 		for (u in 1:opt$nbiter.mcmc[4]) {
 
@@ -249,19 +241,14 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				#generate candidate eta
 					
 				for (i in 1:(Dargs$NM)){
-					
 					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
-					etaMc[i]<- eta_map[i] +Mi
+					etaMc[i,]<- eta_map[i,] +Mi
 				}
 
 
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				# if(Dargs$error.model=="exponential")
-				# 	fpred<-log(cutoff(fpred))
-				# gpred<-error(fpred,varList$pres)
-				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
 				DYF[Uargs$ind.ioM] <- -log(fpred)
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
@@ -273,12 +260,11 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				}
 
 
+
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				
-
-
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)

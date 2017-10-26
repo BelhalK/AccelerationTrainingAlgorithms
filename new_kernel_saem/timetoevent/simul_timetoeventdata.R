@@ -10,17 +10,22 @@ h=lambda/beta
 
 DEFINITION:
 e = {type               = event, 
-     maxEventNumber     = 5, 
      rightCensoringTime = 60,  
      hazard             = h}
+[INDIVIDUAL]
+input={lambda_pop, o_lambda}
+                      
+DEFINITION:
+lambda  ={distribution=lognormal, prediction=lambda_pop,  sd=o_lambda}
      ")
 
 
-p <- c(beta = 1, lambda=20)
-h <- list(name='h', time=seq(0, 6, by=1))
+p <- c(lambda_pop=0.1, o_lambda=0.5,
+       beta = 1)
+h <- list(name='h', time=seq(0, 60, by=1))
 e <- list(name='e', time=0)
 
-N <- 50
+N <- 10
 res <- simulx(model     = model2, 
               settings  = list(seed=123),
               parameter = p, 

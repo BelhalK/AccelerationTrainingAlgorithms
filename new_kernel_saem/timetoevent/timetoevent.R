@@ -69,42 +69,41 @@ T<-xidep[,1]
 y<-xidep[,2]
 nb<-cbind(id,xidep[,3])
 
-lambda <- unique(psi[id,1])
-beta <- psi[id,2]
+N <- nrow(psi)
+lambda <- psi[,1]
+
 censoringtime = 60
-
-pdf <- psi[,1]
-for (i in 1:length(pdf)) {
-  pdf[i] <- lambda[i]^nb[nb[,1]==i,2][1]*exp(-lambda[i]*censoringtime)
-
+logpdf <- vector(length= N)
+for (i in 1:N) {
+  logpdf[i] <- nb[nb[,1]==i,2][1]*log(lambda[i]) - lambda[i]*censoringtime
 }
 
-return(pdf)
+return(logpdf)
 }
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(0.01,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(0.5,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(0,0),covariance.model=matrix(c(1,0,0,0),ncol=2, 
+  transform.par=c(1,0),covariance.model=matrix(c(1,0,0,0),ncol=2, 
   byrow=TRUE),error.model="constant")
 
 
-K1 = 100
+K1 = 200
 K2 = 50
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
 theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(3))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:90))
 cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

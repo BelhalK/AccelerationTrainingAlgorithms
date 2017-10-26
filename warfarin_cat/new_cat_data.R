@@ -55,6 +55,7 @@ iter_mcmc = 200
 
 
 cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+cat_data.saemix <- cat_data.saemix[,]
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
@@ -104,8 +105,8 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 400
-K2 = 100
+K1 = 10
+K2 = 5
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -114,7 +115,7 @@ seed0 = 444
 
 #RWM
 theo_ref <- NULL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -125,13 +126,19 @@ theo_ref[end,]
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:K1),nbiter.sa=0)
+options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:K1),nbiter.sa=0)
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
+# graphConvMC2_saem(theo_ref,new_cat, title="new kernel")
+
+new_cat <- theo_ref
+new_cat[1:250,] <- cat_saem[1:250,]
+new_cat[251:1101,2:7] <- 0
 
 
+graphConvMC2_saem(theo_ref[1:250,],cat_saem[1:250,], title="new kernel")
 
 
 cat_saem[end,]

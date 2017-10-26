@@ -50,7 +50,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	
 	############# Maximisation
 	##### fixed effects
-	if (opt$flag.fmin && kiter>=opt$nbiter.sa) {
+	if (opt$flag.fmin && kiter>=0) {
 		temp<-d1.omega[Uargs$ind.fix11,]*(t(Uargs$COV1)%*%(suffStat$statphi1-Uargs$dstatCOV[,varList$ind.eta]))
 		betas[Uargs$ind.fix11]<-solve(comega[Uargs$ind.fix11,Uargs$ind.fix11],rowSums(temp)) 
 		# ECO TODO: utiliser optimise dans le cas de la dimension 1
@@ -73,7 +73,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	
 
 	# Simulated annealing (applied to the diagonal elements of omega)
-	if (kiter<=opt$nbiter.sa) {
+	if (kiter<=0) {
 		diag.omega.full<-mydiag(omega.full)
 		vec1<-diag.omega.full[Uargs$i1.omega2]
 		vec2<-varList$diag.omega[Uargs$i1.omega2]*opt$alpha1.sa
@@ -97,7 +97,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	# if (Dargs$error.model=="combined") {
 	# 	# ECO TODO: check and secure (when fpred<0 => NaN, & what happens if bres<0 ???)
 	# 	ABres<-optim(par=varList$pres,fn=ssq,y=Dargs$yM,f=fpred)$par
-	# 	if (kiter<=opt$nbiter.saemix[1]) {
+	# 	if (kiter<=0emix[1]) {
 	# 		varList$pres[1]<-max(varList$pres[1]*opt$alpha1.sa,ABres[1])
 	# 		varList$pres[2]<-max(varList$pres[2]*opt$alpha1.sa,ABres[2])
 	# 	} else {
