@@ -57,9 +57,9 @@ library(lattice)
 
 
 # data(theo.saemix)
-# theo.saemix_less <- theo.saemix[1:120,]
-# # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
-# saemix.data<-saemixData(name.data=theo.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+# # theo.saemix_less <- theo.saemix[1:120,]
+# theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
+# saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
 
 
@@ -91,7 +91,6 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 # saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption"
 #   ,psi0=matrix(c(1.,20,0.5),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,0))
 
-
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
@@ -105,7 +104,7 @@ theo_ref <- cbind(iterations, theo_ref)
 
 theo_ref[end,]
 #ref (map always)
-options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
+options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 

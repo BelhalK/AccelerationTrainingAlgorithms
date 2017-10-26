@@ -331,7 +331,8 @@ compute.Uy_time<-function(b0,phiM,pres,args,Dargs,DYF) {
   phiM[,args$i0.omega2]<-do.call(rbind,rep(list(phi0),args$nchains))
   psiM<-transphi(phiM,Dargs$transform.par)
   fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
-  DYF[args$ind.ioM] <- -log(fpred)
+  # DYF[args$ind.ioM] <- -log(fpred)
+  DYF <- -log(fpred)
   U<-sum(DYF)
   return(U)
 }
@@ -341,7 +342,8 @@ conditional.distribution_time<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpa
   psii<-transphi(matrix(phii,nrow=1),trpar)
   if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)
   fi<-model(psii,idi,xi)
-  Uy<-sum(-log(fi))
+  Uy <- -log(fi)
+  # Uy<-sum(-log(fi))
   dphi<- phi1-mphi
   Uphi<- 0.5*sum(dphi*(dphi%*%iomega))
   return(Uy+Uphi)

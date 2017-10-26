@@ -20,11 +20,10 @@ estep_time<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
-	browser()
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 
 
-	DYF[Uargs$ind.ioM] <- -log(fpred)
+	Uc.y <- -log(fpred)
 	U.y<-colSums(DYF)
 	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
 	for (i in 1:(nrow(phiM))) {
@@ -45,8 +44,8 @@ if (!(kiter %in% map_range)){
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		psiMc<-transphi(phiMc,Dargs$transform.par)
 		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-		DYF[Uargs$ind.ioM] <- -log(fpred)
-		Uc.y<-colSums(DYF)
+		Uc.y <- -log(fpred)
+		# Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
@@ -67,8 +66,8 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				DYF[Uargs$ind.ioM] <- -log(fpred)
-				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				Uc.y <- -log(fpred)
+				# Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
@@ -102,8 +101,8 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				DYF[Uargs$ind.ioM] <- -log(fpred)
-				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				Uc.y <- -log(fpred)
+				# Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
@@ -202,10 +201,10 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			DYF[Uargs$ind.ioM] <- -log(fpred1)
+			Uc.y <- -log(fpred1)
 			l1 <- colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			DYF[Uargs$ind.ioM] <- -log(fpred2)
+			Uc.y <- -log(fpred2)
 			l2 <- colSums(DYF)
 			for (i in 1:(Dargs$NM)){
 				# r = 1:sum(Dargs$IdM == i)
@@ -219,7 +218,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		
 		# denom <- DYF
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		DYF[Uargs$ind.ioM] <- -log(fpred)
+		Uc.y <- -log(fpred)
 		denom <- colSums(DYF)
 
 		
@@ -257,9 +256,9 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				# if(Dargs$error.model=="exponential")
 				# 	fpred<-log(cutoff(fpred))
 				# gpred<-error(fpred,varList$pres)
-				# DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-				DYF[Uargs$ind.ioM] <- -log(fpred)
-				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
+				# Uc.y<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+				Uc.y <- -log(fpred)
+				# Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 
 

@@ -1,18 +1,13 @@
 
 
 [LONGITUDINAL]
-input = {lambda,beta}  
+input = {beta,lambda}  
 
 EQUATION:
-h=lambda*beta
+h=lambda/beta
 
 DEFINITION:
 e={type=event,
-eventType=intervalCensored,
-     intervalLength     = 5, 
      rightCensoringTime = 60,  
      hazard             = h}
-
-
-
-                      
+     

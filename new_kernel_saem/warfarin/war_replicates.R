@@ -87,6 +87,13 @@ out<-list(out1,out2)
 # call the simulator 
 res <- simulx(model=model,treatment=trt,parameter=list.param,output=out)
 # warfarin.saemix <- data(res)
+
+# writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv")
+# table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv", header=T, sep=",")
+# table <- table[table$ytype==1,]
+
+# table[,5] <- 0
+
 warfarin.saemix <- res$y1
 warfarin.saemix["amount"] <- 0
 treat <- res$treatment
@@ -95,10 +102,12 @@ treat <- treat[c(1,2,4,3)]
 
 j <- 1
 l<-c()
-for (i in 1:nrow(warfarin.saemix)) {
+
+
+for (i in 1:241) {
     
     if(t(warfarin.saemix["id"])[i]==t(treat["id"])[j]){
-        # print(rownames(warfarin.saemix[i,]))
+        print(rownames(warfarin.saemix[i,]))
         l <- rbind(l,rownames(warfarin.saemix[i,]))
         j<-j+1
       }
@@ -116,42 +125,27 @@ for (i in l[-1]){
 rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 
 
+warfarin.saemix_less <- warfarin.saemix[,]
 model1cpt<-function(psi,id,xidep) { 
-	dose<-xidep[,1]
-	tim<-xidep[,2]  
-	ka<-psi[id,1]
-	V<-psi[id,2]
-	k<-psi[id,3]
-	CL<-k*V
-	ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-	return(ypred)
+  dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+  CL<-k*V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
 }
-
-# warfa<-function(psi,id,xidep) { 
-#   dose<-xidep[,1]
-#   tim<-xidep[,2]  
-#   ka<-psi[id,1]
-#   V<-psi[id,2]
-#   k<-psi[id,3]
-#   CL<-k*V
-#   Tlag<-psi[id,4]
-#   Imax<-psi[id,5]
-#   IC50<-psi[id,6]
-#   kin<-psi[id,7]
-#   kout<-psi[id,8]
-#   ypred1<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-#   E_0 <- kin/kout
-#   dypred2<-kin*(1-Imax*ypred1/(ypred1+IC50))-kout*ypred2
-#   return(ypred1,ypred2)
-# }
 
 
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),transform.par=c(1,1,1))
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(0.1,0,0,0,0.1,0,0,0,0.1),ncol=3,byrow=TRUE))
 
-saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+
+saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 K1 = 200
@@ -184,14 +178,14 @@ graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
 
 
 
-replicate = 20
+replicate = 10
 seed0 = 395246
 
 #RWM
 final_rwm <- 0
 final_mix <- 0
-for (j in 1:replicate){
-  print(j)
+for (m in 1:replicate){
+  
   model<-"warfarin_project_model.txt"
   # treatment
   trt <- read.table("treatment.txt", header = TRUE) 
@@ -212,7 +206,14 @@ for (j in 1:replicate){
 
   # call the simulator 
   res <- simulx(model=model,treatment=trt,parameter=list.param,output=out)
-  # warfarin.saemix <- data(res)
+# warfarin.saemix <- data(res)
+
+# writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv")
+# table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv", header=T, sep=",")
+# table <- table[table$ytype==1,]
+
+# table[,5] <- 0
+
   warfarin.saemix <- res$y1
   warfarin.saemix["amount"] <- 0
   treat <- res$treatment
@@ -221,10 +222,12 @@ for (j in 1:replicate){
 
   j <- 1
   l<-c()
-  for (i in 1:nrow(warfarin.saemix)) {
+
+
+  for (i in 1:241) {
       
       if(t(warfarin.saemix["id"])[i]==t(treat["id"])[j]){
-          print(rownames(warfarin.saemix[i,]))
+          # print(rownames(warfarin.saemix[i,]))
           l <- rbind(l,rownames(warfarin.saemix[i,]))
           j<-j+1
         }
@@ -240,18 +243,26 @@ for (j in 1:replicate){
   }
 
   rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
-  saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  warfarin.saemix_less <- warfarin.saemix[,]
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="warfarin"
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
+
+
+saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
-  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
+  options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2))
   theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
-  theo_ref['individual'] <- j
+  theo_ref['individual'] <- m
   final_rwm <- rbind(final_rwm,theo_ref)
-  options.mix<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(1:3))
-  theo_mix<-data.frame(saemix_new(saemix.model,saemix.data,options.mix))
+  options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
+  print(m)
+  theo_mix<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
   theo_mix <- cbind(iterations, theo_mix)
-  theo_mix['individual'] <- j
+  theo_mix['individual'] <- m
   final_mix <- rbind(final_mix,theo_mix)
 }
 

@@ -64,7 +64,7 @@ library(lattice)
 
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin")
-source('dataproc.R')
+# source('dataproc.R')
 # model 
 model<-"warfarin_project_model.txt"
 # treatment
@@ -124,8 +124,8 @@ for (i in l[-1]){
 
 rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 # warfarin.saemix <- table[c(1,2,3,5)]
+warfarin.saemix_less <- warfarin.saemix[,]
 
-warfarin.saemix_less <- warfarin.saemix[1:144,]
 model1cpt<-function(psi,id,xidep) { 
 	dose<-xidep[,1]
 	tim<-xidep[,2]  
@@ -157,9 +157,18 @@ model1cpt<-function(psi,id,xidep) {
 
 
 
+# # Default model, no covariate
+# saemix.model<-saemixModel(model=model1cpt,description="warfarin"
+#   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1))
+
+
+
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),transform.par=c(1,1,1))
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
+
 
 saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")

@@ -4,7 +4,7 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset theo.saemix_less 
+Dataset theo.saemix 
     Structured data: Concentration ~ Dose + Time | Id 
     X variable for graphs: Time (hr) 
     covariates: Weight (kg), Sex (-) 
@@ -41,28 +41,28 @@ ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
 return(ypred)
 }
   Nb of parameters: 3 
-      parameter names:  ka V CL 
+      parameter names:  ka V k 
       distribution:
      Parameter Distribution Estimated
 [1,] ka        log-normal   Estimated
 [2,] V         log-normal   Estimated
-[3,] CL        log-normal   Estimated
+[3,] k         log-normal   Estimated
   Variance-covariance matrix:
-   ka V CL
-ka  1 0  0
-V   0 1  0
-CL  0 0  1
+   ka V k
+ka  1 0 0
+V   0 1 0
+k   0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka  V  CL
+             ka  V   k
 Pop.CondInit  1 20 0.5
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
-    Number of chains:  20 
+    Number of chains:  1 
     Seed:  395246 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -77,21 +77,21 @@ Pop.CondInit  1 20 0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         1.606  
-[2,] V         31.712  
-[3,] CL         0.088  
-[4,] a          0.727  
+[1,] ka         1.662  
+[2,] V         32.425  
+[3,] k          0.083  
+[4,] a          0.752  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.379   
-V  omega2.V  0.023   
-CL omega2.CL 0.017   
+ka omega2.ka 4.2e-01 
+V  omega2.V  2.8e-02 
+k  omega2.k  2.3e-08 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.CL
-omega2.ka 1         0        0        
-omega2.V  0         1        0        
-omega2.CL 0         0        1        
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       

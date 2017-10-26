@@ -55,34 +55,38 @@ iter_mcmc = 200
 
 
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/timeto.csv", header=T, sep=",")
-saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","ytype","nb_events"), name.X=c("time"))
+timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
+timetoevent.saemix["nb"] <- 0
+for (i in 1:length(unique(timetoevent.saemix$id))) {
+    timetoevent.saemix[timetoevent.saemix$id==i,5] <- length(which(timetoevent.saemix[timetoevent.saemix$id==i,3]==1))
+  }
+
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","nb"), name.X=c("time"))
 
 
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
-nb<-xidep[,4]
+nb<-cbind(id,xidep[,3])
 
-lambda <- psi[id,1]
+lambda <- unique(psi[id,1])
 beta <- psi[id,2]
 censoringtime = 60
-browser()
-  for (i in 1:nrow(psi)) {
-    ji <- which(id==i)
-    ti <- T[ji]
-    yi <- y[ji]
-  }
 
-pdf <- lambda^nb[1]*exp(-lambda*censoringtime)
+pdf <- psi[,1]
+for (i in 1:length(pdf)) {
+  pdf[i] <- lambda[i]^nb[nb[,1]==i,2][1]*exp(-lambda[i]*censoringtime)
+
+}
 
 return(pdf)
 }
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(0.01,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(0,0),covariance.model=matrix(c(1,0,0,1),ncol=2, 
+  transform.par=c(0,0),covariance.model=matrix(c(1,0,0,0),ncol=2, 
   byrow=TRUE),error.model="constant")
 
 
@@ -93,7 +97,7 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE, map.range=c(0))
 theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
