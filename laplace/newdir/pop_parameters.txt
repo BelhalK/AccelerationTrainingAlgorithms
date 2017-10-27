@@ -4,71 +4,64 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset yield.saemix 
-    Structured data: yield ~ dose | site 
-    Predictor: dose (kg/ha) 
-    covariates: soil.nitrogen (kg/ha) 
+Dataset warfarin.saemix_less 
+    Structured data: y1 ~ amount + time | id 
+    X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     37 
-    number of observations: 224 
-    average/min/max nb obs: 6.05  /  5  /  8 
+    number of subjects:     32 
+    number of observations: 252 
+    average/min/max nb obs: 7.88  /  6  /  17 
 First 10 lines of data:
-   site dose yield soil.nitrogen mdv cens occ ytype
-1  1901    0  6.70            70   0    0   1     1
-2  1901   70  8.58            70   0    0   1     1
-3  1901  120 10.56            70   0    0   1     1
-4  1901  170 11.54            70   0    0   1     1
-5  1901  220 10.63            70   0    0   1     1
-6  1901  270 11.54            70   0    0   1     1
-7  1902    0  6.98            80   0    0   1     1
-8  1902   70  9.94            80   0    0   1     1
-9  1902  120 10.56            80   0    0   1     1
-10 1902  170 11.07            80   0    0   1     1
+   id amount time          y1 mdv cens occ ytype
+1   1    100  0.0  0.00000000   0    0   1     1
+2   1    100 24.0  7.45649283   0    0   1     1
+3   1    100 36.0  6.66450280   0    0   1     1
+4   1    100 48.0  3.65825205   0    0   1     1
+5   1    100 72.0  1.29006126   0    0   1     1
+6   1    100 96.0  0.60271857   0    0   1     1
+7   2    100  0.0  0.00000000   0    0   1     1
+8   2    100  0.5 -0.13247142   0    0   1     1
+9   2    100  2.0  0.55926555   0    0   1     1
+10  2    100  3.0 -0.03233595   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear plus plateau model
-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
+  Model function:  warfarin
+function(psi,id,xidep) { 
+dose<-xidep[,1]
+tim<-xidep[,2]  
+ka<-psi[id,1]
+V<-psi[id,2]
+k<-psi[id,3]
+CL<-k*V
+ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+return(ypred)
 }
   Nb of parameters: 3 
-      parameter names:  Ymax Xmax slope 
+      parameter names:  ka V k 
       distribution:
      Parameter Distribution Estimated
-[1,] Ymax      normal       Estimated
-[2,] Xmax      normal       Estimated
-[3,] slope     normal       Estimated
+[1,] ka        log-normal   Estimated
+[2,] V         log-normal   Estimated
+[3,] k         log-normal   Estimated
   Variance-covariance matrix:
-      Ymax Xmax slope
-Ymax     1    0     0
-Xmax     0    1     0
-slope    0    0     1
+   ka V k
+ka  1 0 0
+V   0 1 0
+k   0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             Ymax Xmax slope
-Pop.CondInit    8  100   0.2
+             ka V k
+Pop.CondInit  1 7 1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=20, K2=10 
-    Number of chains:  2 
-    Seed:  39546 
+    Number of iterations:  K1=200, K2=50 
+    Number of chains:  1 
+    Seed:  395246 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -82,21 +75,21 @@ Pop.CondInit    8  100   0.2
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] Ymax        9.191 
-[2,] Xmax      123.899 
-[3,] slope       0.026 
-[4,] a           0.247 
+[1,] ka        0.537   
+[2,] V         7.680   
+[3,] k         0.019   
+[4,] a         1.368   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-      Parameter    Estimate
-Ymax  omega2.Ymax  1.3e+00 
-Xmax  omega2.Xmax  2.3e+03 
-slope omega2.slope 2.5e-05 
+   Parameter Estimate
+ka omega2.ka 2.2e-01 
+V  omega2.V  3.8e-02 
+k  omega2.k  1.7e-10 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.Ymax omega2.Xmax omega2.slope
-omega2.Ymax  1           0           0           
-omega2.Xmax  0           1           0           
-omega2.slope 0           0           1           
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       

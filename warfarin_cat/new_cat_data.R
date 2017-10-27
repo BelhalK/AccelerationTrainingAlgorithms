@@ -105,8 +105,8 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 10
-K2 = 5
+K1 = 800
+K2 = 100
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -126,7 +126,7 @@ theo_ref[end,]
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:K1),nbiter.sa=0)
+options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:100),nbiter.sa=0)
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 

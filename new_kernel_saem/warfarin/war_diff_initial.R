@@ -37,6 +37,7 @@ source('main_estep_newkernel.R')
 source('main_gd_mix.R')
 source('main_estep_gd_mix.R')
 source('main_estep_mix.R')
+source('plots_func.R')
 source('main_estep_newkernel.R')
 source("mixtureFunctions.R")
 library("mlxR")
@@ -173,10 +174,9 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin"
 saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
-K1 = 30
-K2 = 10
+K1 = 200
+K2 = 50
 iterations = 1:(K1+K2+1)
-gd_step = 0.01
 end = K1+K2
 
 #RWM
@@ -186,43 +186,48 @@ theo_ref <- cbind(iterations, theo_ref)
 
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #ref (map always)
+theo_ref[end,]
+theo_new_ref[end,]
 options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
-
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
 
 
 #RWM vs always MAP (ref)
 
 
 
-replicate = 5
+replicate = 4
 seed0 = 395246
 
 #RWM
-final_rwm <- list(theo_ref,theo_ref,theo_ref,theo_ref,theo_ref)
-final_mix <- list(theo_ref,theo_ref,theo_ref,theo_ref,theo_ref)
-for (j in 1:replicate){
-  print(j)
+final_rwm <- 0
+final_mix <- 0
+for (m in 1:replicate){
+  print(m)
   saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(j-1,2*j,j-1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
+  ,psi0=matrix(c(m,2*m,m,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1/m,0,0,0,1/m,0,0,0,1/m),ncol=3,byrow=TRUE))
 
 
   options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
   theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
-  final_rwm[[i]] <- theo_ref
+  theo_ref['individual'] <- m
+  final_rwm <- rbind(final_rwm,theo_ref)
 
   options.new<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
   theo_mix<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
   theo_mix <- cbind(iterations, theo_mix)
-  final_mix[[i]] <- theo_mix
+  theo_mix['individual'] <- m
+  final_mix <- rbind(final_mix,theo_mix)
 }
 
-final_rwm["algo"] <- "RWM"
-final_mix["algo"] <- "Laplace"
+graphConvMC_new(final_rwm, title="RWM")
+graphConvMC_twokernels(final_rwm,final_mix, title="RWM")
+# graphConvMC_twokernels(final_rwm[final_rwm$individual==2,],final_rwm[final_rwm$individual==1,], title="EM")
 
 
 
