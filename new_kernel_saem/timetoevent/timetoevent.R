@@ -83,7 +83,7 @@ return(logpdf)
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(0.5,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,0),covariance.model=matrix(c(1,0,0,0),ncol=2, 
   byrow=TRUE),error.model="constant")
@@ -110,10 +110,6 @@ cat_saem <- cbind(iterations, cat_saem)
 graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-
-index = 1
-graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
-graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
 
 
 final_rwm <- post_rwm[[1]]

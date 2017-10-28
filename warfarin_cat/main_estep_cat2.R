@@ -25,14 +25,14 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
-	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
+	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
 	for (i in 1:(nrow(phiM))) {
-		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
+		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
 	}
 
-	post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
+	post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
 	for (i in 1:(nrow(phiM))) {
-		post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
+		post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
 	}
 
 	
@@ -152,7 +152,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 	  	# saemixObject["results"]["respar"] <- varList$pres
 
 	  	i1.omega2<-saemixObject["model"]["indx.omega"]
-	    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+	  	
+	    iomega.phi1<-solve(saemixObject["results"]["omega"])
 	  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
 	  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
 	  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
@@ -269,9 +270,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
-
-
-
 
 			}
 		}

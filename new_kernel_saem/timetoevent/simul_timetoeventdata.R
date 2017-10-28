@@ -20,7 +20,7 @@ lambda  ={distribution=lognormal, prediction=lambda_pop,  sd=o_lambda}
      ")
 
 
-p <- c(lambda_pop=0.1, o_lambda=0.5,
+p <- c(lambda_pop=0.3, o_lambda=0.5,
        beta = 1)
 h <- list(name='h', time=seq(0, 60, by=1))
 e <- list(name='e', time=0)

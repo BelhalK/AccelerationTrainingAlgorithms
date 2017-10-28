@@ -205,6 +205,8 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),saemix.options$nb.chains))
 	kt<-0
 	omega<-saemix.model["omega.init"]
+	a <- saemix.model["omega.init"]
+	print(a)
 	chol.omega<-try(chol(omega[ind.eta,ind.eta]),silent=TRUE)
 	if(class(chol.omega)=="try-error") {
 		#	cat("ind.eta=",ind.eta,"\n")
@@ -235,6 +237,8 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 		itest.phi<-unique(IdM[inan])
 		ltest.phi<-length(itest.phi)
 	}
+	omega <- a
+	saemix.model["omega.init"] <- a
 
 	var.eta<-mydiag(saemix.model["omega.init"])
 	theta0<-c(fixedpsi.ini,var.eta[i1.omega2])

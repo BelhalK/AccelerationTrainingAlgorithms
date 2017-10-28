@@ -106,7 +106,7 @@ if (!(kiter %in% map_range)){
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
-				print(length(ind))
+				
 				etaM[ind,]<-etaMc[ind,]
 
 				for (i in 1:(nrow(phiM))) {

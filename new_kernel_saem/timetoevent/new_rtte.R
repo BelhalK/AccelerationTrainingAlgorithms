@@ -68,15 +68,20 @@ timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
 nb<-cbind(id,xidep[,3])
-
 N <- nrow(psi)
+Nj <- length(T)
+inter <- cbind(id, diff(T))
+
 lambda <- psi[,1]
 beta <- psi[,2]
-
-censoringtime = 60
-logpdf <- vector(length= N)
+browser()
+h=(beta/lambda)*(T/lambda)^(beta-1)
+censoringtime = 6
+logpdf <- list(vector(length= nb[1,2]))
 for (i in 1:N) {
-  logpdf[i] <- nb[nb[,1]==i,2][1]*log(lambda[i]) - lambda[i]*censoringtime
+  for (j in 2:nb[nb[,1]==i,2][1]) {
+    logpdf[[i]][j] <- -(1/lambda)*(T[j]/lambda)^beta + (1/lambda)*(T[j-1]/lambda)^beta+log(h[j])
+  }
 }
 
 return(logpdf)

@@ -168,7 +168,8 @@ model1cpt<-function(psi,id,xidep) {
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin"
   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,0),ncol=3, 
+  byrow=TRUE))
 
 
 saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
@@ -207,8 +208,9 @@ final_rwm <- 0
 final_mix <- 0
 for (m in 1:replicate){
   print(m)
+  l = list(c(1,7,1,0,0,0),c(0.8,7.2,0.8,0,0,0),c(1.2,6.8,1.2,0,0,0),c(1.4,6.6,1.4,0,0,0))
   saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(m,2*m,m,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(l[[m]],ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1/m,0,0,0,1/m,0,0,0,1/m),ncol=3,byrow=TRUE))
 
 
@@ -226,7 +228,7 @@ for (m in 1:replicate){
 }
 
 graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_twokernels(final_rwm,final_mix, title="RWM")
+graphConvMC_diff(final_rwm,final_mix, title="RWM")
 # graphConvMC_twokernels(final_rwm[final_rwm$individual==2,],final_rwm[final_rwm$individual==1,], title="EM")
 
 

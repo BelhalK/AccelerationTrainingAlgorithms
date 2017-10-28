@@ -54,17 +54,18 @@ require(reshape2)
 iter_mcmc = 200
 
 
-cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
-cat_data.saemix <- cat_data.saemix[,]
-saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
+# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+# cat_data.saemix <- cat_data.saemix[1:692,]
+# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
 
 # cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
 # cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
-# cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
-# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
+cat_data.saemix <- cat_data.saemix[,]
+saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
 
 
 
@@ -91,9 +92,10 @@ return(P.obs)
 
 
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
-  psi0=matrix(c(1,1,1),ncol=3,byrow=TRUE,dimnames=list(NULL,   
-  c("th1","th2","th3"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
-  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  psi0=matrix(c(2,1,2),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("th1","th2","th3"))), 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,0),ncol=3, 
+  byrow=TRUE),omega.init=matrix(c(2,0,0,0,1,0,0,0,0),ncol=3, 
   byrow=TRUE),error.model="constant")
 
 
@@ -105,7 +107,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 800
+K1 = 300
 K2 = 100
 
 iterations = 1:(K1+K2+1)
@@ -126,26 +128,26 @@ theo_ref[end,]
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:100),nbiter.sa=0)
+options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:end),nbiter.sa=0)
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
-
+cat_saem[end,]
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
-# graphConvMC2_saem(theo_ref,new_cat, title="new kernel")
+graphConvMC2_saem(theo_ref[1:100,],cat_saem[1:100,], title="new kernel")
 
 new_cat <- theo_ref
 new_cat[1:250,] <- cat_saem[1:250,]
 new_cat[251:1101,2:7] <- 0
 
 
-graphConvMC2_saem(theo_ref[1:250,],cat_saem[1:250,], title="new kernel")
+graphConvMC2_saem(theo_ref[1:300,],cat_saem[1:300,], title="new kernel")
 
 
-cat_saem[end,]
+cat_saem[300,]
 
 
 
-replicate = 10
+replicate = 5
 seed0 = 39546
 
 #RWM
@@ -161,20 +163,21 @@ theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 
 
 names(final_rwm)[1]<-paste("time")
-names(final_rwm)[6]<-paste("id")
-final_rwm1 <- final_rwm[c(6,1,2)]
-final_rwm2 <- final_rwm[c(6,1,3)]
-final_rwm3 <- final_rwm[c(6,1,4)]
-final_rwm4 <- final_rwm[c(6,1,5)]
+names(final_rwm)[7]<-paste("id")
+final_rwm1 <- final_rwm[c(7,1,2)]
+final_rwm2 <- final_rwm[c(7,1,3)]
+final_rwm3 <- final_rwm[c(7,1,4)]
+final_rwm4 <- final_rwm[c(7,1,5)]
+final_rwm5 <- final_rwm[c(7,1,6)]
 
 
-# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+# prctilemlx(final_rwm1[-1,],band = list(number = 1, level = 10)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
 for (j in 1:replicate){
   print(j)
-  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:220))
+  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:K1))
   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
@@ -183,11 +186,12 @@ for (j in 1:replicate){
 
 
 names(final_mix)[1]<-paste("time")
-names(final_mix)[6]<-paste("id")
-final_mix1 <- final_mix[c(6,1,2)]
-final_mix2 <- final_mix[c(6,1,3)]
-final_mix3 <- final_mix[c(6,1,4)]
-final_mix4 <- final_mix[c(6,1,5)]
+names(final_mix)[7]<-paste("id")
+final_mix1 <- final_mix[c(7,1,2)]
+final_mix2 <- final_mix[c(7,1,3)]
+final_mix3 <- final_mix[c(7,1,4)]
+final_mix4 <- final_mix[c(7,1,5)]
+final_mix5 <- final_mix[c(7,1,6)]
 
 # prctilemlx(final_mix1[-1,],band = list(number = 8, level = 1)) + ggtitle("mix")
 
@@ -271,8 +275,27 @@ plot.S4 <- plot.S4  + ylab("w1")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
 
+final_rwm5['group'] <- 1
+final_mix5['group'] <- 2
+final_mix5$id <- final_mix5$id +1
 
-grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+
+final5 <- rbind(final_rwm5[-1,],final_mix5[-1,])
+labels <- c("ref","new")
+# prctilemlx(final4[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S5 <- plot.prediction.intervals(final5[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('red', '#c17b01'))
+plot.S5 <- plot.S5  + ylab("w2")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+
+grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,plot.S5,ncol=3)
 
 
 
