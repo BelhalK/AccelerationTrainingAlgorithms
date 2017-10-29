@@ -65,21 +65,54 @@ saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, 
 
 
 timetoevent.model<-function(psi,id,xidep) {
+# T<-xidep[,1]
+# y<-xidep[,2]
+# nb<-cbind(id,xidep[,3])
+
+# N <- nrow(psi)
+# lambda <- psi[,1]
+
+# censoringtime = 60
+# logpdf <- vector(length= N)
+# for (i in 1:N) {
+#   logpdf[i] <- nb[nb[,1]==i,2][1]*log(lambda[i]) - lambda[i]*censoringtime
+# }
+
 T<-xidep[,1]
 y<-xidep[,2]
 nb<-cbind(id,xidep[,3])
-
 N <- nrow(psi)
-lambda <- psi[,1]
+Nj <- length(T)
+inter <- cbind(id, diff(T))
 
 censoringtime = 60
-logpdf <- vector(length= N)
-for (i in 1:N) {
-  logpdf[i] <- nb[nb[,1]==i,2][1]*log(lambda[i]) - lambda[i]*censoringtime
+
+lambda <- psi[id,1]
+beta <- psi[id,2]
+init <- which(T==0)
+cens <- which(T==censoringtime)
+ind <- setdiff(1:Nj, append(init,cens))
+
+
+hazard <- lambda/beta
+H <- lambda/beta*T
+
+logpdf <- vector(length= Nj)
+
+for (j in init) {
+  logpdf[j] <- 0
 }
+for (j in cens) {
+  logpdf[j] <- -H[j] + H[j-1]
+}
+for (j in ind) {
+  logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+}
+
 
 return(logpdf)
 }
+
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
@@ -108,7 +141,7 @@ cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
 graphConvMC_saem(cat_saem, title="new kernel")
-graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
+graphConvMC2_saem(theo_ref,cat_saem, title="VS")
 
 
 

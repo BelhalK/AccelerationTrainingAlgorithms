@@ -64,6 +64,7 @@ for (i in 1:length(unique(timetoevent.saemix$id))) {
 saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","nb"), name.X=c("time"))
 
 
+
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
@@ -72,17 +73,30 @@ N <- nrow(psi)
 Nj <- length(T)
 inter <- cbind(id, diff(T))
 
-lambda <- psi[,1]
-beta <- psi[,2]
-browser()
-h=(beta/lambda)*(T/lambda)^(beta-1)
 censoringtime = 6
-logpdf <- list(vector(length= nb[1,2]))
-for (i in 1:N) {
-  for (j in 2:nb[nb[,1]==i,2][1]) {
-    logpdf[[i]][j] <- -(1/lambda)*(T[j]/lambda)^beta + (1/lambda)*(T[j-1]/lambda)^beta+log(h[j])
-  }
+
+lambda <- psi[id,1]
+beta <- psi[id,2]
+init <- which(T==0)
+cens <- which(T==censoringtime)
+ind <- setdiff(1:Nj, append(init,cens))
+
+
+hazard <- (beta/lambda)*(T/lambda)^(beta-1)
+H <- T*beta/(lambda^2)
+
+logpdf <- vector(length= Nj)
+
+for (j in init) {
+  logpdf[j] <- 0
 }
+for (j in cens) {
+  logpdf[j] <- -H[j] + H[j-1]
+}
+for (j in ind) {
+  logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+}
+
 
 return(logpdf)
 }
@@ -91,7 +105,7 @@ return(logpdf)
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
   psi0=matrix(c(0.5,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(1,0),covariance.model=matrix(c(1,0,0,0),ncol=2, 
+  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE),error.model="constant")
 
 
