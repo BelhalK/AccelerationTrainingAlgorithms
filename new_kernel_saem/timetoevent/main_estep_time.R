@@ -209,7 +209,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			l1 <- fpred1
 			DYF[Uargs$ind.ioM]<- fpred1
 			l1<-colSums(DYF)
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
@@ -227,8 +226,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		
 		# denom <- DYF
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		DYF[Uargs$ind.ioM]<- -fpred
-		Uc.y<-colSums(DYF)
+		
 		DYF[Uargs$ind.ioM]<- fpred
 		denom <- colSums(DYF)
 

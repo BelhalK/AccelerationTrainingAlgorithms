@@ -88,28 +88,25 @@ inter <- cbind(id, diff(T))
 censoringtime = 60
 
 lambda <- psi[id,1]
-beta <- psi[id,2]
 init <- which(T==0)
 cens <- which(T==censoringtime)
 ind <- setdiff(1:Nj, append(init,cens))
 
 
-hazard <- lambda/beta
-H <- lambda/beta*T
+hazard <- lambda
+H <- lambda*T
 
 logpdf <- vector(length= Nj)
 
-for (j in init) {
-  logpdf[j] <- 0
-}
-for (j in cens) {
-  logpdf[j] <- -H[j] + H[j-1]
-}
 for (j in ind) {
-  logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+  if (j %in% cens){
+    logpdf[j] <- -H[j] + H[j-1]
+  } else if(j %in% init){
+    logpdf[j] <- 0
+  } else {
+    logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+  }
 }
-
-
 return(logpdf)
 }
 
@@ -122,7 +119,7 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE),error.model="constant")
 
 
-K1 = 200
+K1 = 400
 K2 = 50
 
 iterations = 1:(K1+K2+1)
@@ -143,7 +140,9 @@ cat_saem <- cbind(iterations, cat_saem)
 graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="VS")
 
-
+graphConvMC2_saem(theo_ref[290:450,],cat_saem[290:450,], title="VS")
+plot(theo_ref[,2])
+plot(cat_saem[,2])
 
 final_rwm <- post_rwm[[1]]
 for (i in 2:length(post_rwm)) {

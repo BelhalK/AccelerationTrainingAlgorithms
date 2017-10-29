@@ -87,29 +87,28 @@ H <- T*beta/(lambda^2)
 
 logpdf <- vector(length= Nj)
 
-for (j in init) {
-  logpdf[j] <- 0
-}
-for (j in cens) {
-  logpdf[j] <- -H[j] + H[j-1]
-}
 for (j in ind) {
-  logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+  if (j %in% cens){
+    logpdf[j] <- -H[j] + H[j-1]
+  } else if(j %in% init){
+    logpdf[j] <- 0
+  } else {
+    logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
+  }
 }
-
-
 return(logpdf)
 }
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(0.5,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE),error.model="constant")
 
 
-K1 = 200
+
+K1 = 80
 K2 = 50
 
 iterations = 1:(K1+K2+1)
