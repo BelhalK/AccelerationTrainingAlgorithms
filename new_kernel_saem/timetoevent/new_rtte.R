@@ -51,7 +51,6 @@ require(reshape2)
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # theo.saemix$Sex<-ifelse(theo.saemix$Sex==1,"M","F")
 # saemix.data<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
-iter_mcmc = 200
 
 
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte1.csv", header=T, sep=",")
@@ -71,7 +70,6 @@ y<-xidep[,2]
 nb<-cbind(id,xidep[,3])
 N <- nrow(psi)
 Nj <- length(T)
-inter <- cbind(id, diff(T))
 
 censoringtime = 6
 
@@ -85,9 +83,10 @@ ind <- setdiff(1:Nj, append(init,cens))
 hazard <- (beta/lambda)*(T/lambda)^(beta-1)
 H <- T*beta/(lambda^2)
 
+
 logpdf <- vector(length= Nj)
 
-for (j in ind) {
+for (j in (1:Nj)) {
   if (j %in% cens){
     logpdf[j] <- -H[j] + H[j-1]
   } else if(j %in% init){
@@ -96,6 +95,7 @@ for (j in ind) {
     logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
   }
 }
+
 return(logpdf)
 }
 
@@ -107,15 +107,14 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE),error.model="constant")
 
 
-
-K1 = 80
+K1 = 150
 K2 = 50
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
 theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 

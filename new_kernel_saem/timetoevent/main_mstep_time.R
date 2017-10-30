@@ -18,8 +18,6 @@ mstep_time<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varL
 	
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
-	
-	fpred <- -fpred
 	# if(Dargs$error.model=="exponential")
 	# 	fpred<-log(cutoff(fpred))
 	Uargs$nchains = 1

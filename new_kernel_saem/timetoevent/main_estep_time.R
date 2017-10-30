@@ -48,10 +48,10 @@ if (!(kiter %in% map_range)){
 		fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
 		DYF[Uargs$ind.ioM]<- -fpred
 		Uc.y<-colSums(DYF)
-		# Uc.y <- -fpred
-		# Uc.y<-colSums(DYF)
+		# if (kiter>25){browser()}
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+		print(length(ind))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
 	}
@@ -100,6 +100,8 @@ if (!(kiter %in% map_range)){
 				#        if(nb.etas==1) vk<-c(0)
 				nb.iter2<-1
 			}
+
+
 			for(k2 in 1:nb.iter2) {
 				vk2<-VK[k2+vk]
 				etaMc<-etaM
@@ -214,13 +216,13 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
 			DYF[Uargs$ind.ioM]<- fpred2
 			l2<-colSums(DYF)
+
 			for (i in 1:(Dargs$NM)){
 				# r = 1:sum(Dargs$IdM == i)
     #             r = r+sum(as.matrix(gradf[,j]) != 0L)
 				gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
 			}
 		}
-
 
 		#calculation of the covariance matrix of the proposal
 		
@@ -241,6 +243,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
 			chol.Gamma[[i]] <- chol(Gamma[[i]])
 			inv.Gamma[[i]] <- solve(Gamma[[i]])
+
 		}
 		
 		etaM <- eta_map

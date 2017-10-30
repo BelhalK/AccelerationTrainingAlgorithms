@@ -98,7 +98,7 @@ H <- lambda*T
 
 logpdf <- vector(length= Nj)
 
-for (j in ind) {
+for (j in (1:Nj)) {
   if (j %in% cens){
     logpdf[j] <- -H[j] + H[j-1]
   } else if(j %in% init){
@@ -119,7 +119,7 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE),error.model="constant")
 
 
-K1 = 400
+K1 = 100
 K2 = 50
 
 iterations = 1:(K1+K2+1)
@@ -137,7 +137,7 @@ options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(
 cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
-graphConvMC_saem(cat_saem, title="new kernel")
+# graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="VS")
 
 graphConvMC2_saem(theo_ref[290:450,],cat_saem[290:450,], title="VS")

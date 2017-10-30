@@ -12,31 +12,31 @@ Dataset characteristics:
     number of observations: 252 
     average/min/max nb obs: 7.88  /  6  /  17 
 First 10 lines of data:
-   id amount time         y1 mdv cens occ ytype
-1   1    100  0.0  0.0000000   0    0   1     1
-2   1    100 24.0 10.0306854   0    0   1     1
-3   1    100 36.0  7.7177113   0    0   1     1
-4   1    100 48.0  5.4428734   0    0   1     1
-5   1    100 72.0  3.1656180   0    0   1     1
-6   1    100 96.0  1.5104124   0    0   1     1
-7   2    100  0.0  0.0000000   0    0   1     1
-8   2    100  0.5  0.6562943   0    0   1     1
-9   2    100  2.0  7.1543214   0    0   1     1
-10  2    100  3.0  8.6923150   0    0   1     1
+   id amount time          y1 mdv cens occ ytype
+1   1    100  0.0  0.00000000   0    0   1     1
+2   1    100 24.0  7.47020469   0    0   1     1
+3   1    100 36.0  5.52037461   0    0   1     1
+4   1    100 48.0  3.96880551   0    0   1     1
+5   1    100 72.0  1.29878789   0    0   1     1
+6   1    100 96.0  0.71080651   0    0   1     1
+7   2    100  0.0  0.00000000   0    0   1     1
+8   2    100  0.5  0.02647089   0    0   1     1
+9   2    100  2.0 10.70470187   0    0   1     1
+10  2    100  3.0 11.30813182   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
   Model function:  warfarin
 function(psi,id,xidep) { 
-dose<-xidep[,1]
-tim<-xidep[,2]  
-ka<-psi[id,1]
-V<-psi[id,2]
-k<-psi[id,3]
-CL<-k*V
-ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-return(ypred)
+  dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+  CL<-k*V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
 }
   Nb of parameters: 3 
       parameter names:  ka V k 
@@ -49,7 +49,7 @@ return(ypred)
    ka V k
 ka  1 0 0
 V   0 1 0
-k   0 0 0
+k   0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
@@ -75,19 +75,21 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.451   
-[2,] V         7.643   
-[3,] k         0.018   
-[4,] a         1.066   
+[1,] ka        1.30    
+[2,] V         6.55    
+[3,] k         0.02    
+[4,] a         0.89    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.411   
-V  omega2.V  0.053   
+ka omega2.ka 3.34    
+V  omega2.V  0.72    
+k  omega2.k  0.74    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V
-omega2.ka 1         0       
-omega2.V  0         1       
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       
