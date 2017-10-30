@@ -4,66 +4,73 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset theo.saemix 
-    Structured data: Concentration ~ Dose + Time | Id 
-    X variable for graphs: Time (hr) 
-    covariates: Weight (kg), Sex (-) 
-      reference class for covariate Sex :  0 
+Dataset PD2.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
 Dataset characteristics:
-    number of subjects:     12 
-    number of observations: 120 
-    average/min/max nb obs: 10.00  /  10  /  10 
+    number of subjects:     100 
+    number of observations: 300 
+    average/min/max nb obs: 3.00  /  3  /  3 
 First 10 lines of data:
-   Id    Dose  Time Concentration Weight Sex mdv cens occ ytype
-1   1 319.992  0.25          2.84   79.6   1   0    0   1     1
-2   1 319.992  0.57          6.57   79.6   1   0    0   1     1
-3   1 319.992  1.12         10.50   79.6   1   0    0   1     1
-4   1 319.992  2.02          9.66   79.6   1   0    0   1     1
-5   1 319.992  3.82          8.58   79.6   1   0    0   1     1
-6   1 319.992  5.10          8.36   79.6   1   0    0   1     1
-7   1 319.992  7.03          7.47   79.6   1   0    0   1     1
-8   1 319.992  9.05          6.89   79.6   1   0    0   1     1
-9   1 319.992 12.12          5.94   79.6   1   0    0   1     1
-10  1 319.992 24.37          3.28   79.6   1   0    0   1     1
+   subject dose response gender mdv cens occ ytype
+1        1    0  21.8124      1   0    0   1     1
+2        1   10  65.7807      1   0    0   1     1
+3        1   90 101.9230      1   0    0   1     1
+4        2    0  33.2081      1   0    0   1     1
+5        2   10  65.2646      1   0    0   1     1
+6        2   90  79.7890      1   0    0   1     1
+7        3    0  31.5014      1   0    0   1     1
+8        3   10  81.0744      1   0    0   1     1
+9        3   90 137.2720      1   0    0   1     1
+10       4    0  20.3392      1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  One-compartment model with first-order absorption
-function(psi,id,xidep) { 
+  Model function:  Emax model
+function(psi,id,xidep) {
+# input:
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
+# returns:
+# a vector of predictions of length equal to length of id
 dose<-xidep[,1]
-tim<-xidep[,2]  
-ka<-psi[id,1]
-V<-psi[id,2]
-k<-psi[id,3]
-CL<-k*V
-ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-return(ypred)
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
 }
   Nb of parameters: 3 
-      parameter names:  ka V k 
+      parameter names:  E0 Emax EC50 
       distribution:
      Parameter Distribution Estimated
-[1,] ka        log-normal   Estimated
-[2,] V         log-normal   Estimated
-[3,] k         log-normal   Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
   Variance-covariance matrix:
-   ka V k
-ka  1 0 0
-V   0 1 0
-k   0 0 1
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
   Error model: constant , initial values: a=1 
-    No covariate in the model.
+  Covariate model:
+       [,1] [,2] [,3]
+gender    0    0    1
     Initial values
-             ka  V   k
-Pop.CondInit  1 20 0.5
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
     Number of chains:  1 
-    Seed:  395246 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -76,22 +83,23 @@ Pop.CondInit  1 20 0.5
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-     Parameter Estimate
-[1,] ka         1.662  
-[2,] V         32.425  
-[3,] k          0.083  
-[4,] a          0.752  
+     Parameter         Estimate
+[1,] E0                23.86   
+[2,] Emax              96.10   
+[3,] EC50              13.01   
+[4,] beta_gender(EC50) -0.11   
+[5,] a                  4.91   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-   Parameter Estimate
-ka omega2.ka 4.2e-01 
-V  omega2.V  2.8e-02 
-k  omega2.k  2.3e-08 
+     Parameter   Estimate
+E0   omega2.E0   0.1483  
+Emax omega2.Emax 0.2203  
+EC50 omega2.EC50 0.0016  
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.k
-omega2.ka 1         0        0       
-omega2.V  0         1        0       
-omega2.k  0         0        1       
+            omega2.E0 omega2.Emax omega2.EC50
+omega2.E0   1         0           0          
+omega2.Emax 0         1           0          
+omega2.EC50 0         0           1          

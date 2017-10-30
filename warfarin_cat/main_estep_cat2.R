@@ -42,7 +42,7 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	map_range <- saemix.options$map.range
 
 if (!(kiter %in% map_range)){
-	print('not in map range')
+	# print('not in map range')
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
@@ -137,7 +137,7 @@ if (!(kiter %in% map_range)){
 ############   NEW KERNEl														############
 ###############################################################################################
 if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
-	print('in map range')
+	# print('in map range')
 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 		nrs2<-1
 

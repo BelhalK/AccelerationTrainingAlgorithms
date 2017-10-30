@@ -99,8 +99,9 @@ saemix_mamyula<-function(model,data,control=list()) {
     cat("Please provide a valid data object (see the help page for SaemixData)\n")
     return()
   }
-browser()
+
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
+  
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
   opt.warn<-getOption("warn")
 

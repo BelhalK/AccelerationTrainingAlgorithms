@@ -147,18 +147,81 @@ cat_saem[300,]
 
 
 
-replicate = 5
+replicate = 20
 seed0 = 39546
 
 #RWM
 final_rwm <- 0
+final_mix <- 0
 for (j in 1:replicate){
-  print(j)
-  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
+
+    model2 <- inlineModel("
+
+                  [LONGITUDINAL]
+                  input = {th1, th2, th3}
+
+                  EQUATION:
+                  lgp0 = th1
+                  lgp1 = lgp0 + th2
+                  lgp2 = lgp1 + th3
+
+                  DEFINITION:
+                  level = { type = categorical,  categories = {0, 1, 2, 3},
+                  logit(P(level<=0)) = th1
+                  logit(P(level<=1)) = th1 + th2
+                  logit(P(level<=2)) = th1 + th2 + th3
+                  }
+
+                  [INDIVIDUAL]
+                  input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
+                          
+
+                  DEFINITION:
+                  th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
+                  th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
+                  th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
+                          
+                          ")
+
+    p <- c(th1_pop=1, o_th1=1,
+           th2_pop=3, o_th2=0.5, 
+           th3_pop=1, o_th3=0.1)
+
+
+
+    y1 <- list(name='level', time=seq(1,to=100,by=10))
+
+
+
+    res2a2 <- simulx(model = model2,
+                     parameter = p,
+                     group = list(size=100, level="individual"),
+                     output = y1)
+
+
+    writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv")
+    head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=","))
+
+
+
+
+  cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
+  cat_data.saemix <- cat_data.saemix[,]
+  saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+
+
+  
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
   final_rwm <- rbind(final_rwm,theo_ref)
+print(j)
+  options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:K1))
+  theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
 }
 
 
@@ -174,15 +237,15 @@ final_rwm5 <- final_rwm[c(7,1,6)]
 # prctilemlx(final_rwm1[-1,],band = list(number = 1, level = 10)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
-final_mix <- 0
-for (j in 1:replicate){
-  print(j)
-  options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:K1))
-  theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
-  theo_mix <- cbind(iterations, theo_mix)
-  theo_mix['individual'] <- j
-  final_mix <- rbind(final_mix,theo_mix)
-}
+
+# for (j in 1:replicate){
+#   print(j)
+#   options.cat<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:K1))
+#   theo_mix<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
+#   theo_mix <- cbind(iterations, theo_mix)
+#   theo_mix['individual'] <- j
+#   final_mix <- rbind(final_mix,theo_mix)
+# }
 
 
 names(final_mix)[1]<-paste("time")
@@ -335,53 +398,49 @@ plot.prediction.intervals <- function(r, plot.median=TRUE, level=1, labels=NULL,
 
 
 
-
-
-
 # #values table
-# sample_mean_rwm <- 0
-# var_rwm <- 0
-# error_rwm <- 0
-# ka_true =  1.28289
-# V_true = 7.9396
-# k_true = 0.13452/7.9396
+sample_mean_rwm <- 0
+var_rwm <- 0
+error_rwm <- 0
 
-# o_ka_true =  0.73671^2
-# o_V_true = 0.13672^2
-# o_k_true = 0.26209^2
-# a_true = 0.26629
-# replicate = 10
+th1_pop=1
+o_th1=1^2
+th2_pop=3
+o_th2=0.5^2
+th3_pop=1
+o_th3=0.1^2
 
-# true_param <- c(ka_true,V_true,k_true,o_ka_true,o_V_true,o_k_true,a_true)
-# for (j in 1:replicate){
-#   sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,7,8)])
-# }
-# sample_mean_rwm = 1/replicate*sample_mean_rwm
 
-# for (j in 1:replicate){
-#   var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-sample_mean_rwm)^2
-#   error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-true_param)^2
-# }
+true_param <- c(th1_pop,th2_pop,th3_pop,o_th1,o_th2)
+for (j in 1:replicate){
+  sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5,6)])
+}
+sample_mean_rwm = 1/replicate*sample_mean_rwm
 
-# error_rwm = 1/replicate*error_rwm
-# var_rwm = 1/replicate*var_rwm
+for (j in 1:replicate){
+  var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6)]-sample_mean_rwm)^2
+  error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6)]-true_param)^2
+}
 
+error_rwm = 1/replicate*error_rwm
+var_rwm = 1/replicate*var_rwm
 
 
 
-# sample_mean_mix <- 0
-# var_mix <- 0
-# error_mix <- 0
 
-# for (j in 1:replicate){
-#   sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,7,8)])
-# }
-# sample_mean_mix = 1/replicate*sample_mean_mix
+sample_mean_mix <- 0
+var_mix <- 0
+error_mix <- 0
 
-# for (j in 1:replicate){
-#   var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-sample_mean_mix)^2
-#   error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-true_param)^2
-# }
+for (j in 1:replicate){
+  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5,6)])
+}
+sample_mean_mix = 1/replicate*sample_mean_mix
 
-# error_mix = 1/replicate*error_mix
-# var_mix = 1/replicate*var_mix
+for (j in 1:replicate){
+  var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6)]-sample_mean_mix)^2
+  error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6)]-true_param)^2
+}
+
+error_mix = 1/replicate*error_mix
+var_mix = 1/replicate*var_mix

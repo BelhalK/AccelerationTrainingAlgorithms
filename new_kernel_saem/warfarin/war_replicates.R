@@ -178,7 +178,7 @@ graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
 
 
 
-replicate = 40
+replicate = 10
 seed0 = 395246
 
 #RWM
@@ -465,17 +465,18 @@ k_true = 0.13452/7.9396
 o_ka_true =  0.73671^2
 o_V_true = 0.13672^2
 o_k_true = 0.26209^2
+a_true = 0.26629
+replicate = 10
 
-
-true_param <- c(ka_true,V_true,k_true,o_ka_true,o_V_true,o_k_true)
+true_param <- c(ka_true,V_true,k_true,o_ka_true,o_V_true,o_k_true,a_true)
 for (j in 1:replicate){
-  sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,8)])
+  sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,7,8)])
 }
 sample_mean_rwm = 1/replicate*sample_mean_rwm
 
 for (j in 1:replicate){
-  var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,8)]-sample_mean_rwm)^2
-  error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,8)]-true_param)^2
+  var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-sample_mean_rwm)^2
+  error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-true_param)^2
 }
 
 error_rwm = 1/replicate*error_rwm
@@ -489,13 +490,13 @@ var_mix <- 0
 error_mix <- 0
 
 for (j in 1:replicate){
-  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,8)])
+  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5,6,7,8)])
 }
 sample_mean_mix = 1/replicate*sample_mean_mix
 
 for (j in 1:replicate){
-  var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,8)]-sample_mean_mix)^2
-  error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,8)]-true_param)^2
+  var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-sample_mean_mix)^2
+  error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5,6,7,8)]-true_param)^2
 }
 
 error_mix = 1/replicate*error_mix
