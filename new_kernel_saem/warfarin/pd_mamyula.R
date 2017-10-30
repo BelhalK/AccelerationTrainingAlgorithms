@@ -63,11 +63,11 @@ library(lattice)
 # # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 # saemix.data<-saemixData(name.data=theo.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 
-a<-saemixData(name.data=theo.saemix,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
+
 
 library(saemix)
-PD1.saemix<-read.table( "PD1.saemix.tab",header=T,na=".")
-PD2.saemix<-read.table( "PD2.saemix.tab",header=T,na=".")
+PD1.saemix<-read.table( "data/PD1.saemix.tab",header=T,na=".")
+PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
@@ -106,19 +106,19 @@ gd_step = 0.01
 
 seed0 = 39546
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,0,0), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0,0,0), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
 theo_ref <- cbind(iterations, theo_ref)
-
+graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
 options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
-theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mala))
+theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,0,5,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,6,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
@@ -133,8 +133,8 @@ seed0 = 395246
 final_rwm <- 0
 for (j in 1:replicate){
   print(j)
-  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0)
-  theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
+  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0,0,0), nbiter.saemix = c(K1,K2))
+  theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
   final_rwm <- rbind(final_rwm,theo_ref)
@@ -150,14 +150,14 @@ final_rwm4 <- final_rwm[c(9,1,5)]
 final_rwm5 <- final_rwm[c(9,1,6)]
 final_rwm6 <- final_rwm[c(9,1,7)]
 final_rwm7 <- final_rwm[c(9,1,8)]
-prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
 for (j in 1:replicate){
   print(j)
-  options.new<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
-  theo_mix<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
+  options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,6,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
+  theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
