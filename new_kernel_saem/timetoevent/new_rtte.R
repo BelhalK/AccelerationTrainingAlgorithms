@@ -55,23 +55,22 @@ require(reshape2)
 
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte1.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
-timetoevent.saemix["nb"] <- 0
-for (i in 1:length(unique(timetoevent.saemix$id))) {
-    timetoevent.saemix[timetoevent.saemix$id==i,5] <- length(which(timetoevent.saemix[timetoevent.saemix$id==i,3]==1))
-  }
+# timetoevent.saemix["nb"] <- 0
+# for (i in 1:length(unique(timetoevent.saemix$id))) {
+#     timetoevent.saemix[timetoevent.saemix$id==i,5] <- length(which(timetoevent.saemix[timetoevent.saemix$id==i,3]==1))
+#   }
 
-saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","nb"), name.X=c("time"))
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
 # write.table(timetoevent.saemix[,1:3],"rtte.txt",sep=",",row.names=FALSE)
 
 
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
-nb<-cbind(id,xidep[,3])
 N <- nrow(psi)
 Nj <- length(T)
 
-censoringtime = 6
+censoringtime = 30
 
 lambda <- psi[id,1]
 beta <- psi[id,2]
@@ -92,7 +91,7 @@ return(logpdf)
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(10,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE),error.model="constant")

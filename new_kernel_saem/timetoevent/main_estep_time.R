@@ -51,7 +51,6 @@ if (!(kiter %in% map_range)){
 		# if (kiter>25){browser()}
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-		
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
 	}
@@ -70,6 +69,7 @@ if (!(kiter %in% map_range)){
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+				
 				DYF[Uargs$ind.ioM]<- -fpred
 				Uc.y<-colSums(DYF)
 				# Uc.y <- -fpred
@@ -77,6 +77,7 @@ if (!(kiter %in% map_range)){
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
