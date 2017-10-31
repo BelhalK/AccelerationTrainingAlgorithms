@@ -257,7 +257,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 				#generate candidate eta
 				for (i in 1:(Dargs$NM)){
 					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
-					etaMc[i]<- eta_map[i] +Mi
+					etaMc[i,]<- eta_map[i,] +Mi
 				}
 
 
@@ -271,8 +271,8 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 
 
 				for (i in 1:(Dargs$NM)){
-					propc[i] <- 0.5*rowSums((etaMc[i]-eta_map[i])*(etaMc[i]-eta_map[i])%*%inv.Gamma[[i]])
-					prop[i] <- 0.5*rowSums((etaM[i]-eta_map[i])*(etaM[i]-eta_map[i])%*%inv.Gamma[[i]])
+					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%inv.Gamma[[i]])
+					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%inv.Gamma[[i]])
 				}
 
 

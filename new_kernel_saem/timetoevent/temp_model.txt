@@ -8,7 +8,7 @@ h=(beta/lambda)*(t/lambda)^(beta-1)
 
 DEFINITION:
 e={type=event,
-     rightCensoringTime = 30,  
+     rightCensoringTime = 20,  
      hazard             = h}
 
 [INDIVIDUAL]

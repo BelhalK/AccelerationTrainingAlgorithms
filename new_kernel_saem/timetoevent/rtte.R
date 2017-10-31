@@ -55,33 +55,33 @@ require(reshape2)
 
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte1.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
-timetoevent.saemix["nb"] <- 0
-for (i in 1:length(unique(timetoevent.saemix$id))) {
-    timetoevent.saemix[timetoevent.saemix$id==i,5] <- length(which(timetoevent.saemix[timetoevent.saemix$id==i,3]==1))
-  }
+# timetoevent.saemix["nb"] <- 0
+# for (i in 1:length(unique(timetoevent.saemix$id))) {
+#     timetoevent.saemix[timetoevent.saemix$id==i,5] <- length(which(timetoevent.saemix[timetoevent.saemix$id==i,3]==1))
+#   }
 
-saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","nb"), name.X=c("time"))
-
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
+# write.table(timetoevent.saemix[,1:3],"rtte.txt",sep=",",row.names=FALSE)
 
 
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
 y<-xidep[,2]
-nb<-cbind(id,xidep[,3])
 N <- nrow(psi)
 Nj <- length(T)
 
-censoringtime = 6
+censoringtime = 20
 
 lambda <- psi[id,1]
 beta <- psi[id,2]
+
 init <- which(T==0)
 cens <- which(T==censoringtime)
 ind <- setdiff(1:Nj, append(init,cens))
 
 
 hazard <- (beta/lambda)*(T/lambda)^(beta-1)
-H <- T*beta/(lambda^2)
+H <- (T/lambda)^beta
 
 logpdf <- rep(0,Nj)
 logpdf[cens] <- -H[cens] + H[cens-1]
@@ -92,69 +92,297 @@ return(logpdf)
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
-  psi0=matrix(c(1,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(10,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
-  byrow=TRUE),error.model="constant")
+  byrow=TRUE))
 
 
-K1 = 150
+K1 = 200
 K2 = 50
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-
+end = K1+K2
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
 theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-graphConvMC_saem(theo_ref, title="new kernel")
+# graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,5),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:90))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
 cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
-graphConvMC_saem(cat_saem, title="new kernel")
+# graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
+seed0 = 39546
+replicate = 30
+final_rwm <- 0
+final_mix <- 0
+for (j in 1:replicate){
+  library(mlxR)
 
-index = 1
-graphConvMC_twokernels(post_rwm[[index]],post_rwm[[index]], title="rwm vs foce")
-graphConvMC_twokernels(post_rwm[[index]],post_foce[[index]], title="rwm vs foce")
+model2 <- inlineModel("
+
+[LONGITUDINAL]
+input = {beta,lambda}  
+
+EQUATION:
+h=(beta/lambda)*(t/lambda)^(beta-1)
+
+DEFINITION:
+e = {type               = event, 
+     rightCensoringTime = 20,  
+     hazard             = h}
+
+[INDIVIDUAL]
+input={lambda_pop, o_lambda,beta_pop, o_beta}
+                      
+DEFINITION:
+lambda  ={distribution=lognormal, prediction=lambda_pop,  sd=o_lambda}
+beta  ={distribution=lognormal, prediction=beta_pop,  sd=o_beta}
+     ")
 
 
-final_rwm <- post_rwm[[1]]
-for (i in 2:length(post_rwm)) {
-  final_rwm <- rbind(final_rwm, post_rwm[[i]])
+p <- c(lambda_pop=10, o_lambda=0.3,
+       beta_pop = 5,o_beta = 0.3)
+h <- list(name='h', time=seq(0, 20, by=1))
+e <- list(name='e', time=0)
+
+N <- 10
+res <- simulx(model     = model2, 
+              settings  = list(seed=123),
+              parameter = p, 
+              output    = list(h, e), 
+               group     = list(size = N))
+
+
+writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte2.csv")
+head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte2.csv", header=T, sep=","))
+
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte2.csv", header=T, sep=",")
+timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
+
+saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
+  theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
+  theo_ref <- cbind(iterations, theo_ref)
+  theo_ref['individual'] <- j
+  final_rwm <- rbind(final_rwm,theo_ref)
+
+
+  print(j)
+  options.mix<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
+  theo_mix<-data.frame(saemix_time(saemix.model,saemix.data,options.mix))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
+
 }
 
+names(final_rwm)[1]<-paste("time")
+names(final_rwm)[6]<-paste("id")
+final_rwm1 <- final_rwm[c(6,1,2)]
+final_rwm2 <- final_rwm[c(6,1,3)]
+final_rwm3 <- final_rwm[c(6,1,4)]
+final_rwm4 <- final_rwm[c(6,1,5)]
 
-final_foce <- post_foce[[1]]
-for (i in 2:length(post_foce)) {
-  final_foce <- rbind(final_foce, post_foce[[i]])
+# prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+
+#mix (RWM and MAP new kernel for liste of saem iterations)
+
+# for (j in 1:replicate){
+#   print(j)
+#   options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
+#   theo_mix<-data.frame(saemix_time(saemix.model,saemix.data,options.mix))
+#   theo_mix <- cbind(iterations, theo_mix)
+#   theo_mix['individual'] <- j
+#   final_mix <- rbind(final_mix,theo_mix)
+# }
+
+
+names(final_mix)[1]<-paste("time")
+names(final_mix)[6]<-paste("id")
+final_mix1 <- final_mix[c(6,1,2)]
+final_mix2 <- final_mix[c(6,1,3)]
+final_mix3 <- final_mix[c(6,1,4)]
+final_mix4 <- final_mix[c(6,1,5)]
+
+
+# prctilemlx(final_mix1[-1,1:3],band = list(number = 8, level = 80)) + ggtitle("mix")
+
+
+
+
+
+
+final_rwm1['group'] <- 1
+final_mix1['group'] <- 2
+final_mix1$id <- final_mix1$id +1
+
+
+final1 <- rbind(final_rwm1[-1,],final_mix1[-1,])
+labels <- c("ref","new")
+# prctilemlx(final1[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S <- plot.S1  + ylab("lambda")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+# print(plot.S1)
+
+
+
+final_rwm2['group'] <- 1
+final_mix2['group'] <- 2
+final_mix2$id <- final_mix2$id +1
+
+
+final2 <- rbind(final_rwm2[-1,],final_mix2[-1,])
+labels <- c("ref","new")
+# prctilemlx(final2[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S2 <- plot.S2  + ylab("beta")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+final_rwm3['group'] <- 1
+final_mix3['group'] <- 2
+final_mix3$id <- final_mix3$id +1
+
+
+final3 <- rbind(final_rwm3[-1,],final_mix3[-1,])
+labels <- c("ref","new")
+# prctilemlx(final3[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S3 <- plot.prediction.intervals(final3[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S3 <- plot.S3  + ylab("w2_lambda")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+
+
+final_rwm4['group'] <- 1
+final_mix4['group'] <- 2
+final_mix4$id <- final_mix4$id +1
+
+
+final4 <- rbind(final_rwm4[-1,],final_mix4[-1,])
+labels <- c("ref","new")
+# prctilemlx(final4[c(1,4,2,3)], band = list(number = 4, level = 80),group='group', label = labels) 
+# plt1 <- prctilemlx(final1, band = list(number = 4, level = 80),group='group', label = labels) 
+
+# rownames(final1) <- 1:nrow(final1)
+
+plot.S4 <- plot.prediction.intervals(final4[c(1,4,2,3)], 
+                                    labels       = labels, 
+                                    legend.title = "algos",
+                                    colors       = c('#01b7a5', '#c17b01'))
+plot.S4 <- plot.S4  + ylab("w2_beta")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
+
+
+
+grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+
+
+#values table
+
+#values table
+sample_mean_rwm <- 0
+var_rwm <- 0
+error_rwm <- 0
+lambda_true =  10
+beta_true = 5
+
+
+o_lambda =  0.3^2
+o_beta = 0.3^2
+
+
+
+true_param <- c(lambda_true,beta_true,o_lambda,o_beta)
+for (j in 1:replicate){
+  sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5)])
+}
+sample_mean_rwm = 1/replicate*sample_mean_rwm
+
+for (j in 1:replicate){
+  var_rwm <- var_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5)]-sample_mean_rwm)^2
+  error_rwm <- error_rwm + (final_rwm[(j*(K1+K2)),c(2,3,4,5)]-true_param)^2
 }
 
+error_rwm = 1/replicate*error_rwm
+var_rwm = 1/replicate*var_rwm
 
 
-graphConvMC_twokernels(final_rwm,final_rwm, title="EM")
-graphConvMC_twokernels(final_rwm,final_foce, title="EM")
 
 
-#Autocorrelation
-rwm.obj <- as.mcmc(post_rwm[[1]])
-corr_rwm <- autocorr(rwm.obj[,2])
-autocorr.plot(rwm.obj[,2])
+sample_mean_mix <- 0
+var_mix <- 0
+error_mix <- 0
 
-foce.obj <- as.mcmc(post_foce[[1]])
-corr_foce <- autocorr(foce.obj[,2])
-autocorr.plot(foce.obj[,2])
+for (j in 1:replicate){
+  sample_mean_mix <- sample_mean_mix + colMeans(final_mix[(j*K1):(j*(K1+K2)),c(2,3,4,5)])
+}
+sample_mean_mix = 1/replicate*sample_mean_mix
+
+for (j in 1:replicate){
+  var_mix <- var_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5)]-sample_mean_mix)^2
+  error_mix <- error_mix + (final_mix[(j*(K1+K2)),c(2,3,4,5)]-true_param)^2
+}
+
+error_mix = 1/replicate*error_mix
+var_mix = 1/replicate*var_mix
 
 
-#MSJD
-mssd(post_rwm[[index]][,2])
-mssd(post_foce[[index]][,2])
-
-
+plot.prediction.intervals <- function(r, plot.median=TRUE, level=1, labels=NULL, 
+                                      legend.title=NULL, colors=NULL) {
+  P <- prctilemlx(r, number=1, level=level, plot=FALSE)
+  if (is.null(labels))  labels <- levels(r$group)
+  if (is.null(legend.title))  legend.title <- "group"
+  names(P$y)[2:4] <- c("p.min","p50","p.max")
+  pp <- ggplot(data=P$y)+ylab(NULL)+ 
+    geom_ribbon(aes(x=time,ymin=p.min, ymax=p.max,fill=group),alpha=.5) 
+  if (plot.median)
+    pp <- pp + geom_line(aes(x=time,y=p50,colour=group))
+  
+  if (is.null(colors)) {
+    pp <- pp + scale_fill_discrete(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels)
+    pp <- pp + scale_colour_discrete(name=legend.title,
+                                     breaks=levels(r$group),
+                                     labels=labels, 
+                                     guide=FALSE)
+  } else {
+    pp <- pp + scale_fill_manual(name=legend.title,
+                                 breaks=levels(r$group),
+                                 labels=labels,
+                                 values=colors)
+    pp <- pp + scale_colour_manual(name=legend.title,
+                                   breaks=levels(r$group),
+                                   labels=labels,
+                                   guide=FALSE,values=colors)
+  }  
+  return(pp)
+}
 
