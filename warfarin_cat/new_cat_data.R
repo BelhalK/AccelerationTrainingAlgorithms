@@ -107,7 +107,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 300
+K1 = 100
 K2 = 100
 
 iterations = 1:(K1+K2+1)
@@ -133,6 +133,8 @@ cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 cat_saem[end,]
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
+
+
 graphConvMC2_saem(theo_ref[1:100,],cat_saem[1:100,], title="new kernel")
 
 new_cat <- theo_ref
