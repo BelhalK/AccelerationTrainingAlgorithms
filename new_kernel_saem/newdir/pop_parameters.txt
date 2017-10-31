@@ -10,8 +10,8 @@ Dataset PD2.saemix
     covariates: gender (-) 
       reference class for covariate gender :  0 
 Dataset characteristics:
-    number of subjects:     100 
-    number of observations: 300 
+    number of subjects:     56 
+    number of observations: 168 
     average/min/max nb obs: 3.00  /  3  /  3 
 First 10 lines of data:
    subject dose response gender mdv cens occ ytype
@@ -70,7 +70,7 @@ Cov.CondInit  0    0    0
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=50 
     Number of chains:  1 
-    Seed:  1976230 
+    Seed:  5928690 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -84,18 +84,18 @@ Cov.CondInit  0    0    0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter         Estimate
-[1,] E0                23.69   
-[2,] Emax              95.95   
-[3,] EC50              13.16   
-[4,] beta_gender(EC50) -0.11   
-[5,] a                  4.80   
+[1,] E0                21.56   
+[2,] Emax              94.70   
+[3,] EC50              13.55   
+[4,] beta_gender(EC50) -0.21   
+[5,] a                  5.14   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-E0   omega2.E0   0.1569  
-Emax omega2.Emax 0.2283  
-EC50 omega2.EC50 0.0044  
+E0   omega2.E0   0.2201  
+Emax omega2.Emax 0.2910  
+EC50 omega2.EC50 0.0016  
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

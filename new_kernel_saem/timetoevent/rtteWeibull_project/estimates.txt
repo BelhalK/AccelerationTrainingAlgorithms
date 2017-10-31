@@ -1,0 +1,5 @@
+            ; parameter
+  lambda_pop; 170.54211
+    beta_pop;   0.94996
+omega_lambda;   0.25168
+  omega_beta;   0.15837

@@ -1,0 +1,22 @@
+DESCRIPTION: RTTE model - Weibull distribution
+User defined likelihood function  
+
+[LONGITUDINAL]
+input = {lambda, beta, tpe}  
+tpe = {use=regressor}
+
+DEFINITION:
+Event = {type=count, 
+HAZ = (t/lambda)^beta - (tpe/lambda)^beta
+if k>0
+  h = (beta/lambda)*(t/lambda)^(beta-1)
+  lpk = log(h) - HAZ
+else
+  lpk = - HAZ
+end
+log(P(Event=k)) = lpk
+}
+
+OUTPUT:
+output = Event
+

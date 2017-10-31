@@ -51,7 +51,7 @@ if (!(kiter %in% map_range)){
 		# if (kiter>25){browser()}
 		deltau<-Uc.y-U.y
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-		print(length(ind))
+		
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
 	}

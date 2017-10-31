@@ -1,0 +1,10 @@
+DESCRIPTION: TTE with constant hazard function
+Single event
+
+[LONGITUDINAL]
+input = Te  
+
+DEFINITION:
+Event = { type = event,  hazard = 1/Te,  maxEventNumber = 1, rightCensoringTime=80 }
+
+

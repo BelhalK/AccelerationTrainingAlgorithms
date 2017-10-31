@@ -1,0 +1,14 @@
+DESCRIPTION: RTTE model - Weibull distribution
+
+[LONGITUDINAL]
+input = {lambda, beta}  
+
+EQUATION:
+h = (beta/lambda)*(t/lambda)^(beta-1)
+
+DEFINITION:
+Event = {type=event,  hazard=h}
+
+
+OUTPUT:
+output = Event

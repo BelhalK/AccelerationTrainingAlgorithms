@@ -1,0 +1,16 @@
+DESCRIPTION: RTTE with constant hazard function
+Repeated interval censored and right censored events
+
+[LONGITUDINAL]
+input = Te  
+
+DEFINITION:
+Event = {type=event, 
+              hazard=1/Te,
+              eventType=intervalCensored, 
+              intervalLength=5,     ; used for the graphics (not mandatory)
+              rightCensoringTime=200  ; used for the graphics (not mandatory)
+}
+
+
+

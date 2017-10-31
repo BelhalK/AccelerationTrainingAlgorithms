@@ -1,0 +1,20 @@
+[INDIVIDUAL]
+input = {lambda_pop, omega_lambda, beta_pop, omega_beta}
+
+DEFINITION:
+lambda = {distribution=lognormal, typical=lambda_pop, sd=omega_lambda}
+beta = {distribution=lognormal, typical=beta_pop, sd=omega_beta}
+
+[LONGITUDINAL]
+input = {lambda, beta}  
+
+EQUATION:
+h = (beta/lambda)*(t/lambda)^(beta-1)
+
+DEFINITION:
+Event = {type=event,  hazard=h}
+
+
+OUTPUT:
+output = Event
+

@@ -21,8 +21,8 @@ beta  ={distribution=lognormal, prediction=beta_pop,  sd=o_beta}
      ")
 
 
-p <- c(lambda_pop=5, o_lambda=0.5,
-       beta_pop = 2,o_beta = 0.1)
+p <- c(lambda_pop=1, o_lambda=1,
+       beta_pop = 2,o_beta = 1)
 h <- list(name='h', time=seq(0, 6, by=1))
 e <- list(name='e', time=0)
 
@@ -39,3 +39,10 @@ print(res$e)
 
 writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte1.csv")
 head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/timetoevent/rtte1.csv", header=T, sep=","))
+
+
+# library(mlxR)
+# theme_set(theme_bw())
+
+# project.file <- 'rtteWeibull_project.mlxtran'
+# monolix2simulx(project = project.file)

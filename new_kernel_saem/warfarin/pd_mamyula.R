@@ -71,9 +71,12 @@ PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
+
+PD2.saemix <- PD2.saemix[1:168,]
 saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
+
 
 
 modelemax<-function(psi,id,xidep) {
@@ -104,11 +107,16 @@ K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
+end = K1+K2
+
 seed0 = 39546
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0,0,0), nbiter.saemix = c(K1,K2))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
 theo_ref <- cbind(iterations, theo_ref)
+
+theo_ref[end,]
+
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
 options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
@@ -126,14 +134,14 @@ graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 
 
-replicate = 5
+replicate = 15
 seed0 = 395246
 
 #RWM
 final_rwm <- 0
 for (j in 1:replicate){
   print(j)
-  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,0,0,0), nbiter.saemix = c(K1,K2))
+  options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
   theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
@@ -151,6 +159,15 @@ final_rwm5 <- final_rwm[c(9,1,6)]
 final_rwm6 <- final_rwm[c(9,1,7)]
 final_rwm7 <- final_rwm[c(9,1,8)]
 # prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+final_mix <- 0
+for (j in 1:replicate){
+  print(j)
+  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+  theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix['individual'] <- j
+  final_mix <- rbind(final_mix,theo_mix)
+}
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
@@ -196,7 +213,7 @@ labels <- c("ref","new")
 plot.S1 <- plot.prediction.intervals(final1[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S <- plot.S1  + ylab("ka")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 # print(plot.S1)
 
@@ -217,7 +234,7 @@ labels <- c("ref","new")
 plot.S2 <- plot.prediction.intervals(final2[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S2 <- plot.S2  + ylab("V")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -236,7 +253,7 @@ labels <- c("ref","new")
 plot.S3 <- plot.prediction.intervals(final3[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S3 <- plot.S3  + ylab("k")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -257,7 +274,7 @@ labels <- c("ref","new")
 plot.S4 <- plot.prediction.intervals(final4[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S4 <- plot.S4  + ylab("w2ka")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -276,7 +293,7 @@ labels <- c("ref","new")
 plot.S5 <- plot.prediction.intervals(final5[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S5 <- plot.S5  + ylab("w2V")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -296,7 +313,7 @@ labels <- c("ref","new")
 plot.S6 <- plot.prediction.intervals(final6[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S6 <- plot.S6  + ylab("w2k")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 
@@ -316,7 +333,7 @@ labels <- c("ref","new")
 plot.S7 <- plot.prediction.intervals(final7[c(1,4,2,3)], 
                                     labels       = labels, 
                                     legend.title = "algos",
-                                    colors       = c('#01b7a5', '#c17b01'))
+                                    colors       = c('red', 'blue'))
 plot.S7 <- plot.S7  + ylab("a")+ theme(legend.position=c(0.9,0.8))+ theme_bw()
 
 

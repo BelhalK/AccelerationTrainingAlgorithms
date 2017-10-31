@@ -1,0 +1,3 @@
+        ; parameter
+  Te_pop;  40.19839
+omega_Te;   0.27433

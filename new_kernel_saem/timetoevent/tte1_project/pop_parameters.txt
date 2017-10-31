@@ -1,0 +1,18 @@
+******************************************************************
+*      tte1_project.mlxtran
+*      June 01, 2017 at 12:40:33
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+           parameter 
+Te_pop   :    40.2   
+
+omega_Te :   0.274   
+
+
+Population parameters estimation...
+
+Elapsed time is 7.92 seconds. 
+CPU time is 19.7 seconds. 

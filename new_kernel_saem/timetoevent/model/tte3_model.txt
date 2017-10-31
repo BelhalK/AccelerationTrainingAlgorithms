@@ -1,0 +1,13 @@
+DESCRIPTION: RTTE with constant hazard function
+Repeated events
+
+[LONGITUDINAL]
+input = Te  
+
+DEFINITION:
+Event = {type=event, 
+              hazard=1/Te, 
+              rightCensoringTime=200  ; used for the graphics (not mandatory)
+}
+
+

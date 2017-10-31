@@ -1,0 +1,60 @@
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/rtteCount_data.txt'
+delimiter = tab
+header = {ID, TIME, Event, prev_T}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Event = {use=observation, name=Event, ytype=1, type=discrete}
+prev_T = {use=regressor}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {lambda_pop, omega_lambda, beta_pop, omega_beta}
+
+DEFINITION:
+lambda = {distribution=lognormal, typical=lambda_pop, sd=omega_lambda}
+beta = {distribution=lognormal, typical=beta_pop, sd=omega_beta}
+
+[LONGITUDINAL]
+file = 'model/rtteWeibullCount_model.txt'
+
+<FIT>
+data = Event
+model = Event
+
+<PARAMETER>
+lambda_pop = {value=100, method=MLE}
+omega_lambda = {value=1, method=MLE}
+beta_pop = {value=1, method=MLE}
+omega_beta = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+plotResult()
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'rtteWeibullCount_project'
+autochains = no
+
+POPULATION:
+omegatau = 0.98
+kdisp = 10
+
+LL:
+fixedsimulations = 10000
+optimizedsimulations = 1000
+tdof_opt = {2, 5, 10, 20}
+
+REPORTING:
+knpde = 50
+kvpc = 20
+

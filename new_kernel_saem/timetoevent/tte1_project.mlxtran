@@ -1,0 +1,48 @@
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/tte1_data.txt'
+delimiter = space
+header = {ID, TIME, Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=Event, ytype=1, type=event}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Te_pop, omega_Te}
+
+DEFINITION:
+Te = {distribution=lognormal, typical=Te_pop, sd=omega_Te}
+
+[LONGITUDINAL]
+file = 'model/tte1_model.txt'
+
+<FIT>
+data = Event
+model = Event
+
+<PARAMETER>
+Te_pop = {value=100, method=MLE}
+omega_Te = {value=0.5, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+plotResult()
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'tte1_project'
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+exploratoryiterations = 300
+mixturesinitbeta = 1
+

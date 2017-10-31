@@ -61,7 +61,7 @@ for (i in 1:length(unique(timetoevent.saemix$id))) {
   }
 
 saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y","nb"), name.X=c("time"))
-# write.table(timetoevent.saemix[,1:3],"rtte.txt",sep=",",row.names=FALSE)
+
 
 
 timetoevent.model<-function(psi,id,xidep) {
@@ -105,7 +105,7 @@ iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0))
 theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
