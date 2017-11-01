@@ -119,22 +119,22 @@ theo_ref[end,]
 
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,6,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
-graphConvMC_twokernels(theo_ref,theo_mamyula, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
+graphConvMC_threekernels(theo_ref,theo_mamyula,theo_mamyula, title="new kernel")
 
 
-replicate = 15
+replicate = 30
 seed0 = 395246
 
 #RWM
@@ -159,15 +159,15 @@ final_rwm5 <- final_rwm[c(9,1,6)]
 final_rwm6 <- final_rwm[c(9,1,7)]
 final_rwm7 <- final_rwm[c(9,1,8)]
 # prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
-final_mix <- 0
-for (j in 1:replicate){
-  print(j)
-  options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(1,0,0,5,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
-  theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
-  theo_mix <- cbind(iterations, theo_mix)
-  theo_mix['individual'] <- j
-  final_mix <- rbind(final_mix,theo_mix)
-}
+# final_mix <- 0
+# for (j in 1:replicate){
+#   print(j)
+#   options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+#   theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+#   theo_mix <- cbind(iterations, theo_mix)
+#   theo_mix['individual'] <- j
+#   final_mix <- rbind(final_mix,theo_mix)
+# }
 
 #mix (RWM and MAP new kernel for liste of saem iterations)
 final_mix <- 0
