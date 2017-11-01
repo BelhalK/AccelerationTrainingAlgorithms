@@ -112,14 +112,15 @@ theo_ref <- cbind(iterations, theo_ref)
 # graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(6,0,0,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:150))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
 cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
 # graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
 
-
+seed0 = 39546
+replicate = 10
 final_rwm <- 0
 for (j in 1:replicate){
   print(j)
@@ -143,8 +144,8 @@ final_rwm4 <- final_rwm[c(6,1,5)]
 final_mix <- 0
 for (j in 1:replicate){
   print(j)
-  options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 20, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=c(1:3))
-  theo_mix<-data.frame(saemix_new(saemix.model,saemix.data,options.mix))
+  options.mix<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10))
+  theo_mix<-data.frame(saemix_time(saemix.model,saemix.data,options.mix))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)

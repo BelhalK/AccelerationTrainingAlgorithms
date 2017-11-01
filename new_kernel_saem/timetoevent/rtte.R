@@ -98,7 +98,7 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE))
 
 
-K1 = 200
+K1 = 100
 K2 = 50
 
 iterations = 1:(K1+K2+1)
@@ -118,6 +118,7 @@ cat_saem <- cbind(iterations, cat_saem)
 
 # graphConvMC_saem(cat_saem, title="new kernel")
 graphConvMC2_saem(theo_ref,cat_saem, title="new kernel")
+
 
 seed0 = 39546
 replicate = 30
@@ -301,7 +302,7 @@ plot.S4 <- plot.S4  + ylab("w2_beta")+ theme(legend.position=c(0.9,0.8))+ theme_
 
 
 
-grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=3)
+grid.arrange(plot.S, plot.S2,plot.S3,plot.S4,ncol=2)
 
 
 #values table
@@ -313,13 +314,12 @@ error_rwm <- 0
 lambda_true =  10
 beta_true = 5
 
-
 o_lambda =  0.3^2
 o_beta = 0.3^2
 
 
-
 true_param <- c(lambda_true,beta_true,o_lambda,o_beta)
+
 for (j in 1:replicate){
   sample_mean_rwm <- sample_mean_rwm + colMeans(final_rwm[(j*K1):(j*(K1+K2)),c(2,3,4,5)])
 }
