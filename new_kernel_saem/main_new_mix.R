@@ -74,7 +74,7 @@
 #' 
 #' 
 #' @export saemix
-saemix_new<-function(model,data,control=list()) {
+saemix_new_mix<-function(model,data,control=list()) {
 library("mlxR")
 
 # Convergence plots during fit (special function, not user-level)
@@ -194,7 +194,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
 	# E-step
-  xmcmc<-estep_new2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  xmcmc<-estep_mix(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
@@ -204,7 +204,6 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    
   	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
   	varList<-xstoch$varList
   	mean.phi<-xstoch$mean.phi

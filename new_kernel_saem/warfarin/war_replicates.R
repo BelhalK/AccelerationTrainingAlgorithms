@@ -165,6 +165,14 @@ options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
+
+
+
+options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2),map.range=c(1:3))
+theo_new_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iterations, theo_new_ref)
+
+
 graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
 
 

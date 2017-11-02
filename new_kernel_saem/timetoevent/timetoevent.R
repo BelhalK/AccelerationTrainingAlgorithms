@@ -96,17 +96,10 @@ ind <- setdiff(1:Nj, append(init,cens))
 hazard <- lambda
 H <- lambda*T
 
-logpdf <- vector(length= Nj)
+logpdf <- rep(0,Nj)
+logpdf[cens] <- -H[cens] + H[cens-1]
+logpdf[ind] <- -H[ind] + H[ind-1] + log(hazard[ind])
 
-for (j in (1:Nj)) {
-  if (j %in% cens){
-    logpdf[j] <- -H[j] + H[j-1]
-  } else if(j %in% init){
-    logpdf[j] <- 0
-  } else {
-    logpdf[j] <- -H[j] + H[j-1] + log(hazard[j])
-  }
-}
 return(logpdf)
 }
 

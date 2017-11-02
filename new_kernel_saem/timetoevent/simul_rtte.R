@@ -10,8 +10,9 @@ h=(beta/lambda)*(t/lambda)^(beta-1)
 
 DEFINITION:
 e = {type               = event, 
-     rightCensoringTime = 6,  
+     rightCensoringTime = 20,  
      hazard             = h}
+
 [INDIVIDUAL]
 input={lambda_pop, o_lambda,beta_pop, o_beta}
                       
@@ -21,9 +22,9 @@ beta  ={distribution=lognormal, prediction=beta_pop,  sd=o_beta}
      ")
 
 
-p <- c(lambda_pop=1, o_lambda=1,
-       beta_pop = 2,o_beta = 1)
-h <- list(name='h', time=seq(0, 6, by=1))
+p <- c(lambda_pop=10, o_lambda=0.3,
+       beta_pop = 5,o_beta = 0.3)
+h <- list(name='h', time=seq(0, 20, by=1))
 e <- list(name='e', time=0)
 
 N <- 10

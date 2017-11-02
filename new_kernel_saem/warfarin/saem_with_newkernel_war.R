@@ -32,6 +32,7 @@ source('main_new.R')
 source('main_estep_new.R')
 source('main_estep_new2.R')
 source('main_gd.R')
+source('main_new_mix.R')
 source('main_estep_gd.R')
 source('main_estep_newkernel.R')
 source('main_gd_mix.R')
@@ -174,25 +175,32 @@ saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 K1 = 300
-K2 = 50
+K2 = 300
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
 
 #RWM
-options<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2))
+options<-list(seed=395246,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix_new(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 theo_ref[end,]
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #ref (map always)
-options.new<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
+options.new<-list(seed=395246,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(0,0,0,6),nbiter.saemix = c(K1,K2))
 theo_new_ref<-data.frame(saemix_new(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 
-graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
+
+
 theo_new_ref[end,]
 
+
+options.new<-list(seed=395246,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(0,0,0,6,0),nbiter.saemix = c(K1,K2),map.range=c(1:10,seq(20,K1,by=10)))
+theo_new_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.new))
+theo_new_ref <- cbind(iterations, theo_new_ref)
+
+graphConvMC_twokernels(theo_ref,theo_new_ref, title="new kernel")
 #mix (RWM and MAP new kernel for liste of saem iterations)
 # options.mix<-list(seed=395246,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,4,0),nbiter.saemix = c(K1,K2),step.gd=gd_step,map.range=3)
 # theo_mix<-data.frame(saemix_gd_mix(saemix.model,saemix.data,options.mix))
@@ -200,8 +208,6 @@ theo_new_ref[end,]
 
 
 #RWM vs always MAP (ref)
-
-
 
 replicate = 5
 seed0 = 395246

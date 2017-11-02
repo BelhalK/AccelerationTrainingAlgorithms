@@ -159,6 +159,8 @@ final_rwm5 <- final_rwm[c(9,1,6)]
 final_rwm6 <- final_rwm[c(9,1,7)]
 final_rwm7 <- final_rwm[c(9,1,8)]
 # prctilemlx(final_rwm1[-1,],band = list(number = 8, level = 80)) + ggtitle("RWM")
+
+
 # final_mix <- 0
 # for (j in 1:replicate){
 #   print(j)

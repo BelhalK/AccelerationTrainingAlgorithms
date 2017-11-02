@@ -5,18 +5,18 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 	# Output: varList, DYF, phiM (changed)
 	
 	# Function to perform MCMC simulation
-
-	nb.etas<-length(varList$ind.eta)
+nb.etas<-length(varList$ind.eta)
 	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
 	omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]
 	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
 	saemix.options<-saemixObject["options"]
+	
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
-	Uargs$nchains = 1
+	# Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
@@ -31,9 +31,14 @@ estep_mix<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLis
 		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
 	}
 
-	# browser()
+
+
+	
+	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
+	
 	# etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-	etaM <- phiM - mean.phiM
+
+	# etaM <- phiM - mean.phiM
 	phiMc<-phiM
 	# map_range <- c(1:3)
 	map_range <- saemix.options$map.range
