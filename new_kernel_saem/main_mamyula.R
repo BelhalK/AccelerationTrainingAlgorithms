@@ -40,14 +40,14 @@
 #'    units=list(x="hr",y="mg/L", covariates=c("kg","-")), name.X="Time")
 #' 
 #' model1cpt<-function(psi,id,xidep) { 
-#' 	  dose<-xidep[,1]
-#' 	  tim<-xidep[,2]  
-#' 	  ka<-psi[id,1]
-#' 	  V<-psi[id,2]
-#' 	  CL<-psi[id,3]
-#' 	  k<-CL/V
-#' 	  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-#' 	  return(ypred)
+#'    dose<-xidep[,1]
+#'    tim<-xidep[,2]  
+#'    ka<-psi[id,1]
+#'    V<-psi[id,2]
+#'    CL<-psi[id,3]
+#'    k<-CL/V
+#'    ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+#'    return(ypred)
 #' }
 #' 
 #' saemix.model<-saemixModel(model=model1cpt,
@@ -101,7 +101,7 @@ saemix_mamyula<-function(model,data,control=list()) {
   }
 
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
-  browser()
+  
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
   opt.warn<-getOption("warn")
 
@@ -146,11 +146,11 @@ saemix_mamyula<-function(model,data,control=list()) {
   allpar[1,]<-xinit$allpar0
   
   # using several Markov chains - only useful if passed back to main routine...
-  # 	chdat<-new(Class="SaemixRepData",data=saemix.data, nb.chains=saemix.options$nb.chains)
-  # 	NM<-chdat["NM"]
-  # 	IdM<-chdat["dataM"]$IdM
-  # 	yM<-chdat["dataM"]$yM
-  # 	XM<-chdat["dataM"][,saemix.data["name.predictors"],drop=FALSE]
+  #   chdat<-new(Class="SaemixRepData",data=saemix.data, nb.chains=saemix.options$nb.chains)
+  #   NM<-chdat["NM"]
+  #   IdM<-chdat["dataM"]$IdM
+  #   yM<-chdat["dataM"]$yM
+  #   XM<-chdat["dataM"][,saemix.data["name.predictors"],drop=FALSE]
   
 # List of sufficient statistics - change during call to stochasticApprox
   suffStat<-list(statphi1=0,statphi2=0,statphi3=0,statrese=0)
@@ -169,26 +169,26 @@ print(date())
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 print(kiter)
 # SAEM convergence plots
-	if(kiter%%saemix.options$nbdisplay==0) {
+  if(kiter%%saemix.options$nbdisplay==0) {
     cat(".")
     if(saemix.options$displayProgress)    
       try(convplot.infit(allpar,saemix.options$nbiter.saemix[1],niter=(kiter-2)))
   }
 # Burn-in - resetting sufficient statistics
   if(opt$flag.fmin && kiter==saemix.options$nbiter.sa) {
-  	Uargs$COV1<-Uargs$COV[,Uargs$ind.fix11]
-  	ind.prov<-!(varList$ind.eta %in% Uargs$i0.omega2)
-  	varList$domega2<-varList$domega2[ind.prov,ind.prov,drop=FALSE] # keep in domega2 only indices of parameters with IIV
-  	varList$ind0.eta<-Uargs$i0.omega2
-  	varList$ind.eta<-1:(Uargs$nb.parameters)  	
-  	if(length(varList$ind0.eta)>0) varList$ind.eta<-varList$ind.eta[!(varList$ind.eta %in% varList$ind0.eta)] # update ind.eta, now only parameters with IIV
-  	Uargs$nb.etas<-length(varList$ind.eta)
-  	suffStat$statphi1<-0
-  	suffStat$statphi2<-0
-  	suffStat$statphi3<-0
+    Uargs$COV1<-Uargs$COV[,Uargs$ind.fix11]
+    ind.prov<-!(varList$ind.eta %in% Uargs$i0.omega2)
+    varList$domega2<-varList$domega2[ind.prov,ind.prov,drop=FALSE] # keep in domega2 only indices of parameters with IIV
+    varList$ind0.eta<-Uargs$i0.omega2
+    varList$ind.eta<-1:(Uargs$nb.parameters)    
+    if(length(varList$ind0.eta)>0) varList$ind.eta<-varList$ind.eta[!(varList$ind.eta %in% varList$ind0.eta)] # update ind.eta, now only parameters with IIV
+    Uargs$nb.etas<-length(varList$ind.eta)
+    suffStat$statphi1<-0
+    suffStat$statphi2<-0
+    suffStat$statphi3<-0
   }
 
-	# E-step
+  # E-step
   xmcmc<-estep_mala(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
@@ -199,21 +199,21 @@ print(kiter)
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
-  	varList<-xstoch$varList
-  	mean.phi<-xstoch$mean.phi
-  	phi<-xstoch$phi
-  	betas<-xstoch$betas
-  	suffStat<-xstoch$suffStat
-  	
-  	beta.I<-betas[Uargs$indx.betaI]
-  	fixed.psi<-transphi(matrix(beta.I,nrow=1),saemix.model["transform.par"])
-  	betaC<-betas[Uargs$indx.betaC]
-  	var.eta<-mydiag(varList$omega)
-  	l1<-betas.ini
-  	l1[Uargs$indx.betaI]<-fixed.psi
-  	l1[Uargs$indx.betaC]<-betaC
-  	allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+    xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
+    varList<-xstoch$varList
+    mean.phi<-xstoch$mean.phi
+    phi<-xstoch$phi
+    betas<-xstoch$betas
+    suffStat<-xstoch$suffStat
+    
+    beta.I<-betas[Uargs$indx.betaI]
+    fixed.psi<-transphi(matrix(beta.I,nrow=1),saemix.model["transform.par"])
+    betaC<-betas[Uargs$indx.betaC]
+    var.eta<-mydiag(varList$omega)
+    l1<-betas.ini
+    l1[Uargs$indx.betaI]<-fixed.psi
+    l1[Uargs$indx.betaC]<-betaC
+    allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
   } else { #end of loop on if (stepsize[kiter]>0)
     allpar[(kiter+1),]<-allpar[kiter,]
   }

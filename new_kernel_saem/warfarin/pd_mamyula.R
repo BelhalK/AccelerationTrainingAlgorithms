@@ -134,7 +134,7 @@ graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mamyula,theo_mamyula, title="new kernel")
 
 
-replicate = 30
+replicate = 10
 seed0 = 395246
 
 #RWM

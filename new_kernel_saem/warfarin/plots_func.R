@@ -6,7 +6,7 @@ require(reshape2)
 
 plots_init <- function(df, title=NULL, ylim=NULL)
 {
-  G <- (ncol(df)-2)/3
+  G <- (ncol(df)-1)/3
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
