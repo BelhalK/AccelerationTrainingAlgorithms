@@ -65,42 +65,46 @@ library(lattice)
 
 
 
-library(saemix)
-PD1.saemix<-read.table( "data/PD1.saemix.tab",header=T,na=".")
-PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
-saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
-name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
-units=list(x="mg",y="-",covariates="-"))
+data(cow.saemix)
 
-PD2.saemix <- PD2.saemix[1:168,]
-# PD2.saemix <- PD2.saemix[1:128,]
-saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
-name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
-units=list(x="mg",y="-",covariates="-"))
+# cow.saemix <- cow.saemix[1:594,]
+saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,name.group=c("cow"), 
+  name.predictors=c("time"),name.response=c("weight"), 
+  name.covariates=c("birthyear","twin","birthrank"), 
+  units=list(x="days",y="kg",covariates=c("yr","-","-")))
 
 
+# setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/cow")
+# cow.saemix<-read.table( "cow_synth.csv",header=T,na=".",sep=",")
+# cow.saemix_less <- cow.saemix[1:10,1:3]
+# setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/mcmc_newkernel")
+# saemix.data<-saemixData(name.data=cow.saemix,header=TRUE,
+#   name.group=c("id"),name.predictors=c("time"),name.response=c("y"),
+#   units=list(x="yr",y="cm"))
 
-modelemax<-function(psi,id,xidep) {
+
+growthcow<-function(psi,id,xidep) {
 # input:
-# psi : matrix of parameters (3 columns, E0, Emax, EC50)
-# id : vector of indices
-# xidep : dependent variables (same nb of rows as length of id)
+#   psi : matrix of parameters (3 columns, a, b, k)
+#   id : vector of indices 
+#   xidep : dependent variables (same nb of rows as length of id)
 # returns:
-# a vector of predictions of length equal to length of id
-dose<-xidep[,1]
-e0<-psi[id,1]
-emax<-psi[id,2]
-e50<-psi[id,3]
-f<-e0+emax*dose/(e50+dose)
-return(f)
+#   a vector of predictions of length equal to length of id
+  x<-xidep[,1]
+  a<-psi[id,1]
+  b<-psi[id,2]
+  k<-psi[id,3]
+  f<-a*(1-b*exp(-k*x))
+  return(f)
 }
+saemix.model<-saemixModel(model=growthcow,
+  description="Exponential growth model", 
+  psi0=matrix(c(700,0.9,0.02,0,0,0),ncol=3,byrow=TRUE, 
+  dimnames=list(NULL,c("A","B","k"))),transform.par=c(1,1,1),fixed.estim=c(1,1,1), 
+  covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE), 
+  omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
-saemix.model<-saemixModel(model=modelemax,description="Emax model",
-psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
-dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
-covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
-fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
-byrow=TRUE),error.model="constant")
 
 
 K1 = 100
@@ -112,8 +116,8 @@ end = K1+K2
 
 seed0 = 39546
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,0), nbiter.saemix = c(K1,K2))
+theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 theo_ref[end,]
@@ -121,13 +125,13 @@ theo_ref[end,]
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
 options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
-theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
 options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
@@ -143,7 +147,7 @@ final_rwm <- 0
 for (j in 1:replicate){
   print(j)
   options<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
-  theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
+  theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- j
   final_rwm <- rbind(final_rwm,theo_ref)
@@ -166,7 +170,7 @@ final_rwm7 <- final_rwm[c(9,1,8)]
 # for (j in 1:replicate){
 #   print(j)
 #   options.mala<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
-#   theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+#   theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mala))
 #   theo_mix <- cbind(iterations, theo_mix)
 #   theo_mix['individual'] <- j
 #   final_mix <- rbind(final_mix,theo_mix)
@@ -177,7 +181,7 @@ final_mix <- 0
 for (j in 1:replicate){
   print(j)
   options.mamyula<-list(seed=j*seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,6,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
-  theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
+  theo_mix<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
   theo_mix <- cbind(iterations, theo_mix)
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
