@@ -180,7 +180,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
       try(convplot.infit(allpar,saemix.options$nbiter.saemix[1],niter=(kiter-2)))
   }
 # Burn-in - resetting sufficient statistics
-  if(opt$flag.fmin && kiter==saemix.options$nbiter.sa) {
+  if(opt$flag.fmin && kiter==0) {
   	Uargs$COV1<-Uargs$COV[,Uargs$ind.fix11]
   	ind.prov<-!(varList$ind.eta %in% Uargs$i0.omega2)
   	varList$domega2<-varList$domega2[ind.prov,ind.prov,drop=FALSE] # keep in domega2 only indices of parameters with IIV

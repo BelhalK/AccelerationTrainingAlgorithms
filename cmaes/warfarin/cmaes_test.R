@@ -1,4 +1,5 @@
-setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code/Dir")
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/cmaes/Dir")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -30,10 +31,12 @@ setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code/Dir")
   source('main_new_mix.R')
   source('main_estep_mix.R')
   
-setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code/")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/cmaes/")
 source("mixtureFunctions.R")
 
 
+library("rJava")
+library("rCMA")
 library("mlxR")
 library(sgd)
 library(gridExtra)
@@ -58,7 +61,7 @@ library(lattice)
 
 
 
-setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code/warfarin")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/cmaes/warfarin")
 # source('dataproc.R')
 # model 
 model<-"warfarin_project_model.txt"
@@ -151,11 +154,45 @@ end = K1+K2
 
 
 
-options.new<-list(seed=395246,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),map.range=c(1:10))
+options.new<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),map.range=c(1:3),nbiter.burn =0)
 theo_new_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.new))
 theo_new_ref <- cbind(iterations, theo_new_ref)
 theo_new_ref[end,]
 graphConvMC_twokernels(theo_new_ref,theo_new_ref, title="new kernel")
+
+optim_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.new))
+optim_ref <- cbind(iterations, optim_ref)
+
+graphConvMC_twokernels(optim_ref,theo_new_ref, title="new kernel")
+
+fitFunc <- function(x) { sum(x*x); }
+isFeasible <- function(x) { (sum(x) - length(x)) >= 0; }
+n = 2;
+cma <- cmaNew(propFile="CMAEvolutionStrategy.properties");
+cma <- cmaNew();
+cmaInit(cma,seed=42,dimension=n,initialX=1.5, initialStandardDeviations=0.2);
+res1 = cmaOptimDP(cma,fitFunc,iterPrint=30);
+
+cma <- cmaNew(propFile="CMAEvolutionStrategy.properties");
+cmaInit(cma,seed=42,dimension=n,initialX=1.5, initialStandardDeviations=0.2);
+res2 = cmaOptimDP(cma,fitFunc,isFeasible,iterPrint=30);
+fTarget =c(0,n);
+plot(res1$fitnessVec-fTarget[1],type="l",log="y",xlim=c(1,max(res1$nIter,res2$nIter))
+,xlab="Iteration",ylab="Distance to target fitness");
+lines(res2$fitnessVec-fTarget[2],col="red");
+legend("topright",legend=c("TR2","sphere"),lwd=rep(1,2),col=c("red","black"))
+str(res2);
+bestSolution=rCMA::c
+
+
+
+
+
+
+
+
+
+
 
 
 
