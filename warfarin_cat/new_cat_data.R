@@ -35,6 +35,9 @@ source('SaemixObject_cat.R')
 source('main_initialiseMainAlgo_cat.R') 
 source("mixtureFunctions.R")
 
+
+library("rJava")
+library("rCMA")
 library("mlxR")
 library("psych")
 library("coda")
@@ -117,7 +120,7 @@ seed0 = 444
 
 #RWM
 theo_ref <- NULL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0)
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -128,7 +131,7 @@ theo_ref[end,]
 
 #MAP then RWM
 cat_saem <- NULL
-options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:end),nbiter.sa=0)
+options.cat<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:10),nbiter.sa=0,nbiter.burn =0)
 cat_saem<-data.frame(saemix_cat2(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 cat_saem[end,]
