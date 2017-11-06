@@ -50,7 +50,7 @@ require(reshape2)
 # Doc
 data(yield.saemix)
 yield.saemix_less <- yield.saemix[1:22,]
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
+saemix.data<-saemixData(name.data=yield.saemix_less,header=TRUE,name.group=c("site"),
   name.predictors=c("dose"),name.response=c("yield"),
   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
   covariates=c("kg/ha")))

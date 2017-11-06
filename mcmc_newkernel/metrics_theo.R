@@ -66,7 +66,7 @@ saemix.model<-saemixModel(model=model1cpt,description="One-compartment model wit
 indiv = 1
 seed0 = 35
 replicate = 20
-iter_mcmc = 10000
+iter_mcmc = 100
 burn = 400
 
 

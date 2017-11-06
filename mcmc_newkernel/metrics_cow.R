@@ -44,7 +44,7 @@ require(reshape2)
 
 data(cow.saemix)
 # cow.saemix <- subset(cow.saemix, time!="1620" &time!="1260" &time!="900"&time!="720"&time!="540"&time!="1980")
-cow.saemix_less <- cow.saemix[,]
+cow.saemix_less <- cow.saemix[1001:1049,]
 saemix.data<-saemixData(name.data=cow.saemix_less,header=TRUE,name.group=c("cow"), 
   name.predictors=c("time"),name.response=c("weight"), 
   name.covariates=c("birthyear","twin","birthrank"), 

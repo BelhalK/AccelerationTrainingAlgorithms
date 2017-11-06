@@ -132,19 +132,58 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	if(opt$nbiter.mcmc[4]>0) {
 		print('stan')
+			for (i in 1:(nrow(phiM))) {
+				Nj <- length(Dargs$yobs[Dargs$IdM==i])
+				height <- Dargs$yobs[Dargs$IdM==i]
+				age <- Dargs$XM[Dargs$IdM==i,]
+				earn_dat <- list(N = Nj , #specify number of observations as a scalar
+				                    height = height, # data vector
+				                    age = age # data vector (predictor) 
+				                    )
 
-		# fit1 <- stan(model_code = earn_code, data = earn_dat,
-		#              warmup = 100,
-		#              iter = 1000, 
-		#              chains = 4)
-		# # extract posterior samples for each parameter
-		# fit1_samples = extract(fit1)
-		# str(fit1_samples)
-		# # subset just the betas
-		# betas = fit1_samples[[1]]
+				earn_code <- 'data {
+				  // First we declare all of our variables in the data block
+				  int<lower=0> N;// Number of observations
+				  vector[N] age; //Identify our predictor as a vector
+				  vector[N] height;  //Identify our outcome variable as a vector
+				}
+				parameters {
+				  vector[2] beta; //Our betas are a vector of length 2 (intercept and slope)
+				  real<lower=0> sigma; //error parameter
+				}
+				model {
+				  //Priors
+				  beta[1] ~ normal( 1 , .001); //intercept
+				  beta[2] ~ normal( 0 , 0.1 ); //slope
+				  sigma ~ uniform( 0 , 1 ); //error
+				  height ~ normal(beta[1] + beta[2] * age, sigma);
+				}'
+
+				browser()
+
+				fit1 <- stan(model_code = earn_code, data = earn_dat,
+				             warmup = 50,
+				             iter = 500, 
+				             chains = 4)
+				
+				fit1_samples = extract(fit1)
+				str(fit1_samples)
+				# subset just the betas
+				betas = fit1_samples[[1]]
+
+				phiM[i,]<-betas[end(betas)[1],]
+			}
+
+		
 	}
 	
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+	psiM<-transphi(phiM,Dargs$transform.par)
+	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
+	if(Dargs$error.model=="exponential")
+		fpred<-log(cutoff(fpred))
+	gpred<-error(fpred,varList$pres)
+	DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post))
 }

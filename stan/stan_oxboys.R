@@ -36,7 +36,13 @@ source("mixtureFunctions.R")
 source('main_estep_stan.R')
 source('main_stan.R')
 
+library(lme4)
+library(rstan)
+library(shinystan)#for great model viz
+library(ggplot2)#for great viz in general
+data(Penicillin)
 
+library(RColorBrewer)
 library("mlxR")
 library("psych")
 library("coda")
@@ -75,8 +81,8 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   error.model="constant")
 
 
-K1 = 300
-K2 = 100
+K1 = 10
+K2 = 2
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
@@ -90,7 +96,7 @@ ox_ref[end,]
 graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
 
 
-options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,2),nbiter.saemix = c(K1,K2),nbiter.burn =0)
+options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),nbiter.burn =0)
 ox_stan<-data.frame(saemix_stan(saemix.model,saemix.data,options.stan))
 ox_stan <- cbind(iterations, ox_stan)
 graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")

@@ -15,7 +15,7 @@ height = base_0 +slope_0*age + rnorm(100)
 
 dat = data.frame(age,height)
 
-qplot(age,height)+geom_smooth(method=lm,se=F)
+# qplot(age,height)+geom_smooth(method=lm,se=F)
 
 
 # Important annoying fact #1: STAN needs data as a list not a dataframe!!
@@ -47,8 +47,8 @@ model {
 
 
 fit1 <- stan(model_code = earn_code, data = earn_dat,
-             warmup = 100,
-             iter = 1000, 
+             warmup = 50,
+             iter = 400, 
              chains = 4)
 
 print(fit1)
