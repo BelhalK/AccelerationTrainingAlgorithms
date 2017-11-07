@@ -179,18 +179,19 @@ nb.etas<-length(varList$ind.eta)
 			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 			    phii<-saemixObject["results"]["phi"][i,]
 			    phi1<-phii[i1.omega2]
+			    browser()
 			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 				map2 <- phi1.opti$par
 
-			 #    cond<-function(phi1){
-				# 	conditional.distribution(phi1,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
-				# }
-			 #    cma <- cmaNew()
-				# cmaInit(cma,seed=395246,dimension=nb.etas,initialX=phii)
-				# res1 = cmaOptimDP(cma,cond,iterPrint=100);
-				# mapi <- res1$xMat[res1$nIter,]
-			 #    phi.map[i,i1.omega2]<-mapi
+			    cond<-function(phi1){
+					conditional.distribution(phi1,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
+				}
+			    cma <- cmaNew()
+				cmaInit(cma,seed=395246,dimension=nb.etas,initialX=phii)
+				res1 = cmaOptimDP(cma,cond,iterPrint=10);
+				mapi <- res1$xMat[res1$nIter,]
+			    phi.map[i,i1.omega2]<-mapi
 			    
 			  }
 			 }

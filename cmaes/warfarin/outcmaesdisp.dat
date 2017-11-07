@@ -662,3 +662,13 @@
 (3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Sat Nov 04 01:32:58 CET 2017)
 (3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Sat Nov 04 01:33:00 CET 2017)
  CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
+(3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Tue Nov 07 11:14:40 CET 2017)
+ CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
+(3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Tue Nov 07 13:06:38 CET 2017)
+ CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
+(3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Tue Nov 07 13:07:09 CET 2017)
+ CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
+(3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Tue Nov 07 13:22:12 CET 2017)
+ CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
+(3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Tue Nov 07 15:29:40 CET 2017)
+ CMA-ES warning: flat fitness landscape, consider reformulation of fitness, step-size increased
