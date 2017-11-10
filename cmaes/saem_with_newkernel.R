@@ -55,7 +55,8 @@ theo.saemix<-read.table("theo.saemix.tab",header=T,na=".")
 
 
 
-theo.saemix_less <- theo.saemix[1:120,]
+# theo.saemix_less <- theo.saemix[1:120,]
+theo.saemix_less <- theo.saemix
 # theo.saemix<-read.table("data/theo.saemix.tab",header=T,na=".")
 saemix.data<-saemixData(name.data=theo.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("Id"),name.predictors=c("Dose","Time"),name.response=c("Concentration"),name.covariates=c("Weight","Sex"),units=list(x="hr",y="mg/L",covariates=c("kg","-")), name.X="Time")
 

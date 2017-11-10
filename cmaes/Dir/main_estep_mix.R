@@ -26,9 +26,9 @@ nb.etas<-length(varList$ind.eta)
 	gpred<-error(fpred,varList$pres)
 	DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)^2+log(gpred)
 	U.y<-colSums(DYF)
-	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))
+	post <- list(matrix(nrow = opt$nbiter.mcmc[3],ncol = ncol(phiM)))
 	for (i in 1:(nrow(phiM))) {
-		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM) )
+		post[[i]] <- matrix(nrow = opt$nbiter.mcmc[3],ncol = ncol(phiM) )
 	}
 
 
@@ -123,10 +123,10 @@ nb.etas<-length(varList$ind.eta)
 				etaM[ind,]<-etaMc[ind,]
 
 
-				#        if(kiter<20 | (kiter>150 & kiter<170)) {
-				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
-				#        	print(head(etaMc))
-				#        }
+				
+				for (i in 1:(nrow(phiM))) {
+					post[[i]][u,] <- etaM[i,]
+				}
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
@@ -179,21 +179,21 @@ nb.etas<-length(varList$ind.eta)
 			    mean.phi1<-saemixObject["results"]["mean.phi"][i,i1.omega2]
 			    phii<-saemixObject["results"]["phi"][i,]
 			    phi1<-phii[i1.omega2]
-			    browser()
+			    
 			    phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"])
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 				map2 <- phi1.opti$par
-				a <- conditional.distribution(map2,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
-			    cond<-function(phi1){
-					conditional.distribution(phi1,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
-				}
-			    cma <- cmaNew()
-				cmaInit(cma,seed=395246,dimension=nb.etas,initialX=phii)
-				res1 = cmaOptimDP(cma,cond,iterPrint=10);
+				# a <- conditional.distribution(map2,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
+			 #    cond<-function(phi1){
+				# 	conditional.distribution(phi1,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
+				# }
+			 #    cma <- cmaNew()
+				# cmaInit(cma,seed=395246,dimension=nb.etas,initialX=phii)
+				# res1 = cmaOptimDP(cma,cond,iterPrint=10);
 				
-				mapi <- res1$xMat[res1$nIter,]
-				cma <- conditional.distribution(mapi,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
-			    phi.map[i,i1.omega2]<-mapi
+				# mapi <- res1$xMat[res1$nIter,]
+				# cma <- conditional.distribution(mapi,phii,idi,xi,yi,mean.phi1,i1.omega2,iomega.phi1,saemixObject["model"]["transform.par"],saemixObject["model"]["model"],saemixObject["results"]["respar"],saemixObject["model"]["error.model"])
+			 #    phi.map[i,i1.omega2]<-mapi
 			    
 			  }
 			 }
@@ -319,11 +319,8 @@ nb.etas<-length(varList$ind.eta)
 				nt2[vk2]<-nt2[vk2]+Dargs$NM
 
 
-				# #Or Use the output of VI as the posterior distrib we simulate from
-				# etaM[ind,]<-etaMc[ind,]
-				# for (i in 1:(nrow(phiM))) {
-				# 	post_vb[[i]][u,2:(ncol(post_vb[[i]]) - 1)] <- etaM[i,]
-				# }
+				#Or Use the output of VI as the posterior distrib we simulate from
+				
 
 			}
 		}
