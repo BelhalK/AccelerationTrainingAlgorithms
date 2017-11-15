@@ -47,9 +47,9 @@ model {
 
 
 fit1 <- stan(model_code = earn_code, data = earn_dat,
-             warmup = 50,
-             iter = 400, 
-             chains = 4)
+             warmup = 1,
+             iter = 3, 
+             chains = 1)
 
 print(fit1)
 

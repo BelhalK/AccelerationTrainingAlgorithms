@@ -136,7 +136,8 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				Nj <- length(Dargs$yobs[Dargs$IdM==i])
 				height <- Dargs$yobs[Dargs$IdM==i]
 				age <- Dargs$XM[Dargs$IdM==i,]
-				browser()
+
+				
 				earn_dat <- list(N = Nj , #specify number of observations as a scalar
 				                    height = height, # data vector
 				                    age = age # data vector (predictor) 
@@ -160,12 +161,12 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				  height ~ normal(beta[1] + beta[2] * age, sigma);
 				}'
 
-				browser()
+				# browser()
 
 				fit1 <- stan(model_code = earn_code, data = earn_dat,
-				             warmup = 50,
-				             iter = 500, 
-				             chains = 4)
+				             warmup = 1,
+				             iter = 3, 
+				             chains = 1)
 				
 				fit1_samples = extract(fit1)
 				str(fit1_samples)
