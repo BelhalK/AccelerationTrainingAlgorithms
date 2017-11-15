@@ -136,6 +136,7 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				Nj <- length(Dargs$yobs[Dargs$IdM==i])
 				height <- Dargs$yobs[Dargs$IdM==i]
 				age <- Dargs$XM[Dargs$IdM==i,]
+				browser()
 				earn_dat <- list(N = Nj , #specify number of observations as a scalar
 				                    height = height, # data vector
 				                    age = age # data vector (predictor) 

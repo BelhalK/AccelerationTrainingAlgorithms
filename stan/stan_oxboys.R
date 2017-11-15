@@ -75,6 +75,9 @@ growth.linear<-function(psi,id,xidep) {
   f<-base+slope*x
   return(f)
 }
+
+
+
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
