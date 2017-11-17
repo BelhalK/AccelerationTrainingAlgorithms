@@ -98,8 +98,25 @@ ox_ref <- cbind(iterations, ox_ref)
 ox_ref[end,]
 graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
 
+modelstan <- 'data {
+          // First we declare all of our variables in the data block
+          int<lower=0> N;// Number of observations
+          vector[N] age; //Identify our predictor as a vector
+          vector[N] height;  //Identify our outcome variable as a vector
+        }
+        parameters {
+          vector[2] beta; //Our betas are a vector of length 2 (intercept and slope)
+          real<lower=0> sigma; //error parameter
+        }
+        model {
+          //Priors
+          beta[1] ~ normal( 1 , .001); //intercept
+          beta[2] ~ normal( 0 , 0.1 ); //slope
+          sigma ~ uniform( 0 , 1 ); //error
+          height ~ normal(beta[1] + beta[2] * age, sigma);
+        }'
 
-options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),nbiter.burn =0)
+options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),nbiter.burn =0, modelstan = modelstan)
 ox_stan<-data.frame(saemix_stan(saemix.model,saemix.data,options.stan))
 ox_stan <- cbind(iterations, ox_stan)
 graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")

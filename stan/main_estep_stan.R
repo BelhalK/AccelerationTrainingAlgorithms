@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM) {
+estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -132,6 +132,8 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	if(opt$nbiter.mcmc[4]>0) {
 		print('stan')
+		saemix.options<-saemixObject["options"]
+		modelstan <- saemix.options$modelstan
 			for (i in 1:(nrow(phiM))) {
 				Nj <- length(Dargs$yobs[Dargs$IdM==i])
 				height <- Dargs$yobs[Dargs$IdM==i]
@@ -143,25 +145,8 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				                    age = age # data vector (predictor) 
 				                    )
 
-				earn_code <- 'data {
-				  // First we declare all of our variables in the data block
-				  int<lower=0> N;// Number of observations
-				  vector[N] age; //Identify our predictor as a vector
-				  vector[N] height;  //Identify our outcome variable as a vector
-				}
-				parameters {
-				  vector[2] beta; //Our betas are a vector of length 2 (intercept and slope)
-				  real<lower=0> sigma; //error parameter
-				}
-				model {
-				  //Priors
-				  beta[1] ~ normal( 1 , .001); //intercept
-				  beta[2] ~ normal( 0 , 0.1 ); //slope
-				  sigma ~ uniform( 0 , 1 ); //error
-				  height ~ normal(beta[1] + beta[2] * age, sigma);
-				}'
-
-				# browser()
+				earn_code<-modelstan
+				browser()
 
 				fit1 <- stan(model_code = earn_code, data = earn_dat,
 				             warmup = 1,
