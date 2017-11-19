@@ -75,7 +75,6 @@ library(gridExtra)
 library(grid)
 library(ggplot2)
 library(lattice)
-
 #####################################################################################
 # Theophylline
 
@@ -93,55 +92,100 @@ library(lattice)
 
 
 
-library(saemix)
-PD1.saemix<-read.table( "data/PD1.saemix.tab",header=T,na=".")
-PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
-saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
-name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
-units=list(x="mg",y="-",covariates="-"))
+setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code/warfarin")
+# source('dataproc.R')
+# model 
+model<-"warfarin_project_model.txt"
+# treatment
+trt <- read.table("treatment.txt", header = TRUE) 
 
-PD2.saemix <- PD2.saemix[1:168,]
-# PD2.saemix <- PD2.saemix[1:128,]
-saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
-name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
-units=list(x="mg",y="-",covariates="-"))
+# parameters 
+originalId<- read.table('originalId.txt', header=TRUE) 
+populationParameter<- read.vector('populationParameter.txt') 
+individualCovariate<- read.table('individualCovariate.txt', header = TRUE) 
+list.param <- list(populationParameter,individualCovariate)
+# output 
+name<-"y1"
+time<-read.table("output1.txt",header=TRUE)
+out1<-list(name=name,time=time) 
+name<-"y2"
+time<-read.table("output2.txt",header=TRUE)
+out2<-list(name=name,time=time) 
+out<-list(out1,out2)
+
+# call the simulator 
+res <- simulx(model=model,treatment=trt,parameter=list.param,output=out)
+# warfarin.saemix <- data(res)
+
+# writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv")
+# table <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/warfarin/war_synth.csv", header=T, sep=",")
+# table <- table[table$ytype==1,]
+
+# table[,5] <- 0
+
+warfarin.saemix <- res$y1
+warfarin.saemix["amount"] <- 0
+treat <- res$treatment
+treat["y1"] <- 0
+treat <- treat[c(1,2,4,3)]
+
+j <- 1
+l<-c()
 
 
-
-modelemax<-function(psi,id,xidep) {
-# input:
-# psi : matrix of parameters (3 columns, E0, Emax, EC50)
-# id : vector of indices
-# xidep : dependent variables (same nb of rows as length of id)
-# returns:
-# a vector of predictions of length equal to length of id
-dose<-xidep[,1]
-e0<-psi[id,1]
-emax<-psi[id,2]
-e50<-psi[id,3]
-f<-e0+emax*dose/(e50+dose)
-return(f)
+for (i in 1:241) {
+    
+    if(t(warfarin.saemix["id"])[i]==t(treat["id"])[j]){
+        print(rownames(warfarin.saemix[i,]))
+        l <- rbind(l,rownames(warfarin.saemix[i,]))
+        j<-j+1
+      }
 }
 
-saemix.model<-saemixModel(model=modelemax,description="Emax model",
-psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
-dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
-covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
-fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
-byrow=TRUE),error.model="constant")
+warfarin.saemix <- rbind(treat[1,], warfarin.saemix)
+warfarin.saemix[1:7,4] <- treat[1,4]
+j <- 2
+for (i in l[-1]){
+  warfarin.saemix[(as.numeric(i)+1):(as.numeric(i)+length(which(t(warfarin.saemix["id"]==j)))),4] <- treat[j,4]
+  warfarin.saemix <- rbind(warfarin.saemix[1:(as.numeric(i)-1),], treat[j,], warfarin.saemix[(as.numeric(i)+1):nrow(warfarin.saemix),])
+  j <- j +1
+}
+
+rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
+# warfarin.saemix <- table[c(1,2,3,5)]
+warfarin.saemix_less <- warfarin.saemix[,]
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem")
+model1cpt<-function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+  CL<-k*V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
+}
 
 
-K1 = 100
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="warfarin"
+  ,psi0=matrix(c(1,7,1),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
+
+
+saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+
+K1 = 300
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
-
 end = K1+K2
-
-seed0 = 39546
+seed0 = 395246
 #RWM
 options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
+theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 theo_ref[end,]
@@ -155,7 +199,7 @@ theo_mala <- cbind(iterations, theo_mala)
 
 #saem with mamyula
 options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 theo_ref[end,]
@@ -165,7 +209,7 @@ graphConvMC_twokernels(theo_ref,theo_mala, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mala,theo_mamyula, title="new kernel")
 graphConvMC_threekernels(theo_ref,theo_mamyula,theo_mamyula, title="new kernel")
 
-
+#First run on the same dataset
 
 replicate = 3
 
@@ -174,30 +218,20 @@ final_mix <- 0
 for (m in 1:replicate){
   print(m)
   print(m)
-  l = list(c(5,280,5,0,0,0),c(7,300,7,0,0,0),c(10,320,10,0,0,0),c(20,300,20,0,0,0))
+  l = list(c(1,5,1,0,0,0),c(0.8,4,0.8,0,0,0),c(1.2,3,1.2,0,0,0),c(1.4,6.6,1.4,0,0,0))
+  saemix.model<-saemixModel(model=model1cpt,description="warfarin"
+  ,psi0=matrix(l[[m]],ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1/m,0,0,0,1/m,0,0,0,1/m),ncol=3,byrow=TRUE))
 
-  saemix.model<-saemixModel(model=modelemax,description="Emax model",
-psi0=matrix(l[[m]],ncol=3,byrow=TRUE,
-dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
-covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
-fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
-byrow=TRUE),error.model="constant")
-
-
-  options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2),nbiter.burn =0)
-theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options))
+  options<-list(seed=seed0,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
+  theo_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- m
   final_rwm <- rbind(final_rwm,theo_ref[-1,])
 
-  options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2,nbiter.burn =0)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
-  theo_mix <- cbind(iterations, theo_mamyula)
+  options.new<-list(seed=seed0,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),map.range=c(1:10),nbiter.burn =0)
+  theo_new_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.new))
+  theo_mix <- cbind(iterations, theo_new_ref)
   theo_mix['individual'] <- m
   final_mix <- rbind(final_mix,theo_mix[-1,])
 }
-
-graphConvMC_diff2(final_rwm[,],final_mix[,], title="Diff intial param pd")
-graphConvMC_diff2(final_rwm[,c(1,3,4,9)],final_mix[,c(1,3,4,9)], title="Diff intial param pd")
-graphConvMC_diff2(final_rwm[,c(1,5,6,9)],final_mix[,c(1,5,6,9)], title="Diff intial param pd")
-
