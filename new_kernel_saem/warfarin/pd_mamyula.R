@@ -140,7 +140,7 @@ end = K1+K2
 
 seed0 = 39546
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0),displayProgress=FALSE, nbiter.saemix = c(K1,K2))
 theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
 theo_ref <- cbind(iterations, theo_ref)
 
@@ -148,13 +148,13 @@ theo_ref[end,]
 
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
 theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
@@ -184,13 +184,13 @@ fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
 
-  options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0), nbiter.saemix = c(K1,K2),nbiter.burn =0)
+  options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0),displayProgress=FALSE, nbiter.saemix = c(K1,K2),nbiter.burn =0)
 theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- m
   final_rwm <- rbind(final_rwm,theo_ref[-1,])
 
-  options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2,nbiter.burn =0)
+  options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2,nbiter.burn =0)
 theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
   theo_mix <- cbind(iterations, theo_mamyula)
   theo_mix['individual'] <- m
