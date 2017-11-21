@@ -10,3 +10,14 @@
 (3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Wed Nov 08 15:31:31 CET 2017)
 (3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Wed Nov 08 15:31:33 CET 2017)
 (3,7)-CMA-ES(mu_eff=2.3), Ver="0.99.40", dimension=3, 0 diagonal iter., randomSeed=395246 (Wed Nov 08 15:31:35 CET 2017)
+ CMA-ES error: dimensions do not match
+ CMA-ES error: dimensions do not match
+(2,4)-CMA-ES(mu_eff=1.6), Ver="0.99.40", dimension=1, 0 diagonal iter., randomSeed=395246 (Wed Nov 22 00:18:54 CET 2017)
+(2,4)-CMA-ES(mu_eff=1.6), Ver="0.99.40", dimension=1, 0 diagonal iter., randomSeed=395246 (Wed Nov 22 00:19:09 CET 2017)
+(2,4)-CMA-ES(mu_eff=1.6), Ver="0.99.40", dimension=1, 0 diagonal iter., randomSeed=395246 (Wed Nov 22 00:19:48 CET 2017)
+ CMA-ES warning: setting seed has no effect at this point
+ CMA-ES error: initial x cannot be set anymore
+ CMA-ES warning: setting seed has no effect at this point
+ CMA-ES error: initial x cannot be set anymore
+(2,4)-CMA-ES(mu_eff=1.6), Ver="0.99.40", dimension=1, 0 diagonal iter., randomSeed=395246 (Wed Nov 22 00:21:10 CET 2017)
+(2,4)-CMA-ES(mu_eff=1.6), Ver="0.99.40", dimension=1, 0 diagonal iter., randomSeed=395246 (Wed Nov 22 00:23:05 CET 2017)
