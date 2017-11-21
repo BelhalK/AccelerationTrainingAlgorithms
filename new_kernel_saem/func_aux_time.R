@@ -360,6 +360,17 @@ proximal.function<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model,pres
   return(Uy+1/(2*lambda)*norm(current_phi-phii,type=c("F"))^2)
 }
 
+
+proximal.function_time<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model,pres,err,lambda,current_phi) {
+  phii[idx]<-phi1
+  psii<-transphi(matrix(phii,nrow=1),trpar)
+  if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)
+  fi<-model(psii,idi,xi)
+  Uy <- sum(-fi)
+  dphi<-phi1-mphi
+  return(Uy+1/(2*lambda)*norm(current_phi-phii,type=c("F"))^2)
+}
+
 trnd.mlx<-function(v,n,m) {
   r<-rnorm(n*m)*sqrt(v/2/gammarnd.mlx(v/2,n,m))
   return(r=matrix(r,nrow=n,ncol=m))

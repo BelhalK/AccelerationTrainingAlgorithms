@@ -309,16 +309,16 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 		lambda<-saemix.options$lambda.val
 		for (u in 1:opt$nbiter.mcmc[5]) {
 			# print(u)
+
 			
 ##### find the prox of g (unique minimizer of a regularized g=p(y|z))
 			saemix.options<-saemixObject["options"]
 		  	saemix.model<-saemixObject["model"]
 		  	saemix.data<-saemixObject["data"]
-		  	saemix.options$map <- TRUE
+		  	
 		  	saemixObject["results"]["omega"] <- omega.eta
 		  	saemixObject["results"]["mean.phi"] <- mean.phi
 		  	saemixObject["results"]["phi"] <- phiM
-		  	saemixObject["results"]["respar"] <- varList$pres
 
 		  	i1.omega2<-saemixObject["model"]["indx.omega"]
 		    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
@@ -342,7 +342,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			    phii<-phiM
 			    phi1<-phii[i1.omega2]
 			    
-			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1,
+			    phi1.opti<-optim(par=phi1, fn=proximal.function_time, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1,
 			     trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], 
 			     pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],
 			     lambda=lambda,current_phi=phiM,,control = list(maxit =1))
@@ -447,7 +447,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 			    phii<-phiMc
 			    phi1<-phii[i1.omega2]
 
-			    phi1.opti<-optim(par=phi1, fn=proximal.function, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiMc,control = list(maxit =1))
+			    phi1.opti<-optim(par=phi1, fn=proximal.function_time, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],lambda=lambda,current_phi=phiMc,control = list(maxit =1))
 			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 			    phi.prox[i,i1.omega2]<-phi1.opti$par
 			  }

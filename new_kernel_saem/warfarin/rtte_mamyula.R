@@ -128,23 +128,23 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE))
 
 
-K1 = 400
-K2 = 300
+K1 = 200
+K2 = 100
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
 seed0 = 395246
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(0))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(0))
 theo_ref<-data.frame(saemix_time_mamyula(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 # graphConvMC_saem(theo_ref, title="new kernel")
 
 #ref (map always)
-options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2),nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
-cat_saem<-data.frame(saemix_time(saemix.model,saemix.data,options.cat))
+options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2),nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,sigma.val = 0.5,gamma.val=1,lambda.val=0.6)
+cat_saem<-data.frame(saemix_time_mamyula(saemix.model,saemix.data,options.cat))
 cat_saem <- cbind(iterations, cat_saem)
 
 # graphConvMC_saem(cat_saem, title="new kernel")
@@ -160,21 +160,21 @@ final_rwm <- 0
 final_mix <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(2,1.8),c(5,2.2),c(8,2),c(1.4,2.4))
+  l = list(c(2,1),c(2,1),c(2,1),c(1.4,2.4))
   saemix.model<-saemixModel(model=timetoevent.model,description="time model",   
   psi0=matrix(l[[m]],ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(1,1),omega.init=matrix(c(2/m,0,0,2/m),ncol=2, 
+  transform.par=c(1,1),omega.init=matrix(c(3/m,0,0,3/m),ncol=2, 
   byrow=TRUE))
 
-  options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE, map.range=c(0),nbiter.burn =0)
-  theo_ref<-data.frame(saemix_time(saemix.model,saemix.data,options))
+  options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(0))
+  theo_ref<-data.frame(saemix_time_mamyula(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   theo_ref['individual'] <- m
   final_rwm <- rbind(final_rwm,theo_ref[-1,])
 
-  options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:10),nbiter.burn =0)
-  theo_new_ref<-data.frame(saemix_time(saemix.model,saemix.data,options.new))
+  options.new<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2),nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,sigma.val = 0.5,gamma.val=01,lambda.val=0.6)
+  theo_new_ref<-data.frame(saemix_time_mamyula(saemix.model,saemix.data,options.new))
   theo_mix <- cbind(iterations, theo_new_ref)
   theo_mix['individual'] <- m
   final_mix <- rbind(final_mix,theo_mix[-1,])
