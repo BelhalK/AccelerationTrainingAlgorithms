@@ -4,27 +4,27 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset PD2.saemix 
+Dataset PD1.saemix 
     Structured data: response ~ dose | subject 
     Predictor: dose (mg) 
     covariates: gender (-) 
       reference class for covariate gender :  0 
 Dataset characteristics:
-    number of subjects:     56 
-    number of observations: 168 
+    number of subjects:     100 
+    number of observations: 300 
     average/min/max nb obs: 3.00  /  3  /  3 
 First 10 lines of data:
    subject dose response gender mdv cens occ ytype
-1        1    0  21.8124      1   0    0   1     1
-2        1   10  65.7807      1   0    0   1     1
-3        1   90 101.9230      1   0    0   1     1
-4        2    0  33.2081      1   0    0   1     1
-5        2   10  65.2646      1   0    0   1     1
-6        2   90  79.7890      1   0    0   1     1
-7        3    0  31.5014      1   0    0   1     1
-8        3   10  81.0744      1   0    0   1     1
-9        3   90 137.2720      1   0    0   1     1
-10       4    0  20.3392      1   0    0   1     1
+1        1    0  11.2870      1   0    0   1     1
+2        1   10  63.6114      1   0    0   1     1
+3        1   90 122.9170      1   0    0   1     1
+4        2    0  15.0514      1   0    0   1     1
+5        2   10  39.5296      1   0    0   1     1
+6        2   90  60.8522      1   0    0   1     1
+7        3    0  25.5390      1   0    0   1     1
+8        3   10  58.0035      1   0    0   1     1
+9        3   90  81.1173      1   0    0   1     1
+10       4    0  22.1446      1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -62,7 +62,7 @@ EC50  0    0    1
 gender    0    0    1
     Initial values
              E0 Emax EC50
-Pop.CondInit 20  300   20
+Pop.CondInit 12  320   20
 Cov.CondInit  0    0    0
 -----------------------------------
 ----    Key algorithm options  ----
@@ -84,18 +84,18 @@ Cov.CondInit  0    0    0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter         Estimate
-[1,] E0                21.66   
-[2,] Emax              95.88   
-[3,] EC50              13.59   
-[4,] beta_gender(EC50) -0.21   
-[5,] a                  5.11   
+[1,] E0                 23.53  
+[2,] Emax              105.66  
+[3,] EC50               11.17  
+[4,] beta_gender(EC50)   0.39  
+[5,] a                   4.67  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-E0   omega2.E0   0.2077  
-Emax omega2.Emax 0.2740  
-EC50 omega2.EC50 0.0018  
+E0   omega2.E0   0.130   
+Emax omega2.Emax 0.319   
+EC50 omega2.EC50 0.046   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

@@ -124,7 +124,7 @@ return(f)
 }
 
 saemix.model<-saemixModel(model=modelemax,description="Emax model",
-psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
+psi0=matrix(c(20,300,25,0,0,0),ncol=3,byrow=TRUE,
 dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
 covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
@@ -140,22 +140,22 @@ end = K1+K2
 
 seed0 = 39546
 #RWM
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0),displayProgress=FALSE, nbiter.saemix = c(K1,K2))
-theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0),displayProgress=FALSE, nbiter.saemix = c(K1,K2),nbiter.burn =0)
+theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 theo_ref[end,]
 
 graphConvMC_twokernels(theo_ref,theo_ref, title="new kernel")
 #saem with mala
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01)
-theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mala))
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,2,0,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.01,gamma.val=0.01,nbiter.burn =0)
+theo_mala<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mala))
 theo_mala <- cbind(iterations, theo_mala)
 
 
 #saem with mamyula
-options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2)
-theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data2,options.mamyula))
+options.mamyula<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2,nbiter.burn =0)
+theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
 theo_mamyula <- cbind(iterations, theo_mamyula)
 
 theo_ref[end,]
@@ -174,7 +174,7 @@ final_mix <- 0
 for (m in 1:replicate){
   print(m)
   print(m)
-  l = list(c(5,280,5,0,0,0),c(7,300,7,0,0,0),c(10,320,10,0,0,0),c(20,300,20,0,0,0))
+  l = list(c(15,280,15,0,0,0),c(25,300,25,0,0,0),c(20,320,20,0,0,0),c(20,300,20,0,0,0))
 
   saemix.model<-saemixModel(model=modelemax,description="Emax model",
 psi0=matrix(l[[m]],ncol=3,byrow=TRUE,
@@ -196,6 +196,8 @@ theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyul
   theo_mix['individual'] <- m
   final_mix <- rbind(final_mix,theo_mix[-1,])
 }
+
+
 
 graphConvMC_diff2(final_rwm[,],final_mix[,], title="Diff intial param pd")
 graphConvMC_diff2(final_rwm[,c(1,3,4,9)],final_mix[,c(1,3,4,9)], title="Diff intial param pd")
