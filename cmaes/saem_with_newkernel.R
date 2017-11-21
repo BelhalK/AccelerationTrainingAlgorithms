@@ -72,12 +72,24 @@ model1cpt<-function(psi,id,xidep) {
 }
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="One-compartment model with first-order absorption"
-  ,psi0=matrix(c(1.,20,0.5,0.1,0,-0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
+  ,covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),psi0=matrix(c(1.,20,0.5),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","CL"))),transform.par=c(1,1,1))
 
 K1 = 100
 K2 = 50
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
+
+options<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
+war_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options))
+war_ref <- cbind(iterations, war_ref)
+
+options.cma<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
+war_cma<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.cma))
+war_cma <- cbind(iterations, war_cma)
+
+
+graphConvMC_twokernels(war_ref,war_cma, title="new kernel")
+
 
 
 options.new<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),map.range=c(1:3),nbiter.burn =0)
