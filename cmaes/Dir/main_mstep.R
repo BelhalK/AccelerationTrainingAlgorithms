@@ -62,18 +62,12 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 				compute.Uy(b0,phiM,varList$pres,Uargs,Dargs,DYF)
 			}
 		    cma <- cmaNew()
-			
-			browser()
-			# cmaSetStopTolFun(cma, 0.0001)
-			cmaInit(cma,seed=395246,dimension=length(Uargs$ind.fix10),initialX=betas[Uargs$ind.fix10])
-			# cmaInit(cma,seed=395246,dimension=length(betas),initialX=betas)
-			# browser()
+			cmaSetStopTolFun(cma, 0.001)
+			# cmaInit(cma,seed=395246,dimension=length(betas[Uargs$ind.fix10]),initialX=betas[Uargs$ind.fix10])
+			cmaInit(cma,seed=395246,dimension=length(betas),initialX=betas)
 			res1 = cmaOptimDP(cma,logpy,iterPrint=50)
-			beta0 <- res1$xMat[res1$nIter,Uargs$ind.fix10]
-
-
-			compute.Uy(betas,phiM,varList$pres,Uargs,Dargs,DYF)
-
+			betainit <- res1$xMat[res1$nIter,Uargs$ind.fix10]
+			beta0<-optim(par=betainit,fn=compute.Uy,phiM=phiM,pres=varList$pres,args=Uargs,Dargs=Dargs,DYF=DYF,control=list(maxit=opt$maxim.maxiter))$par
 		} else {
 			beta0<-optim(par=betas[Uargs$ind.fix10],fn=compute.Uy,phiM=phiM,pres=varList$pres,args=Uargs,Dargs=Dargs,DYF=DYF,control=list(maxit=opt$maxim.maxiter))$par
 		}

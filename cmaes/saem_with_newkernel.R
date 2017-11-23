@@ -79,9 +79,11 @@ K2 = 10
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 
+
 options<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0,cma=0)
 war_ref<-data.frame(saemix_new_mix(saemix.model,saemix.data,options))
 war_ref <- cbind(iterations, war_ref)
+
 
 options.cma<-list(seed=395246,map=F,fim=F,ll.is=T,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0,cma=1)
 war_cma<-data.frame(saemix_new_mix(saemix.model,saemix.data,options.cma))
