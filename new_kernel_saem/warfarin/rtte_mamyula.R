@@ -63,12 +63,6 @@ source('main_time.R')
   source('SaemixObject_time.R') 
   source('main_initialiseMainAlgo_time.R') 
 
-main_time.R
-  main_estep_time.R
-  main_mstep_time.R 
-  func_aux_time.R 
-  SaemixObject_time.R 
-  main_initialiseMainAlgo_time.R 
 
 
 library("mlxR")
