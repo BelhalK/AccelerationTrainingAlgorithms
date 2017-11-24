@@ -20,11 +20,9 @@ estep_time_mamyula<-function(kiter, Uargs, Dargs, opt, structural.model, mean.ph
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
-	
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	DYF[Uargs$ind.ioM]<- -fpred
 	U.y<-colSums(DYF)
-
 	# U.y <- -fpred
 
 	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM)))

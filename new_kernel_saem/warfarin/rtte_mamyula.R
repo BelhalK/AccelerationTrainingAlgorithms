@@ -140,7 +140,7 @@ options<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,
 theo_ref<-data.frame(saemix_time_mamyula(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
-# graphConvMC_saem(theo_ref, title="new kernel")
+# graphConvMC2_saem(theo_ref,theo_ref, title="new kernel")
 
 #ref (map always)
 options.cat<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2),nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,sigma.val = 0.5,gamma.val=1,lambda.val=0.6)

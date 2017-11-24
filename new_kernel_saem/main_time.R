@@ -112,7 +112,6 @@ saemix_time_mamyula<-function(model,data,control=list()) {
   saemix.data@data<-saemix.data@data[saemix.data@data[,"mdv"]==0,]
   saemix.data@ntot.obs<-dim(saemix.data@data)[1]
 #  showall(saemixObject)
-
 # Initialising random generator
   OLDRAND<-TRUE
   set.seed(saemix.options$seed)
