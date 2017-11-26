@@ -62,7 +62,7 @@ EC50  0    0    1
 gender    0    0    1
     Initial values
              E0 Emax EC50
-Pop.CondInit 12  320   20
+Pop.CondInit 20  320   20
 Cov.CondInit  0    0    0
 -----------------------------------
 ----    Key algorithm options  ----
@@ -84,18 +84,18 @@ Cov.CondInit  0    0    0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter         Estimate
-[1,] E0                 23.53  
-[2,] Emax              105.66  
-[3,] EC50               11.17  
-[4,] beta_gender(EC50)   0.39  
+[1,] E0                 23.22  
+[2,] Emax              106.24  
+[3,] EC50               11.45  
+[4,] beta_gender(EC50)   0.35  
 [5,] a                   4.67  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-E0   omega2.E0   0.130   
-Emax omega2.Emax 0.319   
-EC50 omega2.EC50 0.046   
+E0   omega2.E0   0.121   
+Emax omega2.Emax 0.315   
+EC50 omega2.EC50 0.041   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

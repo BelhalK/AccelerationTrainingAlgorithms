@@ -101,18 +101,20 @@ library(lattice)
 
 library(saemix)
 PD1.saemix<-read.table( "data/PD1.saemix.tab",header=T,na=".")
-PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
 saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
 
+PD2.saemix<-read.table( "data/PD2.saemix.tab",header=T,na=".")
 PD2.saemix <- PD2.saemix[1:168,]
-# PD2.saemix <- PD2.saemix[1:128,]
 saemix.data2<-saemixData(name.data=PD2.saemix,header=TRUE,name.group=c("subject"),
 name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
 units=list(x="mg",y="-",covariates="-"))
 
-
+PD3.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/new_kernel_saem/pd1.csv", header=T, sep=",")
+saemix.data3<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
+name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
+units=list(x="mg",y="-",covariates="-"))
 
 modelemax<-function(psi,id,xidep) {
 # input:
@@ -205,7 +207,156 @@ theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyul
 
 
 
-graphConvMC_diff2(final_rwm[,],final_mix[,], title="Diff intial param pd")
-graphConvMC_diff2(final_rwm[,c(1,3,4,9)],final_mix[,c(1,3,4,9)], title="Diff intial param pd")
-graphConvMC_diff2(final_rwm[,c(1,5,6,9)],final_mix[,c(1,5,6,9)], title="Diff intial param pd")
+graphConvMC_diff2(final_rwm[,c(1,4,9)],final_mix[,c(1,4,9)], title="Diff intial param pd")
+
+
+
+
+graphConvMC_diff3 <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+      xlab("") +scale_x_log10()+ ylab("w2.V")  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=14, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=14, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=22)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+
+graphConvMC_diff4 <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+      xlab("") +scale_x_log10()+scale_y_continuous()+ ylab(names(df[j]))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=14, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=14, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=22)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+
+a <- graphConvMC_diff4(final_rwm[,c(1,4,9)],final_mix[,c(1,4,9)])
+b <- graphConvMC_diff3(final_rwm[,c(1,7,9)],final_mix[,c(1,7,9)])
+
+grid.arrange(a,b, ncol=2)
+
+#run on diff datasets to compute residual errors
+
+var_rwm <- 0
+error_rwm <- 0
+
+
+var_mix <- 0
+error_mix <- 0
+
+replicate = 40
+
+final_rwm <- 0
+final_mix <- 0
+
+replicate <- 40
+for (m in 1:replicate){
+  
+
+
+ saemix.model<-saemixModel(model=modelemax,description="Emax model",
+psi0=matrix(c(20,300,25,0,0,0),ncol=3,byrow=TRUE,
+dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
+covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
+fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
+byrow=TRUE),error.model="constant")
+
+
+saemix.data1<-saemixData(name.data=PD1.saemix,header=TRUE,name.group=c("subject"),
+name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
+units=list(x="mg",y="-",covariates="-"))
+
+
+
+
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,0,0,0,0,0),displayProgress=FALSE, nbiter.saemix = c(K1,K2),nbiter.burn =0)
+  theo_ref<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options))
+  theo_ref <- cbind(iterations, theo_ref)
+  # var_rwm <- var_rwm + (theo_ref[,2:8]-true_param)^2
+  ML <- theo_ref[,2:8]
+  ML[1:(end+1),]<- theo_ref[end+1,2:8]
+  error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
+  theo_ref['individual'] <- j
+  final_rwm <- rbind(final_rwm,theo_ref)
+  
+  
+  options.mamyula<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(0,0,0,0,2,0),displayProgress=FALSE,nbiter.saemix = c(K1,K2),sigma.val = 0.1,gamma.val=0.01,lambda.val=0.2,nbiter.burn =0)
+  print(m)
+  theo_mamyula<-data.frame(saemix_mamyula(saemix.model,saemix.data1,options.mamyula))
+  theo_mamyula <- cbind(iterations, theo_mamyula)
+  # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
+  ML <- theo_mix[,2:8]
+  ML[1:(end+1),]<- theo_mix[end+1,2:8]
+  error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
+  theo_mix['individual'] <- m
+  final_mix <- rbind(final_mix,theo_mix)
+}
+
+error_rwm <- 1/replicate*error_rwm
+error_mix <- 1/replicate*error_mix
+
+error_rwm <- cbind(iterations, error_rwm)
+error_mix <- cbind(iterations, error_mix)
+
+err_mix<- theo_ref
+err_rwm<- theo_ref
+err_rwm[,2:8] <- error_rwm[,2:8]
+err_mix[,2:8] <- error_mix[,2:8]
+
+err_mix[2,] = err_rwm[2,]
+
+
+# graphConvMC_diff(err_rwm[-1,],err_mix[-1,], title="Quadratic errors Warfa")
+# graphConvMC_diff2(err_rwm[-1,],err_mix[-1,], title="Quadratic errors Warfa")
+
+# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)])
+
+a <- err_rwm[-1,]
+b <- err_mix[-1,]
+# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)], title="Quadratic errors Warfa")
+
+# err_rwm[,2:8] <- sqrt(err_rwm[,2:8])
+# err_mix[,2:8] <- sqrt(err_mix[,2:8])
+
+# graphConvMC_diff2(a[,c(1,3,6,9)],b[,c(1,3,6,9)], title="Quadratic errors Warfa")
+# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)], title="Quadratic errors Warfa")
+
+# graphConvMC_diff2(a[,c(1,3,6,9)],b[,c(1,3,6,9)])
+
+c <- graphConvMC_diff3(a[,c(1,3,9)],b[,c(1,3,9)])
+d <- graphConvMC_diff3(a[,c(1,6,9)],b[,c(1,6,9)])
+
+grid.arrange(c,d, ncol=2)
 
