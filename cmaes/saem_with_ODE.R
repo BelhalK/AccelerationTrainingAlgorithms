@@ -97,5 +97,4 @@ saemix.model<-saemixModel(model=modelMM,
                           covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
                           omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),error.model="constant")
 
-saemix.fit<-saemix(saemix.model,saemix.data,list(seed=632545,directory="MichaelisMenten",
-                                                 save=FALSE,save.graphs=FALSE,map=FALSE,fim=FALSE,ll.is=FALSE))
+saemix.fit<-saemix(saemix.model,saemix.data,list(seed=632545,directory="MichaelisMenten",save=FALSE,save.graphs=FALSE,map=FALSE,fim=FALSE,ll.is=FALSE))

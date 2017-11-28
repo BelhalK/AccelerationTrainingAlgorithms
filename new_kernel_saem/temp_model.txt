@@ -1,19 +1,18 @@
 
                       [LONGITUDINAL]
-                      input = {ka, V, k,a}
+                      input = {e, em, ec,a}
 
-                      
                       EQUATION:
-                      Cc = Dose.*ka./(V.*(ka-k)).*(exp(-k.*Time)-exp(-ka.*Time));
+                      Cc = e+(em*t)/(ec+t)
                       
                       DEFINITION:
-                      y1 ={distribution=lognormal, prediction=Cc, sd=a}
+                      y1 ={distribution=normal, prediction=Cc, sd=a}
                       
                       [INDIVIDUAL]
-                      input={ka_pop,o_ka,V_pop,o_V,k_pop,o_k}
+                      input={e_pop,o_e,em_pop,o_em,ec_pop,o_ec}
                       
                       DEFINITION:
-                      ka  ={distribution=lognormal, prediction=ka_pop,  sd=o_ka}
-                      V   ={distribution=lognormal, prediction=V_pop,   sd=o_V}
-                      k  ={distribution=lognormal, prediction=k_pop,  sd=o_k}
+                      e   ={distribution=lognormal, prediction=e_pop,   sd=o_e}
+                      em   ={distribution=lognormal, prediction=em_pop,   sd=o_em}
+                      ec  ={distribution=lognormal, prediction=ec_pop,  sd=o_ec}
                       
