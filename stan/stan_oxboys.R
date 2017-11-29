@@ -84,13 +84,11 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   error.model="constant")
 
 
-K1 = 10
-K2 = 2
-iterations = 1:(K1+K2+1)
-gd_step = 0.01
-end = K1+K2
-
-
+# K1 = 10
+# K2 = 2
+# iterations = 1:(K1+K2+1)
+# gd_step = 0.01
+# end = K1+K2
 
 options.ref<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0),nbiter.saemix = c(K1,K2),nbiter.burn =0)
 ox_ref<-data.frame(saemix_stan(saemix.model,saemix.data,options.ref))
