@@ -205,7 +205,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
     
-  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
+  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject)
   	varList<-xstoch$varList
   	mean.phi<-xstoch$mean.phi
   	phi<-xstoch$phi

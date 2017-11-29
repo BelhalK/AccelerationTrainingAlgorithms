@@ -77,18 +77,16 @@ growth.linear<-function(psi,id,xidep) {
 }
 
 
-
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
-
-# K1 = 10
-# K2 = 2
-# iterations = 1:(K1+K2+1)
-# gd_step = 0.01
-# end = K1+K2
+K1 = 10
+K2 = 2
+iterations = 1:(K1+K2+1)
+gd_step = 0.01
+end = K1+K2
 
 options.ref<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0),nbiter.saemix = c(K1,K2),nbiter.burn =0)
 ox_ref<-data.frame(saemix_stan(saemix.model,saemix.data,options.ref))
@@ -99,6 +97,11 @@ graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
 modelstan <- 'data {
           // First we declare all of our variables in the data block
           int<lower=0> N;// Number of observations
+          real beta1_pop;
+          real beta2_pop;
+          real pres;
+          real omega.beta1;
+          real omega.beta2;
           vector[N] age; //Identify our predictor as a vector
           vector[N] height;  //Identify our outcome variable as a vector
         }
@@ -108,9 +111,9 @@ modelstan <- 'data {
         }
         model {
           //Priors
-          beta[1] ~ normal( 1 , .001); //intercept
-          beta[2] ~ normal( 0 , 0.1 ); //slope
-          sigma ~ uniform( 0 , 1 ); //error
+          beta[1] ~ normal( beta1_pop , omega.beta1); //intercept
+          beta[2] ~ normal( beta2_pop , omega.beta2 ); //slope
+          sigma ~ uniform( 0 , pres ); //error
           height ~ normal(beta[1] + beta[2] * age, sigma);
         }'
 

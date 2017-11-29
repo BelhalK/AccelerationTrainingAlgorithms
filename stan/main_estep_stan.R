@@ -133,21 +133,22 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	if(opt$nbiter.mcmc[4]>0) {
 		print('stan')
 		saemix.options<-saemixObject["options"]
+		earn_code<-saemix.options$modelstan
 			for (i in 1:(nrow(phiM))) {
-				earn_dat <- list(N = length(Dargs$yobs[Dargs$IdM==i]), height = Dargs$yobs[Dargs$IdM==i],age = Dargs$XM[Dargs$IdM==i,])
-				earn_code<-saemix.options$modelstan
-				fit1 <- stan(model_code = earn_code, data = earn_dat, warmup = 1, iter = 3, chains = 1)
+				browser()
+				earn_dat <- list(N = length(Dargs$yobs[Dargs$IdM==i]),
+								height = Dargs$yobs[Dargs$IdM==i],
+								age = Dargs$XM[Dargs$IdM==i,],
+								beta1_pop=phiM[i,1],beta2_pop=phiM[i,2],
+								pres=varList$pres[1],
+								omega.beta1=varList$domega2[1,1],omega.beta2=varList$domega2[2,2])
+				fit1 <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
 				fit1_samples = extract(fit1)
-				str(fit1_samples)
-				# subset just the betas
 				betas = fit1_samples[[1]]
 				phiM[i,]<-betas[end(betas)[1],]
-			}
-
-		
+			}		
 	}
 	
-
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	psiM<-transphi(phiM,Dargs$transform.par)
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
