@@ -142,9 +142,9 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 								beta1_pop=phiM[i,1],beta2_pop=phiM[i,2],
 								pres=varList$pres[1],
 								omega.beta1=varList$domega2[1,1],omega.beta2=varList$domega2[2,2])
-				fit1 <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
-				fit1_samples = extract(fit1)
-				betas = fit1_samples[[1]]
+				fit <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
+				fit_samples = extract(fit)
+				betas = fit_samples[[1]]
 				phiM[i,]<-betas[end(betas)[1],]
 			}		
 	}

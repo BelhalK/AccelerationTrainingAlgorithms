@@ -33,8 +33,7 @@ model {
 }'
 
 earn_dat <- list(N = 100 , height = height,age = age, beta1_pop=1 )
-fit1 <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
-
+fit <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
 
 
 age = rnorm(100)
@@ -67,20 +66,18 @@ model {
 }'
 
 
-fit1 <- stan(model_code = earn_code, data = earn_dat,
+fit <- stan(model_code = earn_code, data = earn_dat,
              warmup = 1,
              iter = 3, 
              chains = 1)
 
-
-print(fit1)
-
+print(fit)
 
 # extract posterior samples for each parameter
-fit1_samples = extract(fit1)
-str(fit1_samples)
+fit_samples = extract(fit)
+str(fit_samples)
 # subset just the betas
-betas = fit1_samples[[1]]
+betas = fit_samples[[1]]
 
 qplot(betas[,1]) # intercept posterior samples
 qplot(betas[,2]) # slope posterior samples
