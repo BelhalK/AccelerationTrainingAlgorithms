@@ -128,29 +128,35 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			}
 		}
 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+		phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+		psiM<-transphi(phiM,Dargs$transform.par)
 	}
 
 	if(opt$nbiter.mcmc[4]>0) {
-		print('stan')
 		saemix.options<-saemixObject["options"]
-		earn_code<-saemix.options$modelstan
+		stan.model<-saemix.options$modelstan
+		mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
+		psiMstan <- psiM
 			for (i in 1:(nrow(phiM))) {
-				browser()
-				earn_dat <- list(N = length(Dargs$yobs[Dargs$IdM==i]),
-								height = Dargs$yobs[Dargs$IdM==i],
-								age = Dargs$XM[Dargs$IdM==i,],
-								beta1_pop=phiM[i,1],beta2_pop=phiM[i,2],
-								pres=varList$pres[1],
-								omega.beta1=varList$domega2[1,1],omega.beta2=varList$domega2[2,2])
-				fit <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
+				stan_data <- list(N = length(Dargs$yobs[Dargs$IdM==i]),height = Dargs$yobs[Dargs$IdM==i]
+								,age = Dargs$XM[Dargs$IdM==i,],
+								beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],
+								omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
+								pres=varList$pres[1])
+				# browser()
+				fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 500, warmup = 100)
 				fit_samples = extract(fit)
 				betas = fit_samples[[1]]
-				phiM[i,]<-betas[end(betas)[1],]
-			}		
+				psiMstan[i,]<-betas[end(betas)[1],]
+			}
+			browser()
+			phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+			etaMstan <- phiMstan[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
+			psiM <- psiMstan
+			phiM <- phiMstan
+			etaM <- etaMstan
 	}
-	
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	psiM<-transphi(phiM,Dargs$transform.par)
+
 	fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	if(Dargs$error.model=="exponential")
 		fpred<-log(cutoff(fpred))

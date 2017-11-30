@@ -4,6 +4,7 @@ library(shinystan)#for great model viz
 library(ggplot2)#for great viz in general
 data(Penicillin)
 
+
 library(RColorBrewer)
 #where the STAN model is saved
 #simulate some data

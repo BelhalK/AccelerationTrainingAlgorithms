@@ -79,11 +79,11 @@ growth.linear<-function(psi,id,xidep) {
 
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
-  transform.par=c(1,0),covariance.model=matrix(c(1,1,1,1),ncol=2,byrow=TRUE), 
+  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
 K1 = 10
-K2 = 2
+K2 = 10
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
@@ -94,33 +94,32 @@ ox_ref <- cbind(iterations, ox_ref)
 ox_ref[end,]
 graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
 
-modelstan <- 'data {
-          // First we declare all of our variables in the data block
+model <- 'data {
           int<lower=0> N;// Number of observations
           real beta1_pop;
           real beta2_pop;
           real pres;
-          real omega.beta1;
-          real omega.beta2;
-          vector[N] age; //Identify our predictor as a vector
-          vector[N] height;  //Identify our outcome variable as a vector
+          real omega_beta1;
+          real omega_beta2;
+          vector[N] age; //predictor
+          vector[N] height;  //response
         }
         parameters {
-          vector[2] beta; //Our betas are a vector of length 2 (intercept and slope)
-          real<lower=0> sigma; //error parameter
+          vector[2] beta;
         }
         model {
           //Priors
-          beta[1] ~ normal( beta1_pop , omega.beta1); //intercept
-          beta[2] ~ normal( beta2_pop , omega.beta2 ); //slope
-          sigma ~ uniform( 0 , pres ); //error
-          height ~ normal(beta[1] + beta[2] * age, sigma);
+          beta[1] ~ lognormal( beta1_pop , omega_beta1);
+          beta[2] ~ lognormal( beta2_pop , omega_beta2);
+          height ~ normal(beta[1] + beta[2] * age, pres);
         }'
 
-options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),nbiter.burn =0, modelstan = modelstan)
+modelstan <- stan_model(model_name = "oxboys",model_code = model)
+options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,1),nbiter.saemix = c(K1,K2),nbiter.burn =0, modelstan = modelstan)
 ox_stan<-data.frame(saemix_stan(saemix.model,saemix.data,options.stan))
 ox_stan <- cbind(iterations, ox_stan)
-graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")
+ox_stan[end,]
+# graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")
 
 graphConvMC_twokernels(ox_ref,ox_stan, title="new kernel")
 

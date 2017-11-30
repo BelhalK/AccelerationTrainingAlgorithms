@@ -33,11 +33,10 @@ model {
 }'
 
 earn_dat <- list(N = 100 , height = height,age = age, beta1_pop=1 )
-fit <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 3, chains = 1)
+fit <- stan(model_code = earn_code, data = earn_dat,algorithm = "HMC",warmup = 1,iter = 300, chains = 1)
 
 
 age = rnorm(100)
-
 base_0 <- 1
 slope_0 <- 1
 height = base_0 +slope_0*age + rnorm(100)
