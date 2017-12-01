@@ -137,14 +137,13 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 		stan.model<-saemix.options$modelstan
 		mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 		psiMstan <- psiM
-			for (i in 1:(nrow(phiM))) {
+			for (i in 1:(nrow(psiM))) {
 				stan_data <- list(N = length(Dargs$yobs[Dargs$IdM==i]),height = Dargs$yobs[Dargs$IdM==i]
 								,age = Dargs$XM[Dargs$IdM==i,],
 								beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],
 								omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 								pres=varList$pres[1])
-				# browser()
-				fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 500, warmup = 100)
+				fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 100, warmup = 1)
 				fit_samples = extract(fit)
 				betas = fit_samples[[1]]
 				psiMstan[i,]<-betas[end(betas)[1],]
