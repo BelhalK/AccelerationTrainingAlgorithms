@@ -192,9 +192,9 @@ graphConvMC_threekernels(theo_ref,theo_mamyula,theo_mamyula, title="new kernel")
 
 
 
-# replicate = 3
+replicate = 3
 
-# final_rwm <- 0
+final_rwm <- 0
 final_mix <- 0
 for (m in 1:replicate){
   print(m)
