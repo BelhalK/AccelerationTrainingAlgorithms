@@ -43,11 +43,11 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	# ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
 
 
-	if (kiter%%2 == 0){
-		ind_rand = 1:18
-	} else {
-		ind_rand = 19:37
-	}
+	# if (kiter%%2 == 0){
+	# 	ind_rand = 1:18
+	# } else {
+	# 	ind_rand = 19:37
+	# }
 
 	
 	for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
