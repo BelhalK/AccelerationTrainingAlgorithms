@@ -11,20 +11,20 @@ Dataset PD1.saemix
       reference class for covariate gender :  0 
 Dataset characteristics:
     number of subjects:     100 
-    number of observations: 300 
-    average/min/max nb obs: 3.00  /  3  /  3 
+    number of observations: 266 
+    average/min/max nb obs: 2.66  /  2  /  3 
 First 10 lines of data:
    subject dose response gender mdv cens occ ytype
 1        1    0  11.2870      1   0    0   1     1
 2        1   10  63.6114      1   0    0   1     1
-3        1   90 122.9170      1   0    0   1     1
 4        2    0  15.0514      1   0    0   1     1
 5        2   10  39.5296      1   0    0   1     1
-6        2   90  60.8522      1   0    0   1     1
 7        3    0  25.5390      1   0    0   1     1
 8        3   10  58.0035      1   0    0   1     1
-9        3   90  81.1173      1   0    0   1     1
 10       4    0  22.1446      1   0    0   1     1
+11       4   10  30.7108      1   0    0   1     1
+13       5    0  33.5551      1   0    0   1     1
+14       5   10  68.7681      1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -68,7 +68,7 @@ Cov.CondInit  0    0    0
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=500, K2=50 
+    Number of iterations:  K1=200, K2=100 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -84,18 +84,18 @@ Cov.CondInit  0    0    0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter         Estimate
-[1,] E0                 23.93  
-[2,] Emax              107.21  
-[3,] EC50               11.14  
-[4,] beta_gender(EC50)   0.48  
-[5,] a                   4.87  
+[1,] E0                 22.47  
+[2,] Emax              103.57  
+[3,] EC50                9.75  
+[4,] beta_gender(EC50)   0.46  
+[5,] a                   4.61  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-E0   omega2.E0   0.123   
-Emax omega2.Emax 0.317   
-EC50 omega2.EC50 0.029   
+E0   omega2.E0   0.150   
+Emax omega2.Emax 0.294   
+EC50 omega2.EC50 0.037   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

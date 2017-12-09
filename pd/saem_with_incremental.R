@@ -1,5 +1,5 @@
 
-setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+setwd("/Users/karimimohammedbelhal/Desktop/ongoing/Phd/variationalBayes/mcmc_R_isolate/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
@@ -83,8 +83,8 @@ covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
-K1 = 150
-K2 = 30
+K1 = 200
+K2 = 100
 iteration = 1:(K1+K2+1)
 
 

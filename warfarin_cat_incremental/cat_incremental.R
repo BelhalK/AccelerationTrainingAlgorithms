@@ -104,7 +104,7 @@ return(P.obs)
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
   psi0=matrix(c(2,1,2),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))), 
-  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,0),ncol=3, 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,1),ncol=3, 
   byrow=TRUE),omega.init=matrix(c(2,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
@@ -120,7 +120,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 K1 = 300
 K2 = 50
 
-iterations = 1:(K1+K2+1)
+iteration = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
 seed0 = 444
@@ -129,7 +129,7 @@ seed0 = 444
 theo_ref <- NULL
 options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0)
 theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
-theo_ref <- cbind(iterations, theo_ref)
+theo_ref <- cbind(iteration, theo_ref)
 
 
 # graphConvMC_saem(theo_ref, title="new kernel")
@@ -137,9 +137,9 @@ theo_ref <- cbind(iterations, theo_ref)
 
 #RWM
 cat_incremental <- NULL
-options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=10)
+options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
 cat_incremental<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
-cat_incremental <- cbind(iterations, cat_incremental)
+cat_incremental <- cbind(iteration, cat_incremental)
 graphConvMC2_saem(theo_ref,cat_incremental, title="new kernel")
 
 cat_incremental[end,]
@@ -149,14 +149,14 @@ theo_ref$algo <- 'MCEM'
 cat_incremental$algo <- 'IMCEM'
 
 theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
-theo_ref_scaled$iterations = 1:(2*(K1+K2+1))
+theo_ref_scaled$iteration = 1:(2*(K1+K2+1))
 
 
 comparison <- 0
 # comparison <- rbind(theo_ref,theo_incremental)
-comparison <- rbind(theo_ref_scaled[iterations,],cat_incremental)
+comparison <- rbind(theo_ref_scaled[iteration,],cat_incremental)
 
-var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
+var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
 

@@ -40,7 +40,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	# browser()
 
 
-	# ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
 
 
 	# if (kiter%%2 == 0){
@@ -64,7 +64,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		deltau<-Uc.y-U.y
 		
 		deltau[ind_rand] = 1000000
-		print(ind_rand)
+		# print(ind_rand)
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -137,7 +137,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				etaM[ind,]<-etaMc[ind,]
 
 				for (i in 1:(nrow(phiM))) {
-					post[[i]][u,] <- etaM[i,]
+					post[[i]][u,] <- 0
 				}
 
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
