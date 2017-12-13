@@ -93,7 +93,7 @@ ox_ref<-data.frame(saemix_stan(saemix.model,saemix.data,options.ref))
 ox_ref <- cbind(iterations, ox_ref)
 ox_ref[end,]
 graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
-graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
+
 
 model <- 'data {
           int<lower=0> N;// Number of observations
@@ -143,4 +143,8 @@ ox_stan[end,]
 # graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")
 
 graphConvMC_twokernels(ox_ref,ox_stan, title="new kernel")
+
+
+
+
 

@@ -25,15 +25,15 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
-	post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
-	for (i in 1:(nrow(phiM))) {
-		post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
-	}
+	# post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
+	# for (i in 1:(nrow(phiM))) {
+	# 	post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
+	# }
 
-	post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
-	for (i in 1:(nrow(phiM))) {
-		post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
-	}
+	# post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
+	# for (i in 1:(nrow(phiM))) {
+	# 	post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
+	# }
 
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
@@ -115,9 +115,9 @@ if (!(kiter %in% map_range)){
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
-				for (i in 1:(nrow(phiM))) {
-					post[[i]][u,] <- etaM[i,]
-				}
+				# for (i in 1:(nrow(phiM))) {
+				# 	post[[i]][u,] <- etaM[i,]
+				# }
 
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
 				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
@@ -286,7 +286,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 	}
 
 
-
+	post <- post_new <- 0
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post, post_new=post_new))

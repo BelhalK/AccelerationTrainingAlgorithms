@@ -143,12 +143,12 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 								beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],
 								omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 								pres=varList$pres[1])
+				if (kiter >5) browser()
 				fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 100, warmup = 1)
 				fit_samples = extract(fit)
 				betas = fit_samples[[1]]
 				psiMstan[i,]<-betas[end(betas)[1],]
 			}
-			browser()
 			phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 			etaMstan <- phiMstan[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
 			psiM <- psiMstan

@@ -469,4 +469,3 @@ c <- graphConvMC_diff3(a[,c(1,2,9)],b[,c(1,2,9)])
 d <- graphConvMC_diff3(a[,c(1,5,9)],b[,c(1,5,9)])
 
 grid.arrange(c,d, ncol=2)
-

@@ -70,12 +70,13 @@ iter_mcmc = 200
 
 
 
-# cat_data.saemix<-read.table("data/categorical1_data_less.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data.txt",header=T,na=".")
+# cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
 # cat_data.saemix<-read.table("data/categorical1_data_less2.txt",header=T,na=".")
 # cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat1.csv", header=T, sep=",")
 cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat2.csv", header=T, sep=",")
-cat_data.saemix <- cat_data.saemix[,]
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 
 
 
@@ -90,7 +91,6 @@ P0 <- 1/(1+exp(-th1))
 Pcum1 <- 1/(1+exp(-th1-th2))
 Pcum2 <- 1/(1+exp(-th1-th2-th3))
 
-
 P1 <- Pcum1 - P0
 P2 <- Pcum2 - Pcum1
 P3 <- 1 - Pcum2
@@ -104,7 +104,7 @@ return(P.obs)
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
   psi0=matrix(c(2,1,2),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))), 
-  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,0,0,0,0,1),ncol=3, 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),omega.init=matrix(c(2,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
@@ -118,7 +118,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 
 
 K1 = 300
-K2 = 50
+K2 = 200
 
 iteration = 1:(K1+K2+1)
 gd_step = 0.01
@@ -140,6 +140,7 @@ cat_incremental <- NULL
 options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
 cat_incremental<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
 cat_incremental <- cbind(iteration, cat_incremental)
+
 graphConvMC2_saem(theo_ref,cat_incremental, title="new kernel")
 
 cat_incremental[end,]
@@ -159,4 +160,108 @@ comparison <- rbind(theo_ref_scaled[iteration,],cat_incremental)
 var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
+
+
+replicate = 3
+
+final_rwm <- 0
+final_incremental <- 0
+for (m in 1:replicate){
+  print(m)
+  print(m)
+  # l = list(c(1,5,1,0,0,0),c(0.8,12,0.8,0,0,0),c(1.2,3,1.2,0,0,0),c(1.4,6.6,1.4,0,0,0))
+  l = list(c(2,1,2),c(2,1,5),c(2,1,3))
+  saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
+  psi0=matrix(l[[m]],ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("th1","th2","th3"))), 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),omega.init=matrix(c(3/m,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")
+
+
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0)
+  theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+  theo_ref <- cbind(iteration, theo_ref)
+  theo_ref['individual'] <- m
+  final_rwm <- rbind(final_rwm,theo_ref[,])
+
+  options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
+  theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
+  theo_mix <- cbind(iteration, theo_mix)
+  theo_mix['individual'] <- m
+  final_incremental <- rbind(final_incremental,theo_mix[,])
+}
+
+graphConvMC_diff2(final_rwm,final_incremental, title="Diff intial param Warfa")
+
+graphConvMC_diff2(final_rwm[,c(1,3,9)],final_incremental[,c(1,3,9)], title="Diff intial param Warfa")
+
+graphConvMC_diff2(final_rwm[,c(1,3,6,9)],final_incremental[,c(1,3,6,9)], title="Diff intial param Warfa")
+
+graphConvMC_diff(final_rwm[,c(1,2,9)],final_incremental[,c(1,2,9)], title="Diff intial param Warfa")
+
+graphConvMC_diff2(final_rwm[,c(1,3,6,9)],final_incremental[,c(1,3,6,9)])
+
+
+
+graphConvMC_diff3 <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+      xlab("") +scale_x_log10()+ ylab(expression(paste(omega,".",th3)))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=20, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=20, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=30)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+
+
+graphConvMC_diff4 <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+      xlab("") +scale_x_log10()+ ylab(names(df[j]))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=20, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=20, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=30)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+
+# a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)])
+# b <- graphConvMC_diff3(final_rwm[,c(1,7,8)],final_incremental[,c(1,7,8)])
+
+# grid.arrange(a,b, ncol=2)
+
+a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)])
+b <- graphConvMC_diff3(final_rwm[,c(1,5,8)],final_incremental[,c(1,5,8)])
+
+grid.arrange(a,b, ncol=2)
 

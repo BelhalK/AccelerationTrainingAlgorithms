@@ -135,7 +135,7 @@ graphConvMC3_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   graf <- ggplot(df,aes(colour=df$algo ))+geom_line(aes(iteration,value,by=value),show.legend = legend) +
-  xlab("iteration") + ylab('value') + facet_wrap(~variable,scales = "free_y") #+ coord_trans(x = "log10")
+  xlab("iteration") +scale_x_log10()+ ylab('value') + facet_wrap(~variable,scales = "free_y") #+ coord_trans(x = "log10")
   grid.arrange(graf)
   # do.call("grid.arrange", c(graf, ncol=1, top=title))
 }

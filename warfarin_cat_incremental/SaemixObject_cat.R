@@ -100,7 +100,11 @@ setMethod(
     }
     }
     # opt$nbiter.sa<-round(opt$nbiter.saemix[1]/2)
-    opt$nbiter.sa<-1
+    if(length(opt$nbiter.sa)==1){
+      opt$nbiter.sa<-max(1,opt$nbiter.sa)
+    } else{
+      opt$nbiter.sa<-round(opt$nbiter.saemix[1]/2)
+    }
     opt$nbiter.tot<-sum(opt$nbiter.saemix)
     .Object@options<-opt
 # Options for plots
