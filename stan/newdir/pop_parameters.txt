@@ -76,15 +76,15 @@ Pop.CondInit  140     1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] base      149.14  
-[2,] slope       6.27  
-[3,] a           0.78  
+[1,] base        1.4   
+[2,] slope       1.4   
+[3,] a         143.0   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-base  omega2.base  0.0029  
-slope omega2.slope 0.0675  
+base  omega2.base  3.4     
+slope omega2.slope 1.5     
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

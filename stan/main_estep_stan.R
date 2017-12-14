@@ -116,11 +116,6 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 				for (i in 1:(nrow(phiM))) {
 					post[[i]][u,] <- etaM[i,]
 				}
-
-				#        if(kiter<20 | (kiter>150 & kiter<170)) {
-				#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
-				#        	print(head(etaMc))
-				#        }
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 				nbc2[vk2]<-nbc2[vk2]+length(ind)
@@ -135,7 +130,7 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	if(opt$nbiter.mcmc[4]>0) {
 		saemix.options<-saemixObject["options"]
 		stan.model<-saemix.options$modelstan
-		mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
+		mean.psiM<-transphi(mean.phiM,Dargs$transform.par)
 		psiMstan <- psiM
 			for (i in 1:(nrow(psiM))) {
 				stan_data <- list(N = length(Dargs$yobs[Dargs$IdM==i]),height = Dargs$yobs[Dargs$IdM==i]
@@ -143,7 +138,6 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 								beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],
 								omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 								pres=varList$pres[1])
-				if (kiter >5) browser()
 				fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 100, warmup = 1)
 				fit_samples = extract(fit)
 				betas = fit_samples[[1]]
@@ -151,6 +145,7 @@ estep_stan<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 			}
 			phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 			etaMstan <- phiMstan[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
+			
 			psiM <- psiMstan
 			phiM <- phiMstan
 			etaM <- etaMstan

@@ -92,18 +92,19 @@ options.ref<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chain
 ox_ref<-data.frame(saemix_stan(saemix.model,saemix.data,options.ref))
 ox_ref <- cbind(iterations, ox_ref)
 ox_ref[end,]
-graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
+# graphConvMC_twokernels(ox_ref,ox_ref, title="new kernel")
 
 
 model <- 'data {
           int<lower=0> N;// Number of observations
-          real beta1_pop;
-          real beta2_pop;
-          real pres;
-          real omega_beta1;
-          real omega_beta2;
           vector[N] age; //predictor
           vector[N] height;  //response
+          
+          real beta1_pop;
+          real beta2_pop;
+          real<lower=0> omega_beta1;
+          real<lower=0> omega_beta2;
+          real<lower=0>  pres;
         }
         parameters {
           vector[2] beta;
@@ -115,25 +116,6 @@ model <- 'data {
           height ~ normal(beta[1] + beta[2] * age, pres);
         }'
 
-# modeleta <- 'data {
-#           int<lower=0> N;// Number of observations
-#           real pres;
-#           real beta1_pop;
-#           real beta2_pop;
-#           real omega_beta1;
-#           real omega_beta2;
-#           vector[N] age; //predictor
-#           vector[N] height;  //response
-#         }
-#         parameters {
-#           vector[2] eta;
-#         }
-#         model {
-#           //Priors
-#           eta[1] ~ normal( 0 , omega_beta1);
-#           eta[2] ~ normal( 0 , omega_beta2);
-#           height ~ normal(eta[1] + (eta[2]) * age, pres);
-#         }'
 
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
 options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,1),nbiter.saemix = c(K1,K2),nbiter.burn =0, modelstan = modelstan)
