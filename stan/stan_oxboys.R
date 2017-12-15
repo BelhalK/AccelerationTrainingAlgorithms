@@ -82,8 +82,8 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
-K1 = 10
-K2 = 10
+K1 = 40
+K2 = 1
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
 end = K1+K2
@@ -113,7 +113,7 @@ model <- 'data {
           //Priors
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
-          height ~ normal(beta[1] + beta[2] * age, pres);
+          height ~ normal(beta[1] + beta[2] * age, 0.001);
         }'
 
 
@@ -125,6 +125,7 @@ ox_stan[end,]
 # graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")
 
 graphConvMC_twokernels(ox_ref,ox_stan, title="new kernel")
+
 
 
 

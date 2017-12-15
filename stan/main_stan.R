@@ -219,6 +219,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   	l1<-betas.ini
   	l1[Uargs$indx.betaI]<-fixed.psi
   	l1[Uargs$indx.betaC]<-betaC
+    varList$pres[Uargs$ind.res] = 1
   	allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
   } else { #end of loop on if (stepsize[kiter]>0)
     allpar[(kiter+1),]<-allpar[kiter,]

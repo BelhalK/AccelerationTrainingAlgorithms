@@ -59,7 +59,6 @@ model <- 'data {
         }'
 
 
-
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
 
 # fit <- stan(model_code = earn_code, data = earn_dat,

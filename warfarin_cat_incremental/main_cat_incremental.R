@@ -182,7 +182,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
   # E-step
 
-  if(kiter<20) {
+  if(kiter<60) {
   xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
 } else{
   xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
