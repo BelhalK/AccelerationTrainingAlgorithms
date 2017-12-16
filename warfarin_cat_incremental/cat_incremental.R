@@ -117,8 +117,8 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 # post_foce<-saemix_post_cat(saemix.model,saemix.data,saemix.foce)$post_newkernel
 
 
-K1 = 300
-K2 = 200
+K1 = 200
+K2 = 50
 
 iteration = 1:(K1+K2+1)
 gd_step = 0.01
@@ -215,7 +215,7 @@ graphConvMC_diff3 <- function(df,df2, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
-      xlab("") +scale_x_log10()+ ylab(expression(paste(omega,".",th3)))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+      xlab("") +scale_x_log10()+ ylab(expression(paste(omega,"3")))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
 panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
                            size=20, angle=0),
           axis.text.y = element_text(face="bold", color="black", 
@@ -259,7 +259,8 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
 # b <- graphConvMC_diff3(final_rwm[,c(1,7,8)],final_incremental[,c(1,7,8)])
 
 # grid.arrange(a,b, ncol=2)
-
+colnames(final_rwm)[4] <- "z3"
+colnames(final_incremental)[4] <- "z3"
 a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)])
 b <- graphConvMC_diff3(final_rwm[,c(1,5,8)],final_incremental[,c(1,5,8)])
 

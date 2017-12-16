@@ -122,10 +122,8 @@ options.stan<-list(seed=395246,map=F,fim=F,ll.is=F,displayProgress=FALSE,nb.chai
 ox_stan<-data.frame(saemix_stan(saemix.model,saemix.data,options.stan))
 ox_stan <- cbind(iterations, ox_stan)
 ox_stan[end,]
-# graphConvMC_twokernels(ox_stan,ox_stan, title="new kernel")
 
 graphConvMC_twokernels(ox_ref,ox_stan, title="new kernel")
-
 
 
 
