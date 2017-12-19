@@ -173,10 +173,11 @@ graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
 
 
-replicate = 3
+replicate = 2
 
 final_rwm <- 0
 final_incremental <- 0
+final_incremental25 <- 0
 for (m in 1:replicate){
   print(m)
   print(m)
@@ -194,13 +195,23 @@ for (m in 1:replicate){
   theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
   theo_ref <- cbind(iteration, theo_ref)
   theo_ref['individual'] <- m
-  final_rwm <- rbind(final_rwm,theo_ref[,])
+  theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]
+  theo_ref_scaled$iteration = 1:(4*(K1+K2+1))
+  final_rwm <- rbind(final_rwm,theo_ref_scaled[iteration,])
 
   options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
   theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iteration, theo_mix)
   theo_mix['individual'] <- m
-  final_incremental <- rbind(final_incremental,theo_mix[,])
+  theo_mix_scaled <- theo_mix[rep(seq_len(nrow(theo_mix)), each=2),]
+  theo_mix_scaled$iteration = 1:(2*(K1+K2+1))
+  final_incremental <- rbind(final_incremental,theo_mix_scaled[iteration,])
+
+   options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=25)
+  theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
+  theo_mix25 <- cbind(iteration, theo_mix25)
+  theo_mix25['individual'] <- m
+  final_incremental25 <- rbind(final_incremental25,theo_mix25[,])
 }
 
 graphConvMC_diff2(final_rwm,final_incremental, title="Diff intial param Warfa")
@@ -215,17 +226,18 @@ graphConvMC_diff2(final_rwm[,c(1,3,6,9)],final_incremental[,c(1,3,6,9)])
 
 
 
-graphConvMC_diff3 <- function(df,df2, title=NULL, ylim=NULL)
+graphConvMC_diff3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
   df$individual <- as.factor(df$individual)
   df2$individual <- as.factor(df2$individual)
+  df3$individual <- as.factor(df3$individual)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   for (j in (2:(ncol(df)-1)))
   {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="green",linetype = 2,size=2)+
       xlab("") +scale_x_log10()+ ylab(expression(paste(omega,"3")))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
 panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
                            size=20, angle=0),
@@ -241,17 +253,18 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
 
 
 
-graphConvMC_diff4 <- function(df,df2, title=NULL, ylim=NULL)
+graphConvMC_diff4 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
   df$individual <- as.factor(df$individual)
   df2$individual <- as.factor(df2$individual)
+  df3$individual <- as.factor(df3$individual)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   for (j in (2:(ncol(df)-1)))
   {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="green",linetype = 2,size=2)+
       xlab("") +scale_x_log10()+ ylab(names(df[j]))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
 panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
                            size=20, angle=0),
@@ -272,8 +285,9 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
 # grid.arrange(a,b, ncol=2)
 colnames(final_rwm)[4] <- "z3"
 colnames(final_incremental)[4] <- "z3"
-a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)])
-b <- graphConvMC_diff3(final_rwm[,c(1,5,8)],final_incremental[,c(1,5,8)])
+colnames(final_incremental25)[4] <- "z3"
+a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)],final_incremental25[,c(1,4,8)])
+b <- graphConvMC_diff3(final_rwm[,c(1,5,8)],final_incremental[,c(1,5,8)],final_incremental25[,c(1,5,8)])
 
 grid.arrange(a,b, ncol=2)
 
