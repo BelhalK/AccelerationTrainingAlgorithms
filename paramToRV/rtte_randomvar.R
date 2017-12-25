@@ -76,6 +76,6 @@ rttenewnosa <- cbind(iterations, rttenewnosa)
 graphConvMC_twokernels(rtte,rttenewnosa)
 
 #No var no sa but randomvariable
-options_rttenosa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2), nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, av=0)
+options_rttenosa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2), nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, av=0)
 rttenosa<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_rttenosa))
 rttenosa <- cbind(iterations, rttenosa)
