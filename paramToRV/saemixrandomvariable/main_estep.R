@@ -144,31 +144,31 @@ if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 			U0.y[ind]<-Uc0.y[ind]
 		}
 
-	U0.eta<-0.5*rowSums(etaM0*(etaM0%*%somega0))
-	nt2<-nbc2<-matrix(data=0,nrow=length(varList$ind0.eta),ncol=1)
-	nrs2<-1
-	for (u in 1:opt$nbiter.mcmc[4]) {
-		for(vk2 in 1:length(varList$ind0.eta)) {
-			etaMc0<-etaM0
-			#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
-			etaMc0[,vk2]<-etaM0[,vk2]+matrix(rnorm(length(varList$ind0.eta)), ncol=nrs2)%*%chol.omega0 
-			phiMc[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaMc0
-			psiMc<-transphi(phiMc,Dargs$transform.par)
-			if(Dargs$type=="structural"){
-				Uc0.y<-sum(compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF))
-			} else {
-				Uc0.y<-sum(compute.LLy_d(phiMc,Uargs,Dargs,DYF))
-			}
-			Uc0.eta<-0.5*rowSums(etaMc0*(etaMc0%*%somega0))
-			deltu<-Uc0.y-U0.y+Uc0.eta-U0.eta
-			ind<-which(deltu<(-1)*log(runif(length(varList$ind0.eta))))
-			print(ind)
-			etaM0[ind,]<-etaMc0[ind,]
-			U0.y[ind]<-Uc0.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-			U0.eta[ind]<-Uc0.eta[ind]
-			nbc2[vk2]<-nbc2[vk2]+length(ind)
-		}
-	}
+	# U0.eta<-0.5*rowSums(etaM0*(etaM0%*%somega0))
+	# nt2<-nbc2<-matrix(data=0,nrow=length(varList$ind0.eta),ncol=1)
+	# nrs2<-1
+	# for (u in 1:opt$nbiter.mcmc[4]) {
+	# 	for(vk2 in 1:length(varList$ind0.eta)) {
+	# 		etaMc0<-etaM0
+	# 		#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
+	# 		etaMc0[,vk2]<-etaM0[,vk2]+matrix(rnorm(length(varList$ind0.eta)), ncol=nrs2)%*%chol.omega0 
+	# 		phiMc[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaMc0
+	# 		psiMc<-transphi(phiMc,Dargs$transform.par)
+	# 		if(Dargs$type=="structural"){
+	# 			Uc0.y<-sum(compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF))
+	# 		} else {
+	# 			Uc0.y<-sum(compute.LLy_d(phiMc,Uargs,Dargs,DYF))
+	# 		}
+	# 		Uc0.eta<-0.5*rowSums(etaMc0*(etaMc0%*%somega0))
+	# 		deltu<-Uc0.y-U0.y+Uc0.eta-U0.eta
+	# 		ind<-which(deltu<(-1)*log(runif(length(varList$ind0.eta))))
+	# 		print(ind)
+	# 		etaM0[ind,]<-etaMc0[ind,]
+	# 		U0.y[ind]<-Uc0.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+	# 		U0.eta[ind]<-Uc0.eta[ind]
+	# 		nbc2[vk2]<-nbc2[vk2]+length(ind)
+	# 	}
+	# }
 }
 
 
