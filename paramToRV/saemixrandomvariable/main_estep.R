@@ -125,6 +125,7 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 #MCMC on the fixed param (only 1 and not N)
 U0.y <- sum(U.y)
+		
 
 if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 	for(u in 1:opt$nbiter.mcmc[4]) { 

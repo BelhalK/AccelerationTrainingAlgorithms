@@ -1,7 +1,7 @@
-setwd("/Users/karimimohammedbelhal/Desktop/averageiterate")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate")
 source('mixtureFunctions.R') 
 
-setwd("/Users/karimimohammedbelhal/Desktop/averageiterate/avg")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -22,7 +22,7 @@ setwd("/Users/karimimohammedbelhal/Desktop/averageiterate/avg")
 
 
 ###WARFA
-warfa_data <- read.table("/Users/karimimohammedbelhal/Desktop/averageiterate/data/warfarin_data.txt", header=T)
+warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/data/warfarin_data.txt", header=T)
 saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
@@ -46,22 +46,22 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 K1 = 1000
-K2 = 1000
+K2 = 3000
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
 
 #With var no sa
-options.ref<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0)
+options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0)
 warfa.ref<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.ref))
 warfa.ref <- cbind(iterations, warfa.ref)
-graphConvMC_twokernels(warfa.ref,warfa.ref)
+# graphConvMC_twokernels(warfa.ref,warfa.ref)
 
-options.avg<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
+options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
 warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg))
 warfa.avg <- cbind(iterations, warfa.avg)
 
-graphConvMC_twokernels(warfa.avg,warfa.avg)
+# graphConvMC_twokernels(warfa.avg,warfa.avg)
 graphConvMC_twokernels(warfa.ref,warfa.avg)
 
 graphConvMC_twokernels(warfa.ref[K1:end,],warfa.avg[K1:end,])

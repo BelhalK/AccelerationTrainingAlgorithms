@@ -1,7 +1,7 @@
-setwd("/Users/karimimohammedbelhal/Desktop/averageiterate")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate")
 source('mixtureFunctions.R') 
 
-setwd("/Users/karimimohammedbelhal/Desktop/averageiterate/avg")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
