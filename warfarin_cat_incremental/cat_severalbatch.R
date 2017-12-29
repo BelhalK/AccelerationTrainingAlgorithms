@@ -127,8 +127,8 @@ seed0 = 444
 
 #RWM
 theo_ref <- NULL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0)
-theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=100)
+theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iteration, theo_ref)
 
 
@@ -146,7 +146,7 @@ options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter
 cat_incremental25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
 cat_incremental25 <- cbind(iteration, cat_incremental25)
 
-graphConvMC2_saem(theo_ref,cat_incremental, title="new kernel")
+graphConvMC2_saem(theo_ref,cat_incremental25, title="new kernel")
 
 cat_incremental[end,]
 
@@ -191,8 +191,8 @@ for (m in 1:replicate){
   byrow=TRUE),error.model="constant")
 
 
-  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0)
-  theo_ref<-data.frame(saemix_cat2(saemix.model,saemix.data,options))
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=100)
+  theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iteration, theo_ref)
   theo_ref['individual'] <- m
   theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]

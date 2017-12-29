@@ -54,8 +54,8 @@ saemix.model_warfanovar_init<-saemixModel(model=model1cpt,description="warfarin"
   byrow=TRUE))
 
 
-K1 = 150
-K2 = 20
+K1 = 300
+K2 = 300
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
@@ -81,6 +81,8 @@ graphConvMC_twokernels(warfa_without,warfa_newkernel)
 options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
 warfa_withnosa<-data.frame(saemix(saemix.model_warfanovar,saemix.data_warfa,options_warfa_with))
 warfa_withnosa <- cbind(iterations, warfa_withnosa)
-
-options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
+graphConvMC_twokernels(warfa_without[,1:6],warfa_withnosa)
+options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
 warfa_withnosa<-data.frame(saemix(saemix.model_warfanovar_init,saemix.data_warfa,options_warfa_with))
+warfa_withnosa <- cbind(iterations, warfa_withnosa)
+
