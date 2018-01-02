@@ -12,6 +12,7 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
 	chol.omega<-try(chol(omega.eta))
 	somega<-solve(omega.eta)
+	saemix.options<-saemixObject["options"]
 
 	if(opt$flag.fmin){
 		omega0.eta <- varList$omega[varList$ind0.eta,varList$ind0.eta,drop=FALSE]
@@ -127,6 +128,7 @@ U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 U0.y <- sum(U.y)
 		
 
+if(kiter < opt$nbiter.saemix[1]/2){
 if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 	for(u in 1:opt$nbiter.mcmc[4]) { 
 		# browser()
@@ -170,6 +172,7 @@ if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 	# 		nbc2[vk2]<-nbc2[vk2]+length(ind)
 	# 	}
 	# }
+}
 }
 
 

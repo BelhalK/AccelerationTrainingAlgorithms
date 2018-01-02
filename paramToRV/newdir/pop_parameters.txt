@@ -54,15 +54,14 @@ k   0 0 0
     No covariate in the model.
     Initial values
              ka V k
-Pop.CondInit  1 7 3
+Pop.CondInit  1 7 1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
-    Estimation of log-likelihood by importance sampling
+    Algorithms: estimation only
     Number of iterations:  K1=300, K2=300 
     Number of chains:  2 
     Seed:  39546 
-    Number of MCMC iterations for IS:  5000 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -76,15 +75,15 @@ Pop.CondInit  1 7 3
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.657   
-[2,] V         7.406   
-[3,] k         0.018   
-[4,] a         1.146   
+[1,] ka        0.716   
+[2,] V         7.545   
+[3,] k         0.017   
+[4,] a         1.150   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.774   
+ka omega2.ka 0.464   
 V  omega2.V  0.039   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
@@ -92,12 +91,3 @@ V  omega2.V  0.039
           omega2.ka omega2.V
 omega2.ka 1         0       
 omega2.V  0         1       
-----------------------------------------------------
----------------  Statistical criteria  -------------
-----------------------------------------------------
-
-Likelihood computed by importance sampling
-      -2LL= 946.894 
-      AIC = 958.894 
-      BIC = 967.4979 
-----------------------------------------------------

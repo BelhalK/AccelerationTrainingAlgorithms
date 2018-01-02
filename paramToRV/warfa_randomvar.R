@@ -85,4 +85,3 @@ graphConvMC_twokernels(warfa_without[,1:6],warfa_withnosa)
 options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
 warfa_withnosa<-data.frame(saemix(saemix.model_warfanovar_init,saemix.data_warfa,options_warfa_with))
 warfa_withnosa <- cbind(iterations, warfa_withnosa)
-

@@ -173,7 +173,7 @@ graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
 
 
-replicate = 2
+replicate = 3
 
 final_rwm <- 0
 final_incremental <- 0
@@ -199,22 +199,22 @@ for (m in 1:replicate){
   theo_ref_scaled$iteration = 1:(4*(K1+K2+1))
   final_rwm <- rbind(final_rwm,theo_ref_scaled[iteration,])
 
-  options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
-  theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
-  theo_mix <- cbind(iteration, theo_mix)
-  theo_mix['individual'] <- m
-  theo_mix_scaled <- theo_mix[rep(seq_len(nrow(theo_mix)), each=2),]
-  theo_mix_scaled$iteration = 1:(2*(K1+K2+1))
-  final_incremental <- rbind(final_incremental,theo_mix_scaled[iteration,])
+  # options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
+  # theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
+  # theo_mix <- cbind(iteration, theo_mix)
+  # theo_mix['individual'] <- m
+  # theo_mix_scaled <- theo_mix[rep(seq_len(nrow(theo_mix)), each=2),]
+  # theo_mix_scaled$iteration = 1:(2*(K1+K2+1))
+  # final_incremental <- rbind(final_incremental,theo_mix_scaled[iteration,])
 
-   options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=25)
-  theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
-  theo_mix25 <- cbind(iteration, theo_mix25)
-  theo_mix25['individual'] <- m
-  final_incremental25 <- rbind(final_incremental25,theo_mix25[,])
+  #  options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=25)
+  # theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
+  # theo_mix25 <- cbind(iteration, theo_mix25)
+  # theo_mix25['individual'] <- m
+  # final_incremental25 <- rbind(final_incremental25,theo_mix25[,])
 }
 
-graphConvMC_diff2(final_rwm,final_incremental, title="Diff intial param Warfa")
+graphConvMC_diff2(final_rwm,final_rwm, title="Diff intial param Warfa")
 
 graphConvMC_diff2(final_rwm[,c(1,3,9)],final_incremental[,c(1,3,9)], title="Diff intial param Warfa")
 
