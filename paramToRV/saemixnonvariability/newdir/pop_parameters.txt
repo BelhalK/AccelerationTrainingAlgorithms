@@ -49,17 +49,17 @@ function(psi,id,xidep) {
    ka V k
 ka  1 0 0
 V   0 1 0
-k   0 0 1
+k   0 0 0
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka V k
-Pop.CondInit  1 7 1
+              ka   V   k
+Pop.CondInit 1.2 6.8 1.2
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Estimation of log-likelihood by importance sampling
-    Number of iterations:  K1=150, K2=20 
+    Number of iterations:  K1=200, K2=200 
     Number of chains:  2 
     Seed:  39546 
     Number of MCMC iterations for IS:  5000 
@@ -76,30 +76,28 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.680   
-[2,] V         7.516   
+[1,] ka        0.634   
+[2,] V         7.474   
 [3,] k         0.018   
-[4,] a         1.025   
+[4,] a         1.154   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.436   
-V  omega2.V  0.041   
-k  omega2.k  0.035   
+ka omega2.ka 0.403   
+V  omega2.V  0.039   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.k
-omega2.ka 1         0        0       
-omega2.V  0         1        0       
-omega2.k  0         0        1       
+          omega2.ka omega2.V
+omega2.ka 1         0       
+omega2.V  0         1       
 ----------------------------------------------------
 ---------------  Statistical criteria  -------------
 ----------------------------------------------------
 
 Likelihood computed by importance sampling
-      -2LL= 918.5329 
-      AIC = 932.5329 
-      BIC = 942.5708 
+      -2LL= 946.5929 
+      AIC = 958.5929 
+      BIC = 967.1968 
 ----------------------------------------------------

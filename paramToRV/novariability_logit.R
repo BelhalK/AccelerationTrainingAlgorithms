@@ -49,21 +49,21 @@ saemix.model_logitnovar<-saemixModel(model=model1cpt,description="logitrin",type
   byrow=TRUE))
 
 
-K1 = 300
+K1 = 700
 K2 = 300
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
 
 #With var no sa
-options_logit_without<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+options_logit_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 logit_without<-data.frame(saemix(saemix.model_logit,saemix.data_logit,options_logit_without))
 logit_without <- cbind(iterations, logit_without)
 
 graphConvMC_twokernels(logit_without,logit_without)
 
 
-options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
+options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:20), av=0)
 logit_newkernel<-data.frame(saemix(saemix.model_logit,saemix.data_logit,options_newkernel))
 logit_newkernel <- cbind(iterations, logit_newkernel)
 
@@ -71,28 +71,12 @@ graphConvMC_twokernelslog(logit_without,logit_newkernel)
 graphConvMC_twokernels(logit_without,logit_newkernel)
 
 
-#With var sa
-options_logit_without_with_sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
-logit_without_sa<-data.frame(saemix(saemix.model_logit,saemix.data_logit,options_logit_without_with_sa))
-logit_without_sa <- cbind(iterations, logit_without_sa)
-
-graphConvMC_twokernels(logit_without,logit_without_sa)
-graphConvMC_twokernelslog(logit_without,logit_without_sa)
-
-
-options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
-logit_newkernel_sa<-data.frame(saemix(saemix.model_logit,saemix.data_logit,options_newkernel))
-logit_newkernel_sa <- cbind(iterations, logit_newkernel_sa)
-
-graphConvMC_twokernelslog(logit_without_sa,logit_newkernel_sa)
-
-
 #No var no sa
-options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 logit_withnosa<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_logit_with))
 logit_withnosa <- cbind(iterations, logit_withnosa)
 
-options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 logit_withnosanocma<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_logit_with))
 logit_withnosanocma <- cbind(iterations, logit_withnosanocma)
 
@@ -100,14 +84,14 @@ graphConvMC_twokernels(logit_withnosa,logit_withnosanocma)
 
 graphConvMC_twokernels(logit_withnosa,logit_without)
 
-options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,6),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
+options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
 logit_newkernelnosa<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_newkernel))
 logit_newkernelnosa <- cbind(iterations, logit_newkernelnosa)
 
 graphConvMC_twokernelslog(logit_withnosa,logit_newkernelnosa)
 
 #No var sa
-options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 logit_withsa<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_logit_with))
 logit_withsa <- cbind(iterations, logit_withsa)
 
@@ -123,21 +107,21 @@ graphConvMC_twokernelslog(logit_withsa,logit_withsa)
 graphConvMC_twokernelslog(logit_newkernel_sa,logit_newkernel_sa)
 graphConvMC_twokernelslog(logit_newkernelsa,logit_newkernelsa)
 
-options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
+options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=0)
 logit_newkernelsa<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_newkernel))
 logit_newkernelsa <- cbind(iterations, logit_newkernelsa)
 
 graphConvMC_twokernelslog(logit_withsa,logit_newkernelsa)
 
 #No var av
-options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=1)
+options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=1)
 logit_withav<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_logit_with))
 logit_withav <- cbind(iterations, logit_withav)
 
 graphConvMC_twokernels(logit_withav,logit_without)
 
 
-options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5), av=1)
+options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:3), av=1)
 logit_newkernelav<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_newkernel))
 logit_newkernelav <- cbind(iterations, logit_newkernelav)
 
