@@ -80,7 +80,7 @@ error_mix <- 0
 final_rwm <- 0
 final_mix <- 0
 
-replicate <- 3
+replicate <- 40
 for (m in 1:replicate){
   setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin")
   model<-"warfarin_project_model.txt"
@@ -160,6 +160,7 @@ for (m in 1:replicate){
   final_mix <- rbind(final_mix,warfa.avg)
 }
 
+
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
 
@@ -227,17 +228,17 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
-c <- graphConvMC_diff3(a[K1:end,c(1,3,9)],b[K1:end,c(1,3,9)])
-d <- graphConvMC_diff3(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)])
+c <- graphConvMC_diff3(b[K1:end,c(1,3,9)],a[K1:end,c(1,3,9)])
+d <- graphConvMC_diff3(b[K1:end,c(1,6,9)],a[K1:end,c(1,6,9)])
 
 grid.arrange(c,d, ncol=2)
 
-c <- graphConvMC_diff3(a[10:end,c(1,3,9)],b[10:end,c(1,3,9)])
-d <- graphConvMC_diff3(a[10:end,c(1,6,9)],b[10:end,c(1,6,9)])
+c <- graphConvMC_diff3(b[10:end,c(1,3,9)],a[10:end,c(1,3,9)])
+d <- graphConvMC_diff3(b[10:end,c(1,6,9)],a[10:end,c(1,6,9)])
 
 grid.arrange(c,d, ncol=2)
 
-c <- graphConvMC_diff3(a[1:end,c(1,3,9)],b[1:end,c(1,3,9)])
-d <- graphConvMC_diff3(a[1:end,c(1,6,9)],b[1:end,c(1,6,9)])
+c <- graphConvMC_diff3(b[1:end,c(1,3,9)],a[1:end,c(1,3,9)])
+d <- graphConvMC_diff3(b[1:end,c(1,6,9)],a[1:end,c(1,6,9)])
 
 grid.arrange(c,d, ncol=2)

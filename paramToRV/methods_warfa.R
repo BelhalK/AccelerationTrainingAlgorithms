@@ -244,9 +244,11 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "grey"))
 
 graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
 
-graphConvMC_diff(final_av,final_avnew, title="")
-
 #black: optim
 #blue: av
 #red: av newkernel
 #green: bayes
+
+
+graphConvMC_diff(final_av,final_avnew, title="")
+

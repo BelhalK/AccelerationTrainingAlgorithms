@@ -8,21 +8,21 @@ Dataset timetoevent.saemix
     Structured data: y ~ time + y | id 
     X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     10 
-    number of observations: 1395 
-    average/min/max nb obs: 139.50  /  4  /  678 
+    number of subjects:     200 
+    number of observations: 12536 
+    average/min/max nb obs: 62.68  /  3  /  1211 
 First 10 lines of data:
-   id     time y y.1 mdv cens occ ytype
-2   1  0.00000 0   0   0    0   1     1
-10  1  7.92616 1   1   0    0   1     1
-12  1  8.46442 1   1   0    0   1     1
-16  1 11.54491 1   1   0    0   1     1
-18  1 12.55560 1   1   0    0   1     1
-19  1 12.81918 1   1   0    0   1     1
-21  1 13.22396 1   1   0    0   1     1
-22  1 13.67687 1   1   0    0   1     1
-24  1 14.24701 1   1   0    0   1     1
-25  1 14.37813 1   1   0    0   1     1
+   id    time y y.1 mdv cens occ ytype
+2   1 0.00000 0   0   0    0   1     1
+5   1 2.64728 1   1   0    0   1     1
+10  1 6.19589 1   1   0    0   1     1
+11  1 6.24885 1   1   0    0   1     1
+12  1 6.29257 1   1   0    0   1     1
+13  1 6.40917 1   1   0    0   1     1
+14  1 6.68481 1   1   0    0   1     1
+15  1 6.86415 1   1   0    0   1     1
+16  1 7.49184 1   1   0    0   1     1
+17  1 8.64697 1   1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -66,7 +66,7 @@ Pop.CondInit      2    1
 -----------------------------------
     Algorithms: estimation only
     Number of iterations:  K1=100, K2=100 
-    Number of chains:  5 
+    Number of chains:  1 
     Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -81,15 +81,15 @@ Pop.CondInit      2    1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] lambda    10.2    
-[2,] beta       4.7    
+[1,] lambda    3.9     
+[2,] beta      2.0     
 [3,] a         <NA>    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-     Parameter     Estimate
-[1,] omega2.lambda 0.074   
-[2,] omega2.beta   0.173   
+       Parameter     Estimate
+lambda omega2.lambda 0.029   
+beta   omega2.beta   0.087   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

@@ -69,13 +69,13 @@ end = K1+K2
 options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0)
 rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.ref))
 rtte.ref <- cbind(iterations, rtte.ref)
-# graphConvMC_twokernels(rtte.ref,rtte.ref)
+graphConvMC_twokernels(rtte.ref,rtte.ref)
 
 options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
 rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.avg))
 rtte.avg <- cbind(iterations, rtte.avg)
 
-graphConvMC_twokernels(rtte.ref,rtte.avg)
+graphConvMC_twokernels(rtte.avg,rtte.avg)
 
 final_rwm <- 0
 var_rwm <- 0
@@ -91,7 +91,7 @@ error_mix <- 0
 
 
 seed0 = 39546
-replicate = 40
+replicate = 4
 
 for (j in 1:replicate){
 
@@ -105,7 +105,7 @@ for (j in 1:replicate){
 
   DEFINITION:
   e = {type               = event, 
-       rightCensoringTime = 6,  
+       rightCensoringTime = 20,  
        hazard             = h}
   [INDIVIDUAL]
   input={lambda_pop, o_lambda,beta_pop, o_beta}
@@ -116,46 +116,64 @@ for (j in 1:replicate){
        ")
 
 
-  p <- c(lambda_pop=10, o_lambda=1,
-         beta_pop = 2,o_beta = 1)
+  p <- c(lambda_pop=4, o_lambda= 0.2,
+         beta_pop = 2,o_beta = 0.3)
   h <- list(name='h', time=seq(0, 6, by=1))
   e <- list(name='e', time=0)
 
-  N <- 10
+  N <- 200
   res <- simulx(model     = model2, 
-                settings  = list(seed=123),
+                settings  = list(seed=j*123),
                 parameter = p, 
-                output    = list(h, e), 
+                output    = list(h,e), 
                  group     = list(size = N))
 
-
+res
 writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv")
 head(read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv", header=T, sep=","))
-
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv", header=T, sep=",")
+timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
   saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
   print(j)
-
   options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,map.range=c(0),nbiter.burn =0, av=0,avg=0)
-  rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.ref))
+  rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data,options.ref))
   rtte.ref <- cbind(iterations, rtte.ref)
+  rtte.ref['individual'] <- j
+  final_rwm <- rbind(final_rwm,rtte.ref)
 
   var_rwm <- var_rwm + (rtte.ref[,2:5]-true_param)^2
   ML <- rtte.ref[,2:5]
   ML[1:(end+1),]<- rtte.ref[end+1,2:5]
   error_rwm <- error_rwm + (rtte.ref[,2:5]-ML)^2
-  rtte.ref['individual'] <- j
   
 
-  options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0), av=0,avg=1)
-  rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.avg))
-  rtte.avg <- cbind(iterations, rtte.avg)
-  var_mix <- var_mix + (rtte.avg[,2:5]-true_param)^2
-  ML <- rtte.avg[,2:5]
-  ML[1:(end+1),]<- rtte.avg[end+1,2:5]
-  error_mix <- error_mix + (rtte.avg[,2:5]-ML)^2
-  rtte.avg['individual'] <- j
+  # options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0), av=0,avg=1)
+  # rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data,options.avg))
+  # rtte.avg <- cbind(iterations, rtte.avg)
+  # rtte.avg['individual'] <- j
+  # final_mix <- rbind(final_mix,rtte.avg)
+  # var_mix <- var_mix + (rtte.avg[,2:5]-true_param)^2
+  # ML <- rtte.avg[,2:5]
+  # ML[1:(end+1),]<- rtte.avg[end+1,2:5]
+  # error_mix <- error_mix + (rtte.avg[,2:5]-ML)^2
   
 }
+
+graphConvMC_twokernels(rtte.ref,rtte.ref)
+
+first <- subset(final_rwm, individual==1)
+second <- subset(final_rwm, individual==2)
+
+first[150:end,] - second[150:end,]
+
+
+graphConvMC_diff(final_rwm,final_rwm)
+
+
+
+
+
+
 
 
 error_rwm <- 1/replicate*error_rwm
