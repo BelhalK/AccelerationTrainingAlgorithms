@@ -78,7 +78,7 @@
 #' 
 #' @export saemix
 
-saemix<-function(model,data,control=list()) {
+saemix_avg<-function(model,data,control=list()) {
 
 # Convergence plots during fit (special function, not user-level)
   convplot.infit<-function(allpar,K1,niter=0) {
@@ -213,12 +213,33 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
     xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject)
-    varList<-xstoch$varList
-    mean.phi<-xstoch$mean.phi
-    phi<-xstoch$phi
-    betas<-xstoch$betas
-    suffStat<-xstoch$suffStat
-    
+    if(saemix.options$avg==1){
+      if (kiter>saemix.options$nbiter.saemix[1]){
+        q <- kiter-saemix.options$nbiter.saemix[1]
+        varList<-xstoch$varList
+        var.eta<- (q-1)/q*var.eta+ 1/q*varList$diag.omega
+        varList$omega <- diag(var.eta)
+        mean.phi<- (q-1)/q*mean.phi + 1/q*xstoch$mean.phi
+        phi<- (q-1)/q*phi + 1/q*xstoch$phi
+        betas<- (q-1)/q*betas + 1/q*xstoch$betas
+        suffStat<-xstoch$suffStat
+        if(Dargs$type=="structural") varList$pres <- (q-1)/q*pres + 1/q*varList$pres
+      }else{
+        varList<-xstoch$varList
+        mean.phi<-xstoch$mean.phi
+        phi<-xstoch$phi
+        betas<-xstoch$betas
+        suffStat<-xstoch$suffStat      
+      }
+    }else{
+      varList<-xstoch$varList
+      mean.phi<-xstoch$mean.phi
+      phi<-xstoch$phi
+      betas<-xstoch$betas
+      suffStat<-xstoch$suffStat      
+    }
+
+    pres <- varList$pres
     beta.I<-betas[Uargs$indx.betaI]
     fixed.psi<-transphi(matrix(beta.I,nrow=1),saemix.model["transform.par"])
     betaC<-betas[Uargs$indx.betaC]

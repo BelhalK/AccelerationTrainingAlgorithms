@@ -44,6 +44,7 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	suffStat$statphi3<-suffStat$statphi3+opt$stepsize[kiter]*(stat3/Uargs$nchains-suffStat$statphi3)
 	suffStat$statrese<-suffStat$statrese+opt$stepsize[kiter]*(statr/Uargs$nchains-suffStat$statrese)
 	
+	browser()
 	############# Maximisation
 	##### fixed effects
 	if (opt$flag.fmin && kiter>=opt$nbiter.sa) {

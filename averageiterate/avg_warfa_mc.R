@@ -10,6 +10,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('func_plots.R') 
   source('func_simulations.R') 
   source('main.R')
+  source('main_avg.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R')
   source('main_initialiseMainAlgoavg.R')
@@ -149,8 +150,18 @@ for (m in 1:replicate){
   
 
   
+  # options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0, map.range=c(0))
+  # warfa.avgsa<-data.frame(saemix_avg(saemix.model_warfa,saemix.data_warfa,options.avgsa))
+  # warfa.avgsa <- cbind(iterations, warfa.avgsa)
+  # # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
+  # ML <- warfa.avgsa[,2:8]
+  # ML[1:(end+1),]<- warfa.avgsa[end+1,2:8]
+  # error_mix <- error_mix + (warfa.avgsa[,2:8]-ML)^2
+  # warfa.avgsa['individual'] <- m
+  # final_mix <- rbind(final_mix,warfa.avgsa)
+
   options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0, map.range=c(0))
-  warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg))
+  warfa.avg<-data.frame(saemix_avg(saemix.model_warfa,saemix.data_warfa,options.avg))
   warfa.avg <- cbind(iterations, warfa.avg)
   # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
   ML <- warfa.avg[,2:8]

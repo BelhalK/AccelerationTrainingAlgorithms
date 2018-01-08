@@ -10,6 +10,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('func_plots.R') 
   source('func_simulations.R') 
   source('main.R')
+  source('main_avg.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R')
   source('main_initialiseMainAlgoavg.R')
@@ -44,7 +45,6 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-
 K1 = 100
 K2 = 100
 iterations = 1:(K1+K2+1)
@@ -56,6 +56,10 @@ options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbite
 warfa.ref<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.ref))
 warfa.ref <- cbind(iterations, warfa.ref)
 graphConvMC_twokernels(warfa.ref,warfa.ref)
+
+# options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
+# warfa.avgsa<-data.frame(saemix_avg(saemix.model_warfa,saemix.data_warfa,options.avgsa))
+# warfa.avgsa <- cbind(iterations, warfa.avgsa)
 
 options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
 warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg))
