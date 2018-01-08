@@ -10,6 +10,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('func_plots.R') 
   source('func_simulations.R') 
   source('main.R')
+  source('main_avg.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R')
   source('main_initialiseMainAlgoavg.R')
@@ -67,18 +68,19 @@ end = K1+K2
 
 #With var no sa
 options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0)
-rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.ref))
+rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.ref)$parpop)
 rtte.ref <- cbind(iterations, rtte.ref)
 # graphConvMC_twokernels(rtte.ref,rtte.ref)
 
 options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
-rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.avg))
+rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options.avg)$newparpop)
 rtte.avg <- cbind(iterations, rtte.avg)
 
 # graphConvMC_twokernels(rtte.avg,rtte.avg)
 graphConvMC_twokernels(rtte.ref,rtte.avg)
 
 graphConvMC_twokernels(rtte.ref[K1:end,],rtte.avg[K1:end,])
+graphConvMC_twokernels(rtte.ref[(K1-20):end,],rtte.avg[(K1-20):end,])
 
 options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(1:5), av=0,avg=0)
 rtte_newkernel<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_newkernel))

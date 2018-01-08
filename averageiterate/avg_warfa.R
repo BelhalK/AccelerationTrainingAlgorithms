@@ -46,29 +46,32 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 K1 = 100
-K2 = 100
+K2 = 300
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
 
 #With var no sa
 options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0)
-warfa.ref<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.ref))
+warfa.ref<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.ref)$parpop)
 warfa.ref <- cbind(iterations, warfa.ref)
-graphConvMC_twokernels(warfa.ref,warfa.ref)
+# graphConvMC_twokernels(warfa.ref,warfa.ref)
 
 # options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
 # warfa.avgsa<-data.frame(saemix_avg(saemix.model_warfa,saemix.data_warfa,options.avgsa))
 # warfa.avgsa <- cbind(iterations, warfa.avgsa)
 
 options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1)
-warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg))
+# warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg)$parpop)
+# warfa.avg <- cbind(iterations, warfa.avg)
+warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg)$newparpop)
 warfa.avg <- cbind(iterations, warfa.avg)
 
 # graphConvMC_twokernels(warfa.avg,warfa.avg)
 graphConvMC_twokernels(warfa.ref,warfa.avg)
 
 graphConvMC_twokernels(warfa.ref[K1:end,],warfa.avg[K1:end,])
+graphConvMC_twokernels(warfa.ref[(K1-20):end,],warfa.avg[(K1-20):end,])
 
 options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(1:5), av=0,avg=0)
 warfa_newkernel<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_newkernel))

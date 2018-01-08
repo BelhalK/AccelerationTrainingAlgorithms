@@ -8,7 +8,7 @@
 
   DEFINITION:
 e={type=event,
-       rightCensoringTime = 20,  
+       rightCensoringTime = 6,  
        hazard             = h}
   [INDIVIDUAL]
   input={lambda_pop, o_lambda,beta_pop, o_beta}

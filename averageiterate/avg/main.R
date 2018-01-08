@@ -127,11 +127,7 @@ saemix<-function(model,data,control=list()) {
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
-  if(saemix.options$avg==1){
-    xinit<-initialiseMainAlgoavg(saemix.data,saemix.model,saemix.options)
-  }else{
-    xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
-  }
+  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs
@@ -143,6 +139,15 @@ saemix<-function(model,data,control=list()) {
   betas<-betas.ini<-xinit$betas
   fixed.psi<-xinit$fixedpsi.ini
   var.eta<-varList$diag.omega
+
+  newvarList<-xinit$varList
+  newphiM<-xinit$phiM
+  newmean.phi<-xinit$mean.phi
+  newbetas<-newbetas.ini<-xinit$betas
+  newfixed.psi<-xinit$fixedpsi.ini
+  newvar.eta<-varList$diag.omega
+
+
   if (Dargs$type=="structural"){
     theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
     parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
@@ -160,6 +165,7 @@ saemix<-function(model,data,control=list()) {
   parpop[1,]<-theta0
   allpar[1,]<-xinit$allpar0
   
+  newparpop <- parpop
   # using several Markov chains - only useful if passed back to main routine...
   #   chdat<-new(Class="SaemixRepData",data=saemix.data, nb.chains=saemix.options$nb.chains)
   #   NM<-chdat["NM"]
@@ -169,6 +175,7 @@ saemix<-function(model,data,control=list()) {
   
 # List of sufficient statistics - change during call to stochasticApprox
   suffStat<-list(statphi1=0,statphi2=0,statphi3=0,statrese=0)
+  newsuffStat<-suffStat
   phi<-array(data=0,dim=c(Dargs$N, Uargs$nb.parameters, saemix.options$nb.chains))
 
 # structural model, check nb of parameters
@@ -212,7 +219,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject)
+    xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject,newsuffStat)
     varList<-xstoch$varList
     mean.phi<-xstoch$mean.phi
     phi<-xstoch$phi
@@ -226,6 +233,18 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     l1<-betas.ini
     l1[Uargs$indx.betaI]<-fixed.psi
     l1[Uargs$indx.betaC]<-betaC
+
+    newvarList<-xstoch$newvarList
+    newmean.phi<-xstoch$newmean.phi
+    newphi<-xstoch$newphi
+    newbetas<-xstoch$newbetas
+    newsuffStat<-xstoch$newsuffStat
+
+    newbeta.I<-newbetas[Uargs$indx.betaI]
+    newfixed.psi<-transphi(matrix(newbeta.I,nrow=1),saemix.model["transform.par"])
+    newbetaC<-newbetas[Uargs$indx.betaC]
+    newvar.eta<-mydiag(newvarList$omega)
+
     if(Dargs$type=="structural") {
       allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
     } else{
@@ -236,12 +255,14 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
   if(Dargs$type=="structural") {
     theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+    newtheta<-c(newfixed.psi,newvar.eta[Uargs$i1.omega2],newvarList$pres[Uargs$ind.res])
   } else{
     theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
+    newtheta<-c(newfixed.psi,newvar.eta[Uargs$i1.omega2])
   }
 
   parpop[(kiter+1),]<-theta
-
+  newparpop[(kiter+1),]<-newtheta
 # End of loop on kiter
 }
 
@@ -399,5 +420,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(parpop)
+  return(list(parpop=parpop,newparpop=newparpop))
 }

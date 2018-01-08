@@ -10,6 +10,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('func_plots.R') 
   source('func_simulations.R') 
   source('main.R')
+  source('main_avg.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R')
   source('main_initialiseMainAlgoavg.R')
@@ -60,7 +61,7 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
 ##RUNS
 
 K1 = 100
-K2 = 100
+K2 = 200
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
@@ -80,10 +81,10 @@ graphConvMC_twokernels(rtte.avg,rtte.avg)
 final_rwm <- 0
 var_rwm <- 0
 error_rwm <- 0
-lambda_true = 10
-o_lambda_true = 1
-beta_true = 2
-o_beta_true = 1
+lambda_true <- 2
+o_lambda_true <- 0.3
+beta_true <- 2
+o_beta_true <- 0.3
 final_mix <- 0
 true_param <- c(lambda_true,beta_true,o_lambda_true,o_beta_true)
 var_mix <- 0
@@ -95,7 +96,7 @@ replicate = 4
 
 for (j in 1:replicate){
 
-  model2 <- inlineModel("
+     model2 <- inlineModel("
 
   [LONGITUDINAL]
   input = {beta,lambda}  
@@ -105,7 +106,7 @@ for (j in 1:replicate){
 
   DEFINITION:
   e = {type               = event, 
-       rightCensoringTime = 20,  
+       rightCensoringTime = 6,  
        hazard             = h}
   [INDIVIDUAL]
   input={lambda_pop, o_lambda,beta_pop, o_beta}
@@ -116,64 +117,51 @@ for (j in 1:replicate){
        ")
 
 
-  p <- c(lambda_pop=4, o_lambda= 0.2,
-         beta_pop = 2,o_beta = 0.3)
+  p <- c(lambda_pop=lambda_true, o_lambda= o_lambda_true,
+         beta_pop = beta_true,o_beta = o_beta_true)
   h <- list(name='h', time=seq(0, 6, by=1))
   e <- list(name='e', time=0)
 
-  N <- 200
+  N <- 50
   res <- simulx(model     = model2, 
                 settings  = list(seed=j*123),
                 parameter = p, 
                 output    = list(h,e), 
                  group     = list(size = N))
+  
 
-res
-writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv")
-head(read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv", header=T, sep=","))
-timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte2.csv", header=T, sep=",")
+writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte3avg.csv")
+head(read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte3avg.csv", header=T, sep=","))
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code/rtte/rtte3avg.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
   saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
   print(j)
   options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,map.range=c(0),nbiter.burn =0, av=0,avg=0)
-  rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data,options.ref))
+  rtte.ref<-data.frame(saemix(saemix.model_rtte,saemix.data,options.ref)$parpop)
   rtte.ref <- cbind(iterations, rtte.ref)
   rtte.ref['individual'] <- j
   final_rwm <- rbind(final_rwm,rtte.ref)
 
   var_rwm <- var_rwm + (rtte.ref[,2:5]-true_param)^2
   ML <- rtte.ref[,2:5]
-  ML[1:(end+1),]<- rtte.ref[end+1,2:5]
+  # ML[1:(end+1),]<- rtte.ref[end+1,2:5]
+  ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
   error_rwm <- error_rwm + (rtte.ref[,2:5]-ML)^2
   
 
-  # options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0), av=0,avg=1)
-  # rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data,options.avg))
-  # rtte.avg <- cbind(iterations, rtte.avg)
-  # rtte.avg['individual'] <- j
-  # final_mix <- rbind(final_mix,rtte.avg)
-  # var_mix <- var_mix + (rtte.avg[,2:5]-true_param)^2
-  # ML <- rtte.avg[,2:5]
+  options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0), av=0,avg=1)
+  rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data,options.avg)$newparpop)
+  rtte.avg <- cbind(iterations, rtte.avg)
+  rtte.avg['individual'] <- j
+  final_mix <- rbind(final_mix,rtte.avg)
+  var_mix <- var_mix + (rtte.avg[,2:5]-true_param)^2
+  ML <- rtte.avg[,2:5]
   # ML[1:(end+1),]<- rtte.avg[end+1,2:5]
-  # error_mix <- error_mix + (rtte.avg[,2:5]-ML)^2
-  
+  ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
+  error_mix <- error_mix + (rtte.avg[,2:5]-ML)^2
+
+  print(rtte.ref[50:K1,2:5] - rtte.avg[50:K1,2:5])
 }
-
-graphConvMC_twokernels(rtte.ref,rtte.ref)
-
-first <- subset(final_rwm, individual==1)
-second <- subset(final_rwm, individual==2)
-
-first[150:end,] - second[150:end,]
-
-
-graphConvMC_diff(final_rwm,final_rwm)
-
-
-
-
-
-
 
 
 error_rwm <- 1/replicate*error_rwm
@@ -246,6 +234,11 @@ d <- graphConvMC_se2(err_rwm[K1:end,c(1,4,6)],err_mix[K1:end,c(1,4,6)])
 
 grid.arrange(c,d, ncol=2)
 
+
+c <- graphConvMC_se1(err_rwm[(K1-30):end,c(1,2,6)],err_mix[(K1-30):end,c(1,2,6)])
+d <- graphConvMC_se2(err_rwm[(K1-30):end,c(1,4,6)],err_mix[(K1-30):end,c(1,4,6)])
+
+grid.arrange(c,d, ncol=2)
 
 c <- graphConvMC_se1(err_rwm[-1,c(1,2,6)],err_mix[-1,c(1,2,6)])
 d <- graphConvMC_se2(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)])
