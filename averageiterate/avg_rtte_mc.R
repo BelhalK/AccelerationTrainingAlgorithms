@@ -91,8 +91,22 @@ var_mix <- 0
 error_mix <- 0
 
 
+var_rwm <- 0
+error_rwm <- 0
+
+
+var_mix <- 0
+error_mix <- 0
+
+var_avgsa <- 0
+error_avgsa <- 0
+
+final_rwm <- 0
+final_mix <- 0
+final_avgsa <- 0
+
 seed0 = 39546
-replicate = 4
+replicate = 30
 
 for (j in 1:replicate){
 
@@ -144,10 +158,21 @@ timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 
   var_rwm <- var_rwm + (rtte.ref[,2:5]-true_param)^2
   ML <- rtte.ref[,2:5]
-  # ML[1:(end+1),]<- rtte.ref[end+1,2:5]
-  ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
+  ML[1:(end+1),]<- rtte.ref[end+1,2:5]
+  # ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
   error_rwm <- error_rwm + (rtte.ref[,2:5]-ML)^2
   
+
+  options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
+  rtte.avgsa<-data.frame(saemix_avg(saemix.model_rtte,saemix.data,options.avgsa))
+  rtte.avgsa <- cbind(iterations, rtte.avgsa)
+  # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
+  ML <- rtte.avgsa[,2:5]
+  ML[1:(end+1),]<- rtte.avgsa[end+1,2:5]
+  error_avgsa <- error_avgsa + (rtte.avgsa[,2:5]-ML)^2
+  rtte.avgsa['individual'] <- j
+  final_avgsa <- rbind(final_avgsa,rtte.avgsa)
+
 
   options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0), av=0,avg=1)
   rtte.avg<-data.frame(saemix(saemix.model_rtte,saemix.data,options.avg)$newparpop)
@@ -156,8 +181,8 @@ timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
   final_mix <- rbind(final_mix,rtte.avg)
   var_mix <- var_mix + (rtte.avg[,2:5]-true_param)^2
   ML <- rtte.avg[,2:5]
-  # ML[1:(end+1),]<- rtte.avg[end+1,2:5]
-  ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
+  ML[1:(end+1),]<- rtte.avg[end+1,2:5]
+  # ML[1:(end+1),] <- do.call("rbind", replicate(nrow(ML), true_param, simplify = FALSE))
   error_mix <- error_mix + (rtte.avg[,2:5]-ML)^2
 
   print(rtte.ref[50:K1,2:5] - rtte.avg[50:K1,2:5])
@@ -166,16 +191,21 @@ timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
+error_avgsa <- 1/replicate*error_avgsa
 
 error_rwm <- cbind(iterations, error_rwm)
 error_mix <- cbind(iterations, error_mix)
+error_avgsa <- cbind(iterations, error_avgsa)
 
 err_mix<- rtte.ref
 err_rwm<- rtte.ref
+err_avgsa<- rtte.ref
+
 err_rwm[,2:5] <- error_rwm[,2:5]
 err_mix[,2:5] <- error_mix[,2:5]
+err_avgsa[,2:5] <- error_avgsa[,2:5]
 
-err_mix[2,] = err_rwm[2,]
+err_mix[2,] = err_rwm[2,] = err_avgsa[2,]
 
 graphConvMC_se1 <- function(df,df2, title=NULL, ylim=NULL)
 {
@@ -222,27 +252,59 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
     graf[[o[j]]] <- grafj
 
   }
+
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
+graphConvMC_se3 <- function(df,df2,df3, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  df3$individual <- as.factor(df3$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="green",linetype = 2,size=2)+
+      xlab("") + ylab(expression(paste(omega,".",lambda)))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=15, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=30)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+ do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
 # graphConvMC_diff2(err_rwm[-1,c(1,2,4,6)],err_mix[-1,c(1,2,4,6)], title="Quadratic errors RTTE")
 # graphConvMC_diff2(err_rwm[-1,c(1,2,4,6)],err_mix[-1,c(1,2,4,6)])
 
 
 c <- graphConvMC_se1(err_rwm[K1:end,c(1,2,6)],err_mix[K1:end,c(1,2,6)])
 d <- graphConvMC_se2(err_rwm[K1:end,c(1,4,6)],err_mix[K1:end,c(1,4,6)])
+e <- graphConvMC_se3(err_rwm[K1:end,c(1,2,6)],err_mix[K1:end,c(1,2,6)],err_avgsa[K1:end,c(1,2,6)])
+f <- graphConvMC_se3(err_rwm[K1:end,c(1,4,6)],err_mix[K1:end,c(1,4,6)],err_avgsa[K1:end,c(1,4,6)])
 
 grid.arrange(c,d, ncol=2)
+grid.arrange(e,f, ncol=2)
 
 
 c <- graphConvMC_se1(err_rwm[(K1-30):end,c(1,2,6)],err_mix[(K1-30):end,c(1,2,6)])
 d <- graphConvMC_se2(err_rwm[(K1-30):end,c(1,4,6)],err_mix[(K1-30):end,c(1,4,6)])
+e <- graphConvMC_se3(err_rwm[(K1-30):end,c(1,2,6)],err_mix[(K1-30):end,c(1,2,6)],err_avgsa[(K1-30):end,c(1,2,6)])
+f <- graphConvMC_se3(err_rwm[(K1-30):end,c(1,4,6)],err_mix[(K1-30):end,c(1,4,6)],err_avgsa[(K1-30):end,c(1,4,6)])
 
 grid.arrange(c,d, ncol=2)
+grid.arrange(e,f, ncol=2)
 
 c <- graphConvMC_se1(err_rwm[-1,c(1,2,6)],err_mix[-1,c(1,2,6)])
 d <- graphConvMC_se2(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)])
-
+e <- graphConvMC_se3(err_rwm[-1,c(1,2,6)],err_mix[-1,c(1,2,6)],err_avgsa[-1,c(1,2,6)])
+f <- graphConvMC_se3(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)],err_avgsa[-1,c(1,4,6)])
 grid.arrange(c,d, ncol=2)
 
 

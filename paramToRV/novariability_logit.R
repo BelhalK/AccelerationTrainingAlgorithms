@@ -37,7 +37,7 @@ model1cpt<-function(psi,id,xidep) {
 
 
 saemix.model_logit<-saemixModel(model=model1cpt,description="logitrin",type="structural"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(c(2,2,2),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
@@ -49,7 +49,7 @@ saemix.model_logitnovar<-saemixModel(model=model1cpt,description="logitrin",type
   byrow=TRUE))
 
 
-K1 = 700
+K1 = 300
 K2 = 300
 iterations = 1:(K1+K2+1)
 end = K1+K2
@@ -59,6 +59,7 @@ end = K1+K2
 options_logit_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 logit_without<-data.frame(saemix(saemix.model_logit,saemix.data_logit,options_logit_without))
 logit_without <- cbind(iterations, logit_without)
+
 
 graphConvMC_twokernels(logit_without,logit_without)
 

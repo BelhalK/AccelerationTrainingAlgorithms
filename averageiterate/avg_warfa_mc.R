@@ -86,7 +86,7 @@ final_rwm <- 0
 final_mix <- 0
 final_avgsa <- 0
 
-replicate <- 10
+replicate <- 30
 for (m in 1:replicate){
   setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin")
   model<-"warfarin_project_model.txt"
