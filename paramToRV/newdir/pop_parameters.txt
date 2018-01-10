@@ -27,37 +27,37 @@ First 10 lines of data:
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  logitrin  Model type:  structural
+  Model function:  logitrin
 function(psi,id,xidep) { 
   tim<-xidep[,1]  
   p0<-psi[id,1]
   alpha<-psi[id,2]
   tau<-psi[id,3]
-  ypred<-1/(1+((1/p0)-1)*exp(-alpha*(tim-tau)/(p0*(1-p0))))
+  ypred<- 1/(1+((1/p0)-1)*exp(-alpha*(tim-tau)/(p0*(1-p0))))
   return(ypred)
 }
   Nb of parameters: 3 
-      parameter names:  ka V k 
+      parameter names:  p0 alpha tau 
       distribution:
      Parameter Distribution Estimated
-[1,] ka        log-normal   Estimated
-[2,] V         log-normal   Estimated
-[3,] k         log-normal   Estimated
+[1,] p0        logit        Estimated
+[2,] alpha     probit       Estimated
+[3,] tau       log-normal   Estimated
   Variance-covariance matrix:
-   ka V k
-ka  1 0 0
-V   0 1 0
-k   0 0 1
+      p0 alpha tau
+p0     1     0   0
+alpha  0     1   0
+tau    0     0   0
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka V k
-Pop.CondInit  2 2 2
+              p0 alpha tau
+Pop.CondInit 0.6  0.05  60
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=300, K2=300 
+    Number of iterations:  K1=400, K2=200 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -73,21 +73,19 @@ Pop.CondInit  2 2 2
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         0.503  
-[2,] V          0.041  
-[3,] k         76.659  
+[1,] p0         0.433  
+[2,] alpha      0.029  
+[3,] tau       73.789  
 [4,] a          0.010  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-   Parameter Estimate
-ka omega2.ka 0.0674  
-V  omega2.V  0.2602  
-k  omega2.k  0.0076  
+      Parameter    Estimate
+p0    omega2.p0    2.34    
+alpha omega2.alpha 0.08    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.k
-omega2.ka 1         0        0       
-omega2.V  0         1        0       
-omega2.k  0         0        1       
+             omega2.p0 omega2.alpha
+omega2.p0    1         0           
+omega2.alpha 0         1           

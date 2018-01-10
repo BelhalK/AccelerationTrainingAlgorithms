@@ -87,7 +87,6 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 			vec2<-varList$diag.omega[Uargs$i1.omega2]*opt$alpha1.sa
 			idx<-as.integer(vec1<vec2)
 			varList$diag.omega[Uargs$i1.omega2]<-idx*vec2+(1-idx)*vec1
-			varList$diag.omega[Uargs$i0.omega2]<-varList$diag.omega[Uargs$i0.omega2]*opt$alpha0.sa
 		} else {
 			varList$diag.omega<-mydiag(varList$omega)
 		}

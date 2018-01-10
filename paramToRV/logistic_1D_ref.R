@@ -14,21 +14,22 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 
+
 saemix.model_logit<-saemixModel(model=model1cpt,description="logitrin"
-  ,psi0=matrix(c(1,7,1),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+  ,psi0=matrix(c(0.6,0.05,60),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
+  transform.par=c(3,2,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
 saemix.model_logitnovar<-saemixModel(model=model1cpt,description="logitrin"
-  ,psi0=matrix(c(1,7,1),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(0,0,0,0,1,0,0,0,1),ncol=3, 
+  ,psi0=matrix(c(0.6,0.05,60),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
+  transform.par=c(3,2,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,0),ncol=3, 
   byrow=TRUE))
 
 
-K1 = 500
-K2 = 500
+K1 = 400
+K2 = 200
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
