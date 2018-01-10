@@ -9,23 +9,22 @@ model1cpt<-function(psi,id,xidep) {
   p0<-psi[id,1]
   alpha<-psi[id,2]
   tau<-psi[id,3]
-  ypred<- 1/(1+((1/p0)-1)*exp(-alpha*(tim-tau)/(p0*(1-p0))))
+  ypred<-1/( 1 + ((1/p0)-1)*exp( - alpha*(tim-tau)/(p0*(1-p0)) ) )
   return(ypred)
 }
 
 
-
 saemix.model_logit<-saemixModel(model=model1cpt,description="logitrin"
   ,psi0=matrix(c(0.6,0.05,60),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
-  transform.par=c(3,2,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+  transform.par=c(3,1,0),omega.init=matrix(c(1,0,0,0,1,0,0,0,100),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE))
+  byrow=TRUE),error.model="constant")
 
 saemix.model_logitnovar<-saemixModel(model=model1cpt,description="logitrin"
   ,psi0=matrix(c(0.6,0.05,60),ncol=3,byrow=TRUE, dimnames=list(NULL, c("p0","alpha","tau"))),
-  transform.par=c(3,2,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,0),ncol=3, 
-  byrow=TRUE))
+  transform.par=c(3,1,0),omega.init=matrix(c(1,0,0,0,1,0,0,0,100),ncol=3,byrow=TRUE),
+  covariance.model=matrix(c(0,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")
 
 
 K1 = 400

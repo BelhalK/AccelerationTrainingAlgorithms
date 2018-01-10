@@ -207,6 +207,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   phiM<-xmcmc$phiM
   #  psiM<-transphi(phiM,saemix.model["transform.par"])
   # M-step
+  
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
   	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject)

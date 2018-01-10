@@ -412,6 +412,7 @@ if(Dargs$type=="structural"){
 
 }
 	
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))
 }

@@ -27,13 +27,13 @@ First 10 lines of data:
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  logitrin
+  Model function:  logitrin  Model type:  structural
 function(psi,id,xidep) { 
   tim<-xidep[,1]  
   p0<-psi[id,1]
   alpha<-psi[id,2]
   tau<-psi[id,3]
-  ypred<- 1/(1+((1/p0)-1)*exp(-alpha*(tim-tau)/(p0*(1-p0))))
+  ypred<-1/(1+((1/p0)-1)*exp(-alpha*(tim-tau)/(p0*(1-p0))))
   return(ypred)
 }
   Nb of parameters: 3 
@@ -41,13 +41,13 @@ function(psi,id,xidep) {
       distribution:
      Parameter Distribution Estimated
 [1,] p0        logit        Estimated
-[2,] alpha     probit       Estimated
-[3,] tau       log-normal   Estimated
+[2,] alpha     log-normal   Estimated
+[3,] tau       normal       Estimated
   Variance-covariance matrix:
       p0 alpha tau
-p0     1     0   0
+p0     0     0   0
 alpha  0     1   0
-tau    0     0   0
+tau    0     0   1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
@@ -57,7 +57,7 @@ Pop.CondInit 0.6  0.05  60
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=400, K2=200 
+    Number of iterations:  K1=80, K2=1 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -73,19 +73,19 @@ Pop.CondInit 0.6  0.05  60
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] p0         0.433  
-[2,] alpha      0.029  
-[3,] tau       73.789  
+[1,] p0         0.233  
+[2,] alpha      0.032  
+[3,] tau       69.274  
 [4,] a          0.010  
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-p0    omega2.p0    2.34    
-alpha omega2.alpha 0.08    
+alpha omega2.alpha  0.28   
+tau   omega2.tau   43.50   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.p0 omega2.alpha
-omega2.p0    1         0           
-omega2.alpha 0         1           
+             omega2.alpha omega2.tau
+omega2.alpha 1            0         
+omega2.tau   0            1         

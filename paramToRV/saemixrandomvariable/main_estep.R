@@ -33,7 +33,7 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
-	
+
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	etaM0<-phiM[1,varList$ind0.eta]-mean.phiM[1,varList$ind0.eta,drop=FALSE]
 	phiMc<-phiM
@@ -134,14 +134,18 @@ if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 		# browser()
 			etaMc0 <- matrix(rnorm(length(varList$ind0.eta)),ncol=length(varList$ind0.eta))%*%chol.omega0
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+			if(length(varList$ind0.eta)>1){
+				phiMc[,varList$ind0.eta]<-sweep(mean.phiM[,varList$ind0.eta],2,etaMc0,FUN = "+")
+			}
 			phiMc[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaMc0
+
 			if(Dargs$type=="structural"){
 				Uc0.y<-sum(compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF))
 			} else {
 				Uc0.y<-sum(compute.LLy_d(phiMc,Uargs,Dargs,DYF))
 			}
 			delt<-Uc0.y-U0.y
-			ind<-which(delt<(-1)*log(runif(length(varList$ind0.eta))))
+			ind<-which(delt<(-1)*log(runif(1)))
 			print(ind)
 			etaM0[ind,]<-etaMc0[ind,]
 			U0.y[ind]<-Uc0.y[ind]
@@ -468,8 +472,11 @@ if(Dargs$type=="structural"){
 
 }
 	
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	if(opt$flag.fmin){
+		if(length(varList$ind0.eta)>1){
+			phiM[,varList$ind0.eta]<-sweep(mean.phiM[,varList$ind0.eta],2,etaM0, FUN = "+")
+			}
 		phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaM0
 	}
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))

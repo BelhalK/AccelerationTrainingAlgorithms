@@ -153,7 +153,7 @@ saemix<-function(model,data,control=list()) {
     allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)))
     colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"])
   }
-
+  
   parpop[1,]<-theta0
   allpar[1,]<-xinit$allpar0
   

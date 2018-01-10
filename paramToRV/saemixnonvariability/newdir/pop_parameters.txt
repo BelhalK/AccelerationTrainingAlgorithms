@@ -41,23 +41,23 @@ function(psi,id,xidep) {
       distribution:
      Parameter Distribution Estimated
 [1,] p0        logit        Estimated
-[2,] alpha     probit       Estimated
-[3,] tau       log-normal   Estimated
+[2,] alpha     log-normal   Estimated
+[3,] tau       normal       Estimated
   Variance-covariance matrix:
       p0 alpha tau
-p0     1     0   0
+p0     0     0   0
 alpha  0     1   0
-tau    0     0   0
+tau    0     0   1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-              p0 alpha tau
-Pop.CondInit 0.6  0.05  60
+               p0 alpha tau
+Pop.CondInit 0.25  0.05  60
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=400, K2=200 
+    Number of iterations:  K1=80, K2=1 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -73,19 +73,19 @@ Pop.CondInit 0.6  0.05  60
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] p0         0.453  
-[2,] alpha      0.029  
-[3,] tau       74.178  
-[4,] a          0.010  
+[1,] p0         0.2371 
+[2,] alpha      0.0324 
+[3,] tau       69.4984 
+[4,] a          0.0099 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
       Parameter    Estimate
-p0    omega2.p0    2.37    
-alpha omega2.alpha 0.08    
+alpha omega2.alpha  0.29   
+tau   omega2.tau   46.09   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.p0 omega2.alpha
-omega2.p0    1         0           
-omega2.alpha 0         1           
+             omega2.alpha omega2.tau
+omega2.alpha 1            0         
+omega2.tau   0            1         
