@@ -115,7 +115,7 @@ logit_newkernelsa <- cbind(iterations, logit_newkernelsa)
 graphConvMC_twokernelslog(logit_withsa,logit_newkernelsa)
 
 #No var av
-options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=1)
+options_logit_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=1)
 logit_withav<-data.frame(saemix(saemix.model_logitnovar,saemix.data_logit,options_logit_with))
 logit_withav <- cbind(iterations, logit_withav)
 

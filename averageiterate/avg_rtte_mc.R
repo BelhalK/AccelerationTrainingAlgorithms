@@ -14,7 +14,8 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
   source('main_estep.R')
   source('main_initialiseMainAlgo.R')
   source('main_initialiseMainAlgoavg.R')
-  source('main_mstep.R') 
+  source('main_mstep.R')
+  source('main_mstep_avg.R') 
   source('SaemixData.R')
   source('SaemixModel.R') 
   source('SaemixRes.R') 
@@ -306,7 +307,7 @@ d <- graphConvMC_se2(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)])
 e <- graphConvMC_se3(err_rwm[-1,c(1,2,6)],err_mix[-1,c(1,2,6)],err_avgsa[-1,c(1,2,6)])
 f <- graphConvMC_se3(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)],err_avgsa[-1,c(1,4,6)])
 grid.arrange(c,d, ncol=2)
-
+grid.arrange(e,f, ncol=2)
 
 
 

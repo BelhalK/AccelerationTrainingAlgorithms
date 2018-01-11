@@ -14,7 +14,7 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 	somega<-solve(omega.eta)
 	saemix.options<-saemixObject["options"]
 
-	if(opt$flag.fmin){
+	if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 		omega0.eta <- varList$omega[varList$ind0.eta,varList$ind0.eta,drop=FALSE]
 		chol.omega0<-try(chol(omega0.eta))
 		somega0<-solve(omega0.eta)
@@ -136,8 +136,9 @@ if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 			if(length(varList$ind0.eta)>1){
 				phiMc[,varList$ind0.eta]<-sweep(mean.phiM[,varList$ind0.eta],2,etaMc0,FUN = "+")
+			} else{
+				phiMc[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaMc0
 			}
-			phiMc[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaMc0
 
 			if(Dargs$type=="structural"){
 				Uc0.y<-sum(compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF))
@@ -473,11 +474,12 @@ if(Dargs$type=="structural"){
 }
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	if(opt$flag.fmin){
+	if(opt$flag.fmin & opt$nbiter.mcmc[4]>0){
 		if(length(varList$ind0.eta)>1){
 			phiM[,varList$ind0.eta]<-sweep(mean.phiM[,varList$ind0.eta],2,etaM0, FUN = "+")
-			}
-		phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaM0
+			} else{
+			phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]+etaM0
+		}
 	}
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))
 }

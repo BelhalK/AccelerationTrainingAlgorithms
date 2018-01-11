@@ -49,8 +49,8 @@ saemix.model_logitnovar<-saemixModel(model=model1cpt,description="logitrin",type
   byrow=TRUE))
 
 
-K1 = 80
-K2 = 1
+K1 = 200
+K2 = 10
 iterations = 1:(K1+K2+1)
 end = K1+K2
 

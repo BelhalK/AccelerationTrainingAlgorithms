@@ -37,11 +37,10 @@ model1cpt<-function(psi,id,xidep) {
   beta<-psi[id,5]
   CL<-alpha*V^beta
   k<-CL/V
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-  # ypred<-dose*ka/(V*(ka-k))*(exp(-k*(tim-T))-exp(-ka*(tim-T)))
+  # ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*(tim-T))-exp(-ka*(tim-T)))
   return(ypred)
 }
-
 
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
@@ -67,6 +66,7 @@ K1 = 400
 K2 = 200
 iterations = 1:(K1+K2+1)
 end = K1+K2
+
 
 
 #With var no sa

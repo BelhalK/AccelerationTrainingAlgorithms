@@ -143,7 +143,7 @@ for (m in 1:replicate){
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 
-  options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0, map.range=c(0))
+  options.ref<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=0, map.range=c(0))
   warfa.ref<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.ref)$parpop)
   warfa.ref <- cbind(iterations, warfa.ref)
   # var_rwm <- var_rwm + (warfa.ref[,2:8]-true_param)^2
@@ -153,7 +153,7 @@ for (m in 1:replicate){
   warfa.ref['individual'] <- j
   final_rwm <- rbind(final_rwm,warfa.ref)
   
-  options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
+  options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
   warfa.avgsa<-data.frame(saemix_avg(saemix.model_warfa,saemix.data_warfa,options.avgsa))
   warfa.avgsa <- cbind(iterations, warfa.avgsa)
   # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
@@ -163,7 +163,7 @@ for (m in 1:replicate){
   warfa.avgsa['individual'] <- m
   final_avgsa <- rbind(final_avgsa,warfa.avgsa)
 
-  options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,6), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
+  options.avg<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
   warfa.avg<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options.avg)$newparpop)
   warfa.avg <- cbind(iterations, warfa.avg)
   # var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
@@ -176,7 +176,11 @@ for (m in 1:replicate){
   print(warfa.ref[50:K1,2:8] - warfa.avg[50:K1,2:8])
 
 }
+ML_rwm <- subset(final_rwm, iterations=200)
+ML_avg <- subset(final_mix, iterations=200)
+ML_avgsa <- subset(final_avgsa, iterations=200)
 
+graphConvMC_twokernels(warfa.ref,warfa.avg)
 
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
@@ -281,16 +285,18 @@ d <- graphConvMC_diff3(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)])
 e <- graphConvMC_diff5(a[K1:end,c(1,3,9)],b[K1:end,c(1,3,9)],avgsa[K1:end,c(1,3,9)])
 f <- graphConvMC_diff5(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)],avgsa[K1:end,c(1,6,9)])
 
-grid.arrange(c,d, ncol=2)
+# grid.arrange(c,d, ncol=2)
 grid.arrange(e,f, ncol=2)
 
 c <- graphConvMC_diff3(a[(K1-30):end,c(1,3,9)],b[(K1-30):end,c(1,3,9)])
 d <- graphConvMC_diff3(a[(K1-30):end,c(1,6,9)],b[(K1-30):end,c(1,6,9)])
-e <- graphConvMC_diff5(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)],avgsa[K1:end,c(1,6,9)])
+e <- graphConvMC_diff5(a[(K1-30):end,c(1,3,9)],b[(K1-30):end,c(1,3,9)],avgsa[(K1-30):end,c(1,3,9)])
+f <- graphConvMC_diff5(a[(K1-30):end,c(1,6,9)],b[(K1-30):end,c(1,6,9)],avgsa[(K1-30):end,c(1,6,9)])
 grid.arrange(c,d, ncol=2)
 
 
 c <- graphConvMC_diff3(a[1:end,c(1,3,9)],b[1:end,c(1,3,9)])
 d <- graphConvMC_diff3(a[1:end,c(1,6,9)],b[1:end,c(1,6,9)])
-
+e <- graphConvMC_diff5(a[1:end,c(1,3,9)],b[1:end,c(1,3,9)],avgsa[1:end,c(1,3,9)])
+f <- graphConvMC_diff5(a[1:end,c(1,6,9)],b[1:end,c(1,6,9)],avgsa[1:end,c(1,6,9)])
 grid.arrange(c,d, ncol=2)
