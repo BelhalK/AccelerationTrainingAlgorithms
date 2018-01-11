@@ -190,6 +190,15 @@ timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 }
 
 
+ML_rwm <- subset(final_rwm, iterations==300)
+ML_avg <- subset(final_mix, iterations==300)
+ML_avgsa <- subset(final_avgsa, iterations==300)
+
+graphConvMC_diff(final_rwm,final_rwm, title="ref")
+graphConvMC_diff(final_mix,final_mix, title="avg")
+graphConvMC_diff(final_avgsa,final_avgsa, title="avgsa")
+
+
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
 error_avgsa <- 1/replicate*error_avgsa
@@ -309,6 +318,13 @@ f <- graphConvMC_se3(err_rwm[-1,c(1,4,6)],err_mix[-1,c(1,4,6)],err_avgsa[-1,c(1,
 grid.arrange(c,d, ncol=2)
 grid.arrange(e,f, ncol=2)
 
+
+first <- graphConvMC_se3(err_rwm[(K1-50):end,c(1,2,6)],err_mix[(K1-50):end,c(1,2,6)],err_avgsa[(K1-50):end,c(1,2,6)])
+second <- graphConvMC_se3(err_rwm[(K1-50):end,c(1,3,6)],err_mix[(K1-50):end,c(1,3,6)],err_avgsa[(K1-50):end,c(1,3,6)])
+third <- graphConvMC_se3(err_rwm[(K1-50):end,c(1,4,6)],err_mix[(K1-50):end,c(1,4,6)],err_avgsa[(K1-50):end,c(1,4,6)])
+fourth <- graphConvMC_se3(err_rwm[(K1-50):end,c(1,5,6)],err_mix[(K1-50):end,c(1,5,6)],err_avgsa[(K1-50):end,c(1,5,6)])
+
+grid.arrange(first,second,third,fourth, ncol=2)
 
 
 

@@ -86,7 +86,7 @@ final_rwm <- 0
 final_mix <- 0
 final_avgsa <- 0
 
-replicate <- 30
+replicate <- 50
 for (m in 1:replicate){
   setwd("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin")
   model<-"warfarin_project_model.txt"
@@ -138,8 +138,7 @@ for (m in 1:replicate){
   rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 
   setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/averageiterate/avg")
-  warfarin.saemix_less <- warfarin.saemix[,]
-  saemix.data_warfa<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  saemix.data_warfa<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 
@@ -150,7 +149,7 @@ for (m in 1:replicate){
   ML <- warfa.ref[,2:8]
   ML[1:(end+1),]<- warfa.ref[end+1,2:8]
   error_rwm <- error_rwm + (warfa.ref[,2:8]-ML)^2
-  warfa.ref['individual'] <- j
+  warfa.ref['individual'] <- m
   final_rwm <- rbind(final_rwm,warfa.ref)
   
   options.avgsa<-list(seed=39546,map=F,fim=F,ll.is=F,nb.chains = 1,nbiter.mcmc = c(2,2,2,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,avg=1, map.range=c(0))
@@ -176,11 +175,14 @@ for (m in 1:replicate){
   print(warfa.ref[50:K1,2:8] - warfa.avg[50:K1,2:8])
 
 }
-ML_rwm <- subset(final_rwm, iterations=200)
-ML_avg <- subset(final_mix, iterations=200)
-ML_avgsa <- subset(final_avgsa, iterations=200)
 
-graphConvMC_twokernels(warfa.ref,warfa.avg)
+ML_rwm <- subset(final_rwm, iterations==200)
+ML_avg <- subset(final_mix, iterations==200)
+ML_avgsa <- subset(final_avgsa, iterations==200)
+
+graphConvMC_diff(final_rwm,final_rwm, title="ref")
+graphConvMC_diff(final_mix,final_mix, title="avg")
+graphConvMC_diff(final_avgsa,final_avgsa, title="avgsa")
 
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
@@ -205,6 +207,26 @@ a <- err_rwm[-1,]
 b <- err_mix[-1,]
 avgsa <- err_avgsa[-1,]
 
+graphConvMC_diff <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+
+      xlab("iteration")+ ylab(names(df[j]))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "grey"))
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=3, top=title))
+}
 
 graphConvMC_diff3 <- function(df,df2, title=NULL, ylim=NULL)
 {
@@ -285,6 +307,9 @@ d <- graphConvMC_diff3(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)])
 e <- graphConvMC_diff5(a[K1:end,c(1,3,9)],b[K1:end,c(1,3,9)],avgsa[K1:end,c(1,3,9)])
 f <- graphConvMC_diff5(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)],avgsa[K1:end,c(1,6,9)])
 
+e <- graphConvMC_diff5(a[K1:end,c(1,2,9)],b[K1:end,c(1,2,9)],avgsa[K1:end,c(1,2,9)])
+f <- graphConvMC_diff5(a[K1:end,c(1,5,9)],b[K1:end,c(1,5,9)],avgsa[K1:end,c(1,5,9)])
+
 # grid.arrange(c,d, ncol=2)
 grid.arrange(e,f, ncol=2)
 
@@ -300,3 +325,28 @@ d <- graphConvMC_diff3(a[1:end,c(1,6,9)],b[1:end,c(1,6,9)])
 e <- graphConvMC_diff5(a[1:end,c(1,3,9)],b[1:end,c(1,3,9)],avgsa[1:end,c(1,3,9)])
 f <- graphConvMC_diff5(a[1:end,c(1,6,9)],b[1:end,c(1,6,9)],avgsa[1:end,c(1,6,9)])
 grid.arrange(c,d, ncol=2)
+
+
+
+l <- graphConvMC_diff5(a[K1:end,c(1,2,9)],b[K1:end,c(1,2,9)],avgsa[K1:end,c(1,2,9)])
+j <- graphConvMC_diff5(a[K1:end,c(1,3,9)],b[K1:end,c(1,3,9)],avgsa[K1:end,c(1,3,9)])
+c <- graphConvMC_diff5(a[K1:end,c(1,4,9)],b[K1:end,c(1,4,9)],avgsa[K1:end,c(1,4,9)])
+d <- graphConvMC_diff5(a[K1:end,c(1,5,9)],b[K1:end,c(1,5,9)],avgsa[K1:end,c(1,5,9)])
+e <- graphConvMC_diff5(a[K1:end,c(1,6,9)],b[K1:end,c(1,6,9)],avgsa[K1:end,c(1,6,9)])
+f <- graphConvMC_diff5(a[K1:end,c(1,7,9)],b[K1:end,c(1,7,9)],avgsa[K1:end,c(1,7,9)])
+
+
+grid.arrange(l,j,c,d,e,f, ncol=3)
+
+l <- graphConvMC_diff5(a[(K1-30):end,c(1,2,9)],b[(K1-30):end,c(1,2,9)],avgsa[(K1-30):end,c(1,2,9)])
+j <- graphConvMC_diff5(a[(K1-30):end,c(1,3,9)],b[(K1-30):end,c(1,3,9)],avgsa[(K1-30):end,c(1,3,9)])
+c <- graphConvMC_diff5(a[(K1-30):end,c(1,4,9)],b[(K1-30):end,c(1,4,9)],avgsa[(K1-30):end,c(1,4,9)])
+d <- graphConvMC_diff5(a[(K1-30):end,c(1,5,9)],b[(K1-30):end,c(1,5,9)],avgsa[(K1-30):end,c(1,5,9)])
+e <- graphConvMC_diff5(a[(K1-30):end,c(1,6,9)],b[(K1-30):end,c(1,6,9)],avgsa[(K1-30):end,c(1,6,9)])
+f <- graphConvMC_diff5(a[(K1-30):end,c(1,7,9)],b[(K1-30):end,c(1,7,9)],avgsa[(K1-30):end,c(1,7,9)])
+
+
+grid.arrange(l,j,c,d,e,f, ncol=3)
+
+
+

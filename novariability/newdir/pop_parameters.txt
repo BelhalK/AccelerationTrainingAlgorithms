@@ -8,21 +8,21 @@ Dataset timetoevent.saemix
     Structured data: y ~ time + y | id 
     X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     50 
-    number of observations: 1573 
-    average/min/max nb obs: 31.46  /  3  /  366 
+    number of subjects:     10 
+    number of observations: 1395 
+    average/min/max nb obs: 139.50  /  4  /  678 
 First 10 lines of data:
-   id    time y y.1 mdv cens occ ytype
-2   1 0.00000 0   0   0    0   1     1
-5   1 2.04523 1   1   0    0   1     1
-6   1 2.39526 1   1   0    0   1     1
-9   1 4.88725 1   1   0    0   1     1
-11  1 5.35820 1   1   0    0   1     1
-12  1 5.71656 1   1   0    0   1     1
-13  1 5.93294 1   1   0    0   1     1
-15  1 6.00000 0   0   0    0   1     1
-17  2 0.00000 0   0   0    0   1     1
-21  2 3.40265 1   1   0    0   1     1
+   id     time y y.1 mdv cens occ ytype
+2   1  0.00000 0   0   0    0   1     1
+10  1  7.92616 1   1   0    0   1     1
+12  1  8.46442 1   1   0    0   1     1
+16  1 11.54491 1   1   0    0   1     1
+18  1 12.55560 1   1   0    0   1     1
+19  1 12.81918 1   1   0    0   1     1
+21  1 13.22396 1   1   0    0   1     1
+22  1 13.67687 1   1   0    0   1     1
+24  1 14.24701 1   1   0    0   1     1
+25  1 14.37813 1   1   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -54,7 +54,7 @@ function(psi,id,xidep) {
 [2,] beta      log-normal   Estimated
   Variance-covariance matrix:
        lambda beta
-lambda      1    0
+lambda      0    0
 beta        0    1
   Error model: constant , initial values: a=1 
     No covariate in the model.
@@ -65,8 +65,8 @@ Pop.CondInit      2    1
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=100, K2=200 
-    Number of chains:  1 
+    Number of iterations:  K1=150, K2=20 
+    Number of chains:  5 
     Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -81,18 +81,16 @@ Pop.CondInit      2    1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] lambda    2.1     
-[2,] beta      2.4     
-[3,] a         <NA>    
+[1,] lambda    1.8e+308
+[2,] beta       1.4e-03
+[3,] a          1.1e+01
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-       Parameter     Estimate
-lambda omega2.lambda 0.120   
-beta   omega2.beta   0.093   
+     Parameter   Estimate
+beta omega2.beta 0       
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-              omega2.lambda omega2.beta
-omega2.lambda 1             0          
-omega2.beta   0             1          
+            omega2.beta
+omega2.beta 1          
