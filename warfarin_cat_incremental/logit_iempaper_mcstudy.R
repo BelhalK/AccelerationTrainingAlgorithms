@@ -125,54 +125,6 @@ gd_step = 0.01
 end = K1+K2
 seed0 = 444
 
-#RWM
-theo_ref <- NULL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=100)
-theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
-theo_ref <- cbind(iteration, theo_ref)
-
-
-# graphConvMC_saem(theo_ref, title="new kernel")
-
-
-#RWM
-cat_incremental <- NULL
-options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
-cat_incremental<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
-cat_incremental <- cbind(iteration, cat_incremental)
-
-cat_incremental25 <- NULL
-options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=25)
-cat_incremental25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
-cat_incremental25 <- cbind(iteration, cat_incremental25)
-
-graphConvMC2_saem(theo_ref,cat_incremental25, title="new kernel")
-
-cat_incremental[end,]
-
-
-theo_ref$algo <- 'MCEM'
-cat_incremental$algo <- 'IMCEM50'
-cat_incremental25$algo <- 'IMCEM25'
-
-
-theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=4),]
-cat_incremental_scaled <- cat_incremental[rep(seq_len(nrow(cat_incremental)), each=2),]
-# theo_ref_scaled <- theo_ref[rep(seq_len(nrow(theo_ref)), each=2),]
-theo_ref_scaled$iteration = 1:(4*(K1+K2+1))
-cat_incremental_scaled$iteration = 1:(2*(K1+K2+1))
-
-
-comparison <- 0
-# comparison <- rbind(theo_ref,theo_incremental)
-# comparison <- rbind(theo_ref_scaled[iteration,],cat_incremental)
-comparison <- rbind(theo_ref_scaled[iteration,],cat_incremental_scaled[iteration,], cat_incremental25)
-
-var <- melt(comparison, id.var = c('iteration','algo'), na.rm = TRUE)
-graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
-
-
-
 replicate = 3
 
 final_rwm <- 0
@@ -290,4 +242,212 @@ a <- graphConvMC_diff4(final_rwm[,c(1,4,8)],final_incremental[,c(1,4,8)],final_i
 b <- graphConvMC_diff3(final_rwm[,c(1,5,8)],final_incremental[,c(1,5,8)],final_incremental25[,c(1,5,8)])
 
 grid.arrange(a,b, ncol=2)
+
+
+
+
+#MC STUDY
+
+
+final_rwm <- 0
+var_rwm <- 0
+error_rwm <- 0
+
+th1 <- 1
+th2 <- 3
+th3 <- 1
+o_th1 <- 1
+o_th2 <- 0.5
+o_th3 <- 0.1
+final_mix <- 0
+final_mix25 <- 0
+true_param <- c(th1,th2,th3,o_th1,o_th2,o_th3)
+var_mix <- 0
+var_mix25 <- 0
+error_mix <- 0
+error_mix25 <- 0
+
+
+seed0 = 39546
+replicate = 20
+
+for (j in 1:replicate){
+
+     model2 <- inlineModel("
+
+                  [LONGITUDINAL]
+                  input = {th1, th2, th3}
+
+                  EQUATION:
+                  lgp0 = th1
+                  lgp1 = lgp0 + th2
+                  lgp2 = lgp1 + th3
+
+                  DEFINITION:
+                  level = { type = categorical,  categories = {0, 1, 2, 3},
+                  logit(P(level<=0)) = th1
+                  logit(P(level<=1)) = th1 + th2
+                  logit(P(level<=2)) = th1 + th2 + th3
+                  }
+
+                  [INDIVIDUAL]
+                  input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
+                          
+
+                  DEFINITION:
+                  th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
+                  th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
+                  th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
+                          
+                          ")
+
+    p <- c(th1_pop=1, o_th1=1,
+           th2_pop=3, o_th2=0.5, 
+           th3_pop=1, o_th3=0.1)
+
+
+
+    y1 <- list(name='level', time=seq(1,to=100,by=10))
+
+
+
+    res2a2 <- simulx(model = model2,
+                     parameter = p,
+                     group = list(size=100, level="individual"),
+                     output = y1)
+
+
+    writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat_mcstudy.csv")
+
+
+  cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/warfarin_cat/data/cat_mcstudy.csv", header=T, sep=",")
+  saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("y"), name.X=c("time"))
+  saemix.model<-saemixModel(model=cat_data.model,description="cat model",   
+  psi0=matrix(c(2,1,2),ncol=3,byrow=TRUE,dimnames=list(NULL,   
+  c("th1","th2","th3"))), 
+  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),error.model="constant")
+  print(j)
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=100)
+  theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
+  theo_ref <- cbind(iteration, theo_ref)
+
+  var_rwm <- var_rwm + (theo_ref[,2:7]-true_param)^2
+  ML <- theo_ref[,2:7]
+  ML[1:(end+1),]<- theo_ref[end+1,2:7]
+  error_rwm <- error_rwm + (theo_ref[,2:7]-ML)^2
+  theo_ref['individual'] <- j
+  
+
+
+  options.incremental<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50)
+  theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
+  theo_mix <- cbind(iteration, theo_mix)
+
+  var_mix <- var_mix + (theo_mix[,2:7]-true_param)^2
+  ML <- theo_mix[,2:7]
+  ML[1:(end+1),]<- theo_mix[end+1,2:7]
+  error_mix <- error_mix + (theo_mix[,2:7]-ML)^2
+  theo_mix['individual'] <- j
+
+  options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=25)
+  theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
+  theo_mix25 <- cbind(iteration, theo_mix25)
+  
+  var_mix25 <- var_mix25 + (theo_mix25[,2:7]-true_param)^2
+  ML <- theo_mix25[,2:7]
+  ML[1:(end+1),]<- theo_mix25[end+1,2:7]
+  error_mix25 <- error_mix25 + (theo_mix25[,2:7]-ML)^2
+  theo_mix25['individual'] <- j
+  
+}
+
+
+error_rwm <- 1/replicate*error_rwm
+error_mix <- 1/replicate*error_mix
+error_mix25 <- 1/replicate*error_mix25
+
+error_rwm <- cbind(iterations, error_rwm)
+error_mix <- cbind(iterations, error_mix)
+error_mix25 <- cbind(iterations, error_mix25)
+
+err_mix<- theo_ref
+err_rwm<- theo_ref
+err_mix25<- theo_ref
+
+
+err_rwm[,2:7] <- error_rwm[,1:6]
+err_mix[,2:7] <- error_mix[,1:6]
+err_mix25[,2:7] <- error_mix25[,1:6]
+
+err_mix[2,] = err_rwm[2,]=err_mix25[2,]
+
+
+graphConvMC_se1 <- function(df,df2, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+
+      xlab("") + ylab(expression(paste(lambda)))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=15, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=30)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+graphConvMC_se2 <- function(df,df2,df3, title=NULL, ylim=NULL)
+{
+  G <- (ncol(df)-2)/3
+  df$individual <- as.factor(df$individual)
+  df2$individual <- as.factor(df2$individual)
+  df3$individual <- as.factor(df3$individual)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=2) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=2)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="green",linetype = 2,size=2)+
+      xlab("") + ylab("")  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=15, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=30)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+# graphConvMC_diff2(err_rwm[-1,c(1,2,4,6)],err_mix[-1,c(1,2,4,6)], title="Quadratic errors RTTE")
+# graphConvMC_diff2(err_rwm[-1,c(1,2,4,6)],err_mix[-1,c(1,2,4,6)])
+
+err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
+err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
+err_rwm_scaled$iteration = 1:(4*(K1+K2+1))
+err_mix_scaled$iteration = 1:(2*(K1+K2+1))
+
+c <- graphConvMC_se2(err_rwm_scaled[-1,c(1,4,8)],err_mix_scaled[-1,c(1,4,8)],err_mix25[-1,c(1,4,8)])
+d <- graphConvMC_se2(err_rwm_scaled[-1,c(1,5,8)],err_mix_scaled[-1,c(1,5,8)],err_mix25[-1,c(1,5,8)])
+
+grid.arrange(c,d, ncol=2)
+
+c <- graphConvMC_se2(err_rwm_scaled[2:600,c(1,3,8)],err_mix_scaled[2:600,c(1,3,8)],err_mix25[2:600,c(1,3,8)])
+d <- graphConvMC_se2(err_rwm_scaled[2:600,c(1,7,8)],err_mix_scaled[2:600,c(1,7,8)],err_mix25[2:600,c(1,7,8)])
+
+grid.arrange(c,d, ncol=2)
 
