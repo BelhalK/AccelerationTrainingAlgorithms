@@ -2,15 +2,18 @@ source("mixtureAlgos.R")
 source("mixtureFunctions.R")
 theme_set(theme_bw())
 
-n <- 500
+n <- 100
 weight<-c(0.4, 0.3,0.3) 
 mu<-c(0,2,4)
-sigma<-c(1,1,1)*0.6
+sigma<-c(0.5,0.5,0.5)
 
+weight0<-c(0.1, 0.1,0.1) 
+mu0<-c(1,1,1)
+sigma0<-c(0.2,0.2,0.2)
 
 KNR <- 500
 K1 <-10
-K <- 500
+K <- 5000
 # Several Chains for the same iteration
 # M <- 10
 
@@ -21,13 +24,13 @@ seed0=44444
 # ylim <- c(0.15, 0.5, 0.4)
 ylim <- c(0.1, 0.3, 0.3)
 
-nsim <- 10
+nsim <- 5
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
 theta<-list(p=weight,mu=mu,sigma=sigma)
-# theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
-theta0<-theta
+theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
+# theta0<-theta
 
 
 ##  Simulation
@@ -70,7 +73,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
   df <- mixt.ident3(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -101,7 +106,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
   df <- mixt.ident3(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -132,7 +139,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
   df <- mixt.ident3(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -166,7 +175,7 @@ table1r$algo <- '10R'
 table2r$algo <- '50R'
 tablenr_scaled$algo <- 'NR'
 
-variance <- rbind(table1r[1:KR,],table2r[1:KR,],tablenr[1:KR,]) #10replacement
+variance <- rbind(table1r[1:KR,],table2r_scaled[1:KR,],tablenr_scaled[1:KR,]) #10replacement
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
 graphConvMC2_new(variance, title="ALGO - EM (same complexity)",legend=TRUE)

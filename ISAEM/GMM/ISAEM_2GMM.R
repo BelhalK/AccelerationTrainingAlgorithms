@@ -10,16 +10,16 @@ theme_set(theme_bw())
 n <- 500
 weight<-c(0.7, 0.3) 
 mu<-c(0,1)
-sigma<-c(0.2,0.2)*1
+sigma<-c(0.5,0.2)*1
 
 
-# weight0<-c(.5,.5)
-# mu0<-c(1,2)
-# sigma0<-c(.5,2)
+weight0<-c(.5,.5)
+mu0<-c(1,2)
+sigma0<-c(.5,1)
 
 KNR <- 500
 K1 <-10
-K <- 5000
+K <- 6000
 
 alpha1 <- 0.7
 alpha2 <- 0.4
@@ -30,13 +30,13 @@ seed0=44444
 ylim <- c(0.1, 0.3, 0.3)
 
 M <- 1
-nsim <- 15
+nsim <- 35
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
 theta<-list(p=weight,mu=mu,sigma=sigma)
-# theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
-theta0<-theta
+theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
+# theta0<-theta
 
 
 ##  Simulation
@@ -68,7 +68,7 @@ for (j in (1:nsim))
 ##  SAEM1 replacement vs EM
 print('SAEM 10R')
 nb_r <- n/10
-KR <- 100
+KR<-K
 diffr <- NULL
 for (j in (1:nsim))
 {
@@ -77,7 +77,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
   df <- mixt.ident(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -97,7 +99,7 @@ table1r[,2:7] <- 1/nsim*table1r[,2:7]
 
 print('SAEM 100R')
 nb_r <- n
-KR <- 100
+KR<-K
 diffr <- NULL
 for (j in (1:nsim))
 {
@@ -106,7 +108,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
   df <- mixt.ident(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -130,7 +134,7 @@ tablenr_scaled$iteration = 1:(10*(KR+1))
 
 print('SAEM 100R')
 nb_r <- n/2
-KR <- 100
+KR<-K
 diffr <- NULL
 for (j in (1:nsim))
 {
@@ -139,7 +143,9 @@ for (j in (1:nsim))
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
   df <- mixt.ident(df)
-  df <- df - df.em[[j]][1:(KR+1),]
+  ML <- df.em[[j]]
+  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
+  df <- df - ML
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -167,10 +173,10 @@ tablenr_scaled$iteration = 1:(10*(KR+1))
 
 # tablenr[1,2:7] <- tablenr[2,2:7]
 table1r$algo <- '10R'
-table2r$algo <- '50R'
+table2r_scaled$algo <- '50R'
 tablenr_scaled$algo <- 'NR'
 
-variance <- rbind(table1r[1:KR,],table2r[1:KR,],tablenr[1:KR,]) #10replacement
+variance <- rbind(table1r[1:KR,],table2r_scaled[1:KR,],tablenr_scaled[1:KR,]) #10replacement
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
 graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
