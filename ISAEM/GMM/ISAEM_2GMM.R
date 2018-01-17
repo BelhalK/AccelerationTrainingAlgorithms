@@ -10,16 +10,16 @@ theme_set(theme_bw())
 n <- 500
 weight<-c(0.7, 0.3) 
 mu<-c(0,1)
-sigma<-c(0.5,0.2)*1
+sigma<-c(0.5,0.9)*1
 
 
-weight0<-c(.5,.5)
-mu0<-c(1,2)
+weight0<-c(.9,.1)
+mu0<-c(4,6)
 sigma0<-c(.5,1)
 
 KNR <- 500
 K1 <-10
-K <- 6000
+K <- 300
 
 alpha1 <- 0.7
 alpha2 <- 0.4
@@ -56,14 +56,14 @@ dem <- NULL
 df.em <- vector("list", length=nsim)
 for (j in (1:nsim))
 { print(j)
-  df <- mixt.em(x[,j], theta, K)
+  df <- mixt.em(x[,j], theta0, K)
   df <- mixt.ident(df)
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
 }
-# graphConvMC(dem, title="EM")
+graphConvMC(dem, title="EM")
 
 ##  SAEM1 replacement vs EM
 print('SAEM 10R')
@@ -132,7 +132,7 @@ tablenr_scaled <- tablenr[rep(seq_len(nrow(tablenr)), each=100/10),]
 tablenr_scaled$iteration = 1:(10*(KR+1))
 
 
-print('SAEM 100R')
+print('SAEM 50R')
 nb_r <- n/2
 KR<-K
 diffr <- NULL
