@@ -127,7 +127,7 @@ true_param <- c(ka_true,V_true,k_true,o_ka,o_V,o_k)
 
 seed0 = 39546
 replicate = 20
-replicate <- 4
+replicate <- 20
 for (m in 1:replicate){
   
     model<-"/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/warfarin_project_model.txt"
@@ -233,8 +233,6 @@ ML[1:(end+1),]<- theo_mix25[end+1,2:8]
 error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
 theo_mix25['individual'] <- j
 final_mix25 <- rbind(final_mix25,theo_mix25)
-
-
  
 }
 
@@ -243,39 +241,31 @@ graphConvMC_diff(final_ref,final_mix,final_mix25)
 
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
+error_mix25 <- 1/replicate*error_mix25
 
 error_rwm <- cbind(iterations, error_rwm)
 error_mix <- cbind(iterations, error_mix)
+error_mix25 <- cbind(iterations, error_mix25)
 
 err_mix<- theo_ref
 err_rwm<- theo_ref
+err_mix25<- theo_ref
+
+
 err_rwm[,2:8] <- error_rwm[,2:8]
 err_mix[,2:8] <- error_mix[,2:8]
+err_mix25[,2:8] <- error_mix25[,2:8]
 
-err_mix[2,] = err_rwm[2,]
+err_mix[2,] = err_rwm[2,]=err_mix25[2,]
+
+err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
+err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
+err_rwm_scaled$iterations = 1:(4*(K1+K2+1))
+err_mix_scaled$iterations = 1:(2*(K1+K2+1))
 
 
-# graphConvMC_diff(err_rwm[-1,],err_mix[-1,], title="Quadratic errors Warfa")
-# graphConvMC_diff2(err_rwm[-1,],err_mix[-1,], title="Quadratic errors Warfa")
-
-# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)])
-
-a <- err_rwm[-1,]
-b <- err_mix[-1,]
-# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)], title="Quadratic errors Warfa")
-
-# err_rwm[,2:8] <- sqrt(err_rwm[,2:8])
-# err_mix[,2:8] <- sqrt(err_mix[,2:8])
-
-# graphConvMC_diff2(a[,c(1,3,6,9)],b[,c(1,3,6,9)], title="Quadratic errors Warfa")
-# graphConvMC_diff2(err_rwm[-1,c(1,3,6,9)],err_mix[-1,c(1,3,6,9)], title="Quadratic errors Warfa")
-
-# graphConvMC_diff2(a[,c(1,3,6,9)],b[,c(1,3,6,9)])
-
-c <- graphConvMC_diff3(a[,c(1,3,9)],b[,c(1,3,9)])
-d <- graphConvMC_diff3(a[,c(1,6,9)],b[,c(1,6,9)])
+# c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
+c <- graphConvMC_sec(err_rwm_scaled[2:end,c(1,2,9)],err_mix_scaled[2:end,c(1,2,9)],err_mix25[2:end,c(1,2,9)])
+d <- graphConvMC_sed(err_rwm_scaled[2:end,c(1,5,9)],err_mix_scaled[2:end,c(1,5,9)],err_mix25[2:end,c(1,5,9)])
 
 grid.arrange(c,d, ncol=2)
-
-
-
