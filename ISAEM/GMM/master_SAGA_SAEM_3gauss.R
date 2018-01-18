@@ -21,7 +21,7 @@ seed0=44444
 # ylim <- c(0.15, 0.5, 0.4)
 ylim <- c(0.1, 0.3, 0.3)
 
-nsim <- 100
+nsim <- 10
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
