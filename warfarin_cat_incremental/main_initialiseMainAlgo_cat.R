@@ -269,9 +269,9 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 
 	# List of options and settings (fixed) - passed on to functions, unchanged
 	stepsize<-rep(1,saemix.options$nbiter.tot)
-	# stepsize[(saemix.options$nbiter.saemix[1]+1):saemix.options$nbiter.tot]<-1/
-	# 	(1:saemix.options$nbiter.saemix[2])
-	# stepsize[1:saemix.options$nbiter.burn]<-0
+	stepsize[(saemix.options$nbiter.saemix[1]+1):saemix.options$nbiter.tot]<-1/
+		(1:saemix.options$nbiter.saemix[2])^0.9
+	stepsize[1:saemix.options$nbiter.burn]<-0
 	opt<-list(stepsize.rw=saemix.options$stepsize.rw,stepsize=stepsize,
 						proba.mcmc=saemix.options$proba.mcmc,nbiter.mcmc=saemix.options$nbiter.mcmc,
 						nbiter.sa=saemix.options$nbiter.sa,alpha1.sa=saemix.options$alpha.sa,
