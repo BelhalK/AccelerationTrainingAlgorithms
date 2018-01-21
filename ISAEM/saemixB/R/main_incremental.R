@@ -177,6 +177,10 @@ saemix_incremental<-function(model,data,control=list()) {
 if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
+
+nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
+l <- sample(1:Dargs$NM,Dargs$NM)
+
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 # SAEM convergence plots
@@ -200,8 +204,14 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
 	# E-step
+  if (kiter%%(Dargs$NM/nb_replacement) <2)
+      { 
+        l <- sample(1:Dargs$NM,Dargs$NM)
+        ind_rand<-1:nb_replacement
+      }
+  xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
   
-  xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  ind_rand <- ind_rand + nb_replacement
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM

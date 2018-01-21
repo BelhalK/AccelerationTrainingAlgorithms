@@ -1,5 +1,5 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
-estep_cat_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
+estep_cat_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -16,7 +16,7 @@ estep_cat_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
-	Uargs$nchains = 1
+	# Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
@@ -25,24 +25,17 @@ estep_cat_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean
 
 	DYF[Uargs$ind.ioM] <- -log(fpred)
 	U.y<-colSums(DYF)
-	# post <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
-	# for (i in 1:(nrow(phiM))) {
-	# 	post[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
-	# }
-
-	# post_new <- list(matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta])))
-	# for (i in 1:(nrow(phiM))) {
-	# 	post_new[[i]] <- matrix(nrow = opt$nbiter.mcmc,ncol = ncol(phiM[,varList$ind.eta]) )
-	# }
-
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 
 	phiMc<-phiM
 	map_range <- saemix.options$map.range
 	
-	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+	index <- matrix(data=0,nrow=Dargs$NM,ncol=2)
+	index[,1]<-1:Dargs$NM
+	index[,2]<-rep(1:Dargs$N,Uargs$nchains)
+	delete <- 1:Dargs$NM - index[index[,1] %in% l[ind_rand],1]
+	length(delete)
 
 if (!(kiter %in% map_range)){
 	# print('not in map range')
@@ -55,13 +48,12 @@ if (!(kiter %in% map_range)){
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
-		deltau[ind_rand] = 1000000
+		deltau[l[-ind_rand]] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
 	}
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	
 	# Second stage
 	
 	if(opt$nbiter.mcmc[2]>0) {
@@ -79,7 +71,8 @@ if (!(kiter %in% map_range)){
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[ind_rand] = 1000000
+				# deltu[ind_rand] = 1000000
+				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -116,7 +109,8 @@ if (!(kiter %in% map_range)){
 				Uc.y<-colSums(DYF) # Warning: Uc.y, Uc.eta = vecteurs
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[ind_rand] = 1000000
+				# deltu[ind_rand] = 1000000
+				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 
@@ -293,6 +287,5 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range) {
 	post <- post_new <- 0
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
-	
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, post = post, post_new=post_new))
 }

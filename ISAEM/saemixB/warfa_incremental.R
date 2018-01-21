@@ -104,6 +104,54 @@ options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), 
 warfanew<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfanew))
 
 
+#Diff initial values
+
+replicate = 4
+seed0 = 395246
+
+#RWM
+final_rwm <- 0
+final_50 <- 0
+final_25 <- 0
+for (m in 1:replicate){
+  print(m)
+  l = list(c(1,7,1,0,0,0),c(0.8,7.2,0.8,0,0,0),c(1.2,6.8,1.2,0,0,0),c(1.4,6.6,1.4,0,0,0))
+  saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(l[[m]],ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1/m,0,0,0,1/m,0,0,0,1/m),ncol=3,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE))
+
+  options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+  warfa<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfa))
+  warfa<-cbind(iterations,warfa)
+  warfa['individual'] <- m
+  warfa$algo <- 'rwm'
+  warfa_scaled <- warfa[rep(seq_len(nrow(warfa)), each=100/batchsize25),]
+  warfa_scaled$iterations = 1:(4*(K1+K2+1))
+  final_rwm <- rbind(final_rwm,warfa)
+
+  options_warfaincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
+  warfaincr25<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr25))
+  warfaincr25<-cbind(iterations,warfaincr25)
+  warfaincr25['individual'] <- m
+  warfaincr25$algo <- 'ISAEM25'
+  final_25 <- rbind(final_25,warfaincr25)
+
+  options_warfaincr50<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
+  warfaincr50<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr50))
+  warfaincr50<-cbind(iterations,warfaincr50)
+  warfaincr50['individual'] <- m
+  warfaincr50$algo <- 'ISAEM50'
+  warfa_scaled50 <- warfaincr50[rep(seq_len(nrow(warfaincr50)), each=100/batchsize50),]
+  warfa_scaled50$iterations = 1:(2*(K1+K2+1))
+  final_50 <- rbind(final_50,warfaincr50)
+}
+
+graphConvMC_new(final_rwm, title="RWM")
+graphConvMC_diff(final_rwm,final_mix, title="RWM")
+
+
 final_rwm <- 0
 final_ref <- 0
 var_rwm <- 0
@@ -126,8 +174,7 @@ o_k <- 0.3
 true_param <- c(ka_true,V_true,k_true,o_ka,o_V,o_k)
 
 seed0 = 39546
-replicate = 20
-replicate <- 20
+replicate = 30
 for (m in 1:replicate){
   
     model<-"/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/warfarin_project_model.txt"
@@ -208,7 +255,7 @@ var_rwm <- var_rwm + (theo_ref[,2:8]-true_param)^2
 ML <- theo_ref[,2:8]
 ML[1:(end+1),]<- theo_ref[end+1,2:8]
 error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
-theo_ref['individual'] <- j
+theo_ref['individual'] <- m
 final_ref <- rbind(final_ref,theo_ref)
 
 
@@ -220,7 +267,7 @@ var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
 ML <- theo_mix[,2:8]
 ML[1:(end+1),]<- theo_mix[end+1,2:8]
 error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
-theo_mix['individual'] <- j
+theo_mix['individual'] <- m
 final_mix <- rbind(final_mix,theo_mix)
 
 options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
@@ -231,7 +278,7 @@ var_mix25 <- var_mix25 + (theo_mix25[,2:8]-true_param)^2
 ML <- theo_mix25[,2:8]
 ML[1:(end+1),]<- theo_mix25[end+1,2:8]
 error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
-theo_mix25['individual'] <- j
+theo_mix25['individual'] <- m
 final_mix25 <- rbind(final_mix25,theo_mix25)
  
 }
@@ -243,29 +290,36 @@ error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
 error_mix25 <- 1/replicate*error_mix25
 
-error_rwm <- cbind(iterations, error_rwm)
-error_mix <- cbind(iterations, error_mix)
-error_mix25 <- cbind(iterations, error_mix25)
+err_mix<- theo_ref[-1,]
+err_rwm<- theo_ref[-1,]
+err_mix25<- theo_ref[-1,]
 
-err_mix<- theo_ref
-err_rwm<- theo_ref
-err_mix25<- theo_ref
+err_rwm[,2:8] <- error_rwm[-1,]
+err_mix[,2:8] <- error_mix[-1,]
+err_mix25[,2:8] <- error_mix25[-1,]
 
-
-err_rwm[,2:8] <- error_rwm[,2:8]
-err_mix[,2:8] <- error_mix[,2:8]
-err_mix25[,2:8] <- error_mix25[,2:8]
-
-err_mix[2,] = err_rwm[2,]=err_mix25[2,]
 
 err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
+err_rwm_scaled$iterations = rep(1:end, each=4)
 err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
-err_rwm_scaled$iterations = 1:(4*(K1+K2+1))
-err_mix_scaled$iterations = 1:(2*(K1+K2+1))
+err_mix_scaled$iterations = rep(1:end, each=2)
 
+err_mix25$iterations = 1:((K1+K2))
+
+# c <- graphConvMC_se2(err_rwm_scaled[-1,c(1,2,8)],err_mix_scaled[-1,c(1,2,8)],err_mix25[-1,c(1,2,8)])
+# d <- graphConvMC_se2(err_rwm_scaled[-1,c(1,3,8)],err_mix_scaled[-1,c(1,3,8)],err_mix25[-1,c(1,3,8)])
+
+# grid.arrange(c,d, ncol=2)
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
-c <- graphConvMC_sec(err_rwm_scaled[2:end,c(1,2,9)],err_mix_scaled[2:end,c(1,2,9)],err_mix25[2:end,c(1,2,9)])
-d <- graphConvMC_sed(err_rwm_scaled[2:end,c(1,5,9)],err_mix_scaled[2:end,c(1,5,9)],err_mix25[2:end,c(1,5,9)])
+c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,2,9)],err_mix_scaled [0:end,c(1,2,9)],err_mix25[0:end,c(1,2,9)])
+d <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,5,9)],err_mix_scaled[0:end,c(1,5,9)],err_mix25[0:end,c(1,5,9)])
 
 grid.arrange(c,d, ncol=2)
+
+e <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,3,9)],err_mix_scaled[0:end,c(1,3,9)],err_mix25[0:end,c(1,3,9)])
+f <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,6,9)],err_mix_scaled[0:end,c(1,6,9)],err_mix25[0:end,c(1,6,9)])
+
+grid.arrange(e,f, ncol=2)
+
+

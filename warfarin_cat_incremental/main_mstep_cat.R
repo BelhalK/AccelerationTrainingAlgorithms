@@ -6,6 +6,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	#					mean.phi (created)
 	
 	# Update variances - TODO - check if here or elsewhere
+	# browser()
 	nb.etas<-length(varList$ind.eta)
 	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
 	omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]

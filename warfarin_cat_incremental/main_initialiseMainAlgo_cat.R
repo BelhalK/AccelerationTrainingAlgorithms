@@ -35,7 +35,7 @@ initialiseMainAlgo_cat<-function(saemix.data,saemix.model,saemix.options) {
 	structural.model<-saemix.model["model"]
 	nb.parameters<-saemix.model["nb.parameters"]
 	N<-saemix.data["N"]
-	saemix.options$nb.chains = 1
+	# saemix.options$nb.chains = 1
 	# Initialising residual error model
 	# error models :
 	#   constant            y = f + a*e

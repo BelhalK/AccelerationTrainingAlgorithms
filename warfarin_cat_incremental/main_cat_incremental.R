@@ -159,6 +159,10 @@ xinit<-initialiseMainAlgo_cat(saemix.data,saemix.model,saemix.options)
 if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
+
+nb_replacement = round(saemix.options$nb.replacement*Dargs$N/100)
+l <- sample(1:Dargs$N,Dargs$N)
+
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 # SAEM convergence plots
   if(kiter%%saemix.options$nbdisplay==0) {
@@ -181,9 +185,16 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
+  if(kiter<opt$nbiter.saemix[1]) {
+    # browser()
+    if (kiter%%(Dargs$NM/nb_replacement)<2)
+      { 
+        l <- sample(1:Dargs$N,Dargs$N)
+        ind_rand<-1:nb_replacement
+      }
 
-  if(kiter<200) {
-  xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject, l , ind_rand)
+  ind_rand <- ind_rand + nb_replacement
 } else{
   xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
 }

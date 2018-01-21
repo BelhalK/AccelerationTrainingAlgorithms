@@ -1,6 +1,6 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
 
-estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject) {
+estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -43,7 +43,8 @@ if (!(kiter %in% map_range)){
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 		}
 		deltau<-Uc.y-U.y
-		deltau[ind_rand] = 1000000
+		# deltau[ind_rand] = 1000000
+		deltau[l[-ind_rand]] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -68,7 +69,8 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[ind_rand] = 1000000
+				# deltu[ind_rand] = 1000000
+				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -106,7 +108,8 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[ind_rand] = 1000000
+				# deltu[ind_rand] = 1000000
+				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {

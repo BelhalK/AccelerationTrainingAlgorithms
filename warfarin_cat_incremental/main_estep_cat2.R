@@ -16,7 +16,7 @@ estep_cat2<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varLi
 	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
 	
 	VK<-rep(c(1:nb.etas),2)
-	Uargs$nchains = 1
+	# Uargs$nchains = 1
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	psiM<-transphi(phiM,Dargs$transform.par)
