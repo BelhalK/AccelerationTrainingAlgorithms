@@ -171,10 +171,9 @@ o_ka <- 0.5
 o_V <- 0.2
 o_k <- 0.3
 
-true_param <- c(ka_true,V_true,k_true,o_ka,o_V,o_k)
-
+true_param <- data.frame("ka" = ka_true, "V" = V_true, "k" = 0.1/8, "omega2.ka"=o_ka ,"omega2.V"= o_V,"omega2.k"= o_k)
 seed0 = 39546
-replicate = 30
+replicate = 3
 for (m in 1:replicate){
   
     model<-"/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/warfarin_project_model.txt"
@@ -237,7 +236,7 @@ rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 # warfarin.saemix <- table[c(1,2,3,5)]
 warfarin.saemix_less <- warfarin.saemix[,]
   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(c(3,10,2,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
@@ -251,9 +250,10 @@ saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA
 options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100)
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
-var_rwm <- var_rwm + (theo_ref[,2:8]-true_param)^2
+
 ML <- theo_ref[,2:8]
-ML[1:(end+1),]<- theo_ref[end+1,2:8]
+# ML[1:(end+1),]<- theo_ref[end+1,2:8]
+ML[1:(end+1),1:6]<- true_param
 error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
 theo_ref['individual'] <- m
 final_ref <- rbind(final_ref,theo_ref)
@@ -262,10 +262,9 @@ final_ref <- rbind(final_ref,theo_ref)
 options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
 theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))
 theo_mix <- cbind(iterations, theo_mix)
-
-var_mix <- var_mix + (theo_mix[,2:8]-true_param)^2
 ML <- theo_mix[,2:8]
-ML[1:(end+1),]<- theo_mix[end+1,2:8]
+# ML[1:(end+1),]<- theo_mix[end+1,2:8]
+ML[1:(end+1),1:6]<- true_param
 error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
 theo_mix['individual'] <- m
 final_mix <- rbind(final_mix,theo_mix)
@@ -273,10 +272,9 @@ final_mix <- rbind(final_mix,theo_mix)
 options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
 theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
 theo_mix25 <- cbind(iterations, theo_mix25)
-
-var_mix25 <- var_mix25 + (theo_mix25[,2:8]-true_param)^2
 ML <- theo_mix25[,2:8]
-ML[1:(end+1),]<- theo_mix25[end+1,2:8]
+# ML[1:(end+1),]<- theo_mix25[end+1,2:8]
+ML[1:(end+1),1:6]<- true_param
 error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
 theo_mix25['individual'] <- m
 final_mix25 <- rbind(final_mix25,theo_mix25)
@@ -298,11 +296,12 @@ err_rwm[,2:8] <- error_rwm[-1,]
 err_mix[,2:8] <- error_mix[-1,]
 err_mix25[,2:8] <- error_mix25[-1,]
 
+err_rwm_scaled <- err_rwm
+err_rwm_scaled$iterations = seq(1, 4*end, by=4)
 
-err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
-err_rwm_scaled$iterations = rep(1:end, each=4)
-err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
-err_mix_scaled$iterations = rep(1:end, each=2)
+err_mix_scaled <- err_rwm
+err_mix_scaled$iterations = seq(1, 2*end, by=2)
+
 
 err_mix25$iterations = 1:((K1+K2))
 

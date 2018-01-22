@@ -179,7 +179,7 @@ beta_true <- 2
 o_beta_true <- 0.3
 final_mix <- 0
 true_param <- c(lambda_true,beta_true,o_lambda_true,o_beta_true)
-
+true_param <- data.frame("lambda" = lambda_true, "beta" = beta_true,"omega2.lambda" = o_lambda_true,"omega2.beta" = o_beta_true)
 
 seed0 = 39546
 replicate = 20
@@ -238,9 +238,9 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",type=
   options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100)
   theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
-  var_rwm <- var_rwm + (theo_ref[,2:5]-true_param)^2
   ML <- theo_ref[,2:5]
-  ML[1:(end+1),]<- theo_ref[end+1,2:5]
+  # ML[1:(end+1),]<- theo_ref[end+1,2:5]
+  ML[1:(end+1),1:4]<- true_param
   error_rwm <- error_rwm + (theo_ref[,2:5]-ML)^2
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
@@ -249,10 +249,9 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",type=
   options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
   theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iterations, theo_mix)
-
-  var_mix <- var_mix + (theo_mix[,2:5]-true_param)^2
   ML <- theo_mix[,2:5]
-  ML[1:(end+1),]<- theo_mix[end+1,2:5]
+  # ML[1:(end+1),]<- theo_mix[end+1,2:5]
+  ML[1:(end+1),1:4]<- true_param  
   error_mix <- error_mix + (theo_mix[,2:5]-ML)^2
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
@@ -260,10 +259,9 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",type=
   options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
   theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iterations, theo_mix25)
-  
-  var_mix25 <- var_mix25 + (theo_mix25[,2:5]-true_param)^2
   ML <- theo_mix25[,2:5]
-  ML[1:(end+1),]<- theo_mix25[end+1,2:5]
+  # ML[1:(end+1),]<- theo_mix25[end+1,2:5]
+  ML[1:(end+1),1:4]<- true_param 
   error_mix25 <- error_mix25 + (theo_mix25[,2:5]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
@@ -290,12 +288,13 @@ err_rwm[,2:5] <- error_rwm[,2:5]
 err_mix[,2:5] <- error_mix[,2:5]
 err_mix25[,2:5] <- error_mix25[,2:5]
 
-err_mix[2,] = err_rwm[2,]=err_mix25[2,]
 
-err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
-err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
-err_rwm_scaled$iterations = 1:(4*(K1+K2+1))
-err_mix_scaled$iterations = 1:(2*(K1+K2+1))
+err_rwm_scaled <- err_rwm
+err_rwm_scaled$iterations = seq(1, 4*end, by=4)
+
+err_mix_scaled <- err_rwm
+err_mix_scaled$iterations = seq(1, 2*end, by=2)
+
 
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])

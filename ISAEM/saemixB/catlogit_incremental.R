@@ -194,7 +194,8 @@ o_th3 <- 0.5
 final_mix <- 0
 final_mix25 <- 0
 final_mix10 <- 0
-true_param <- c(th1,th2,th3,o_th1,o_th2,o_th3)
+
+true_param <- data.frame("ka" = th1, "V" = th2, "k" = th3, "omega2.ka"=o_th1 ,"omega2.V"= o_th2,"omega2.k"= o_th3)
 error_mix <- 0
 error_mix25 <- 0
 error_mix10 <- 0
@@ -260,7 +261,8 @@ for (j in 1:replicate){
   theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iteration, theo_ref)
   ML <- theo_ref[,2:6]
-  ML[1:(end+1),]<- theo_ref[end+1,2:6]
+  # ML[1:(end+1),]<- theo_ref[end+1,2:6]
+  ML[1:(end+1),1:6]<- true_param
   error_rwm <- error_rwm + (theo_ref[,2:6]-ML)^2
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
@@ -270,7 +272,8 @@ for (j in 1:replicate){
   theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iteration, theo_mix)
   ML <- theo_mix[,2:6]
-  ML[1:(end+1),]<- theo_mix[end+1,2:6]
+  # ML[1:(end+1),]<- theo_mix[end+1,2:6]
+  ML[1:(end+1),1:6]<- true_param
   error_mix <- error_mix + (theo_mix[,2:6]-ML)^2
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
@@ -279,7 +282,8 @@ for (j in 1:replicate){
   theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iteration, theo_mix25)
   ML <- theo_mix25[,2:6]
-  ML[1:(end+1),]<- theo_mix25[end+1,2:6]
+  # ML[1:(end+1),]<- theo_mix25[end+1,2:6]
+  ML[1:(end+1),1:6]<- true_param
   error_mix25 <- error_mix25 + (theo_mix25[,2:6]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
@@ -331,17 +335,12 @@ err_mix[,2:6] <- error_mix[-1,1:5]
 err_mix25[,2:6] <- error_mix25[-1,1:5]
 
 
-err_rwm_scaled <- err_rwm[rep(seq_len(nrow(err_rwm)), each=4),]
-err_rwm_scaled$iterations = rep(1:end, each=4)
-err_mix_scaled <- err_mix[rep(seq_len(nrow(err_mix)), each=2),]
-err_mix_scaled$iterations = rep(1:end, each=2)
-err_mix25$iterations = 1:((K1+K2))
+err_rwm_scaled <- err_rwm
+err_rwm_scaled$iterations = seq(1, 4*end, by=4)
 
+err_mix_scaled <- err_rwm
+err_mix_scaled$iterations = seq(1, 2*end, by=2)
 
-# err_rwm_scaled <- err_rwm[1:(end/4),]
-# err_mix_scaled <- err_mix[1:(end/2),]
-# err_rwm_scaled$iteration = seq(1,end,by=4)
-# err_mix_scaled$iteration = seq(1,end,by=2)
 err_mix25$iteration = 1:((K1+K2))
 
 

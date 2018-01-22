@@ -204,13 +204,18 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
 	# E-step
-  if (kiter%%(Dargs$NM/nb_replacement) <2)
+  if (Dargs$NM==nb_replacement){
+    l <- 1:Dargs$NM
+    ind_rand<-1:Dargs$NM
+  } else{
+    if (kiter%%(Dargs$NM/nb_replacement) == 1)
       { 
         l <- sample(1:Dargs$NM,Dargs$NM)
         ind_rand<-1:nb_replacement
       }
-  xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
+  }
   
+  xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
   ind_rand <- ind_rand + nb_replacement
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF

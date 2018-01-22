@@ -20,11 +20,8 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	saemix.options<-saemixObject["options"]
 	map_range <- saemix.options$map.range
-
-	nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-	ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
-
-
+	# nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
+	# ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
 	if(Dargs$type=="structural"){
 		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
 	} else{
