@@ -23,16 +23,21 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	fpred <- -log(fpred)
 	# if(Dargs$error.model=="exponential")
 	# 	fpred<-log(cutoff(fpred))
-	Uargs$nchains = 1
-	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=Uargs$nchains)
-	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
+
+	#increasing the number of chains
+	chains <- data.frame("iterations" = seq(1,opt$nbiter.saemix[1], by=1), "nchains" = rep(1:Uargs$nchains, each = opt$nbiter.saemix[1]/Uargs$nchains))
+	nchains = chains[chains[,1]==kiter,2]
+
+
+	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=nchains)
+	for(k in 1:nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	# overall speed similar
 	#    phi<-aperm(array(phiM,c(N,nchains,3)),c(1,3,2))
 	stat1<-apply(phi[,varList$ind.eta,,drop=FALSE],c(1,2),sum) # sum on columns ind.eta of phi, across 3rd dimension
 	stat2<-matrix(data=0,nrow=nb.etas,ncol=nb.etas)
 	stat3<-apply(phi**2,c(1,2),sum) #  sum on phi**2, across 3rd dimension
 	statr<-0
-	for(k in 1:Uargs$nchains) {
+	for(k in 1:nchains) {
 		phik<-phi[,varList$ind.eta,k]
 		stat2<-stat2+t(phik)%*%phik
 		fk<-ff[,k]
@@ -44,10 +49,10 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 		# statr<-statr+resk
 	}
 	# Update sufficient statistics
-	suffStat$statphi1<-suffStat$statphi1+opt$stepsize[kiter]*(stat1/Uargs$nchains-suffStat$statphi1)
-	suffStat$statphi2<-suffStat$statphi2+opt$stepsize[kiter]*(stat2/Uargs$nchains-suffStat$statphi2)
-	suffStat$statphi3<-suffStat$statphi3+opt$stepsize[kiter]*(stat3/Uargs$nchains-suffStat$statphi3)
-	suffStat$statrese<-suffStat$statrese+opt$stepsize[kiter]*(statr/Uargs$nchains-suffStat$statrese)
+	suffStat$statphi1<-suffStat$statphi1+opt$stepsize[kiter]*(stat1/nchains-suffStat$statphi1)
+	suffStat$statphi2<-suffStat$statphi2+opt$stepsize[kiter]*(stat2/nchains-suffStat$statphi2)
+	suffStat$statphi3<-suffStat$statphi3+opt$stepsize[kiter]*(stat3/nchains-suffStat$statphi3)
+	suffStat$statrese<-suffStat$statrese+opt$stepsize[kiter]*(statr/nchains-suffStat$statrese)
 	
 	############# Maximisation
 	##### fixed effects

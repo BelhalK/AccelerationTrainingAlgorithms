@@ -182,7 +182,7 @@ true_param <- c(lambda_true,beta_true,o_lambda_true,o_beta_true)
 true_param <- data.frame("lambda" = lambda_true, "beta" = beta_true,"omega2.lambda" = o_lambda_true,"omega2.beta" = o_beta_true)
 
 seed0 = 39546
-replicate = 20
+replicate = 5
 
 for (j in 1:replicate){
 
@@ -275,18 +275,13 @@ error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
 error_mix25 <- 1/replicate*error_mix25
 
-error_rwm <- cbind(iterations, error_rwm)
-error_mix <- cbind(iterations, error_mix)
-error_mix25 <- cbind(iterations, error_mix25)
+err_mix<- theo_ref[-1,]
+err_rwm<- theo_ref[-1,]
+err_mix25<- theo_ref[-1,]
 
-err_mix<- theo_ref
-err_rwm<- theo_ref
-err_mix25<- theo_ref
-
-
-err_rwm[,2:5] <- error_rwm[,2:5]
-err_mix[,2:5] <- error_mix[,2:5]
-err_mix25[,2:5] <- error_mix25[,2:5]
+err_rwm[,2:5] <- error_rwm[-1,]
+err_mix[,2:5] <- error_mix[-1,]
+err_mix25[,2:5] <- error_mix25[-1,]
 
 
 err_rwm_scaled <- err_rwm
@@ -296,11 +291,18 @@ err_mix_scaled <- err_rwm
 err_mix_scaled$iterations = seq(1, 2*end, by=2)
 
 
+err_mix25$iterations = 1:((K1+K2))
+
+
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
-c <- graphConvMC_sec(err_rwm_scaled[2:end,c(1,2,6)],err_mix_scaled[2:end,c(1,2,6)],err_mix25[2:end,c(1,2,6)])
-d <- graphConvMC_sed(err_rwm_scaled[2:end,c(1,4,6)],err_mix_scaled[2:end,c(1,4,6)],err_mix25[2:end,c(1,4,6)])
+c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,2,6)],err_mix_scaled[0:end,c(1,2,6)],err_mix25[0:end,c(1,2,6)])
+d <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,4,6)],err_mix_scaled[0:end,c(1,4,6)],err_mix25[0:end,c(1,4,6)])
 
 grid.arrange(c,d, ncol=2)
 
+e <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,3,6)],err_mix_scaled[0:end,c(1,3,6)],err_mix25[0:end,c(1,3,6)])
+f <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,5,6)],err_mix_scaled[0:end,c(1,5,6)],err_mix25[0:end,c(1,5,6)])
+
+grid.arrange(e,f, ncol=2)
 

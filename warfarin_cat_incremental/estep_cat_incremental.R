@@ -34,8 +34,7 @@ estep_cat_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean
 	index <- matrix(data=0,nrow=Dargs$NM,ncol=2)
 	index[,1]<-1:Dargs$NM
 	index[,2]<-rep(1:Dargs$N,Uargs$nchains)
-	delete <- 1:Dargs$NM - index[index[,1] %in% l[ind_rand],1]
-	length(delete)
+	delete <- setdiff(1:Dargs$NM,index[index[,2] %in% l[ind_rand],1])
 
 if (!(kiter %in% map_range)){
 	# print('not in map range')
@@ -48,7 +47,7 @@ if (!(kiter %in% map_range)){
 		DYF[Uargs$ind.ioM] <- -log(fpred)
 		Uc.y<-colSums(DYF)
 		deltau<-Uc.y-U.y
-		deltau[l[-ind_rand]] = 1000000
+		deltau[delete] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -72,7 +71,7 @@ if (!(kiter %in% map_range)){
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				# deltu[ind_rand] = 1000000
-				deltu[l[-ind_rand]] = 1000000
+				deltu[delete] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -110,7 +109,7 @@ if (!(kiter %in% map_range)){
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
 				# deltu[ind_rand] = 1000000
-				deltu[l[-ind_rand]] = 1000000
+				deltu[delete] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 

@@ -305,9 +305,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range){
 	}
 }
 	
-	phiMold<-phiM
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,]
-	phiM[ind_rand,varList$ind.eta] <- phiMold[ind_rand,varList$ind.eta]
-	# phiM[ind,varList$ind.eta]<-mean.phiM[ind,varList$ind.eta]+etaM[ind,]
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))
 }
