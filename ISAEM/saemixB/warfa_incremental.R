@@ -106,7 +106,7 @@ warfanew<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfane
 
 #Diff initial values
 
-replicate = 4
+replicate = 3
 seed0 = 395246
 
 #RWM
@@ -127,29 +127,37 @@ for (m in 1:replicate){
   warfa<-cbind(iterations,warfa)
   warfa['individual'] <- m
   warfa$algo <- 'rwm'
-  warfa_scaled <- warfa[rep(seq_len(nrow(warfa)), each=100/batchsize25),]
-  warfa_scaled$iterations = 1:(4*(K1+K2+1))
-  final_rwm <- rbind(final_rwm,warfa)
+  warfa_scaled <- warfa[-1,]
+  warfa_scaled$iterations = seq(1, 4*end, by=4)
+  warfa_scaled <- warfa_scaled[rep(seq_len(nrow(warfa_scaled)), each=100/batchsize25),]
+  final_rwm <- rbind(final_rwm,warfa[0:end,])
 
   options_warfaincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
   warfaincr25<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr25))
   warfaincr25<-cbind(iterations,warfaincr25)
   warfaincr25['individual'] <- m
   warfaincr25$algo <- 'ISAEM25'
-  final_25 <- rbind(final_25,warfaincr25)
+  warfaincr25 <- warfaincr25[-1,]
+  warfaincr25$iterations = seq(1, end, by=1)
+  final_25 <- rbind(final_25,warfaincr25[0:end,])
 
   options_warfaincr50<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
   warfaincr50<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr50))
   warfaincr50<-cbind(iterations,warfaincr50)
   warfaincr50['individual'] <- m
   warfaincr50$algo <- 'ISAEM50'
-  warfa_scaled50 <- warfaincr50[rep(seq_len(nrow(warfaincr50)), each=100/batchsize50),]
-  warfa_scaled50$iterations = 1:(2*(K1+K2+1))
-  final_50 <- rbind(final_50,warfaincr50)
+  warfa_scaled50 <- warfaincr50[-1,]
+  warfa_scaled50$iterations = seq(1, 2*end, by=2)
+  warfa_scaled50 <- warfa_scaled50[rep(seq_len(nrow(warfa_scaled50)), each=100/batchsize50),]
+  final_50 <- rbind(final_50,warfaincr50[0:end,])
 }
 
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_diff(final_rwm,final_mix, title="RWM")
+a <- graphConvMC_diffz(final_rwm[,c(1,3,9)],final_50[,c(1,3,9)],final_25[,c(1,3,9)])
+b <- graphConvMC_diffw(final_rwm[,c(1,6,9)],final_50[,c(1,6,9)],final_25[,c(1,6,9)])
+
+grid.arrange(a,b, ncol=2)
+
+
 
 
 final_rwm <- 0
@@ -257,7 +265,6 @@ ML[1:(end+1),1:6]<- true_param
 error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
 theo_ref['individual'] <- m
 final_ref <- rbind(final_ref,theo_ref)
-
 
 options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
 theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))

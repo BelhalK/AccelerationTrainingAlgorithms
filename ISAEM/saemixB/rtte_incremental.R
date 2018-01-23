@@ -112,7 +112,7 @@ graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 # rttenew<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew))
 
 
-replicate = 4
+replicate = 2
 seed0 = 395246
 
 #RWM
@@ -121,7 +121,7 @@ final_50 <- 0
 final_25 <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(2,1),c(2,1),c(2,1),c(2,1))
+  l = list(c(2,1),c(1,2),c(3,3),c(2,1))
   
   saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
   psi0=matrix(l[[m]],ncol=2,byrow=TRUE,dimnames=list(NULL,   
@@ -134,29 +134,36 @@ for (m in 1:replicate){
   rtte<-cbind(iterations,rtte)
   rtte['individual'] <- m
   rtte$algo <- 'rwm'
-  rtte_scaled <- rtte[rep(seq_len(nrow(rtte)), each=100/batchsize25),]
-  rtte_scaled$iterations = 1:(2*(K1+K2+1))
-  final_rwm <- rbind(final_rwm,rtte)
+  rtte_scaled <- rtte[-1,]
+  rtte_scaled$iterations = seq(1, 4*end, by=4)
+  rtte_scaled <- rtte_scaled[rep(seq_len(nrow(rtte_scaled)), each=4),]
+  final_rwm <- rbind(final_rwm,rtte_scaled[0:end,])
 
   options_rtteincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
   rtteincr<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr))
   rtteincr<-cbind(iterations,rtteincr)
   rtteincr['individual'] <- m
   rtteincr$algo <- 'ISAEM50'
-  rtte_scaled50 <- rtteincr[rep(seq_len(nrow(rtte)), each=100/batchsize50),]
-  rtte_scaled50$iterations = 1:(2*(K1+K2+1))
-  final_50 <- rbind(final_50,rtteincr)
+  rtte_scaled50 <- rtte[-1,]
+  rtte_scaled50$iterations = seq(1, 2*end, by=2)
+  rtte_scaled50 <- rtte_scaled50[rep(seq_len(nrow(rtte_scaled50)), each=100/batchsize50),]
+  final_50 <- rbind(final_50,rtte_scaled50[0:end,])
 
   options_rtteincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
   rtteincr25<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr25))
   rtteincr25<-cbind(iterations,rtteincr25)
   rtteincr25['individual'] <- m
+  rtteincr25 <- rtteincr25[-1,]
   rtteincr25$algo <- 'ISAEM25'
-  final_25 <- rbind(final_25,rtteincr25)
+  rtteincr25$iterations = seq(1, end, by=1)
+  rtteincr25[end,] <- rtteincr25[(end-2),]
+  final_25 <- rbind(final_25,rtteincr25[0:end,])
 }
 
-graphConvMC_new(final_rwm, title="RWM")
-graphConvMC_diff(final_rwm,final_mix, title="RWM")
+a <- graphConvMC_diffz(final_rwm[,c(1,2,6)],final_50[,c(1,2,6)],final_25[,c(1,2,6)])
+b <- graphConvMC_diffw(final_rwm[,c(1,4,6)],final_50[,c(1,4,6)],final_25[,c(1,4,6)])
+
+grid.arrange(a,b, ncol=2)
 
 #MC STUDY
 
