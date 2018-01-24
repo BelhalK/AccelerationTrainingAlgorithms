@@ -53,8 +53,8 @@ k   0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka V k
-Pop.CondInit  1 7 1
+              ka   V   k
+Pop.CondInit 1.2 6.8 1.2
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -75,17 +75,17 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.27    
-[2,] V         5.75    
-[3,] k         0.03    
-[4,] a         1.76    
+[1,] ka        0.664   
+[2,] V         7.576   
+[3,] k         0.017   
+[4,] a         0.990   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.875   
-V  omega2.V  0.035   
-k  omega2.k  0.111   
+ka omega2.ka 0.452   
+V  omega2.V  0.042   
+k  omega2.k  0.064   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

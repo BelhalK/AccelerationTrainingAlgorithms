@@ -208,7 +208,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     l <- 1:Dargs$NM
     ind_rand<-1:Dargs$NM
   } else{
-    if (kiter%%(Dargs$NM/nb_replacement) == 1)
+    if (kiter%%round(Dargs$NM/nb_replacement) == 1)
       { 
         l <- sample(1:Dargs$NM,Dargs$NM)
         ind_rand<-1:nb_replacement

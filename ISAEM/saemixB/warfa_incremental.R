@@ -130,7 +130,7 @@ for (m in 1:replicate){
   warfa_scaled <- warfa[-1,]
   warfa_scaled$iterations = seq(1, 4*end, by=4)
   warfa_scaled <- warfa_scaled[rep(seq_len(nrow(warfa_scaled)), each=100/batchsize25),]
-  final_rwm <- rbind(final_rwm,warfa[0:end,])
+  final_rwm <- rbind(final_rwm,warfa_scaled[0:end,])
 
   options_warfaincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
   warfaincr25<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr25))
@@ -149,7 +149,7 @@ for (m in 1:replicate){
   warfa_scaled50 <- warfaincr50[-1,]
   warfa_scaled50$iterations = seq(1, 2*end, by=2)
   warfa_scaled50 <- warfa_scaled50[rep(seq_len(nrow(warfa_scaled50)), each=100/batchsize50),]
-  final_50 <- rbind(final_50,warfaincr50[0:end,])
+  final_50 <- rbind(final_50,warfa_scaled50[0:end,])
 }
 
 a <- graphConvMC_diffz(final_rwm[,c(1,3,9)],final_50[,c(1,3,9)],final_25[,c(1,3,9)])
