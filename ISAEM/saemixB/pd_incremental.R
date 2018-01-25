@@ -131,7 +131,7 @@ saemix.model<-saemixModel(model=modelemax,description="Emax model",type="structu
 psi0=matrix(l[[m]],ncol=3,byrow=TRUE,
 dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
 covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
-fixed.estim=c(1,1,1),covariance.model=matrix(c(1/m,0,0,0,1/m,0,0,0,1/m),ncol=3,
+fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
 
   options_pd<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))

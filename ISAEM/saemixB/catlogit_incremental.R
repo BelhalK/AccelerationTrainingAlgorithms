@@ -189,9 +189,7 @@ for (m in 1:replicate){
 # b <- graphConvMC_diff3(final_rwm[,c(1,7,8)],final_incremental[,c(1,7,8)])
 
 # grid.arrange(a,b, ncol=2)
-colnames(final_rwm)[4] <- "z2"
-colnames(final_incremental)[4] <- "z2"
-colnames(final_incremental25)[4] <- "z2"
+
 a <- graphConvMC_diffz(final_rwm[,c(1,3,7)],final_incremental[,c(1,3,7)],final_incremental25[,c(1,3,7)])
 b <- graphConvMC_diffw(final_rwm[,c(1,6,7)],final_incremental[,c(1,6,7)],final_incremental25[,c(1,6,7)])
 

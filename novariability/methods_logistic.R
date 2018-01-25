@@ -18,7 +18,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
   
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
 source('mixtureFunctions.R') 
-source('plots.R') 
+source('plots.R')
 
 library('rCMA')
 ###logit

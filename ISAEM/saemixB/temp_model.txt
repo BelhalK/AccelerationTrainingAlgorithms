@@ -1,19 +1,19 @@
 
-                      [LONGITUDINAL]
-                      input = {e0, emax, e50,a}
 
-                      
-                      EQUATION:
-                      Cc = e0+emax*t/(e50+t)
-                      
-                      DEFINITION:
-                      y1 ={distribution=normal, prediction=Cc, sd=a}
-                      
-                      [INDIVIDUAL]
-                      input={e0_pop,o_e0,emax_pop,o_emax,e50_pop,o_e50}
-                      
-                      DEFINITION:
-                      e0  ={distribution=lognormal, prediction=e0_pop,  sd=o_e0}
-                      emax   ={distribution=lognormal, prediction=emax_pop,   sd=o_emax}
-                      e50  ={distribution=lognormal, prediction=e50_pop,  sd=o_e50}
-                      
+  [LONGITUDINAL]
+  input = {beta,lambda}  
+
+  EQUATION:
+  h=(beta/lambda)*(t/lambda)^(beta-1)
+
+  DEFINITION:
+e={type=event,
+       rightCensoringTime = 6,  
+       hazard             = h}
+  [INDIVIDUAL]
+  input={lambda_pop, o_lambda,beta_pop, o_beta}
+                        
+  DEFINITION:
+  lambda  ={distribution=lognormal, prediction=lambda_pop,  sd=o_lambda}
+  beta  ={distribution=lognormal, prediction=beta_pop,  sd=o_beta}
+       
