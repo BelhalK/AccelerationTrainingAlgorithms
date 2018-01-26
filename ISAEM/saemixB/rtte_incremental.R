@@ -25,7 +25,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('mixtureFunctions.R')
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/")
-source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 library("mlxR")
 library("psych")
 library("coda")
@@ -112,7 +112,7 @@ graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 # rttenew<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew))
 
 
-replicate = 2
+replicate = 3
 seed0 = 395246
 
 #RWM
@@ -127,7 +127,7 @@ for (m in 1:replicate){
   psi0=matrix(l[[m]],ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
-  byrow=TRUE))
+  byrow=TRUE),omega.init=matrix(c(1/m,0,0,1/m),ncol=2,byrow=TRUE))
 
   options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
   rtte<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rtte))

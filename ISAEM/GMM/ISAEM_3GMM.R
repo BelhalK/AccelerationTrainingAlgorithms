@@ -24,7 +24,7 @@ seed0=44444
 # ylim <- c(0.15, 0.5, 0.4)
 ylim <- c(0.1, 0.3, 0.3)
 
-nsim <- 5
+nsim <- 20
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -80,6 +80,7 @@ for (j in (1:nsim))
   df$sim <- j
   diffr <- rbind(diffr,df)
 }
+
 diffr[,2:10] <- diffr[,2:10]^2
 table1r <- NULL
 table1r <- diffr[diffr$sim==1,2:10]
@@ -87,11 +88,10 @@ for (j in (2:nsim))
 {
   table1r <- table1r+diffr[diffr$sim==j,2:10]
 }
-table1r$iteration <- 0:KR
-table1r$algo <- '10R'
-table1r <- subset(table1r, select=c(10,1:11))
-table1r[,11]<-NULL
+table1r$iteration = seq(0, K, by=1)
+table1r <- subset(table1r, select=c(10,1:9))
 table1r[,2:10] <- 1/nsim*table1r[,2:10]
+
 
 ##  SAEMRP
 print('SAEM 50R')
@@ -113,7 +113,6 @@ for (j in (1:nsim))
   df$sim <- j
   diffr <- rbind(diffr,df)
 }
-
 diffr[,2:10] <- diffr[,2:10]^2
 table2r <- NULL
 table2r <- diffr[diffr$sim==1,2:10]
@@ -121,11 +120,11 @@ for (j in (2:nsim))
 {
   table2r <- table2r+diffr[diffr$sim==j,2:10]
 }
-table2r$iteration <- 0:KR
-table2r$algo <- '50R'
-table2r <- subset(table2r, select=c(10,1:11))
-table2r[,11]<-NULL
+table2r$iteration = seq(0, 5*K, by=5)
+table2r <- subset(table2r, select=c(10,1:9))
 table2r[,2:10] <- 1/nsim*table2r[,2:10]
+table2r <- table2r[rep(seq_len(nrow(table2r)), each=5),]
+
 
 print('SAEM 100R')
 nb_r <- n
@@ -154,28 +153,20 @@ for (j in (2:nsim))
 {
   tablenr <- tablenr+diffr[diffr$sim==j,2:10]
 }
-tablenr$iteration <- 0:KR
-tablenr$algo <- 'NR'
-tablenr <- subset(tablenr, select=c(10,1:11))
-tablenr[,11]<-NULL
+tablenr$iteration = seq(0, 10*K, by=10)
+tablenr <- subset(tablenr, select=c(10,1:9))
 tablenr[,2:10] <- 1/nsim*tablenr[,2:10]
+tablenr <- tablenr[rep(seq_len(nrow(tablenr)), each=10),]
 
 # graphConvMC_new(diffr, title="5OR")
 # graphConvMC2_new(tablenr, title="NRRALGO - EM (same complexity)",legend=TRUE)
 
-table2r_scaled <- table2r[rep(seq_len(nrow(table2r)), each=5),]
-tablenr_scaled <- tablenr[rep(seq_len(nrow(tablenr)), each=10),]
-table2r_scaled$iteration = 1:(5*(K+1))
-tablenr_scaled$iteration = 1:(10*(K+1))
-
-
-
 # tablenr[1,2:7] <- tablenr[2,2:7]
 table1r$algo <- '10R'
 table2r$algo <- '50R'
-tablenr_scaled$algo <- 'NR'
+tablenr$algo <- 'NR'
 
-variance <- rbind(table1r[1:KR,],table2r_scaled[1:KR,],tablenr_scaled[1:KR,]) #10replacement
+variance <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) #10replacement
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
 graphConvMC2_new(variance, title="ALGO - EM (same complexity)",legend=TRUE)

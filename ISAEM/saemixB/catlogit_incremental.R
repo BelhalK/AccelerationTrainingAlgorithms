@@ -42,7 +42,7 @@ source('SaemixObject_cat.R')
 source('main_initialiseMainAlgo_cat.R') 
 source("mixtureFunctions.R")
 
-source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 
 
 library("rJava")
@@ -116,7 +116,7 @@ saemix.foce<-list(seed=39546,map=F,fim=F,ll.is=F, nb.chains = 1, nbiter.mcmc = c
 
 
 K1 = 600
-K2 = 0
+K2 = 100
 
 iterations = 1:(K1+K2+1)
 gd_step = 0.01
@@ -204,7 +204,7 @@ grid.arrange(a,b, ncol=2)
 
 
 K1 = 400
-K2 = 0
+K2 = 100
 
 iterations = 1:(K1+K2+1)
 end = K1+K2
@@ -213,12 +213,12 @@ final_rwm <- 0
 final_ref <- 0
 error_rwm <- 0
 
-th1 <- 1
-th2 <- 3
+th1 <- 0
+th2 <- 1
 th3 <- 1
-o_th1 <- 1
-o_th2 <- 0.5
-o_th3 <- 0.5
+o_th1 <- 0.2
+o_th2 <- 0.2
+o_th3 <- 0
 final_mix <- 0
 final_mix25 <- 0
 final_mix10 <- 0
@@ -229,7 +229,7 @@ error_mix10 <- 0
 
 
 seed0 = 39546
-replicate = 40
+replicate = 5
 
 for (j in 1:replicate){
 
@@ -261,9 +261,10 @@ for (j in 1:replicate){
                           
                           ")
 
-    p <- c(th1_pop=0, o_th1=0.2,
-           th2_pop=1, o_th2=0.2, 
-           th3_pop=1, o_th3=0)
+   
+    p <- c(th1_pop=th1, o_th1=o_th1,
+           th2_pop=th2, o_th2=o_th2, 
+           th3_pop=th3, o_th3=o_th3)
 
     y1 <- list(name='level', time=seq(1,to=100,by=10))
 
@@ -288,7 +289,8 @@ for (j in 1:replicate){
   theo_ref<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   ML <- theo_ref[,2:6]
-  ML[1:(end+1),]<- theo_ref[end,2:6]
+  # ML[1:(end+1),]<- theo_ref[end,2:6]
+  ML[1:(end+1),1:5]<- true_param[1:5]
   error_rwm <- error_rwm + (theo_ref[,2:6]-ML)^2
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
@@ -298,7 +300,8 @@ for (j in 1:replicate){
   theo_mix<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iterations, theo_mix)
   ML <- theo_mix[,2:6]
-  ML[1:(end+1),]<- theo_mix[end,2:6]
+  # ML[1:(end+1),]<- theo_mix[end,2:6]
+  ML[1:(end+1),1:5]<- true_param[1:5]
   error_mix <- error_mix + (theo_mix[,2:6]-ML)^2
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
@@ -307,7 +310,8 @@ for (j in 1:replicate){
   theo_mix25<-data.frame(saemix_cat_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iterations, theo_mix25)
   ML <- theo_mix25[,2:6]
-  ML[1:(end+1),]<- theo_mix25[end,2:6]
+  # ML[1:(end+1),]<- theo_mix25[end,2:6]
+  ML[1:(end+1),1:5]<- true_param[1:5]
   error_mix25 <- error_mix25 + (theo_mix25[,2:6]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
@@ -332,13 +336,13 @@ error_mix25 <- 1/replicate*error_mix25
 # error_mix10 <- 1/replicate*error_mix10
 
 
-err_mix<- theo_ref[-1,]
-err_rwm<- theo_ref[-1,]
-err_mix25<- theo_ref[-1,]
+err_mix<- theo_ref
+err_rwm<- theo_ref
+err_mix25<- theo_ref
 
-err_rwm[,2:6] <- error_rwm[-1,1:5]
-err_mix[,2:6] <- error_mix[-1,1:5]
-err_mix25[,2:6] <- error_mix25[-1,1:5]
+err_rwm[,2:6] <- error_rwm[,1:5]
+err_mix[,2:6] <- error_mix[,1:5]
+err_mix25[,2:6] <- error_mix25[,1:5]
 
 
 err_rwm_scaled <- err_rwm

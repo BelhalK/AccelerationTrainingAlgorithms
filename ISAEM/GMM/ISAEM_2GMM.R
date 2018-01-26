@@ -10,7 +10,7 @@ theme_set(theme_bw())
 n <- 500
 weight<-c(0.7, 0.3) 
 mu<-c(0,1)
-sigma<-c(0.5,0.9)*1
+sigma<-c(0.6,0.9)*1
 
 
 weight0<-c(.9,.1)
@@ -63,7 +63,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.em[[j]] <- df
 }
-graphConvMC(dem, title="EM")
+# graphConvMC(dem, title="EM")
 
 ##  SAEM1 replacement vs EM
 print('SAEM 10R')
@@ -91,10 +91,8 @@ for (j in (2:nsim))
 {
   table1r <- table1r+diffr[diffr$sim==j,2:7]
 }
-table1r$iteration <- 0:KR
-table1r$algo <- '10R'
-table1r <- subset(table1r, select=c(7,1:8))
-table1r[,8]<-NULL
+table1r$iteration = seq(0, K, by=1)
+table1r <- subset(table1r, select=c(7,1:6))
 table1r[,2:7] <- 1/nsim*table1r[,2:7]
 
 print('SAEM 100R')
@@ -122,15 +120,10 @@ for (j in (2:nsim))
 {
   tablenr <- tablenr+diffr[diffr$sim==j,2:7]
 }
-tablenr$iteration <- 0:KR
-tablenr$algo <- 'NR'
-tablenr <- subset(tablenr, select=c(7,1:8))
-tablenr[,8]<-NULL
+tablenr$iteration = seq(0, 10*K, by=10)
+tablenr <- subset(tablenr, select=c(7,1:6))
 tablenr[,2:7] <- 1/nsim*tablenr[,2:7]
-
-tablenr_scaled <- tablenr[rep(seq_len(nrow(tablenr)), each=100/10),]
-tablenr_scaled$iteration = 1:(10*(KR+1))
-
+tablenr <- tablenr[rep(seq_len(nrow(tablenr)), each=10),]
 
 print('SAEM 50R')
 nb_r <- n/2
@@ -157,26 +150,17 @@ for (j in (2:nsim))
 {
   table2r <- table2r+diffr[diffr$sim==j,2:7]
 }
-table2r$iteration <- 0:KR
-table2r$algo <- 'NR'
-table2r <- subset(table2r, select=c(7,1:8))
-table2r[,8]<-NULL
+table2r$iteration = seq(0, 5*K, by=5)
+table2r <- subset(table2r, select=c(7,1:6))
 table2r[,2:7] <- 1/nsim*table2r[,2:7]
-
-
-table2r_scaled <- table2r[rep(seq_len(nrow(table2r)), each=5),]
-tablenr_scaled <- tablenr[rep(seq_len(nrow(tablenr)), each=10),]
-table2r_scaled$iteration = 1:(5*(KR+1))
-tablenr_scaled$iteration = 1:(10*(KR+1))
-
-
+table2r <- table2r[rep(seq_len(nrow(table2r)), each=5),]
 
 # tablenr[1,2:7] <- tablenr[2,2:7]
 table1r$algo <- '10R'
-table2r_scaled$algo <- '50R'
-tablenr_scaled$algo <- 'NR'
+table2r$algo <- '50R'
+tablenr$algo <- 'NR'
 
-variance <- rbind(table1r[1:KR,],table2r_scaled[1:KR,],tablenr_scaled[1:KR,]) #10replacement
+variance <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) #10replacement
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
 graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)

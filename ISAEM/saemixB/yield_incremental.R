@@ -25,7 +25,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('mixtureFunctions.R')
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/")
-source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 library("mlxR")
 library("psych")
 library("coda")
@@ -34,6 +34,7 @@ library(abind)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
+
 
 #####################################################################################
 # Theophylline
@@ -46,7 +47,7 @@ require(reshape2)
 
 # Doc
 data(yield.saemix)
-saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),type="structural",
+saemix.data<-saemixData(name.data=yield.saemix,header=TRUE,name.group=c("site"),
   name.predictors=c("dose"),name.response=c("yield"),
   name.covariates=c("soil.nitrogen"),units=list(x="kg/ha",y="t/ha",
   covariates=c("kg/ha")))
@@ -67,7 +68,7 @@ yield.LP<-function(psi,id,xidep) {
   f[x>xmax]<-ymax[x>xmax]
   return(f)
 }
-saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model",   
+saemix.model<-saemixModel(model=yield.LP,description="Linear plus plateau model", type="structural",     
   psi0=matrix(c(8,100,0.2,0,0,0),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("Ymax","Xmax","slope"))),covariate.model=matrix(c(0,0,0),ncol=3,byrow=TRUE), 
   transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
@@ -94,7 +95,7 @@ options_yieldincr50<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0
 yieldincr50<-data.frame(saemix_incremental(saemix.model,saemix.data,options_yieldincr50))
 yieldincr50<-cbind(iterations,yieldincr50)
 
-graphConvMC2_saem(yield,yieldincr, title="new kernel")
+graphConvMC2_saem(yield,yieldincr25, title="new kernel")
 
 yield$algo <- 'rwm'
 yieldincr25$algo <- 'ISAEM25'

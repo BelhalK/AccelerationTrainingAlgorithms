@@ -24,7 +24,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('main_estep_incremental.R')
 
   source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R/mixtureFunctions.R')
-  source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+  source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB")
 
 
@@ -181,7 +181,7 @@ o_k <- 0.3
 
 true_param <- data.frame("ka" = ka_true, "V" = V_true, "k" = 0.1/8, "omega2.ka"=o_ka ,"omega2.V"= o_V,"omega2.k"= o_k)
 seed0 = 39546
-replicate = 3
+replicate = 5
 for (m in 1:replicate){
   
     model<-"/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/warfarin_project_model.txt"
@@ -306,7 +306,7 @@ err_mix25[,2:8] <- error_mix25[-1,]
 err_rwm_scaled <- err_rwm
 err_rwm_scaled$iterations = seq(1, 4*end, by=4)
 
-err_mix_scaled <- err_rwm
+err_mix_scaled <- err_mix
 err_mix_scaled$iterations = seq(1, 2*end, by=2)
 
 
@@ -323,8 +323,8 @@ d <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,5,9)],err_mix_scaled[0:end,c(1,5,9
 
 grid.arrange(c,d, ncol=2)
 
-e <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,3,9)],err_mix_scaled[0:end,c(1,3,9)],err_mix25[0:end,c(1,3,9)])
-f <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,6,9)],err_mix_scaled[0:end,c(1,6,9)],err_mix25[0:end,c(1,6,9)])
+e <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,4,9)],err_mix_scaled[0:end,c(1,4,9)],err_mix25[0:end,c(1,4,9)])
+f <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,,9)],err_mix_scaled[0:end,c(1,,9)],err_mix25[0:end,c(1,,9)])
 
 grid.arrange(e,f, ncol=2)
 

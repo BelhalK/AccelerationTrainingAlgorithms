@@ -25,7 +25,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('mixtureFunctions.R')
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/")
-source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 
 
 library("rJava")
@@ -183,15 +183,15 @@ error_mix <- 0
 error_mix25 <- 0
 
 
-e0_true <- 1
+e0_true <- 23
 o_e0_true <- 0.5
-emax_true <- 10
+emax_true <- 100
 o_emax_true <- 0.3
-e50_true <- 0.2
+e50_true <- 10
 o_e50_true <- 0.3
 
 final_mix <- 0
-true_param <- data.frame("e0" = e0_true, "emax" = emax_true, "e50" = e50_true, "omega2.e0"=o_e0_true ,"omega2.emax"= o_emax_true,"omega2.e50"= o_e50_true)
+true_param <- data.frame("e0" = e0_true, "emax" = emax_true, "e50" = e50_true, "omega2.e0"=o_e0_tru^2 ,"omega2.emax"= o_emax_true^2,"omega2.e50"= o_e50_true^2)
 
 
 seed0 = 39546
@@ -202,7 +202,31 @@ for (j in 1:replicate){
 
      
 model2 <- inlineModel("
-                      [LONGITUDINAL]
+                      [COVARIATE]
+                      input={p_F}
+
+                      DEFINITION:
+                      gender = { type        = categorical, 
+                                 categories  = {0,1},
+                                 P(gender=0) = p_F }
+                      
+                      [INDIVIDUAL]
+                      input={e0_pop,o_e0,emax_pop,o_emax,gender, beta_F,e50_pop,o_e50}
+                      gender={type=categorical,categories={0,1}}
+
+                      
+                      DEFINITION:
+                      e0  ={distribution=lognormal, 
+                            prediction=e0_pop,
+                            sd=o_e0}
+                      emax   ={distribution=lognormal, prediction=emax_pop,   sd=o_emax}
+                      e50  ={distribution=lognormal, 
+                              reference=e50_pop,  
+                              covariate = gender,
+                              coefficient  = {beta_F,0},
+                              sd=o_e50}
+
+                       [LONGITUDINAL]
                       input = {e0, emax, e50,a}
 
                       
@@ -211,46 +235,45 @@ model2 <- inlineModel("
                       
                       DEFINITION:
                       y1 ={distribution=normal, prediction=Cc, sd=a}
-                      
-                      [INDIVIDUAL]
-                      input={e0_pop,o_e0,emax_pop,o_emax,e50_pop,o_e50}
-                      
-                      DEFINITION:
-                      e0  ={distribution=lognormal, prediction=e0_pop,  sd=o_e0}
-                      emax   ={distribution=lognormal, prediction=emax_pop,   sd=o_emax}
-                      e50  ={distribution=lognormal, prediction=e50_pop,  sd=o_e50}
+
                       ")
+
 
 adm  <- list(amount=1, time=seq(0,50,by=50))
 
-p <- c(e0_pop=1, o_e0=0.5,
-       emax_pop=10, o_emax=0.3, 
-       e50_pop=0.2, o_e50=0.3,  
-       a=0.1)
-y1 <- list(name='y1', time=seq(1,to=50,by=2))
 
+p <- c(p_F=0.3,  beta_F=0.6,e0_pop=e0_true, o_e0=o_e0_true,
+       emax_pop=emax_true, o_emax=o_emax_true, 
+       e50_pop=e50_true, o_e50=o_e50_true,  
+       a=0.1)
+y1 <- list(name='y1', time=seq(0,to=50,by=10))
+ind <- list(name=c("gender"))
 
 res2a2 <- simulx(model = model2,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=100, level="individual"),
-                 output = y1)
+                 group = list(size=100, level="covariate"),
+                 output = list(ind, y1))
 
-
-
-writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_pd.csv")
-head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_pd.csv", header=T, sep=","))
+  writeDatamlx(res2a2, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_pd.csv")
   pd.data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_pd.csv", header=T, sep=",")
-  pd.data <- pd.data[pd.data[,2]!=0 & pd.data[,2]!=50 ,]
+  pd.data <- pd.data[pd.data[,4]!=1 ,c(1,2,3,5)]
+  pd.data[,3] <- res2a2$y1[,3]
+  colnames(pd.data) <- c("subject","dose","response","gender")
 
-  saemix.data<-saemixData(name.data=pd.data,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time"), name.X=c("time"))
+
+saemix.data<-saemixData(name.data=pd.data,header=TRUE,name.group=c("subject"),
+name.predictors=c("dose"),name.response=c("response"),name.covariates=c("gender"),
+units=list(x="mg",y="-",covariates="-"))
 
 saemix.model<-saemixModel(model=modelemax,description="Emax model",type="structural",
 psi0=matrix(c(20,300,20,0,0,0),ncol=3,byrow=TRUE,
 dimnames=list(NULL,c("E0","Emax","EC50"))),transform.par=c(1,1,1),
+covariate.model=matrix(c(0,0,1),ncol=3,byrow=TRUE),
 fixed.estim=c(1,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,
 byrow=TRUE),error.model="constant")
   print(j)
+
 
   options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100)
   theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
@@ -267,7 +290,6 @@ byrow=TRUE),error.model="constant")
   theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iterations, theo_mix)
 
-  var_mix <- var_mix + (theo_mix[,2:5]-true_param)^2
   ML <- theo_mix[,2:7]
   # ML[1:(end+1),]<- theo_mix[end+1,2:5]
   ML[1:(end+1),1:6]<- true_param
@@ -279,11 +301,10 @@ byrow=TRUE),error.model="constant")
   theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iterations, theo_mix25)
   
-  var_mix25 <- var_mix25 + (theo_mix25[,2:7]-true_param)^2
   ML <- theo_mix25[,2:7]
   # ML[1:(end+1),]<- theo_mix25[end+1,2:5]
   ML[1:(end+1),1:6]<- true_param
-  error_mix25 <- error_mix25 + (theo_mix25[,2:5]-ML)^2
+  error_mix25 <- error_mix25 + (theo_mix25[,2:7]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
 }
@@ -319,8 +340,8 @@ err_mix25$iterations = 1:((K1+K2))
 
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
-c <- graphConvMC_sec(err_rwm_scaled[2:end,c(1,3,9)],err_mix_scaled[2:end,c(1,3,9)],err_mix25[2:end,c(1,3,9)])
-d <- graphConvMC_sed(err_rwm_scaled[2:end,c(1,6,9)],err_mix_scaled[2:end,c(1,6,9)],err_mix25[2:end,c(1,6,9)])
+c <- graphConvMC_sec(err_rwm_scaled[1:end,c(1,3,9)],err_mix_scaled[1:end,c(1,3,9)],err_mix25[1:end,c(1,3,9)])
+d <- graphConvMC_sed(err_rwm_scaled[1:end,c(1,6,9)],err_mix_scaled[1:end,c(1,6,9)],err_mix25[1:end,c(1,6,9)])
 
 grid.arrange(c,d, ncol=2)
 
