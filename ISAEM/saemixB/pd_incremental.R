@@ -346,3 +346,13 @@ d <- graphConvMC_sed(err_rwm_scaled[1:end,c(1,6,9)],err_mix_scaled[1:end,c(1,6,9
 grid.arrange(c,d, ncol=2)
 
 
+
+
+
+# c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
+e <- graphConvMC_sec(err_rwm_scaled[1:end,c(1,3,9)],err_mix_scaled[1:end,c(1,3,9)],err_mix25[1:end,c(1,3,9)])
+f <- graphConvMC_sed(err_rwm_scaled[1:end,c(1,6,9)],err_mix_scaled[1:end,c(1,6,9)],err_mix25[1:end,c(1,6,9)])
+
+grid.arrange(e,f, ncol=2)
+
+
