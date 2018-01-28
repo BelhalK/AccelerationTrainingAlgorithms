@@ -24,7 +24,7 @@ library('rCMA')
 
 ###rtte
 ###RTTE
-timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/paramToRV/data/rtte_data.csv", header=T, sep=",")
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/rtte_data.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 saemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
 timetoevent.model<-function(psi,id,xidep) {
@@ -86,7 +86,7 @@ for (m in 1:replicate){
  saemix.model_rttenovar<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
   psi0=matrix(l[[m]],ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
+  transform.par=c(1,1),covariance.model=matrix(c(0,0,0,1),ncol=2, 
   byrow=TRUE))
 
   #No var
@@ -125,4 +125,4 @@ graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
 #red: av newkernel
 #green: bayes
 
-graphConvMC_diff(final_bayes,final_av, title="")
+graphConvMC_diff(final_optim,final_bayes, title="")

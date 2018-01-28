@@ -24,7 +24,7 @@ library('rCMA')
 
 
 # zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/paramToRV/data/dataPK_zifrosilone.csv", header=T,sep=";")
-zifro_data <- read.table("/Users/karimimohammedbelhal/Desktop/novariability/data/dataPK_zifrosilone.txt", header=T)
+zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/dataPK_zifrosilone.txt", header=T)
 saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
   name.predictors=c("AMT","TIME"),name.response=c("Y"), name.X="X")
 
@@ -46,7 +46,7 @@ model1cpt<-function(psi,id,xidep) {
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(c(0.2,1,250,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5, 
   byrow=TRUE),error.model="exponential")
 
@@ -58,7 +58,7 @@ saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="str
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(c(0.158,0.18,40,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
   byrow=TRUE),error.model="exponential")
 
@@ -110,13 +110,13 @@ for (m in 1:replicate){
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5, 
   byrow=TRUE),error.model="exponential")
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
   byrow=TRUE),error.model="exponential")
 

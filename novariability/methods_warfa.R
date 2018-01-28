@@ -21,7 +21,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
 source('mixtureFunctions.R') 
 library('rCMA')
 ###WARFA
-warfa_data <- read.table("/Users/karimimohammedbelhal/Desktop/novariability/data/warfarin_data.txt", header=T)
+warfa_data <- read.table("//Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/warfarin_data.txt", header=T)
 saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
@@ -103,7 +103,7 @@ for (m in 1:replicate){
   ##### pseudo bayesian
 
 
-  options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
+  options_warfa_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
   warfa_bayes<-data.frame(saemix(saemix.model_warfanovar,saemix.data_warfa,options_warfa_with))
   warfa_bayes <- cbind(iterations, warfa_bayes)
   warfa_bayes['individual'] <- m

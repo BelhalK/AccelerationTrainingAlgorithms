@@ -24,7 +24,7 @@ library('rCMA')
 ###logit
 
 
-logit_data <- read.table("/Users/karimimohammedbelhal/Desktop/novariability/data/Data_logistic_1D_simule.txt", header=T)
+logit_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/Data_logistic_1D_simule.txt", header=T)
 saemix.data_logit<-saemixData(name.data=logit_data,header=TRUE,sep=" ",na=NA, name.group=c("group"),
   name.predictors=c("X"),name.response=c("Y"), name.X="X")
 

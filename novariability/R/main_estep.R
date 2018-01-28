@@ -323,7 +323,6 @@ if(opt$flag.fmin & opt$nbiter.mcmc[5]>0){
 			}
 			delt<-Uc0.y-U0.y
 			ind<-which(delt<(-1)*log(runif(1)))
-
 			print(ind)
 			etaM0[ind,]<-etaMc0[ind,]
 			U0.y[ind]<-Uc0.y[ind]
