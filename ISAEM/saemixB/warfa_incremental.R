@@ -60,8 +60,8 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 
-K1 = 300
-K2 = 200
+K1 = 100
+K2 = 50
 iterations = 1:(K1+K2+1)
 end = K1+K2
 batchsize25 = 25
@@ -79,7 +79,7 @@ options_warfaincr50<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0
 warfaincr50<-data.frame(saemix_incremental(saemix.model_warfa,saemix.data_warfa,options_warfaincr50))
 warfaincr50<-cbind(iterations,warfaincr50)
 
-graphConvMC2_saem(warfa,warfaincr, title="new kernel")
+graphConvMC2_saem(warfa,warfa, title="new kernel") 
 
 warfa$algo <- 'rwm'
 warfaincr25$algo <- 'ISAEM25'

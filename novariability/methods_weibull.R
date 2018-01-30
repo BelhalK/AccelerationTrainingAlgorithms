@@ -15,7 +15,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-  
+
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
 source('mixtureFunctions.R') 
 source('plots.R') 
@@ -25,7 +25,6 @@ library('rCMA')
 ###rtte
 ###RTTE
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/lung_cancer_.csv", header=T, sep=",")
-timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 saemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("ID"),name.response=c("Y"),name.predictors=c("TIME","Y"), name.X=c("TIME"))
 timetoevent.model<-function(psi,id,xidep) {
   T<-xidep[,1]
@@ -52,12 +51,12 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
   byrow=TRUE))
 
 saemix.model_rttenovar<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
-  psi0=matrix(c(300,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(200,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("Te","p"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,0),ncol=2, 
   byrow=TRUE))
 
-##RUNS
+
 
 K1 = 400
 K2 = 20

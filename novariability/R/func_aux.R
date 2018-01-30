@@ -329,6 +329,7 @@ dtransphi<-function(phi,tr) {
   return(dpsi)
 }
 
+
 compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF) {
 # Attention, DYF variable locale non modifiee en dehors
   args$MCOV0[args$j0.covariate]<-b0
