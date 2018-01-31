@@ -171,8 +171,12 @@ graphConvMC2_saem <- function(df,df2, title=NULL, ylim=NULL)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   for (j in (2:(ncol(df))))
   {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+
-      xlab("iteration") + ylab(names(df[j])) 
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)])) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue")+ geom_vline(xintercept = 100,color = "red", size=1.5)+
+      xlab("iteration") + ylab(names(df[j])) +theme_bw()+ theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=14, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=14, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=22))
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj

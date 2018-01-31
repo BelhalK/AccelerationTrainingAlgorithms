@@ -30,8 +30,8 @@ saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, na
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  tim<-xidep[,2]  
-  T<-psi[id,1]
+  time<-xidep[,2]  
+  Tlag<-psi[id,1]
   ka<-psi[id,2]
   V<-psi[id,3]
   alpha<-psi[id,4]
@@ -39,13 +39,16 @@ model1cpt<-function(psi,id,xidep) {
   CL<-alpha*V^beta
   k<-CL/V
   # ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*(tim-T))-exp(-ka*(tim-T)))
+  dt <- pmax(time-Tlag, 0)
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*dt)-exp(-ka*dt))
   return(ypred)
 }
 
 
+
+
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
-  ,psi0=matrix(c(0.2,1,250,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
+  ,psi0=matrix(c(0.2,1,500,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5, 
   byrow=TRUE),error.model="exponential")
@@ -57,10 +60,12 @@ saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="str
 #   byrow=TRUE),error.model="exponential")
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
-  ,psi0=matrix(c(0.158,0.18,40,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
+  ,psi0=matrix(c(0.158,2,500,0.5,2),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
-  byrow=TRUE),error.model="exponential")
+  byrow=TRUE),fixed.estim=c(1,1,1,1,1),error.model="exponential")
+
+
 
 
 K1 = 400
@@ -76,7 +81,7 @@ zifro_without<-data.frame(saemix(saemix.model_zifro,saemix.data_zifro,options_zi
 zifro_without <- cbind(iterations, zifro_without)
 
 #no var
-options_zifro_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0), nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+options_zifro_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 zifro_without<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_without))
 zifro_without <- cbind(iterations, zifro_without)
 
@@ -105,7 +110,7 @@ final_avnew <- 0
 final_bayes <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(0.158,0.18,40,1,1),c(0.168,0.2,43,1,1),c(0.138,0.15,37,1,1),c(0.158,0.18,40,1,1))
+  l = list(c(0.158,0.18,40,1,1),c(0.168,0.2,43,1.5,1.5),c(0.138,0.15,37,1.2,1.2),c(0.158,0.18,40,1,1))
   
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
@@ -116,7 +121,7 @@ saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="str
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
-  transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
+  transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
   byrow=TRUE),error.model="exponential")
 
@@ -154,7 +159,7 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 
 
 graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
-
+graphConvMC_diff4(final_optim,final_optim,final_bayes,final_bayes, title="")
 #black: optim
 #blue: av
 #red: av newkernel

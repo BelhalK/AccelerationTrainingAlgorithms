@@ -30,8 +30,8 @@ Nonlinear mixed-effects model
   Model function:  zifrorin  Model type:  structural
 function(psi,id,xidep) { 
   dose<-xidep[,1]
-  tim<-xidep[,2]  
-  T<-psi[id,1]
+  time<-xidep[,2]  
+  Tlag<-psi[id,1]
   ka<-psi[id,2]
   V<-psi[id,3]
   alpha<-psi[id,4]
@@ -39,38 +39,38 @@ function(psi,id,xidep) {
   CL<-alpha*V^beta
   k<-CL/V
   # ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*(tim-T))-exp(-ka*(tim-T)))
+  dt <- pmax(time-Tlag, 0)
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*dt)-exp(-ka*dt))
   return(ypred)
 }
   Nb of parameters: 5 
-      parameter names:  T ka V alpha beta 
+      parameter names:  Tlag ka V alpha beta 
       distribution:
      Parameter Distribution Estimated
-[1,] T         log-normal   Estimated
+[1,] Tlag      log-normal   Estimated
 [2,] ka        log-normal   Estimated
 [3,] V         log-normal   Estimated
 [4,] alpha     log-normal   Estimated
 [5,] beta      log-normal   Estimated
   Variance-covariance matrix:
-      T ka V alpha beta
-T     1  0 0     0    0
-ka    0  1 0     0    0
-V     0  0 1     0    0
-alpha 0  0 0     0    0
-beta  0  0 0     0    0
+      Tlag ka V alpha beta
+Tlag     1  0 0     0    0
+ka       0  1 0     0    0
+V        0  0 1     0    0
+alpha    0  0 0     0    0
+beta     0  0 0     0    0
   Error model: exponential , initial values: a=1 
     No covariate in the model.
     Initial values
-                 T   ka  V alpha beta
-Pop.CondInit 0.158 0.18 40     1    1
+              Tlag ka   V alpha beta
+Pop.CondInit 0.158  2 500   0.5    2
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
-    Estimation of log-likelihood by importance sampling
+    Algorithms: estimation only
     Number of iterations:  K1=400, K2=200 
     Number of chains:  5 
     Seed:  39546 
-    Number of MCMC iterations for IS:  5000 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -84,32 +84,23 @@ Pop.CondInit 0.158 0.18 40     1    1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] T          0.15   
-[2,] ka         0.17   
-[3,] V         41.55   
-[4,] alpha     10.48   
-[5,] beta       0.36   
-[6,] a          0.36   
+[1,] Tlag       0.21   
+[2,] ka         0.16   
+[3,] V         31.16   
+[4,] alpha     17.49   
+[5,] beta       0.24   
+[6,] a          0.37   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-   Parameter Estimate
-T  omega2.T  0.202   
-ka omega2.ka 0.073   
-V  omega2.V  0.805   
+     Parameter   Estimate
+Tlag omega2.Tlag 0.001   
+ka   omega2.ka   0.037   
+V    omega2.V    1.399   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.T omega2.ka omega2.V
-omega2.T  1        0         0       
-omega2.ka 0        1         0       
-omega2.V  0        0         1       
-----------------------------------------------------
----------------  Statistical criteria  -------------
-----------------------------------------------------
-
-Likelihood computed by importance sampling
-      -2LL= -17056.19 
-      AIC = -17038.19 
-      BIC = -17033.82 
-----------------------------------------------------
+            omega2.Tlag omega2.ka omega2.V
+omega2.Tlag 1           0         0       
+omega2.ka   0           1         0       
+omega2.V    0           0         1       
