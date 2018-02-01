@@ -20,13 +20,69 @@ source('plots.R')
 source('mixtureFunctions.R') 
 
 library('rCMA')
+library(mlxR)
 ###zifro
 
 
-# zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/paramToRV/data/dataPK_zifrosilone.csv", header=T,sep=";")
+# zifro_data <- read.csv("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/zifro.csv", header=T,sep=",")
+# saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+#   name.predictors=c("amount","time"),name.response=c("y"), name.X="x")
+
 zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/dataPK_zifrosilone.txt", header=T)
 saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
   name.predictors=c("AMT","TIME"),name.response=c("Y"), name.X="X")
+
+
+
+model <- inlineModel("
+              [INDIVIDUAL]
+              input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, omega_V, alpha_pop ,omega_alpha, beta_pop, omega_beta}
+
+              DEFINITION:
+              Tlag = {distribution=lognormal, prediction=Tlag_pop, sd=omega_Tlag}
+              ka = {distribution=lognormal, prediction=ka_pop, sd=omega_ka}
+              V = {distribution=lognormal, prediction=V_pop,sd=omega_V}
+              alpha = {distribution=lognormal, prediction=alpha_pop,sd=omega_alpha}
+              beta = {distribution=lognormal, prediction=beta_pop,sd=omega_beta}
+
+
+              [LONGITUDINAL]
+              input = {Tlag, ka, V, alpha, beta,a}
+
+              EQUATION:
+              Cc = pkmodel(Tlag, ka, V, Cl=alpha*(V^beta))
+
+              OUTPUT:
+              output = Cc
+
+              DEFINITION:
+              y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+
+                      ")
+
+adm  <- list(amount=100, time=seq(0,50,by=50))
+
+
+p <- c(Tlag_pop=0.000359, omega_Tlag=0.7,  
+      ka_pop=0.7234, omega_ka=0.8,
+       V_pop=94.84, omega_V=0.6, 
+       alpha_pop=1, omega_alpha=0,  
+       beta_pop=0.5, omega_beta=0,  
+       a=0.2)
+y1 <- list(name='y1', time=seq(1,to=50,by=2))
+
+res <- simulx(model = model,
+                 treatment = adm,
+                 parameter = p,
+                 group = list(size=200, level="individual"),
+                 output = y1)
+
+zifro_data <- res$y1
+zifro_data$amount = 100
+head(zifro_data)
+saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y1"), name.X="x")
+
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
@@ -45,25 +101,23 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 
-
-
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(c(0.2,1,500,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5, 
-  byrow=TRUE),error.model="exponential")
+  byrow=TRUE),error.model="constant")
 
 # saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin"
 #   ,psi0=matrix(c(0.2,1,250,1,1),ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
 #   transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
 #   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
-#   byrow=TRUE),error.model="exponential")
+#   byrow=TRUE),error.model="constant")
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(c(0.158,2,500,0.5,2),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
-  byrow=TRUE),fixed.estim=c(1,1,1,1,1),error.model="exponential")
+  byrow=TRUE),fixed.estim=c(1,1,1,1,1),error.model="constant")
 
 
 
@@ -72,7 +126,6 @@ K1 = 400
 K2 = 200
 iterations = 1:(K1+K2+1)
 end = K1+K2
-
 
 
 #With var 
@@ -110,20 +163,20 @@ final_avnew <- 0
 final_bayes <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(0.158,0.18,40,1,1),c(0.168,0.2,43,1.5,1.5),c(0.138,0.15,37,1.2,1.2),c(0.158,0.18,40,1,1))
+  l = list(c(0.158,0.18,200,1,1),c(0.168,0.2,230,1.5,1.5),c(0.138,0.15,250,1.2,1.2),c(0.158,0.18,40,1,1))
   
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5, 
-  byrow=TRUE),error.model="exponential")
+  byrow=TRUE),error.model="constant")
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
-  byrow=TRUE),error.model="exponential")
+  byrow=TRUE),error.model="constant")
 
 
   #No var
@@ -140,12 +193,12 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
   zifro_withav['individual'] <- m
   final_av <- rbind(final_av,zifro_withav)
 
-  ##### AV and new kernel
-  options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1), av=1)
-  zifro_newkernelav<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_newkernel))
-  zifro_newkernelav <- cbind(iterations, zifro_newkernelav)
-  zifro_newkernelav['individual'] <- m
-  final_avnew <- rbind(final_avnew,zifro_newkernelav)
+  # ##### AV and new kernel
+  # options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1), av=1)
+  # zifro_newkernelav<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_newkernel))
+  # zifro_newkernelav <- cbind(iterations, zifro_newkernelav)
+  # zifro_newkernelav['individual'] <- m
+  # final_avnew <- rbind(final_avnew,zifro_newkernelav)
 
   ##### pseudo bayesian
 
@@ -159,7 +212,7 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 
 
 graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
-graphConvMC_diff4(final_optim,final_optim,final_bayes,final_bayes, title="")
+graphConvMC_diff4(final_optim,final_av,final_bayes,final_bayes, title="")
 #black: optim
 #blue: av
 #red: av newkernel

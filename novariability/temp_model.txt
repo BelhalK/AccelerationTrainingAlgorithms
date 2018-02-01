@@ -3,11 +3,11 @@
               input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, omega_V, alpha_pop ,omega_alpha, beta_pop, omega_beta}
 
               DEFINITION:
-              Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
-              ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
-              V = {distribution=lognormal, typical=V_pop,sd=omega_V}
-              alpha = {distribution=lognormal, typical=alpha_pop,sd=omega_alpha}
-              beta = {distribution=lognormal, typical=beta_pop,sd=omega_beta}
+              Tlag = {distribution=lognormal, prediction=Tlag_pop, sd=omega_Tlag}
+              ka = {distribution=lognormal, prediction=ka_pop, sd=omega_ka}
+              V = {distribution=lognormal, prediction=V_pop,sd=omega_V}
+              alpha = {distribution=lognormal, prediction=alpha_pop,sd=omega_alpha}
+              beta = {distribution=lognormal, prediction=beta_pop,sd=omega_beta}
 
 
               [LONGITUDINAL]
