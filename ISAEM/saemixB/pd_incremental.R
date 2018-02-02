@@ -89,7 +89,7 @@ options_pd<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter
 pd<-data.frame(saemix(saemix.model,saemix.data2,options_pd))
 pd<-cbind(iterations,pd)
 
-options_pdincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize)
+options_pdincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
 pdincr<-data.frame(saemix_incremental(saemix.model,saemix.data2,options_pdincr))
 pdincr<-cbind(iterations,pdincr)
 
@@ -99,7 +99,7 @@ graphConvMC2_saem(pd,pdincr, title="new kernel")
 pd$algo <- 'rwm'
 pdincr$algo <- 'ISAEM'
 
-pd_scaled <- pd[rep(seq_len(nrow(pd)), each=100/batchsize),]
+pd_scaled <- pd[rep(seq_len(nrow(pd)), each=100/batchsize50),]
 pd_scaled$iterations = 1:(2*(K1+K2+1))
 
 
@@ -189,9 +189,9 @@ emax_true <- 100
 o_emax_true <- 0.3
 e50_true <- 10
 o_e50_true <- 0.3
-
+a = 0.1
 final_mix <- 0
-true_param <- data.frame("e0" = e0_true, "emax" = emax_true, "e50" = e50_true, "omega2.e0"=o_e0_tru^2 ,"omega2.emax"= o_emax_true^2,"omega2.e50"= o_e50_true^2)
+true_param <- data.frame("e0" = e0_true, "emax" = emax_true, "e50" = e50_true, "omega2.e0"=o_e0_true^2 ,"omega2.emax"= o_emax_true^2,"omega2.e50"= o_e50_true^2, "a" =0.1)
 
 
 seed0 = 39546
@@ -278,10 +278,10 @@ byrow=TRUE),error.model="constant")
   options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100)
   theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
-  ML <- theo_ref[,2:7]
+  ML <- theo_ref[,2:8]
   # ML[1:(end+1),]<- theo_ref[end+1,2:5]
-  ML[1:(end+1),1:6]<- true_param
-  error_rwm <- error_rwm + (theo_ref[,2:7]-ML)^2
+  ML[1:(end+1),1:7]<- true_param
+  error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
 
@@ -290,10 +290,10 @@ byrow=TRUE),error.model="constant")
   theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iterations, theo_mix)
 
-  ML <- theo_mix[,2:7]
+  ML <- theo_mix[,2:8]
   # ML[1:(end+1),]<- theo_mix[end+1,2:5]
-  ML[1:(end+1),1:6]<- true_param
-  error_mix <- error_mix + (theo_mix[,2:7]-ML)^2
+  ML[1:(end+1),1:7]<- true_param
+  error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
   
@@ -301,10 +301,10 @@ byrow=TRUE),error.model="constant")
   theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iterations, theo_mix25)
   
-  ML <- theo_mix25[,2:7]
+  ML <- theo_mix25[,2:8]
   # ML[1:(end+1),]<- theo_mix25[end+1,2:5]
-  ML[1:(end+1),1:6]<- true_param
-  error_mix25 <- error_mix25 + (theo_mix25[,2:7]-ML)^2
+  ML[1:(end+1),1:7]<- true_param
+  error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
 }
@@ -317,19 +317,13 @@ error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
 error_mix25 <- 1/replicate*error_mix25
 
-error_rwm <- cbind(iterations, error_rwm)
-error_mix <- cbind(iterations, error_mix)
-error_mix25 <- cbind(iterations, error_mix25)
-
-
-
 err_mix<- theo_ref[-1,]
 err_rwm<- theo_ref[-1,]
 err_mix25<- theo_ref[-1,]
 
-err_rwm[,2:7] <- error_rwm[-1,1:6]
-err_mix[,2:7] <- error_mix[-1,1:6]
-err_mix25[,2:7] <- error_mix25[-1,1:6]
+err_rwm[,2:8] <- error_rwm[-1,1:7]
+err_mix[,2:8] <- error_mix[-1,1:7]
+err_mix25[,2:8] <- error_mix25[-1,1:7]
 
 
 err_rwm_scaled <- err_rwm

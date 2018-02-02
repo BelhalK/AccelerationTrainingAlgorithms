@@ -58,14 +58,14 @@ end = K1+K2
 batchsize<-50
 
 options_logistic<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-logistic<-data.frame(saemix(saemix.model_logistic,saemix.data_logistic,options_logistic))
+logistic<-data.frame(saemix(saemix.model_logistic,saemix.data_logit,options_logistic))
 logistic<-cbind(iterations,logistic)
 
 options_logisticincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize)
-logisticincr<-data.frame(saemix_incremental(saemix.model_logistic,saemix.data_logistic,options_logisticincr))
+logisticincr<-data.frame(saemix_incremental(saemix.model_logistic,saemix.data_logit,options_logisticincr))
 logisticincr<-cbind(iterations,logisticincr)
 
-graphConvMC2_saem(logistic,logisticincr, title="new kernel")
+graphConvMC2_saem(logistic,logisticnew, title="new kernel")
 
 
 logistic$algo <- 'rwm'
@@ -83,4 +83,5 @@ var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
 options_logisticnew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5))
-logisticnew<-data.frame(saemix(saemix.model_logistic,saemix.data_logistic,options_logisticnew))
+logisticnew<-data.frame(saemix(saemix.model_logistic,saemix.data_logit,options_logisticnew))
+logisticnew<-cbind(iterations,logisticnew)

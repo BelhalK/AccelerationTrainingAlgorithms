@@ -63,18 +63,18 @@ model <- inlineModel("
 adm  <- list(amount=100, time=seq(0,50,by=50))
 
 
-p <- c(Tlag_pop=0.000359, omega_Tlag=0.7,  
+p <- c(Tlag_pop=0.000359, omega_Tlag=3.5,  
       ka_pop=0.7234, omega_ka=0.8,
-       V_pop=94.84, omega_V=0.6, 
-       alpha_pop=1, omega_alpha=0,  
-       beta_pop=0.5, omega_beta=0,  
+       V_pop=195, omega_V=0.6, 
+       alpha_pop=1.3, omega_alpha=0,  
+       beta_pop=0.6, omega_beta=0,  
        a=0.2)
-y1 <- list(name='y1', time=seq(1,to=50,by=2))
+y1 <- list(name='y1', time=seq(1,to=50,by=5))
 
 res <- simulx(model = model,
                  treatment = adm,
                  parameter = p,
-                 group = list(size=200, level="individual"),
+                 group = list(size=15, level="individual"),
                  output = y1)
 
 zifro_data <- res$y1
@@ -114,7 +114,7 @@ saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="str
 #   byrow=TRUE),error.model="constant")
 
 saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
-  ,psi0=matrix(c(0.158,2,500,0.5,2),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
+  ,psi0=matrix(c(0.158,2,200,0.5,2),ncol=5,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","alpha","beta"))),
   transform.par=c(1,1,1,1,1),omega.init=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1),ncol=5,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0),ncol=5, 
   byrow=TRUE),fixed.estim=c(1,1,1,1,1),error.model="constant")
@@ -122,8 +122,8 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 
 
 
-K1 = 400
-K2 = 200
+K1 = 300
+K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
@@ -133,7 +133,7 @@ options_zifro_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2
 zifro_without<-data.frame(saemix(saemix.model_zifro,saemix.data_zifro,options_zifro_without))
 zifro_without <- cbind(iterations, zifro_without)
 
-#no var
+#no var and optim
 options_zifro_without<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0), nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
 zifro_without<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_without))
 zifro_without <- cbind(iterations, zifro_without)
@@ -153,7 +153,7 @@ zifro_withnosa <- cbind(iterations, zifro_withnosa)
 graphConvMC_twokernels(zifro_without[,1:6],zifro_withnosa)
 
 
-replicate = 3
+replicate = 5
 seed0 = 395246
 
 #RWM
@@ -163,7 +163,7 @@ final_avnew <- 0
 final_bayes <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(0.158,0.18,200,1,1),c(0.168,0.2,230,1.5,1.5),c(0.138,0.15,250,1.2,1.2),c(0.158,0.18,40,1,1))
+  l = list(c(0.1,0.18,100,1,1),c(0.15,0.2,150,1.5,1.5),c(0.11,0.15,130,1.2,1.2),c(0.2,0.18,210,1,1),c(0.25,0.18,50,1,1))
   
 
 saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
@@ -186,7 +186,7 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
   zifro_optim <- cbind(iterations, zifro_optim)
   zifro_optim['individual'] <- m
   final_optim <- rbind(final_optim,zifro_optim)
-  ##### AV
+  #### AV
   options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, map.range=c(0),av=1)
   zifro_withav<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
   zifro_withav <- cbind(iterations, zifro_withav)
