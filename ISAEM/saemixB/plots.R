@@ -257,3 +257,22 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
   }
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
+
+
+
+seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
+{
+  G <- (ncol(df)-2)/3
+  df$algo <- as.factor(df$algo)
+  df$method <- as.factor(df$method)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  graf <- ggplot(df,aes(colour=df$algo ))+geom_line(aes(iterations,value,by=value,linetype = df$method),show.legend = legend) +
+  xlab("iterations")+scale_x_log10() + ylab('value') + facet_wrap(~variable,scales = "free_y") + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=10, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=10, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=15)) 
+  grid.arrange(graf)
+  # do.call("grid.arrange", c(graf, ncol=1, top=title))
+}

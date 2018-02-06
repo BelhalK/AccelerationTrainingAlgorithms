@@ -27,7 +27,7 @@ mstep_cat<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varLi
 	#increasing the number of chains
 	chains <- data.frame("iterations" = seq(1,opt$nbiter.saemix[1], by=1), "nchains" = rep(1:Uargs$nchains, each = opt$nbiter.saemix[1]/Uargs$nchains))
 	nchains = chains[chains[,1]==kiter,2]
-	# if (kiter>opt$nbiter.saemix[1]) nchains=1
+	if (kiter>opt$nbiter.saemix[1]) nchains=1
 
 	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=nchains)
 	for(k in 1:nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]

@@ -10,7 +10,7 @@ theme_set(theme_bw())
 n <- 500
 weight<-c(0.7, 0.3) 
 mu<-c(0,1)
-sigma<-c(0.6,0.9)*1
+sigma<-c(0.4,0.9)*1
 
 
 weight0<-c(.9,.1)
@@ -19,7 +19,7 @@ sigma0<-c(.5,1)
 
 
 K1 <-200
-K <- 600
+K <- 1000
 
 alpha1 <- 0.7
 alpha2 <- 0.4

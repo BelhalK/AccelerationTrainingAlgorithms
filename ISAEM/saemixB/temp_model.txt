@@ -1,36 +1,27 @@
 
-                      [COVARIATE]
-                      input={p_F}
 
-                      DEFINITION:
-                      gender = { type        = categorical, 
-                                 categories  = {0,1},
-                                 P(gender=0) = p_F }
-                      
-                      [INDIVIDUAL]
-                      input={e0_pop,o_e0,emax_pop,o_emax,gender, beta_F,e50_pop,o_e50}
-                      gender={type=categorical,categories={0,1}}
+                  [LONGITUDINAL]
+                  input = {th1, th2, th3}
 
-                      
-                      DEFINITION:
-                      e0  ={distribution=lognormal, 
-                            prediction=e0_pop,
-                            sd=o_e0}
-                      emax   ={distribution=lognormal, prediction=emax_pop,   sd=o_emax}
-                      e50  ={distribution=lognormal, 
-                              reference=e50_pop,  
-                              covariate = gender,
-                              coefficient  = {beta_F,0},
-                              sd=o_e50}
+                  EQUATION:
+                  lgp0 = th1
+                  lgp1 = lgp0 + th2
+                  lgp2 = lgp1 + th3
 
-                       [LONGITUDINAL]
-                      input = {e0, emax, e50,a}
+                  DEFINITION:
+                  level = { type = categorical,  categories = {0, 1, 2, 3},
+                  logit(P(level<=0)) = th1
+                  logit(P(level<=1)) = th1 + th2
+                  logit(P(level<=2)) = th1 + th2 + th3
+                  }
 
-                      
-                      EQUATION:
-                      Cc = e0+emax*t/(e50+t)
-                      
-                      DEFINITION:
-                      y1 ={distribution=normal, prediction=Cc, sd=a}
+                  [INDIVIDUAL]
+                  input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
+                          
 
-                      
+                  DEFINITION:
+                  th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
+                  th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
+                  th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
+                          
+                          
