@@ -54,14 +54,16 @@ for (j in (1:nsim))
 print('EM')
 dem <- NULL
 df.em <- vector("list", length=nsim)
+ML <- vector("list", length=nsim)
 for (j in (1:nsim))
 { print(j)
   df <- mixt.em(x[,j], theta0, K)
-  df <- mixt.ident(df)
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
+  ML[[j]] <- df
+  ML[[j]][1:(K+1),]<- df[(K+1),]
 }
 # graphConvMC(dem, title="EM")
 
@@ -76,10 +78,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
-  df <- mixt.ident(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -105,10 +104,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
-  df <- mixt.ident(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -135,10 +131,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M, nb_r)
-  df <- mixt.ident(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)

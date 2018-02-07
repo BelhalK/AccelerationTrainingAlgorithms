@@ -286,7 +286,7 @@ o_th3 <- 0
 true_param <- c(th1,th2,th3,o_th1,o_th2,o_th3)
 
 seed0 = 39546
-replicate = 5
+replicate = 50
 
 for (j in 1:replicate){
 
@@ -416,9 +416,9 @@ for (j in 1:replicate){
   final_mix25 <- rbind(final_mix25,theo_mix25)
 }
 
-graphConvMC_diff(final_ref,final_ref,final_ref)
-graphConvMC_diff(final_ref,final_mix,final_mix25)
-graphConvMC_diff4(final_ref,final_mix,final_mix25,final_mix10)
+# graphConvMC_diff(final_ref,final_ref,final_ref)
+# graphConvMC_diff(final_ref,final_mix,final_mix25)
+# graphConvMC_diff4(final_ref,final_mix,final_mix25,final_mix10)
 
 error_rwm <- 1/replicate*error_rwm
 error_mixseq <- 1/replicate*error_mixseq
@@ -470,8 +470,6 @@ err_mix25pass$iterations = 1:((K1+K2))
 err_mix25iter$iterations = 1:((K1+K2))
 
 
-
-
 err_rwm_scaled$algo <- 'SAEM'
 err_rwm_scaled$method <- 'seq'
 
@@ -490,6 +488,10 @@ err_mixiter_scaled$method <- 'iter'
 err_mix25seq$method <- 'seq'
 err_mix25pass$method <- 'pass'
 err_mix25iter$method <- 'iter'
+
+
+err_mixseq_scaled[1,2:6] = err_mixpass_scaled[1,2:6] = err_mixiter_scaled[1,2:6] = err_rwm_scaled[1,2:6]
+err_mix25seq[1,2:6] = err_mix25pass[1,2:6] = err_mix25iter[1,2:6] = err_rwm_scaled[1,2:6]
 
 
 

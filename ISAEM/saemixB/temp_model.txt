@@ -1,27 +1,16 @@
 
 
+                   [INDIVIDUAL]
+                  input = {ka_pop, omega_ka, V_pop, omega_V, k_pop, omega_k}
+
+                  DEFINITION:
+                  ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+                  V = {distribution=lognormal, typical=V_pop, sd=omega_V}
+                  k = {distribution=lognormal, typical=k_pop, sd=omega_k} 
                   [LONGITUDINAL]
-                  input = {th1, th2, th3}
-
+                  input = {ka,V, k, a}
                   EQUATION:
-                  lgp0 = th1
-                  lgp1 = lgp0 + th2
-                  lgp2 = lgp1 + th3
-
+                  Cc = pkmodel(ka,V,k)
                   DEFINITION:
-                  level = { type = categorical,  categories = {0, 1, 2, 3},
-                  logit(P(level<=0)) = th1
-                  logit(P(level<=1)) = th1 + th2
-                  logit(P(level<=2)) = th1 + th2 + th3
-                  }
-
-                  [INDIVIDUAL]
-                  input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
-                          
-
-                  DEFINITION:
-                  th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
-                  th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
-                  th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
-                          
+                  y = {distribution=normal, prediction=Cc, sd=a}
                           

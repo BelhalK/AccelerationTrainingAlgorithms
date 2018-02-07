@@ -248,7 +248,6 @@ for (i in l[-1]){
 
 rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 # warfarin.saemix <- table[c(1,2,3,5)]
-warfarin.saemix_less <- warfarin.saemix[,]
   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(3,10,2,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(2,0,0,0,2,0,0,0,2),ncol=3,byrow=TRUE),
@@ -256,7 +255,7 @@ warfarin.saemix_less <- warfarin.saemix[,]
   byrow=TRUE))
 
 
-saemix.data<-saemixData(name.data=warfarin.saemix_less,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 

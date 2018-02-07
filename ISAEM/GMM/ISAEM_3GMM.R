@@ -2,14 +2,14 @@ source("mixtureAlgos.R")
 source("mixtureFunctions.R")
 theme_set(theme_bw())
 
-n <- 100
+n <- 200
 weight<-c(0.4, 0.3,0.3) 
 mu<-c(0,2,4)
-sigma<-c(0.5,0.5,0.5)
+sigma<-c(0.3,0.3,0.3)
 
-weight0<-c(0.1, 0.1,0.1) 
-mu0<-c(1,1,1)
-sigma0<-c(0.2,0.2,0.2)
+weight0<-c(0.1, 0.3,0.6) 
+mu0<-c(1,2,3)
+sigma0<-c(0.2,0.1,0.3)
 
 KNR <- 500
 K1 <-10
@@ -24,7 +24,7 @@ seed0=44444
 # ylim <- c(0.15, 0.5, 0.4)
 ylim <- c(0.1, 0.3, 0.3)
 
-nsim <- 20
+nsim <- 3
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -48,15 +48,18 @@ for (j in (1:nsim))
 print('EM')
 dem <- NULL
 df.em <- vector("list", length=nsim)
+ML <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
   df <- mixt.em(x[,j], theta, K)
-  df <- mixt.ident3(df)
+  # df <- mixt.ident3(df)
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
+  ML[[j]] <- df
+  ML[[j]][1:(K+1),]<- df[(K+1),]
 }
 # graphConvMC_new(dem, title="EM")
 
@@ -72,10 +75,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
-  df <- mixt.ident3(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -105,10 +105,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
-  df <- mixt.ident3(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -137,10 +134,7 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
-  df <- mixt.ident3(df)
-  ML <- df.em[[j]]
-  ML[1:(K+1),]<- df.em[[j]][(KR+1),]
-  df <- df - ML
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
@@ -166,7 +160,7 @@ table1r$algo <- '10R'
 table2r$algo <- '50R'
 tablenr$algo <- 'NR'
 
-variance <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) #10replacement
+variance <- rbind(table1r[0:K,],table2r[0:K,],tablenr[0:K,]) #10replacement
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
 graphConvMC2_new(variance, title="ALGO - EM (same complexity)",legend=TRUE)
