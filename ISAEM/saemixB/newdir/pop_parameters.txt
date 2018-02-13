@@ -8,21 +8,21 @@ Dataset warfarin.saemix
     Structured data: y ~ amount + time | id 
     X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     100 
-    number of observations: 1000 
-    average/min/max nb obs: 10.00  /  10  /  10 
+    number of subjects:     200 
+    number of observations: 2200 
+    average/min/max nb obs: 11.00  /  11  /  11 
 First 10 lines of data:
-   id amount time          y mdv cens occ ytype
-1   1    100    1  1.4772630   0    0   1     1
-2   1    100    2  3.0059985   0    0   1     1
-3   1    100    3  1.4957642   0    0   1     1
-4   1    100    4 -1.0038978   0    0   1     1
-5   1    100    5 -0.4217481   0    0   1     1
-6   1    100    6  1.5617218   0    0   1     1
-7   1    100    7  1.8448214   0    0   1     1
-8   1    100    8  1.2809329   0    0   1     1
-9   1    100    9 -0.4390502   0    0   1     1
-10  1    100   10 -0.5417706   0    0   1     1
+   id amount time         y mdv cens occ ytype
+1   1    100  0.0 -1.786942   0    0   1     1
+2   1    100  0.5 12.879830   0    0   1     1
+3   1    100  1.0 14.524613   0    0   1     1
+4   1    100  1.5 13.102824   0    0   1     1
+5   1    100  2.0 13.543631   0    0   1     1
+6   1    100  2.5 12.675338   0    0   1     1
+7   1    100  3.0 12.500939   0    0   1     1
+8   1    100  3.5 12.123323   0    0   1     1
+9   1    100  4.0 11.248278   0    0   1     1
+10  1    100  4.5 11.319292   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -33,32 +33,33 @@ function(psi,id,xidep) {
   tim<-xidep[,2]  
   ka<-psi[id,1]
   V<-psi[id,2]
-  k<-psi[id,3]
+  Cl<-psi[id,3]
+  k <- Cl/V
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
   return(ypred)
 }
   Nb of parameters: 3 
-      parameter names:  ka V k 
+      parameter names:  ka V Cl 
       distribution:
      Parameter Distribution Estimated
 [1,] ka        log-normal   Estimated
 [2,] V         log-normal   Estimated
-[3,] k         log-normal   Estimated
+[3,] Cl        log-normal   Estimated
   Variance-covariance matrix:
-   ka V k
-ka  1 0 0
-V   0 1 0
-k   0 0 1
+   ka V Cl
+ka  1 0  0
+V   0 1  0
+Cl  0 0  1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka  V k
-Pop.CondInit  5 15 5
+             ka  V Cl
+Pop.CondInit  5 15  5
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=400, K2=100 
+    Number of iterations:  K1=500, K2=300 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -74,21 +75,21 @@ Pop.CondInit  5 15 5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.90    
-[2,] V         9.60    
-[3,] k         1.39    
-[4,] a         0.97    
+[1,] ka         1.1    
+[2,] V         10.6    
+[3,] Cl         1.1    
+[4,] a          1.0    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.726   
-V  omega2.V  0.074   
-k  omega2.k  0.058   
+ka omega2.ka 0.59    
+V  omega2.V  0.39    
+Cl omega2.Cl 0.31    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.k
-omega2.ka 1         0        0       
-omega2.V  0         1        0       
-omega2.k  0         0        1       
+          omega2.ka omega2.V omega2.Cl
+omega2.ka 1         0        0        
+omega2.V  0         1        0        
+omega2.Cl 0         0        1        

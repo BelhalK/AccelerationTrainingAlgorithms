@@ -20,8 +20,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	saemix.options<-saemixObject["options"]
 	map_range <- saemix.options$map.range
-	# nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-	# ind_rand = sample(1:Dargs$NM,(Dargs$NM-nb_replacement))
+
 	if(Dargs$type=="structural"){
 		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
 	} else{
@@ -40,7 +39,6 @@ if (!(kiter %in% map_range)){
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 		}
 		deltau<-Uc.y-U.y
-		# deltau[ind_rand] = 1000000
 		deltau[l[-ind_rand]] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
@@ -66,7 +64,6 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				# deltu[ind_rand] = 1000000
 				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
@@ -105,7 +102,6 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				# deltu[ind_rand] = 1000000
 				deltu[l[-ind_rand]] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
@@ -212,7 +208,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range){
 				prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
 			}
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
-			deltu[ind_rand] = 1000000
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 			etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -296,7 +291,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range){
 			}
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
-			deltu[ind_rand] = 1000000
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 			etaM[ind]<-etaMc[ind]
 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -305,6 +299,6 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range){
 	}
 }
 	
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM
+	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
 	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))
 }

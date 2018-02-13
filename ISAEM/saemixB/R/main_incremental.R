@@ -224,6 +224,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     ind_rand<-sample(1:Dargs$NM,nb_replacement)
   } 
   xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
+  # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   ind_rand <- ind_rand + nb_replacement
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
