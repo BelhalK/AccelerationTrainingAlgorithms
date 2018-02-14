@@ -181,15 +181,15 @@ error_mix25 <- 0
 
 
 lambda_true <- 2
-o_lambda_true <- 0.3
+o_lambda_true <- sqrt(0.3)
 beta_true <- 2
-o_beta_true <- 0.3
+o_beta_true <- sqrt(0.3)
 final_mix <- 0
 true_param <- c(lambda_true,beta_true,o_lambda_true,o_beta_true)
 true_param <- data.frame("lambda" = lambda_true, "beta" = beta_true,"omega2.lambda" = o_lambda_true,"omega2.beta" = o_beta_true)
 
 seed0 = 39546
-replicate = 5
+replicate = 10
 
 for (j in 1:replicate){
 
@@ -216,59 +216,57 @@ for (j in 1:replicate){
 
   p <- c(lambda_pop=lambda_true, o_lambda= o_lambda_true,
          beta_pop = beta_true,o_beta = o_beta_true)
-  h <- list(name='h', time=seq(0, 6, by=1))
+  h <- list(name='h', time=seq(0, 3, by=1))
   e <- list(name='e', time=0)
 
   N <- 50
   res <- simulx(model     = model2, 
-                settings  = list(seed=j*123),
                 parameter = p, 
                 output    = list(h,e), 
                  group     = list(size = N))
   
-
 writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_rtte.csv")
 head(read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_rtte.csv", header=T, sep=","))
   timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/incr_rtte.csv", header=T, sep=",")
   timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
-
+print(head(timetoevent.saemix))
   saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
 
 
 saemix.model<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
-  psi0=matrix(c(2,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(5,5),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
   print(j)
 
-  options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100)
+  options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100, sampling='')
   theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
   theo_ref <- cbind(iterations, theo_ref)
   ML <- theo_ref[,2:5]
-  # ML[1:(end+1),]<- theo_ref[end+1,2:5]
-  ML[1:(end+1),1:4]<- true_param
+  ML[1:(end+1),]<- theo_ref[end+1,2:5]
+  # ML[1:(end+1),1:4]<- true_param
   error_rwm <- error_rwm + (theo_ref[,2:5]-ML)^2
   theo_ref['individual'] <- j
   final_ref <- rbind(final_ref,theo_ref)
 
 
-  options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
+  options.incremental<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50, sampling='randompass')
   theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental))
   theo_mix <- cbind(iterations, theo_mix)
   ML <- theo_mix[,2:5]
-  # ML[1:(end+1),]<- theo_mix[end+1,2:5]
-  ML[1:(end+1),1:4]<- true_param  
+  ML[1:(end+1),]<- theo_mix[end+1,2:5]
+  # ML[1:(end+1),1:4]<- true_param  
   error_mix <- error_mix + (theo_mix[,2:5]-ML)^2
   theo_mix['individual'] <- j
   final_mix <- rbind(final_mix,theo_mix)
   
-  options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
+  options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25, sampling='randompass')
   theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
   theo_mix25 <- cbind(iterations, theo_mix25)
   ML <- theo_mix25[,2:5]
-  # ML[1:(end+1),]<- theo_mix25[end+1,2:5]
-  ML[1:(end+1),1:4]<- true_param 
+  ML[1:(end+1),]<- theo_mix25[end+1,2:5]
+  # ML[1:(end+1),1:4]<- true_param 
   error_mix25 <- error_mix25 + (theo_mix25[,2:5]-ML)^2
   theo_mix25['individual'] <- j
   final_mix25 <- rbind(final_mix25,theo_mix25)
@@ -300,10 +298,14 @@ err_mix_scaled$iterations = seq(1, 2*end, by=2)
 
 err_mix25$iterations = 1:((K1+K2))
 
+err_mix25[1,] = err_mix_scaled[1,]=err_rwm_scaled[1,]
 
+for (i in 2:5){
+graphConvMC_sec(err_rwm_scaled[0:end,c(1,i,6)],err_mix_scaled[0:end,c(1,i,6)],err_mix25[0:end,c(1,i,6)])
+}
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
-c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,2,6)],err_mix_scaled[0:end,c(1,2,6)],err_mix25[0:end,c(1,2,6)])
+c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,5,6)],err_mix_scaled[0:end,c(1,5,6)],err_mix25[0:end,c(1,5,6)])
 d <- graphConvMC_sed(err_rwm_scaled[0:end,c(1,4,6)],err_mix_scaled[0:end,c(1,4,6)],err_mix25[0:end,c(1,4,6)])
 
 grid.arrange(c,d, ncol=2)

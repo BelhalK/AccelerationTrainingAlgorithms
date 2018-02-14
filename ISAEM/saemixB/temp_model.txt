@@ -2,17 +2,17 @@
 
 
 [INDIVIDUAL]
-input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
+input = {d_pop, b_pop, k_pop, omega_d, omega_b, omega_k}
 DEFINITION:
-ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
-V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
-Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
+d = {distribution=lognormal, reference=d_pop, sd=omega_d}
+b  = {distribution=lognormal, reference=b_pop,  sd=omega_b}
+k = {distribution=lognormal, reference=k_pop, sd=omega_k}
 
 
 [LONGITUDINAL]
-input = {ka, V, Cl,a}
+input = {d, b, k,a}
 EQUATION:
-C = pkmodel(ka,V,Cl)
+C = d*(1-b*exp(-k*t))
 DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 
