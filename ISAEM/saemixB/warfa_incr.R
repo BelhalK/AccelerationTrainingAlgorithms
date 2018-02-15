@@ -46,12 +46,12 @@ saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, na
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  tim<-xidep[,2]  
+  time<-xidep[,2]  
   ka<-psi[id,1]
   V<-psi[id,2]
   Cl<-psi[id,3]
   k <- Cl/V
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
   return(ypred)
 }
 
