@@ -7,7 +7,7 @@ theme_set(theme_bw())
 #############################################
 
 
-n <- 500
+n <- 200
 weight<-c(0.7, 0.3) 
 mu<-c(0,1)
 sigma<-c(0.4,0.9)*1
@@ -19,7 +19,7 @@ sigma0<-c(.5,1)
 
 
 K1 <-200
-K <- 1000
+K <- 30000
 
 alpha1 <- 0.7
 alpha2 <- 0.4
@@ -30,7 +30,7 @@ seed0=44444
 ylim <- c(0.1, 0.3, 0.3)
 
 M <- 1
-nsim <- 3
+nsim <- 20
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -58,14 +58,14 @@ ML <- vector("list", length=nsim)
 for (j in (1:nsim))
 { print(j)
   df <- mixt.em(x[,j], theta0, K)
-  df$rep <- j
+  df$sim <- j
   dem <- rbind(dem,df)
-  df$rep <- NULL
+  df$sim <- NULL
   df.em[[j]] <- df
   ML[[j]] <- df
   ML[[j]][1:(K+1),]<- df[(K+1),]
 }
-# graphConvMC(dem, title="EM")
+graphConvMC_new(dem, title="EM")
 
 ##  SAEM1 replacement vs EM
 print('SAEM 10R')
@@ -83,6 +83,7 @@ for (j in (1:nsim))
   df$sim <- j
   diffr <- rbind(diffr,df)
 }
+# graphConvMC_new(diffr, title="EM")
 diffr[,2:7] <- diffr[,2:7]^2
 table1r <- NULL
 table1r <- diffr[diffr$sim==1,2:7]
@@ -136,6 +137,7 @@ for (j in (1:nsim))
   df$sim <- j
   diffr <- rbind(diffr,df)
 }
+# graphConvMC_new(diffr, title="EM")
 diffr[,2:7] <- diffr[,2:7]^2
 table2r <- NULL
 table2r <- diffr[diffr$sim==1,2:7]
@@ -153,7 +155,9 @@ table1r$algo <- '10R'
 table2r$algo <- '50R'
 tablenr$algo <- 'NR'
 
-variance <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) #10replacement
+variance <- rbind(table1r[50:K,],table2r[50:K,],tablenr[50:K,]) 
+graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
-graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
+variance2 <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) 
+graphConvMC2(variance2, title="ALGO - EM (same complexity)",legend=TRUE)

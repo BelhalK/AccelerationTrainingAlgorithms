@@ -255,15 +255,15 @@ final_mix <- rbind(final_mix,theo_mix)
 # theo_mix['individual'] <- m
 # final_mix <- rbind(final_mix,theo_mix)
 
-# options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25,sampling='randomiter')
-# theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
-# theo_mix25 <- cbind(iterations, theo_mix25)
-# ML <- theo_mix25[,2:10]
-# # ML[1:(end+1),]<- theo_mix25[end+1,2:10]
-# ML[1:(end+1),1:9]<- true_param
-# error_mix25iter <- error_mix25iter + (theo_mix25[,2:10]-ML)^2
-# theo_mix25['individual'] <- m
-# final_mix25 <- rbind(final_mix25,theo_mix25)
+options.incremental25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25,sampling='randomiter')
+theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
+theo_mix25 <- cbind(iterations, theo_mix25)
+ML <- theo_mix25[,2:10]
+# ML[1:(end+1),]<- theo_mix25[end+1,2:10]
+ML[1:(end+1),1:9]<- true_param
+error_mix25iter <- error_mix25iter + (theo_mix25[,2:10]-ML)^2
+theo_mix25['individual'] <- m
+final_mix25 <- rbind(final_mix25,theo_mix25)
  
 }
 
@@ -407,6 +407,14 @@ err_rwm_scaled$method <- 'seq'
 err_mixpass_scaled$algo <- 'ISAEM50'
 err_mixpass_scaled$method <- 'pass'
 
+
+error_mix25iter <- 1/replicate*error_mix25iter
+err_mix25iter<- theo_ref[-1,]
+err_mix25iter[,2:10] <- error_mix25iter[-1,]
+err_mix25iter$iterations = 1:((K1+K2))
+
+err_mix25iter$algo <- 'ISAEM25'
+err_mix25iter$method <- 'iter'
 
 
 for (i in 2:10){

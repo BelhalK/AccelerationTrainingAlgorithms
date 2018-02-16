@@ -31,7 +31,7 @@ mixt.ident3 <- function(df)
 graphConvMC_new <- function(df, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
-  df$rep <- as.factor(df$rep)
+  df$sim <- as.factor(df$sim)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
