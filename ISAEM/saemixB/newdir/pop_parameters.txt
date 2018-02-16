@@ -6,23 +6,24 @@ Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
 Dataset warfarin.saemix 
     Structured data: y1 ~ amount + time | id 
-    X variable for graphs: time () 
+    X variable for graphs: time (kg) 
+    covariates: wt (kg/ha) 
 Dataset characteristics:
     number of subjects:     32 
-    number of observations: 252 
-    average/min/max nb obs: 7.88  /  6  /  17 
+    number of observations: 251 
+    average/min/max nb obs: 7.84  /  6  /  17 
 First 10 lines of data:
-   id amount time          y1 mdv cens occ ytype
-1   1    100  0.0  0.00000000   0    0   1     1
-2   1    100 24.0 11.45526665   0    0   1     1
-3   1    100 36.0 10.48007184   0    0   1     1
-4   1    100 48.0  8.11202432   0    0   1     1
-5   1    100 72.0  6.55896441   0    0   1     1
-6   1    100 96.0  5.51195754   0    0   1     1
-7   2    100  0.0  0.00000000   0    0   1     1
-8   2    100  0.5 -0.09380835   0    0   1     1
-9   2    100  2.0 12.54133950   0    0   1     1
-10  2    100  3.0 11.46459993   0    0   1     1
+   id amount  time         y1   wt mdv cens occ ytype
+1   1    100  24.0 10.8355939 66.7   0    0   1     1
+2   1    100  36.0  8.9557449 66.7   0    0   1     1
+3   1    100  48.0  7.5896787 66.7   0    0   1     1
+4   1    100  72.0  5.4030570 66.7   0    0   1     1
+5   1    100  96.0  3.8485940 66.7   0    0   1     1
+6   1    100 120.0  2.3926439 66.7   0    0   1     1
+7   2    100   0.5  0.2306187 66.7   0    0   1     1
+8   2    100   2.0  8.2684627 66.7   0    0   1     1
+9   2    100   3.0 10.3134522 66.7   0    0   1     1
+10  2    100   6.0 11.7062451 66.7   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -41,29 +42,32 @@ function(psi,id,xidep) {
   return(ypred)
 }
   Nb of parameters: 4 
-      parameter names:  Tlag ka V k 
+      parameter names:  Tlag ka V Cl 
       distribution:
      Parameter Distribution Estimated
 [1,] Tlag      log-normal   Estimated
 [2,] ka        log-normal   Estimated
 [3,] V         log-normal   Estimated
-[4,] k         log-normal   Estimated
+[4,] Cl        log-normal   Estimated
   Variance-covariance matrix:
-     Tlag ka V k
-Tlag    1  0 0 0
-ka      0  1 0 0
-V       0  0 1 0
-k       0  0 0 1
+     Tlag ka V Cl
+Tlag    1  0 0  0
+ka      0  1 0  0
+V       0  0 1  0
+Cl      0  0 0  1
   Error model: constant , initial values: a=1 
-    No covariate in the model.
+  Covariate model:
+   [,1] [,2] [,3] [,4]
+wt    0    0    1    1
     Initial values
-             Tlag ka  V k
-Pop.CondInit  0.2  3 10 2
+             Tlag ka  V Cl
+Pop.CondInit  0.2  3 10  2
+Cov.CondInit  0.0  0  0  0
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=200, K2=100 
+    Number of iterations:  K1=600, K2=100 
     Number of chains:  2 
     Seed:  39546 
     Simulations:
@@ -78,25 +82,27 @@ Pop.CondInit  0.2  3 10 2
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-     Parameter Estimate
-[1,] Tlag      0.265   
-[2,] ka        1.178   
-[3,] V         7.894   
-[4,] k         0.013   
-[5,] a         0.794   
+     Parameter   Estimate
+[1,] Tlag         0.68999
+[2,] ka           1.26503
+[3,] V            8.89860
+[4,] beta_wt(V)  -0.00064
+[5,] Cl           0.00982
+[6,] beta_wt(Cl)  0.00221
+[7,] a            0.25222
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-Tlag omega2.Tlag 1.679   
-ka   omega2.ka   0.770   
-V    omega2.V    0.091   
-k    omega2.k    0.154   
+Tlag omega2.Tlag 0.108   
+ka   omega2.ka   0.169   
+V    omega2.V    0.066   
+Cl   omega2.Cl   0.142   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-            omega2.Tlag omega2.ka omega2.V omega2.k
-omega2.Tlag 1           0         0        0       
-omega2.ka   0           1         0        0       
-omega2.V    0           0         1        0       
-omega2.k    0           0         0        1       
+            omega2.Tlag omega2.ka omega2.V omega2.Cl
+omega2.Tlag 1           0         0        0        
+omega2.ka   0           1         0        0        
+omega2.V    0           0         1        0        
+omega2.Cl   0           0         0        1        

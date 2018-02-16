@@ -1,18 +1,33 @@
 
 
+[COVARIATE]
+input = wt
+
+EQUATION:
+lw70 = log(wt/70)
 
 [INDIVIDUAL]
-input = {d_pop, b_pop, k_pop, omega_d, omega_b, omega_k}
-DEFINITION:
-d = {distribution=lognormal, reference=d_pop, sd=omega_d}
-b  = {distribution=lognormal, reference=b_pop,  sd=omega_b}
-k = {distribution=lognormal, reference=k_pop, sd=omega_k}
+input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, beta_V_lw70, lw70, omega_V, Cl_pop, beta_Cl_lw70, omega_Cl}
 
+DEFINITION:
+Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
+ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_lw70, sd=omega_V}
+Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
 
 [LONGITUDINAL]
-input = {d, b, k,a}
+input = {a}
+ 
+DESCRIPTION: PK oral + indirect response model
+
+input =  {Tlag, ka, V, Cl}
+
 EQUATION:
-C = d*(1-b*exp(-k*t))
+Cc = pkmodel(Tlag, ka, V, Cl)
+
+OUTPUT:
+output = {Cc}
+
 DEFINITION:
-y = {distribution=normal, prediction=C, sd=a}
+y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
 
