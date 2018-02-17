@@ -112,7 +112,7 @@ for (j in (1:nsim))
 }
 diffr[,2:7] <- diffr[,2:7]^2
 tablenr <- NULL
-tablenr <- diffr[diffr$sim==1,2:7]
+# tablenr <- diffr[diffr$sim==1,2:7]
 for (j in (2:nsim))
 {
   tablenr <- tablenr+diffr[diffr$sim==j,2:7]
