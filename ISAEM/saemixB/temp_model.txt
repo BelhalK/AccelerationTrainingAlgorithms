@@ -16,11 +16,7 @@ V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_l
 Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
 
 [LONGITUDINAL]
-input = {a}
- 
-DESCRIPTION: PK oral + indirect response model
-
-input =  {Tlag, ka, V, Cl}
+input =  {Tlag, ka, V, Cl,a}
 
 EQUATION:
 Cc = pkmodel(Tlag, ka, V, Cl)
@@ -29,5 +25,5 @@ OUTPUT:
 output = {Cc}
 
 DEFINITION:
-y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+y1 = {distribution=normal, prediction=Cc, sd=a}
 

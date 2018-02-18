@@ -49,15 +49,15 @@ model1cpt<-function(psi,id,xidep) {
   Tlag<-psi[id,1]
   ka<-psi[id,2]
   V<-psi[id,3]
-  k<-psi[id,4]
-  CL<-k*V
+  Cl<-psi[id,4]
+  k<-Cl/V
   dt <- pmax(time-Tlag, 0)
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*dt)-exp(-ka*dt))
   return(ypred)
 }
 
 saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.2,1,7,1),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","k"))),
+  ,psi0=matrix(c(0.2,1,7,1),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
   byrow=TRUE))
@@ -94,17 +94,18 @@ Tlag_true=0.78
 ka_true <- 1
 V_true <- 8
 Cl_true <- 0.1
-o_Tlag <- 0.57
-o_ka <- 0.5
-o_V <- 0.2
-o_Cl <- 0.3
+
+o_Tlag <- 0.57 #o^2=0.32
+o_ka <- 0.5 #o^2=0.25
+o_V <- 0.2  #o^2=0.04
+o_Cl <- 0.3  #o^2=0.09
 a_true = 0.266
 beta_Cl_lw70_true = 0.60411
 beta_V_lw70_true = 0.8818
 
-true_param <- data.frame("Tlag" = Tlag_true,"ka" = ka_true, "V" = V_true, "Cl" = 0.1/8, "omega2.Tlag"=o_Tlag^2, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
+true_param <- data.frame("Tlag" = Tlag_true,"ka" = ka_true, "V" = V_true, "Cl" = Cl_true, "omega2.Tlag"=o_Tlag^2, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
 seed0 = 39546
-replicate = 40
+replicate = 4
 for (m in 1:replicate){
   
   myModel <- inlineModel("
@@ -125,11 +126,7 @@ V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_l
 Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
 
 [LONGITUDINAL]
-input = {a}
- 
-DESCRIPTION: PK oral + indirect response model
-
-input =  {Tlag, ka, V, Cl}
+input =  {Tlag, ka, V, Cl,a}
 
 EQUATION:
 Cc = pkmodel(Tlag, ka, V, Cl)
@@ -138,27 +135,29 @@ OUTPUT:
 output = {Cc}
 
 DEFINITION:
-y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+y1 = {distribution=normal, prediction=Cc, sd=a}
 ")
 
-# treatment
-trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/treatment.txt", header = TRUE) 
 
-# parameters 
-originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/originalId.txt', header=TRUE) 
 populationParameter   <- c(Tlag_pop= Tlag_true, omega_Tlag= o_Tlag,
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
   Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =a_true, beta_V_lw70 = beta_V_lw70_true, beta_Cl_lw70 = beta_Cl_lw70_true)
 
+# trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/treatment.txt", header = TRUE) 
+# originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/originalId.txt', header=TRUE) 
+# individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/individualCovariate.txt', header = TRUE) 
+# time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/output1.txt",header=TRUE)
+
+trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/treatment.txt", header = TRUE) 
+originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/originalId.txt', header=TRUE) 
 individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/individualCovariate.txt', header = TRUE) 
-list.param <- list(populationParameter,individualCovariate)
-
-# output 
-name<-"y1"
 time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/output1.txt",header=TRUE)
-out1<-list(name=name,time=time) 
 
+
+list.param <- list(populationParameter,individualCovariate)
+name<-"y1"
+out1<-list(name=name,time=time) 
 
 # call the simulator 
 res <- simulx(model=myModel,treatment=trt,parameter=list.param,output=out1)
