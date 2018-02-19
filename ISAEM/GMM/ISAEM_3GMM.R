@@ -75,12 +75,12 @@ for (j in (1:nsim))
   seed <- j*seed0
   set.seed(seed)
   df <- mixt.saem1_replace1(x[,j], theta0, KR, K1, alpha=0.6, M=1, nb_r)
-  # df <- df - ML[[j]]
+  df <- df - ML[[j]]
   df$iteration <- 0:KR
   df$sim <- j
   diffr <- rbind(diffr,df)
 }
-graphConvMC_new(diffr, title="EM")
+# graphConvMC_new(diffr, title="EM")
 diffr[,2:10] <- diffr[,2:10]^2
 table1r <- NULL
 table1r <- diffr[diffr$sim==1,2:10]
@@ -160,7 +160,11 @@ table1r$algo <- '10R'
 table2r$algo <- '50R'
 tablenr$algo <- 'NR'
 
-variance <- rbind(table1r[0:K,],table2r[0:K,],tablenr[0:K,]) #10replacement
+variance2 <- rbind(table1r[1:K,],table2r[1:K,],tablenr[1:K,]) 
+graphConvMC2_new(variance2, title="GMM 2",legend=TRUE)
+variance <- rbind(table1r[11:K,],table2r[11:K,],tablenr[11:K,]) 
+graphConvMC2_new(variance, title="GMM2 zoom",legend=TRUE)
 # var <- graphConvMC2(variance, title="ALGO - EM (same complexity)",legend=TRUE)
 # ggsave('conv_100sim.png',var)
-graphConvMC2_new(variance, title="ALGO - EM (same complexity)",legend=TRUE)
+
+

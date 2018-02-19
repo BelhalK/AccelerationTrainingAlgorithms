@@ -30,7 +30,7 @@ seed0=44444
 ylim <- c(0.1, 0.3, 0.3)
 
 M <- 1
-nsim <- 20
+nsim <- 30
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))

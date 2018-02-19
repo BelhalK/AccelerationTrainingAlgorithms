@@ -25,7 +25,8 @@ model1cpt<-function(psi,id,xidep) {
   tim<-xidep[,2]  
   ka<-psi[id,1]
   V<-psi[id,2]
-  k<-psi[id,3]
+  Cl<-psi[id,3]
+  k <- Cl/V
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
   return(ypred)
 }
@@ -38,13 +39,13 @@ input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
 DEFINITION:
 ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
 V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
-k = {distribution=lognormal, reference=k_pop, sd=omega_k}
+Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
 
 
 [LONGITUDINAL]
-input = {ka, V, k,a}
+input = {ka, V, Cl,a}
 EQUATION:
-C = pkmodel(ka,V,Cl=k*V)
+C = pkmodel(ka,V,Cl)
 DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
@@ -54,7 +55,7 @@ N=200
 pop.param   <- c(
   ka_pop  = 1,    omega_ka  = 0.5,
   V_pop   = 10,   omega_V   = 0.4,
-  k_pop  = 1,    omega_k  = 0.3, a =1)
+  Cl_pop  = 1,    omega_Cl  = 0.3, a =1)
   
 res <- simulx(model     = myModel,
               parameter = pop.param,
@@ -66,7 +67,7 @@ res <- simulx(model     = myModel,
   warfarin.saemix$amount <- 100
 
   saemix.model<-saemixModel(model=model1cpt,description="warfarin"
-  ,psi0=matrix(c(2,15,2,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(c(2,15,2,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
