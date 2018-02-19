@@ -65,7 +65,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 
-K1 = 600
+K1 = 700
 K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
@@ -105,7 +105,7 @@ beta_V_lw70_true = 0.8818
 
 true_param <- data.frame("Tlag" = Tlag_true,"ka" = ka_true, "V" = V_true, "Cl" = Cl_true, "omega2.Tlag"=o_Tlag^2, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
 seed0 = 39546
-replicate = 4
+replicate = 20
 for (m in 1:replicate){
   
   myModel <- inlineModel("
@@ -139,44 +139,27 @@ y1 = {distribution=normal, prediction=Cc, sd=a}
 ")
 
 
+
 populationParameter   <- c(Tlag_pop= Tlag_true, omega_Tlag= o_Tlag,
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
   Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =a_true, beta_V_lw70 = beta_V_lw70_true, beta_Cl_lw70 = beta_Cl_lw70_true)
-
-# trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/treatment.txt", header = TRUE) 
-# originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/originalId.txt', header=TRUE) 
 # individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/individualCovariate.txt', header = TRUE) 
-# time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/output1.txt",header=TRUE)
-
-trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/treatment.txt", header = TRUE) 
-originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/originalId.txt', header=TRUE) 
 individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/individualCovariate.txt', header = TRUE) 
-time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/output1.txt",header=TRUE)
-
-
 list.param <- list(populationParameter,individualCovariate)
-name<-"y1"
-out1<-list(name=name,time=time) 
+
+amount <- 100
+res <- simulx(model     = myModel,
+              parameter = list.param,
+              treatment = list(time=0, amount=amount),
+              output    = list(name='y1', time=seq(1,10,by=1)))
+
 
 # call the simulator 
-res <- simulx(model=myModel,treatment=trt,parameter=list.param,output=out1)
-individualCovariate[1:10,]$id <- 1:10
 warfarin.saemix <- res$y1
-treat <- res$treatment[,c(1,3)]
-covandtreat <- merge(individualCovariate ,treat,by="id")
-warfarin.saemix <- merge(covandtreat ,warfarin.saemix,by="id")
-
-# warfarin.saemix <- table[c(1,2,3,5)]
-
-# saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-#   ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
-#   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
-#   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
-#   byrow=TRUE),error.model="constant")
-
-# saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-#   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+individualCovariate[1:10,]$id <- 1:10
+warfarin.saemix$amount <- amount
+warfarin.saemix <- merge(individualCovariate ,warfarin.saemix,by="id")
 
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),

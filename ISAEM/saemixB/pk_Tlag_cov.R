@@ -164,7 +164,7 @@ grid.arrange(a,b, ncol=2)
 
 
 
-batchsize25 = 10
+batchsize25 = 25
 batchsize50 = 50
 
 final_rwm <- 0
@@ -194,9 +194,9 @@ o_ka <- 0.5
 o_V <- 0.2
 o_k <- 0.3
 
-true_param <- data.frame("Tlag" = Tlag_true,"ka" = ka_true, "V" = V_true, "k" = 0.1/8, "omega2.Tlag"=o_Tlag, "omega2.ka"=o_ka ,"omega2.V"= o_V,"omega2.k"= o_k, "a" = 1)
+true_param <- data.frame("Tlag" = Tlag_true,"ka" = ka_true, "V" = V_true, "k" = k_true, "omega2.Tlag"=o_Tlag^2, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.k"= o_k^2, "a" = 1)
 seed0 = 39546
-replicate = 4
+replicate = 20
 for (m in 1:replicate){
   
     model<-"/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/warfarin_project_model.txt"
@@ -259,7 +259,7 @@ rownames(warfarin.saemix) <- 1:nrow(warfarin.saemix)
 # warfarin.saemix <- table[c(1,2,3,5)]
 
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","k"))),
+  ,psi0=matrix(c(0.2,3,13,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","k"))),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
   byrow=TRUE))
@@ -345,8 +345,8 @@ final_mix25 <- rbind(final_mix25,theo_mix25)
  
 }
 
-graphConvMC_diff(final_ref,final_ref,final_ref)
-graphConvMC_diff(final_ref,final_mix,final_mix25)
+# graphConvMC_diff(final_ref,final_ref,final_ref)
+# graphConvMC_diff(final_ref,final_mix,final_mix25)
 
 error_rwm <- 1/replicate*error_rwm
 error_mixseq <- 1/replicate*error_mixseq

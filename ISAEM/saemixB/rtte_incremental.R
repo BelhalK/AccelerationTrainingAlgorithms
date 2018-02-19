@@ -189,7 +189,7 @@ true_param <- c(lambda_true,beta_true,o_lambda_true,o_beta_true)
 true_param <- data.frame("lambda" = lambda_true, "beta" = beta_true,"omega2.lambda" = o_lambda_true,"omega2.beta" = o_beta_true)
 
 seed0 = 39546
-replicate = 10
+replicate = 50
 
 for (j in 1:replicate){
 
@@ -219,7 +219,7 @@ for (j in 1:replicate){
   h <- list(name='h', time=seq(0, 3, by=1))
   e <- list(name='e', time=0)
 
-  N <- 50
+  N <- 100
   res <- simulx(model     = model2, 
                 parameter = p, 
                 output    = list(h,e), 
@@ -303,6 +303,22 @@ err_mix25[1,] = err_mix_scaled[1,]=err_rwm_scaled[1,]
 for (i in 2:5){
 graphConvMC_sec(err_rwm_scaled[0:end,c(1,i,6)],err_mix_scaled[0:end,c(1,i,6)],err_mix25[0:end,c(1,i,6)])
 }
+a <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,2,6)],err_mix_scaled[0:end,c(1,2,6)],err_mix25[0:end,c(1,2,6)])
+b <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,3,6)],err_mix_scaled[0:end,c(1,3,6)],err_mix25[0:end,c(1,3,6)])
+c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,4,6)],err_mix_scaled[0:end,c(1,4,6)],err_mix25[0:end,c(1,4,6)])
+d <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,5,6)],err_mix_scaled[0:end,c(1,5,6)],err_mix25[0:end,c(1,5,6)])
+
+grid.arrange(a,b,c,d, ncol=2)
+
+start <- 2
+
+a <- graphConvMC_sec(err_rwm_scaled[start:end,c(1,2,6)],err_mix_scaled[start:end,c(1,2,6)],err_mix25[start:end,c(1,2,6)])
+b <- graphConvMC_sec(err_rwm_scaled[start:end,c(1,3,6)],err_mix_scaled[start:end,c(1,3,6)],err_mix25[start:end,c(1,3,6)])
+c <- graphConvMC_sec(err_rwm_scaled[start:end,c(1,4,6)],err_mix_scaled[start:end,c(1,4,6)],err_mix25[start:end,c(1,4,6)])
+d <- graphConvMC_sec(err_rwm_scaled[start:end,c(1,5,6)],err_mix_scaled[start:end,c(1,5,6)],err_mix25[start:end,c(1,5,6)])
+
+grid.arrange(a,b,c,d, ncol=2)
+
 
 # c <- graphConvMC_se2(err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)],err_rwm_scaled[,c(1,2,8)])
 c <- graphConvMC_sec(err_rwm_scaled[0:end,c(1,5,6)],err_mix_scaled[0:end,c(1,5,6)],err_mix25[0:end,c(1,5,6)])
