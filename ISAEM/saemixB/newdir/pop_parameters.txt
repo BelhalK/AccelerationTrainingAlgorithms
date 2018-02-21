@@ -7,22 +7,23 @@ Object of class SaemixData
 Dataset warfarin.saemix 
     Structured data: y1 ~ amount + time | id 
     X variable for graphs: time () 
+    covariates: wt (-) 
 Dataset characteristics:
-    number of subjects:     32 
-    number of observations: 252 
-    average/min/max nb obs: 7.88  /  6  /  17 
+    number of subjects:     400 
+    number of observations: 4000 
+    average/min/max nb obs: 10.00  /  10  /  10 
 First 10 lines of data:
-   id amount time          y1 mdv cens occ ytype
-1   1    100  0.0  0.00000000   0    0   1     1
-2   1    100 24.0  8.62024130   0    0   1     1
-3   1    100 36.0  5.83064898   0    0   1     1
-4   1    100 48.0  5.88578516   0    0   1     1
-5   1    100 72.0  3.94092388   0    0   1     1
-6   1    100 96.0  2.37344210   0    0   1     1
-7   2    100  0.0  0.00000000   0    0   1     1
-8   2    100  0.5 -0.02062168   0    0   1     1
-9   2    100  2.0  9.85389537   0    0   1     1
-10  2    100  3.0 11.85339601   0    0   1     1
+   id amount time        y1         wt mdv cens occ ytype
+1   1    100    1  2.087019 0.03634306   0    0   1     1
+2   1    100    2 10.151157 0.03634306   0    0   1     1
+3   1    100    3 13.004132 0.03634306   0    0   1     1
+4   1    100    4 13.965877 0.03634306   0    0   1     1
+5   1    100    5 14.244033 0.03634306   0    0   1     1
+6   1    100    6 13.679440 0.03634306   0    0   1     1
+7   1    100    7 13.792804 0.03634306   0    0   1     1
+8   1    100    8 13.893890 0.03634306   0    0   1     1
+9   1    100    9 13.720005 0.03634306   0    0   1     1
+10  1    100   10 12.801640 0.03634306   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -34,37 +35,40 @@ function(psi,id,xidep) {
   Tlag<-psi[id,1]
   ka<-psi[id,2]
   V<-psi[id,3]
-  k<-psi[id,4]
-  CL<-k*V
+  Cl<-psi[id,4]
+  k<-Cl/V
   dt <- pmax(time-Tlag, 0)
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*dt)-exp(-ka*dt))
   return(ypred)
 }
   Nb of parameters: 4 
-      parameter names:  Tlag ka V k 
+      parameter names:  Tlag ka V Cl 
       distribution:
      Parameter Distribution Estimated
 [1,] Tlag      log-normal   Estimated
 [2,] ka        log-normal   Estimated
 [3,] V         log-normal   Estimated
-[4,] k         log-normal   Estimated
+[4,] Cl        log-normal   Estimated
   Variance-covariance matrix:
-     Tlag ka V k
-Tlag    1  0 0 0
-ka      0  1 0 0
-V       0  0 1 0
-k       0  0 0 1
+     Tlag ka V Cl
+Tlag    1  0 0  0
+ka      0  1 0  0
+V       0  0 1  0
+Cl      0  0 0  1
   Error model: constant , initial values: a=1 
-    No covariate in the model.
+  Covariate model:
+   [,1] [,2] [,3] [,4]
+wt    0    0    1    1
     Initial values
-             Tlag ka  V k
-Pop.CondInit  0.2  3 13 2
+             Tlag ka  V Cl
+Pop.CondInit  0.2  3 10  2
+Cov.CondInit  0.0  0  0  0
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=1800, K2=100 
-    Number of chains:  2 
+    Number of iterations:  K1=700, K2=100 
+    Number of chains:  1 
     Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -78,25 +82,27 @@ Pop.CondInit  0.2  3 13 2
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-     Parameter Estimate
-[1,] Tlag      0.337   
-[2,] ka        0.758   
-[3,] V         7.672   
-[4,] k         0.013   
-[5,] a         0.765   
+     Parameter   Estimate
+[1,] Tlag        0.69    
+[2,] ka          0.85    
+[3,] V           7.59    
+[4,] beta_wt(V)  0.68    
+[5,] Cl          0.14    
+[6,] beta_wt(Cl) 0.41    
+[7,] a           0.40    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-Tlag omega2.Tlag 0.750   
-ka   omega2.ka   0.152   
-V    omega2.V    0.043   
-k    omega2.k    0.050   
+Tlag omega2.Tlag 0.366   
+ka   omega2.ka   0.260   
+V    omega2.V    0.035   
+Cl   omega2.Cl   0.114   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-            omega2.Tlag omega2.ka omega2.V omega2.k
-omega2.Tlag 1           0         0        0       
-omega2.ka   0           1         0        0       
-omega2.V    0           0         1        0       
-omega2.k    0           0         0        1       
+            omega2.Tlag omega2.ka omega2.V omega2.Cl
+omega2.Tlag 1           0         0        0        
+omega2.ka   0           1         0        0        
+omega2.V    0           0         1        0        
+omega2.Cl   0           0         0        1        

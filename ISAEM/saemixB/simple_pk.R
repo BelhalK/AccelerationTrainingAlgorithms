@@ -56,7 +56,7 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
@@ -137,7 +137,7 @@ comparison <- rbind(warfa_scaled[iterations,],warfa_scaled50[iterations,],warfai
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
-K1 = 1300
+K1 = 600
 K2 = 300
 iterations = 1:(K1+K2)
 end = K1+K2
@@ -205,7 +205,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=800
+N=400
 pop.param   <- c(
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
@@ -215,7 +215,7 @@ res <- simulx(model     = myModel,
               parameter = pop.param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(0,5,by=1)))
+              output    = list(name='y', time=seq(0,2,by=1)))
   
   # writeDatamlx(res, result.file = "res.csv")
   # head(read.csv("res.csv"))
@@ -224,7 +224,7 @@ res <- simulx(model     = myModel,
   warfarin.saemix <- res$y
   warfarin.saemix$amount <- 100
 
-  head(warfarin.saemix)
+  
   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(5,10,5,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
@@ -422,9 +422,7 @@ err_mixpass_scaled$method <- 'pass'
 for (i in 2:8){
 # i = 6
 comparison <- 0
-comparison <- rbind(err_rwm_scaled[0:end,c(1,i,9,10)],err_mixpass_scaled [0:end,c(1,i,9,10)],error_mix25pass[0:end,c(1,i,9,10)],
-                                              err_mixpass_scaled [0:end,c(1,i,9,10)],error_mix25pass[0:end,c(1,i,9,10)],
-                                              err_mixpass_scaled [0:end,c(1,i,9,10)],error_mix25pass[0:end,c(1,i,9,10)])
+comparison <- rbind(err_rwm_scaled[0:end,c(1,i,9,10)],err_mixpass_scaled [0:end,c(1,i,9,10)],error_mix25pass[0:end,c(1,i,9,10)])
 
 var <- melt(comparison, id.var = c('iterations','algo','method'), na.rm = TRUE)
 

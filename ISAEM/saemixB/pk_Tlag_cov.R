@@ -382,16 +382,16 @@ err_mix25iter[,2:10] <- error_mix25iter[-1,]
 
 
 err_rwm_scaled <- err_rwm
-err_rwm_scaled$iterations = seq(1, 10*end, by=10)
+err_rwm_scaled$iterations = seq(1, 4*end, by=4)
 
 err_mixseq_scaled <- err_mixseq
-err_mixseq_scaled$iterations = seq(1, 5*end, by=5)
+err_mixseq_scaled$iterations = seq(1, 2*end, by=2)
 
 err_mixpass_scaled <- err_mixpass
-err_mixpass_scaled$iterations = seq(1, 5*end, by=5)
+err_mixpass_scaled$iterations = seq(1, 2*end, by=2)
 
 err_mixiter_scaled <- err_mixiter
-err_mixiter_scaled$iterations = seq(1, 5*end, by=5)
+err_mixiter_scaled$iterations = seq(1, 2*end, by=2)
 
 err_mix25seq$iterations = 1:((K1+K2))
 err_mix25pass$iterations = 1:((K1+K2))
