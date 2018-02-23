@@ -42,7 +42,7 @@ res <- simulx(model     = model,
               parameter = param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(1,4,by=1)))
+              output    = list(name='y', time=seq(1,3,by=1)))
 
  
 res$y[2,3]
@@ -50,10 +50,10 @@ typeof(res$y[2,3])
 
 writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/data_pk/res1a.txt", sep="\t")
 b <- read.table("/Users/karimimohammedbelhal/Desktop/data_pk/res1a.txt", header=TRUE, sep="\t")
-d <- readDatamlx(datafile = '/Users/karimimohammedbelhal/Desktop/data_pk/res1a.txt', 
-                 header   = c('id','time','y','amount'))
+d <- readDatamlx(datafile = '/Users/karimimohammedbelhal/Desktop/data_pk/res1a.txt',  header   = c('id','time','y','amount'))
 
-
+d$y[3,3]
+typeof(d$y[2,3])
 
 writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/data_pk/test.csv")
 warfarin.saemix<-read.table("/Users/karimimohammedbelhal/Desktop/data_pk/test.csv", header=T, sep=",")

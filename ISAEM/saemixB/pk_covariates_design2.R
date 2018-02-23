@@ -144,15 +144,15 @@ populationParameter   <- c(Tlag_pop= Tlag_true, omega_Tlag= o_Tlag,
   V_pop   = V_true,   omega_V   = o_V,
   Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =a_true, beta_V_lw70 = beta_V_lw70_true, beta_Cl_lw70 = beta_Cl_lw70_true)
 
-# trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/treatment.txt", header = TRUE) 
-# originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/originalId.txt', header=TRUE) 
-# individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/individualCovariate.txt', header = TRUE) 
-# time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/output1.txt",header=TRUE)
+trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/treatment.txt", header = TRUE) 
+originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/originalId.txt', header=TRUE) 
+individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/individualCovariate.txt', header = TRUE) 
+time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/design2/output1.txt",header=TRUE)
 
-trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/treatment.txt", header = TRUE) 
-originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/originalId.txt', header=TRUE) 
-individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/individualCovariate.txt', header = TRUE) 
-time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/output1.txt",header=TRUE)
+# trt <- read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/treatment.txt", header = TRUE) 
+# originalId<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/originalId.txt', header=TRUE) 
+# individualCovariate<- read.table('/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/individualCovariate.txt', header = TRUE) 
+# time<-read.table("/Users/karimimohammedbelhal/Desktop/CSDA_code_ref/warfarin/output1.txt",header=TRUE)
 
 
 list.param <- list(populationParameter,individualCovariate)
@@ -359,36 +359,11 @@ setwd("/Users/karimimohammedbelhal/Desktop/")
 ggsave(paste("precwarfa_", i, ".png", sep=""),prec)
 }
 
-error_rwm <- 1/replicate*error_rwm
-err_rwm<- theo_ref[-1,]
-err_rwm[,2:10] <- error_rwm[-1,]
-err_rwm_scaled <- err_rwm
-err_rwm_scaled$iterations = seq(1, 4*end, by=4)
-err_rwm_scaled$algo <- 'SAEM'
-err_rwm_scaled$method <- 'seq'
-
-error_mixseq <- 1/replicate*error_mixseq
-err_mixseq<- theo_ref[-1,]
-err_mixseq[,2:10] <- error_mixseq[-1,]
-err_mixseq_scaled <- err_mixseq
-err_mixseq_scaled$iterations = seq(1, 2*end, by=2)
-err_mixseq_scaled$algo <- 'ISAEM50'
-err_mixseq_scaled$method <- 'seq'
-
-error_mix25seq <- 1/replicate*error_mix25seq
-err_mix25seq<- theo_ref[-1,]
-err_mix25seq[,2:10] <- error_mix25seq[-1,]
-err_mix25seq$iterations = 1:((K1+K2))
-err_mix25seq$algo <- 'ISAEM25'
-err_mix25seq$method <- 'seq'
-
-# K_inc <- 12
 # error_rwm <- 1/replicate*error_rwm
 # err_rwm<- theo_ref[-1,]
 # err_rwm[,2:10] <- error_rwm[-1,]
 # err_rwm_scaled <- err_rwm
-# err_rwm_scaled[1:(K_inc/4),]$iterations = seq(1, K_inc, by=4)
-# err_rwm_scaled[((K_inc/4)+1):end,]$iterations = err_rwm_scaled[((K_inc/4)+1):end,]$iterations + err_rwm_scaled[(K_inc/4),]$iterations 
+# err_rwm_scaled$iterations = seq(1, 4*end, by=4)
 # err_rwm_scaled$algo <- 'SAEM'
 # err_rwm_scaled$method <- 'seq'
 
@@ -396,8 +371,7 @@ err_mix25seq$method <- 'seq'
 # err_mixseq<- theo_ref[-1,]
 # err_mixseq[,2:10] <- error_mixseq[-1,]
 # err_mixseq_scaled <- err_mixseq
-# err_mixseq_scaled[1:(K_inc/2),]$iterations = seq(1, K_inc, by=2)
-# err_mixseq_scaled[((K_inc/2)+1):end,]$iterations = err_mixseq_scaled[((K_inc/2)+1):end,]$iterations + err_mixseq_scaled[(K_inc/2),]$iterations 
+# err_mixseq_scaled$iterations = seq(1, 2*end, by=2)
 # err_mixseq_scaled$algo <- 'ISAEM50'
 # err_mixseq_scaled$method <- 'seq'
 
@@ -407,6 +381,32 @@ err_mix25seq$method <- 'seq'
 # err_mix25seq$iterations = 1:((K1+K2))
 # err_mix25seq$algo <- 'ISAEM25'
 # err_mix25seq$method <- 'seq'
+
+K_inc <- 12
+error_rwm <- 1/replicate*error_rwm
+err_rwm<- theo_ref[-1,]
+err_rwm[,2:10] <- error_rwm[-1,]
+err_rwm_scaled <- err_rwm
+err_rwm_scaled[1:(K_inc/4),]$iterations = seq(1, K_inc, by=4)
+err_rwm_scaled[((K_inc/4)+1):end,]$iterations = err_rwm_scaled[((K_inc/4)+1):end,]$iterations + err_rwm_scaled[(K_inc/4),]$iterations 
+err_rwm_scaled$algo <- 'SAEM'
+err_rwm_scaled$method <- 'seq'
+
+error_mixseq <- 1/replicate*error_mixseq
+err_mixseq<- theo_ref[-1,]
+err_mixseq[,2:10] <- error_mixseq[-1,]
+err_mixseq_scaled <- err_mixseq
+err_mixseq_scaled[1:(K_inc/2),]$iterations = seq(1, K_inc, by=2)
+err_mixseq_scaled[((K_inc/2)+1):end,]$iterations = err_mixseq_scaled[((K_inc/2)+1):end,]$iterations + err_mixseq_scaled[(K_inc/2),]$iterations 
+err_mixseq_scaled$algo <- 'ISAEM50'
+err_mixseq_scaled$method <- 'seq'
+
+error_mix25seq <- 1/replicate*error_mix25seq
+err_mix25seq<- theo_ref[-1,]
+err_mix25seq[,2:10] <- error_mix25seq[-1,]
+err_mix25seq$iterations = 1:((K1+K2))
+err_mix25seq$algo <- 'ISAEM25'
+err_mix25seq$method <- 'seq'
 
 for (i in 2:10){
 # i = 6

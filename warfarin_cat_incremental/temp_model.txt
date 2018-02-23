@@ -1,27 +1,23 @@
 
+[LONGITUDINAL]
+input =  {beta1,beta2,dose}
+dose = {use=regressor}
+EQUATION:
+lp0=dose*beta1-beta2*t
+lp1=beta1-beta2*t/2
 
-                  [LONGITUDINAL]
-                  input = {th1, th2, th3}
 
-                  EQUATION:
-                  lgp0 = th1
-                  lgp1 = lgp0 + th2
-                  lgp2 = lgp1 + th3
+p0 = 1/(1+exp(-lp0))
+p1 = 1/(1+exp(-lp1)) - p0
+DEFINITION:
+y = {type=categorical, categories={0, 1, 2}, 
+     P(y=0)=p0, P(y=1)=p1}
 
-                  DEFINITION:
-                  level = { type = categorical,  categories = {0, 1, 2, 3},
-                  logit(P(level<=0)) = th1
-                  logit(P(level<=1)) = th1 + th2
-                  logit(P(level<=2)) = th1 + th2 + th3
-                  }
+[INDIVIDUAL]
+input={beta1_pop, o_beta1,beta2_pop, o_beta2}
+        
 
-                  [INDIVIDUAL]
-                  input={th1_pop, o_th1,th2_pop, o_th2,th3_pop, o_th3}
-                          
+DEFINITION:
+beta1  ={distribution=normal, prediction=beta1_pop,  sd=o_beta1}
+beta2  ={distribution=lognormal, prediction=beta2_pop,  sd=o_beta2}
 
-                  DEFINITION:
-                  th1  ={distribution=normal, prediction=th1_pop,  sd=o_th1}
-                  th2  ={distribution=lognormal, prediction=th2_pop,  sd=o_th2}
-                  th3  ={distribution=lognormal, prediction=th3_pop,  sd=o_th3}
-                          
-                          

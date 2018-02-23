@@ -205,7 +205,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 	# E-step
 
-  if (kiter < 1000000){
+  if (kiter < 12){
   if (Dargs$NM==nb_replacement){
     l <- 1:Dargs$NM
     ind_rand<-1:Dargs$NM
