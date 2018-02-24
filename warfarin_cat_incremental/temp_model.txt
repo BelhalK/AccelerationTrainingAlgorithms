@@ -3,15 +3,13 @@
 input =  {beta1,beta2,dose}
 dose = {use=regressor}
 EQUATION:
-lp0=dose*beta1-beta2*t
-lp1=beta1-beta2*t/2
+lp1=-dose*beta1+beta2*t
 
 
-p0 = 1/(1+exp(-lp0))
-p1 = 1/(1+exp(-lp1)) - p0
+p1 = 1/(1+exp(-lp1))
 DEFINITION:
-y = {type=categorical, categories={0, 1, 2}, 
-     P(y=0)=p0, P(y=1)=p1}
+y = {type=categorical, categories={0, 1}, 
+     P(y=1)=p1}
 
 [INDIVIDUAL]
 input={beta1_pop, o_beta1,beta2_pop, o_beta2}
@@ -19,5 +17,5 @@ input={beta1_pop, o_beta1,beta2_pop, o_beta2}
 
 DEFINITION:
 beta1  ={distribution=normal, prediction=beta1_pop,  sd=o_beta1}
-beta2  ={distribution=lognormal, prediction=beta2_pop,  sd=o_beta2}
+beta2  ={distribution=normal, prediction=beta2_pop,  sd=o_beta2}
 
