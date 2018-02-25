@@ -185,7 +185,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
-  if(kiter<100000) {
+  if(kiter<saemix.options$nbiter.saemix[1]/2) {
     # browser()
   
     # if (Dargs$N==nb_replacement){
