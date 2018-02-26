@@ -21,7 +21,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
 source('mixtureFunctions.R') 
 library('rCMA')
 ###WARFA
-warfa_data <- read.table("//Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/warfarin_data.txt", header=T)
+warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/warfarin_data.txt", header=T)
 saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 

@@ -185,7 +185,8 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
   # E-step
-  if(kiter<saemix.options$nbiter.saemix[1]/2) {
+  
+  if(kiter<saemix.options$nbiter.saemix[1]) {
     # browser()
   
     # if (Dargs$N==nb_replacement){
@@ -199,7 +200,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     #     }
     # }
 
-    if (Dargs$NM==nb_replacement){
+  if (Dargs$NM==nb_replacement){
     l <- 1:Dargs$NM
     ind_rand<-1:Dargs$NM
   } else{
@@ -218,13 +219,16 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   if (saemix.options$sampling=='randomiter'){
     ind_rand<-sample(1:Dargs$NM,nb_replacement)
   } 
+
   xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject, l , ind_rand)
   ind_rand <- ind_rand + nb_replacement
 } else{
-  l <- 1:Dargs$NM
-  ind_rand<-1:Dargs$NM
-  xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject, l , ind_rand)
+  # l <- 1:Dargs$NM
+  # ind_rand<-1:Dargs$NM
+  # xmcmc<-estep_cat_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject, l , ind_rand)
+  xmcmc<-estep_cat2(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
 }
+ind_rand <- ind_rand + nb_replacement
   # if(kiter>48) browser()
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
