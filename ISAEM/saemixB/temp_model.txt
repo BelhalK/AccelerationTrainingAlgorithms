@@ -1,31 +1,29 @@
 
-[LONGITUDINAL]
-input =  {beta0,gamma0,delta0, dose}
-dose = {use=regressor}
+
+[COVARIATE]
+input = wt
+
 EQUATION:
-lm0 = beta0+gamma0*t + delta0*dose
-
-D = exp(lm0)+1
-
-p0 = exp(lm0)/D
-p1 = 1/D
-
-DEFINITION:
-y = {type=categorical, categories={0, 1}, 
-     P(y=0)=p0,
-     P(y=1)=p1}
+lw70 = log(wt/70)
 
 [INDIVIDUAL]
-input={beta0_pop, o_beta0,
-      gamma0_pop, o_gamma0,
-      delta0_pop, o_delta0}
-
+input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, beta_V_lw70, lw70, omega_V, Cl_pop, beta_Cl_lw70, omega_Cl}
 
 DEFINITION:
-beta0  ={distribution=normal, prediction=beta0_pop,  sd=o_beta0}
+Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
+ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_lw70, sd=omega_V}
+Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
 
-gamma0  ={distribution=normal, prediction=gamma0_pop,  sd=o_gamma0}
+[LONGITUDINAL]
+input =  {Tlag, ka, V, Cl,a}
 
-delta0  ={distribution=normal, prediction=delta0_pop,  sd=o_delta0}
+EQUATION:
+Cc = pkmodel(Tlag, ka, V, Cl)
 
+OUTPUT:
+output = {Cc}
+
+DEFINITION:
+y1 = {distribution=normal, prediction=Cc, sd=a}
 
