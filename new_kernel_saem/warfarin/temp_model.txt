@@ -1,18 +1,18 @@
 
-                      [LONGITUDINAL]
-                      input = {e, em, ec,a}
 
-                      EQUATION:
-                      Cc = e+(em*t)/(ec+t)
-                      
-                      DEFINITION:
-                      y1 ={distribution=normal, prediction=Cc, sd=a}
-                      
-                      [INDIVIDUAL]
-                      input={e_pop,o_e,em_pop,o_em,ec_pop,o_ec}
-                      
-                      DEFINITION:
-                      e   ={distribution=lognormal, prediction=e_pop,   sd=o_e}
-                      em   ={distribution=lognormal, prediction=em_pop,   sd=o_em}
-                      ec  ={distribution=lognormal, prediction=ec_pop,  sd=o_ec}
-                      
+
+[INDIVIDUAL]
+input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
+DEFINITION:
+ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
+V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
+Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
+
+
+[LONGITUDINAL]
+input = {ka, V, Cl,a}
+EQUATION:
+C = pkmodel(ka,V,Cl)
+DEFINITION:
+y = {distribution=normal, prediction=C, sd=a}
+
