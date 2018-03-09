@@ -40,15 +40,15 @@ require(reshape2)
 
 
 
-# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
-# saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-#   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
+saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 
-# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
-# saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-#   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time", name.covariates=c("wt"),units=list(x="kg",
-#   covariates=c("kg/ha")))
+warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
+saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time", name.covariates=c("wt"),units=list(x="kg",
+  covariates=c("kg/ha")))
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
