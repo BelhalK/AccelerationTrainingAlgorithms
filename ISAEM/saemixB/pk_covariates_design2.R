@@ -40,12 +40,12 @@ require(reshape2)
 
 
 
-warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
-saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
+# saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+#   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 
-warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
+
 saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time", name.covariates=c("wt"),units=list(x="kg",
   covariates=c("kg/ha")))
@@ -86,13 +86,14 @@ seed0=3456
 
 
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='')
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref)
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,nbiter.burn =0, nb.replacement=50,sampling='randompass')
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='seq')
 theo_mix50<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental50))
 theo_mix50 <- cbind(iterations, theo_mix50)
 
@@ -100,21 +101,21 @@ theo_mix50 <- cbind(iterations, theo_mix50)
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='seq')
 theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
 theo_mix25 <- cbind(iterations, theo_mix25)
 
 
 options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='seq')
 theo_mix75<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental75))
 theo_mix75 <- cbind(iterations, theo_mix75)
 
 
 options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='randompass')
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='seq')
 theo_mix85<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental85))
 theo_mix85 <- cbind(iterations, theo_mix85)
 

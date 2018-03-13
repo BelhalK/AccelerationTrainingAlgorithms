@@ -179,7 +179,13 @@ cat("Running main SAEM algorithm\n")
 print(date())
 
 nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
-l <- sample(1:Dargs$NM,Dargs$NM)
+if (saemix.options$sampling=='seq'){
+  l <- c(replicate(saemix.options$nbiter.tot,1:Dargs$NM))
+} else if(saemix.options$sampling=='randompass'){
+  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$NM,Dargs$NM,replace=FALSE)))
+} else if(saemix.options$sampling=='randomiter'){
+  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$NM,Dargs$NM,replace=TRUE)))
+}
 ind_rand<-1:nb_replacement
 
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
@@ -207,48 +213,14 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 	# E-step
 
   if (kiter <= saemix.options$nbiter.tot){
-    
-  if (Dargs$NM==nb_replacement){
-    l <- 1:Dargs$NM
-    ind_rand<-1:Dargs$NM
-  } else{
-    if (kiter%%round(Dargs$NM/nb_replacement) == 1)
-      { 
-        if (saemix.options$sampling=='seq'){
-          l <- 1:Dargs$NM
-          ind_rand<-1:nb_replacement
-        } else if(saemix.options$sampling=='randompass'){
-          l <- sample(1:Dargs$NM,Dargs$NM)
-          # l <- 1:Dargs$NM
-          ind_rand<-1:nb_replacement
-        }
-      }
+    xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
+    ind_rand <- ind_rand + nb_replacement
+  }else{
+    xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   }
-  if (saemix.options$sampling=='randomiter'){
-    ind_rand<-sample(1:Dargs$NM,nb_replacement)
-  } 
-
-    # if (saemix.options$nb.replacement <=50){
-    #   if (kiter%%round(Dargs$NM/nb_replacement) == 1){
-    #     l <- sample(1:Dargs$NM,Dargs$NM)
-    #     ind_rand<-1:nb_replacement
-    #   }
-    # } else{
-    #     l <- sample(1:Dargs$NM,Dargs$NM)
-    #     ind_rand<-1:nb_replacement
-    # }
-    
-  xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
-  ind_rand <- ind_rand + nb_replacement
-}else{
-  xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
-}
-  # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
-  # ind_rand <- ind_rand + nb_replacement
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
-  #  psiM<-transphi(phiM,saemix.model["transform.par"])
   
   # M-step
   if(opt$stepsize[kiter]>0) {

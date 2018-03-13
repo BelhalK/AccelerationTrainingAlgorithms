@@ -27,6 +27,8 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
 	
+	block <- setdiff(1:Dargs$NM, l[ind_rand])
+
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 if (!(kiter %in% map_range)){
@@ -39,7 +41,8 @@ if (!(kiter %in% map_range)){
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 		}
 		deltau<-Uc.y-U.y
-		deltau[l[-ind_rand]] = 1000000
+		
+		deltau[block] = 1000000
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -64,7 +67,7 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[l[-ind_rand]] = 1000000
+				deltu[block] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -102,7 +105,7 @@ if (!(kiter %in% map_range)){
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				deltu[l[-ind_rand]] = 1000000
+				deltu[block] = 1000000
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {

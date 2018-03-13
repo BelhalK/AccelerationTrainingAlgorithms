@@ -1,19 +1,29 @@
 
 
-  [LONGITUDINAL]
-  input = {beta,lambda}  
+[COVARIATE]
+input = wt
 
-  EQUATION:
-  h=(beta/lambda)*(t/lambda)^(beta-1)
+EQUATION:
+lw70 = log(wt/70)
 
-  DEFINITION:
-e={type=event,
-       rightCensoringTime = 6,  
-       hazard             = h}
-  [INDIVIDUAL]
-  input={lambda_pop, o_lambda,beta_pop, o_beta}
-                        
-  DEFINITION:
-  lambda  ={distribution=lognormal, prediction=lambda_pop,  sd=o_lambda}
-  beta  ={distribution=lognormal, prediction=beta_pop,  sd=o_beta}
-       
+[INDIVIDUAL]
+input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, beta_V_lw70, lw70, omega_V, Cl_pop, beta_Cl_lw70, omega_Cl}
+
+DEFINITION:
+Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
+ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_lw70, sd=omega_V}
+Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
+
+[LONGITUDINAL]
+input =  {Tlag, ka, V, Cl,a}
+
+EQUATION:
+Cc = pkmodel(Tlag, ka, V, Cl)
+
+OUTPUT:
+output = {Cc}
+
+DEFINITION:
+y1 = {distribution=normal, prediction=Cc, sd=a}
+

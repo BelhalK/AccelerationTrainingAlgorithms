@@ -368,7 +368,7 @@ graphConvMC_5 <- function(df,df2,df3,df4,df5, title=NULL, ylim=NULL)
       xlab("iteration")+ ylab(names(df[j])) + theme_bw()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
-    graf[[o[j]]] <- grafj
+    graf[[o[j]]] <- grafj 
 
   }
   do.call("grid.arrange", c(graf, ncol=3, top=title))
