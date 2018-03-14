@@ -75,38 +75,43 @@ batchsize50<-50
 batchsize25<-25
 
 #Weibull
-options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,sampling='seq', map.range=c(0))
 rtte<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rtte))
 rtte<-cbind(iterations,rtte)
 
-options_rtteincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize50)
-rtteincr<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr))
-rtteincr<-cbind(iterations,rtteincr)
+options_rtteincr<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,sampling='randompass', map.range=c(0), nb.replacement=batchsize50)
+rtteincr50<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr))
+rtteincr50<-cbind(iterations,rtteincr50)
 
-options_rtteincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=batchsize25)
+options_rtteincr25<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,sampling='randompass', map.range=c(0), nb.replacement=batchsize25)
 rtteincr25<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr25))
 rtteincr25<-cbind(iterations,rtteincr25)
 
+options_rtteincr75<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,sampling='randompass', map.range=c(0), nb.replacement=75)
+rtteincr75<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr75))
+rtteincr75<-cbind(iterations,rtteincr75)
+
+
+options_rtteincr85<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,sampling='randompass', map.range=c(0), nb.replacement=85)
+rtteincr85<-data.frame(saemix_incremental(saemix.model_rtte,saemix.data_rtte,options_rtteincr85))
+rtteincr85<-cbind(iterations,rtteincr85)
 # graphConvMC2_saem(rtte,rtteincr, title="new kernel")
 
+rtte_scaled <- rtte
+rtteincr50_scaled <- rtteincr50
+rtteincr25_scaled <- rtteincr25
+rtteincr75_scaled <- rtteincr75
+rtteincr85_scaled <- rtteincr85
 
-rtte$algo <- 'rwm'
-rtteincr$algo <- 'ISAEM50'
-rtteincr25$algo <- 'ISAEM25'
 
-rtte_scaled <- rtte[rep(seq_len(nrow(rtte)), each=100/batchsize25),]
-rtte_scaled$iterations = 1:(2*(K1+K2+1))
+rtte_scaled$iterations = rtte_scaled$iterations*1
+rtteincr50_scaled$iterations = rtteincr50_scaled$iterations*0.5
+rtteincr25_scaled$iterations = rtteincr25_scaled$iterations*0.25
+rtteincr75_scaled$iterations = rtteincr75_scaled$iterations*0.75
+rtteincr85_scaled$iterations = rtteincr85_scaled$iterations*0.85
 
-rtte_scaled50 <- rtteincr[rep(seq_len(nrow(rtte)), each=100/batchsize50),]
-rtte_scaled50$iterations = 1:(2*(K1+K2+1))
+graphConvMC_5(rtte_scaled,rtteincr50_scaled,rtteincr25_scaled,rtteincr75_scaled,rtteincr85_scaled)
 
-comparison <- 0
-# comparison <- rbind(theo_ref,theo_incremental)
-comparison <- rbind(rtte_scaled[iterations,],rtte_scaled50[iterations,],rtteincr25)
-comparison <- rbind(rtte_scaled[iterations,],rtteincr)
-
-var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
-graphConvMC3_new(var, title="ALGO - EM (same complexity)",legend=TRUE)
 
 # options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5))
 # rttenew<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew))
