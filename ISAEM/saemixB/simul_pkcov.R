@@ -1,8 +1,19 @@
 library("mlxR")
-library(saemix)
-
 
  
+Tlag_true=0.78
+ka_true <- 1
+V_true <- 8
+Cl_true <- 0.1
+
+o_Tlag <- 0.57 #o^2=0.32
+o_ka <- 0.5 #o^2=0.25
+o_V <- 0.2  #o^2=0.04
+o_Cl <- 0.3  #o^2=0.09
+a_true = 0.266
+beta_Cl_lw70_true = 0.60411
+beta_V_lw70_true = 0.8818
+seed0 = 39546
 
   myModel <- inlineModel("
 
