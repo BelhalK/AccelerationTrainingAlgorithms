@@ -27,7 +27,8 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R/mixtureFunctions.R')
   source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB")
-
+# load("isaem_design2.RData")
+# save.image("isaem_design2.RData")
 
 library("mlxR")
 library("psych")
@@ -82,8 +83,6 @@ batchsize25 = 25
 batchsize50 = 50
 
 seed0=3456
-
-
 
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
@@ -228,6 +227,7 @@ out1<-list(name=name,time=time)
 # call the simulator 
 res <- simulx(model=myModel,treatment=trt,parameter=list.param,output=out1)
 # writeDatamlx(res, result.file = paste("/Users/karimimohammedbelhal/Desktop/data_pk/pk_mcstudy_", m, ".csv", sep=""))
+# writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Desktop/data_pk/isaem_design2.csv")
 # warfarin.saemix<-read.table(paste("/Users/karimimohammedbelhal/Desktop/data_pk/pk_mcstudy_", m, ".csv", sep=""), header=T, sep=",")
 # typeof(warfarin.saemix[2,3])
 # typeof(res$y1[2,3])
