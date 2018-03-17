@@ -75,14 +75,6 @@ saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, nam
   covariates=c("kg/ha")))
 
 
-
-saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
-  transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
-  byrow=TRUE),covariate.model=c(0,0,1,1),error.model="constant")
-
-
 K1 = 300
 K2 = 100
 iterations = 1:(K1+K2+1)
