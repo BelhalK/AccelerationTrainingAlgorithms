@@ -43,33 +43,33 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	phi.map<-saemixObject["results"]["mean.phi"]
 
 	
-		#MAP calculation
-	 	for(i in 1:saemixObject["data"]["N"]) {
-		    isuj<-id.list[i]
-		    xi<-xind[id==isuj,,drop=FALSE]
-		    yi<-yobs[id==isuj]
-		    idi<-rep(1,length(yi))
-		    mean.phi1<-mean.phiM[i,i1.omega2]
-		    phii<-saemixObject["results"]["phi"][i,]
-		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
-		    phi.map[i,i1.omega2]<-phi1.opti$par
-		}
-		#rep the map nchains time
-		phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
+	# 	#MAP calculation
+	#  	for(i in 1:saemixObject["data"]["N"]) {
+	# 	    isuj<-id.list[i]
+	# 	    xi<-xind[id==isuj,,drop=FALSE]
+	# 	    yi<-yobs[id==isuj]
+	# 	    idi<-rep(1,length(yi))
+	# 	    mean.phi1<-mean.phiM[i,i1.omega2]
+	# 	    phii<-saemixObject["results"]["phi"][i,]
+	# 	    phi1<-phii[i1.omega2]
+	# 	    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
+	# 	    phi.map[i,i1.omega2]<-phi1.opti$par
+	# 	}
+	# 	#rep the map nchains time
+	# 	phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
 
-	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-		map.psi<-data.frame(id=id.list,map.psi)
-		map.phi<-data.frame(id=id.list,phi.map)
-		psi_map <- as.matrix(map.psi[,-c(1)])
+	#   	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+	# 	map.psi<-data.frame(id=id.list,map.psi)
+	# 	map.phi<-data.frame(id=id.list,phi.map)
+	# 	psi_map <- as.matrix(map.psi[,-c(1)])
 	
-	block <- setdiff(1:Dargs$NM, l[ind_rand])	
-	browser()
-	print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
-	print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
-	colMeans(psi_map[block,])
-	colMeans(psi_map[l[ind_rand],])
-	colMeans(psi_map)
+	# block <- setdiff(1:Dargs$NM, l[ind_rand])	
+	# # browser()
+	# print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
+	# print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
+	# colMeans(psi_map[block,])
+	# colMeans(psi_map[l[ind_rand],])
+	# colMeans(psi_map)
 
 
 	block <- setdiff(1:Dargs$NM, l[ind_rand])
@@ -338,6 +338,7 @@ if(opt$nbiter.mcmc[4]>0 & kiter %in% map_range){
 			}
 
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+			deltu[block] = 1000000
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 			etaM[ind]<-etaMc[ind]
 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs

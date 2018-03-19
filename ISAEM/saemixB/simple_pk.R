@@ -39,75 +39,28 @@ require(gridExtra)
 require(reshape2)
 
 
+warfa_data <- read.table("/Users/karimimohammedbelhal/Desktop/csda_new/data/warfarin_data.txt", header=T)
+saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+
+
+
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  time<-xidep[,2]  
+  tim<-xidep[,2]  
   ka<-psi[id,1]
   V<-psi[id,2]
-  Cl<-psi[id,3]
-  k <- Cl/V
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
+  k<-psi[id,3]
+  CL<-k*V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
   return(ypred)
 }
 
-
-ka_true <- 2
-V_true <- 13
-Cl_true <- 1
-o_ka <- sqrt(0.2)
-o_V <- sqrt(0.1)
-o_Cl <- sqrt(0.3)
-a_true<-1
-
-
-
-myModel <- inlineModel("
-
-
-[INDIVIDUAL]
-input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
-DEFINITION:
-ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
-V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
-Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
-
-
-[LONGITUDINAL]
-input = {ka, V, Cl,a}
-EQUATION:
-C = pkmodel(ka,V,Cl)
-DEFINITION:
-y = {distribution=normal, prediction=C, sd=a}
-")
-
-N=20000
-pop.param   <- c(
-  ka_pop  = ka_true,    omega_ka  = o_ka,
-  V_pop   = V_true,   omega_V   = o_V,
-  Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =a_true)
-  
-res <- simulx(model     = myModel,
-              parameter = pop.param,
-              treatment = list(time=0, amount=100),
-              group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(0,4,by=1)))
-  
-  # writeDatamlx(res, result.file = "res.csv")
-  # head(read.csv("res.csv"))
-  # tab <- read.csv("res.csv")
-  
-  warfarin.saemix <- res$y
-  warfarin.saemix$amount <- 100
-
-  
-  saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(5,10,5,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
-
-  saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
 
 
 
@@ -125,13 +78,26 @@ options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref[-1,])
 
+options.new<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=100,sampling='seq')
+theo_new<-data.frame(saemix_incremental(saemix.model,saemix.data,options.new))
+theo_new <- cbind(iterations, theo_new[-1,])
+
+graphConvMC_twokernels(theo_ref,theo_new)
+
+options.newincr<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=50,sampling='seq')
+theo_newincr<-data.frame(saemix_incremental(saemix.model,saemix.data,options.newincr))
+theo_newincr <- cbind(iterations, theo_newincr[-1,])
+
+graphConvMC_threekernels(theo_ref,theo_new,theo_newincr)
+
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
                           nbiter.burn =0, nb.replacement=50,sampling='randompass')
 theo_mix50<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental50))
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
-
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
