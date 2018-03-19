@@ -27,7 +27,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R/mixtureFunctions.R')
   source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB")
-# load("isaem_design2.RData")
+load("isaem_design2.RData")
 # save.image("isaem_design2.RData")
 
 library("mlxR")

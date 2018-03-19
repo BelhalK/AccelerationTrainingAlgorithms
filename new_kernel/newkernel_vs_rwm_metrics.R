@@ -119,7 +119,6 @@ prctilemlx(new_burn[-1,],band = list(number = 4, level = 80)) + ylim(-3,-1) + gg
 
 # graphConvMC_twokernels(post_rwm[[1]],post_new[[1]], title="EM")
 
-
 final_rwm <- post_rwm[[1]]
 for (i in 2:length(post_rwm)) {
   final_rwm <- rbind(final_rwm, post_rwm[[i]])
@@ -132,8 +131,6 @@ for (i in 2:length(post_new)) {
 }
 
 
-
-#Autocorrelation
 rwm.obj <- as.mcmc(post_rwm[[1]])
 corr_rwm <- autocorr(rwm.obj[,2])
 autocorr.plot(rwm.obj[,2]) + title("RWM SAEM Autocorrelation")
