@@ -177,6 +177,12 @@ saemix<-function(model,data,control=list()) {
 if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
+
+T0 <- 10
+iter <- 1:saemix.options$nbiter.tot
+T <- T0*(exp(-opt$alpha1.sa*iter)+1)
+
+
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 # SAEM convergence plots
@@ -237,7 +243,12 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     } else{
       theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
     }
-
+    
+    browser()
+    if (saemix.options$an){
+      varList$pres[Uargs$ind.res] <- varList$pres[Uargs$ind.res]*sqrt(T[kiter])
+      var.eta[Uargs$i1.omega2] <- var.eta[Uargs$i1.omega2]*T[kiter]
+    }
   parpop[(kiter+1),]<-theta
 # End of loop on kiter
 }
@@ -396,5 +407,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(saemixObject)
+  return(parpop)
 }

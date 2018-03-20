@@ -59,15 +59,15 @@ Pop.CondInit  1 7 1
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=300, K2=100 
+    Number of iterations:  K1=200, K2=50 
     Number of chains:  1 
-    Seed:  3456 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
     Input/output
         save the results to a file:  TRUE 
-        save the graphs to files:  FALSE 
+        save the graphs to files:  TRUE 
         directory where results should be saved:  newdir 
 ----------------------------------------------------
 ----                  Results                   ----
@@ -75,17 +75,17 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.650   
-[2,] V         7.661   
-[3,] k         0.017   
-[4,] a         1.000   
+[1,] ka        0.723   
+[2,] V         7.539   
+[3,] k         0.018   
+[4,] a         1.017   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.369   
-V  omega2.V  0.041   
-k  omega2.k  0.051   
+ka omega2.ka 0.483   
+V  omega2.V  0.039   
+k  omega2.k  0.043   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
