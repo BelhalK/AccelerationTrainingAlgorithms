@@ -181,11 +181,12 @@
   T0 <- 2
   iter <- 1:saemix.options$nbiter.tot
   coeff <- saemix.options$coeff
-  T <- c(seq(1,1,length=1),
-         seq(1,T0,length=50),
-         seq(T0,1,length=100),
-         seq(1,1,length=1000))
-  # T <- (T0*exp(-coeff*iter)+1)
+  # T <- c(seq(1,1,length=0),
+  #        seq(1,T0,length=100),
+  #        seq(T0,1,length=50),
+  #        seq(1,1,length=1000))
+
+  T <- (T0*exp(-coeff*iter)+1)
 
 
   for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
@@ -244,7 +245,7 @@
 
       if (saemix.options$an){
         if(Dargs$type=="structural") {
-          varList$pres[Uargs$ind.res] <- varList$pres[Uargs$ind.res]*sqrt(T[kiter])
+          varList$pres <- varList$pres*sqrt(T[kiter])
           # varList$omega <- varList$omega*T[kiter]
           varList$omega <- pmin(varList$omega*T[kiter],2)
         } else{

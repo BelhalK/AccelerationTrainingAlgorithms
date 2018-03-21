@@ -6,6 +6,7 @@ library(abind)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
+# save.image("pk_cov_an.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/annealing/R")
   source('aaa_generics.R') 
@@ -74,7 +75,7 @@ y1 = {distribution=normal, prediction=Cc, sd=a}
 ")
 
 
-N <- 50
+N <- 30
 populationParameter   <- c(Tlag_pop= Tlag_true, omega_Tlag= o_Tlag,
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
@@ -128,18 +129,20 @@ iterations = 1:(K1+K2)
 end = K1+K2
 
 #Warfarin
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1)
+options_warfa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1)
 warfa<-data.frame(saemix(saemix.model,saemix.data,options_warfa))
 warfa <- cbind(iterations, warfa[-1,])
 
-options_warfa.sa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1)
+options_warfa.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1)
 warfa.sa<-data.frame(saemix(saemix.model,saemix.data,options_warfa.sa))
 warfa.sa <- cbind(iterations, warfa.sa[-1,])
 
 
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=0.05)
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=0.0303)
 warfanew<-data.frame(saemix(saemix.model,saemix.data,options_warfanew))
 warfanew <- cbind(iterations, warfanew[-1,])
+
+plot3(warfa,warfa.sa,warfanew)
 
 # options_warfanew2<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=1)
 # warfanew2<-data.frame(saemix(saemix.model,saemix.data,options_warfanew2))
@@ -149,6 +152,46 @@ warfanew <- cbind(iterations, warfanew[-1,])
 # warfanew3<-data.frame(saemix(saemix.model,saemix.data,options_warfanew3))
 # warfanew3 <- cbind(iterations, warfanew3[-1,])
 
-plot3(warfa,warfa.sa,warfanew)
+
 
 plot5(warfa,warfa.sa,warfanew,warfanew2,warfanew3)
+
+
+
+replicate = 3
+
+final.ref <- 0
+final.sa <- 0
+final.an <- 0
+for (m in 1:replicate){
+  print(m)
+  l = list(c(0.2,3,10,2),c(0.2,3,10,2),c(0.2,3,10,2))
+  
+  saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(l[[m]],ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
+  transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
+  byrow=TRUE),covariate.model=matrix(c(0,0,1,1),ncol=4,byrow=TRUE),error.model="constant")
+
+
+
+  options<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1)
+  pk<-data.frame(saemix(saemix.model,saemix.data,options))
+  pk <- cbind(iterations, pk[-1,])
+  pk['individual'] <- m
+  final.ref <- rbind(final.ref,pk)
+
+
+  options.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1, alpha.sa=0.95)
+  pk.sa<-data.frame(saemix(saemix.model,saemix.data,options.sa))
+  pk.sa <- cbind(iterations, pk.sa[-1,])
+  pk.sa['individual'] <- m
+  final.sa <- rbind(final.sa,pk.sa)
+
+  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=2)
+  pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
+  pknew <- cbind(iterations, pknew[-1,])
+  pknew['individual'] <- m
+  final.an <- rbind(final.an,pknew)
+
+}
