@@ -4,26 +4,25 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset warfarin.saemix 
+Dataset warfa_data 
     Structured data: y1 ~ amount + time | id 
     X variable for graphs: time () 
-    covariates: wt (-) 
 Dataset characteristics:
-    number of subjects:     50 
-    number of observations: 150 
-    average/min/max nb obs: 3.00  /  3  /  3 
+    number of subjects:     31 
+    number of observations: 271 
+    average/min/max nb obs: 8.74  /  7  /  18 
 First 10 lines of data:
-   id amount time         y1          wt mdv cens occ ytype
-1   1    100    1  1.4079666 -0.02974029   0    0   1     1
-2   1    100    2  5.9407131 -0.02974029   0    0   1     1
-3   1    100    3  7.4006824 -0.02974029   0    0   1     1
-4   2    100    1  5.7490685  0.12878231   0    0   1     1
-5   2    100    2 11.6000326  0.12878231   0    0   1     1
-6   2    100    3 12.6814245  0.12878231   0    0   1     1
-7   3    100    1 -0.3874887 -0.08062852   0    0   1     1
-8   3    100    2  6.6198955 -0.08062852   0    0   1     1
-9   3    100    3 13.1321694 -0.08062852   0    0   1     1
-10  4    100    1  3.8920176 -0.02133471   0    0   1     1
+   id amount  time  y1 mdv cens occ ytype
+1   1    100   0.0 0.0   0    0   1     1
+2   1    100  24.0 9.2   0    0   1     1
+3   1    100  36.0 8.5   0    0   1     1
+4   1    100  48.0 6.4   0    0   1     1
+5   1    100  72.0 4.8   0    0   1     1
+6   1    100  96.0 3.1   0    0   1     1
+7   1    100 120.0 2.5   0    0   1     1
+8   2    100   0.0 0.0   0    0   1     1
+9   2    100   0.5 0.0   0    0   1     1
+10  2    100   2.0 8.4   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -31,45 +30,39 @@ Nonlinear mixed-effects model
   Model function:  warfarin  Model type:  structural
 function(psi,id,xidep) { 
   dose<-xidep[,1]
-  time<-xidep[,2]  
-  Tlag<-psi[id,1]
-  ka<-psi[id,2]
-  V<-psi[id,3]
-  Cl<-psi[id,4]
-  k<-Cl/V
-  dt <- pmax(time-Tlag, 0)
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*dt)-exp(-ka*dt))
-  return(ypred)
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+  CL<-k*V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred) 
 }
-  Nb of parameters: 4 
-      parameter names:  Tlag ka V Cl 
+  Nb of parameters: 3 
+      parameter names:  ka V k 
       distribution:
      Parameter Distribution Estimated
-[1,] Tlag      log-normal   Estimated
-[2,] ka        log-normal   Estimated
-[3,] V         log-normal   Estimated
-[4,] Cl        log-normal   Estimated
+[1,] ka        log-normal   Estimated
+[2,] V         log-normal   Estimated
+[3,] k         log-normal   Estimated
   Variance-covariance matrix:
-     Tlag ka V Cl
-Tlag    1  0 0  0
-ka      0  1 0  0
-V       0  0 1  0
-Cl      0  0 0  1
+   ka V k
+ka  1 0 0
+V   0 1 0
+k   0 0 1
   Error model: constant , initial values: a=1 
-  Covariate model:
-   [,1] [,2] [,3] [,4]
-wt    0    0    1    1
+    No covariate in the model.
     Initial values
-             Tlag ka  V Cl
-Pop.CondInit  0.2  3 10  2
-Cov.CondInit  0.0  0  0  0
+             ka V k
+Pop.CondInit  1 7 1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
-    Algorithms: estimation only
+    Estimation of log-likelihood by importance sampling
     Number of iterations:  K1=300, K2=100 
     Number of chains:  1 
     Seed:  39546 
+    Number of MCMC iterations for IS:  5000 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -82,27 +75,31 @@ Cov.CondInit  0.0  0  0  0
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-     Parameter   Estimate
-[1,] Tlag         6.3e-02
-[2,] ka           4.3e-01
-[3,] V            7.6e+00
-[4,] beta_wt(V)  -7.4e-02
-[5,] Cl           6.9e-24
-[6,] beta_wt(Cl)  2.1e+01
-[7,] a            3.1e+00
+     Parameter Estimate
+[1,] ka        0.785   
+[2,] V         7.629   
+[3,] k         0.017   
+[4,] a         1.005   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-     Parameter   Estimate
-Tlag omega2.Tlag 1.0e-03 
-ka   omega2.ka   2.2e-03 
-V    omega2.V    1.7e-11 
-Cl   omega2.Cl   1.3e-05 
+   Parameter Estimate
+ka omega2.ka 0.696   
+V  omega2.V  0.040   
+k  omega2.k  0.054   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-            omega2.Tlag omega2.ka omega2.V omega2.Cl
-omega2.Tlag 1           0         0        0        
-omega2.ka   0           1         0        0        
-omega2.V    0           0         1        0        
-omega2.Cl   0           0         0        1        
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       
+----------------------------------------------------
+---------------  Statistical criteria  -------------
+----------------------------------------------------
+
+Likelihood computed by importance sampling
+      -2LL= 917.5061 
+      AIC = 931.5061 
+      BIC = 941.544 
+----------------------------------------------------

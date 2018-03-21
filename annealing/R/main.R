@@ -183,8 +183,7 @@
   coeff <- saemix.options$coeff
   T <- c(seq(1,1,length=1),
          seq(1,T0,length=50),
-         seq(T0,-T0,length=50),
-         seq(-T0,1,length=50),
+         seq(T0,1,length=100),
          seq(1,1,length=1000))
   # T <- (T0*exp(-coeff*iter)+1)
 
@@ -246,8 +245,8 @@
       if (saemix.options$an){
         if(Dargs$type=="structural") {
           varList$pres[Uargs$ind.res] <- varList$pres[Uargs$ind.res]*sqrt(T[kiter])
-          varList$omega <- varList$omega*T[kiter]
-          # varList$omega <- pmin(varList$omega*T[kiter],2)
+          # varList$omega <- varList$omega*T[kiter]
+          varList$omega <- pmin(varList$omega*T[kiter],2)
         } else{
           var.eta[Uargs$i1.omega2] <- var.eta[Uargs$i1.omega2]*T[kiter]
         }
