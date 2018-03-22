@@ -54,7 +54,7 @@ k   0 0 1
     No covariate in the model.
     Initial values
              ka V k
-Pop.CondInit  1 7 1
+Pop.CondInit  1 4 1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -75,17 +75,17 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.650   
-[2,] V         7.661   
+[1,] ka        0.673   
+[2,] V         7.634   
 [3,] k         0.017   
-[4,] a         1.000   
+[4,] a         1.005   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.369   
-V  omega2.V  0.041   
-k  omega2.k  0.051   
+ka omega2.ka 0.420   
+V  omega2.V  0.039   
+k  omega2.k  0.050   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

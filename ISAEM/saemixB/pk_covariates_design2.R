@@ -76,12 +76,12 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
-  byrow=TRUE),covariate.model=c(0,0,1,1),error.model="constant")
+  byrow=TRUE),covariate.model=t(c(0,0,1,1)),error.model="constant")
 
 
 K1 = 300
 K2 = 100
-iterations = 1:(K1+K2+1)
+iterations = 0:(K1+K2-1)
 end = K1+K2
 batchsize25 = 25
 batchsize50 = 50
@@ -103,35 +103,35 @@ graphConvMC_twokernels(theo_ref,theo_new)
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
-theo_ref <- cbind(iterations, theo_ref)
+theo_ref <- cbind(iterations, theo_ref[-1,])
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
                           nbiter.burn =0, nb.replacement=50,sampling='randompass')
 theo_mix50<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental50))
-theo_mix50 <- cbind(iterations, theo_mix50)
+theo_mix50 <- cbind(iterations, theo_mix50[-1,])
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
 theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
-theo_mix25 <- cbind(iterations, theo_mix25)
+theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
 
 options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
 theo_mix75<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental75))
-theo_mix75 <- cbind(iterations, theo_mix75)
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
 options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='randompass')
 theo_mix85<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental85))
-theo_mix85 <- cbind(iterations, theo_mix85)
+theo_mix85 <- cbind(iterations, theo_mix85[-1,])
 
 
 theo_ref_scaled <- theo_ref

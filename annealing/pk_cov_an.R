@@ -165,7 +165,7 @@ final.sa <- 0
 final.an <- 0
 for (m in 1:replicate){
   print(m)
-  l = list(c(0.2,3,10,2),c(0.2,3,10,2),c(0.2,3,10,2))
+  l = list(c(0.2,3,10,2),c(0.5,5,12,1),c(0.7,6,14,4))
   
   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(l[[m]],ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
@@ -188,10 +188,13 @@ for (m in 1:replicate){
   pk.sa['individual'] <- m
   final.sa <- rbind(final.sa,pk.sa)
 
-  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=2)
+  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=0.0303)
   pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
   pknew <- cbind(iterations, pknew[-1,])
   pknew['individual'] <- m
   final.an <- rbind(final.an,pknew)
 
 }
+
+
+diff(final.ref,final.sa,final.an)

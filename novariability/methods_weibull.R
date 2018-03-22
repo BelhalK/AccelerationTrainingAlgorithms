@@ -66,7 +66,8 @@ end = K1+K2
 
 
 #with var no sa
-options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2),nbiter.saemix = c(K1,K2), nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, av=0)
+options_rtte<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2),
+  nbiter.saemix = c(K1,K2), nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, av=0)
 rtte<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rtte))
 rtte <- cbind(iterations, rtte)
 
