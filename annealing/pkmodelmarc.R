@@ -1,6 +1,8 @@
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
+# save.image("pkmarc.RData")
+load("pkmarc.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/annealing/R")
   source('aaa_generics.R') 
@@ -120,5 +122,3 @@ for (m in 1:replicate){
 }
 
 diff(final.ref,final.sa,final.an)
-
-

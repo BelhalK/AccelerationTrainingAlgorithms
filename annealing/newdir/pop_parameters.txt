@@ -4,30 +4,30 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset warfa_data 
-    Structured data: y1 ~ amount + time | id 
+Dataset data 
+    Structured data: y ~ dose + time | id 
     X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     31 
-    number of observations: 271 
-    average/min/max nb obs: 8.74  /  7  /  18 
+    number of subjects:     80 
+    number of observations: 640 
+    average/min/max nb obs: 8.00  /  8  /  8 
 First 10 lines of data:
-   id amount  time  y1 mdv cens occ ytype
-1   1    100   0.0 0.0   0    0   1     1
-2   1    100  24.0 9.2   0    0   1     1
-3   1    100  36.0 8.5   0    0   1     1
-4   1    100  48.0 6.4   0    0   1     1
-5   1    100  72.0 4.8   0    0   1     1
-6   1    100  96.0 3.1   0    0   1     1
-7   1    100 120.0 2.5   0    0   1     1
-8   2    100   0.0 0.0   0    0   1     1
-9   2    100   0.5 0.0   0    0   1     1
-10  2    100   2.0 8.4   0    0   1     1
+   id dose time      y mdv cens occ ytype
+1   1   40  0.5 3.4000   0    0   1     1
+2   1   40  2.0 2.9500   0    0   1     1
+3   1   40  4.0 1.8900   0    0   1     1
+4   1   40  8.0 0.9250   0    0   1     1
+5   1   40 12.0 0.4220   0    0   1     1
+6   1   40 16.0 0.0010   0    0   1     1
+7   1   40 20.0 0.0404   0    0   1     1
+8   1   40 24.0 0.0010   0    0   1     1
+9   2   40  0.5 4.0400   0    0   1     1
+10  2   40  2.0 4.8700   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  warfarin  Model type:  structural
+  Model function:  pk  Model type:  structural
 function(psi,id,xidep) { 
   dose<-xidep[,1]
   tim<-xidep[,2]  
@@ -50,16 +50,16 @@ function(psi,id,xidep) {
 ka  1 0 0
 V   0 1 0
 k   0 0 1
-  Error model: constant , initial values: a=1 
+  Error model: combined , initial values: a=1 b=1 
     No covariate in the model.
     Initial values
-             ka V k
-Pop.CondInit  1 7 1
+             ka  V k
+Pop.CondInit  3 12 3
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Estimation of log-likelihood by importance sampling
-    Number of iterations:  K1=300, K2=100 
+    Number of iterations:  K1=1000, K2=100 
     Number of chains:  1 
     Seed:  39546 
     Number of MCMC iterations for IS:  5000 
@@ -76,17 +76,18 @@ Pop.CondInit  1 7 1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.793   
-[2,] V         7.619   
-[3,] k         0.017   
-[4,] a         1.009   
+[1,] ka        0.93    
+[2,] V         7.16    
+[3,] k         0.25    
+[4,] a         0.13    
+[5,] b         0.12    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.776   
-V  omega2.V  0.039   
-k  omega2.k  0.050   
+ka omega2.ka 0.427   
+V  omega2.V  0.056   
+k  omega2.k  0.020   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
@@ -99,7 +100,7 @@ omega2.k  0         0        1
 ----------------------------------------------------
 
 Likelihood computed by importance sampling
-      -2LL= 917.8804 
-      AIC = 931.8804 
-      BIC = 941.9183 
+      -2LL= 734.4355 
+      AIC = 750.4355 
+      BIC = 769.4917 
 ----------------------------------------------------
