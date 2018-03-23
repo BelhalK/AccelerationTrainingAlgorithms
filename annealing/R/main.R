@@ -178,7 +178,8 @@
   cat("Running main SAEM algorithm\n")
   print(date())
 
-  T0 <- 2
+
+  T0 <- 0.5
   iter <- 1:saemix.options$nbiter.tot
   coeff <- saemix.options$coeff
   # T <- c(seq(1,1,length=0),
@@ -186,6 +187,9 @@
   #        seq(T0,1,length=50),
   #        seq(1,1,length=1000))
   T <- (T0*exp(-coeff*iter)+1)
+  # T1 <- (T0*exp(-coeff*iter)+1)
+  # T2 <- (T0*exp(-coeff*iter)+1)
+  # T3 <- (T0*exp(-coeff*iter)+1)
 
 
   for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
@@ -244,9 +248,21 @@
 
       if (saemix.options$an){
         if(Dargs$type=="structural") {
-          varList$pres <- varList$pres*sqrt(T[kiter])
-          # varList$omega <- varList$omega*T[kiter]
-          varList$omega <- pmin(varList$omega*T[kiter],2)
+          varList$omega <- varList$omega*T[kiter]
+          # varList$omega <- pmin(varList$omega*T[kiter],2)
+
+          # varList$omega <-T[kiter]/((1+T[kiter])/2)*varList$omega
+
+
+          # T1[kiter] <- min(max(theta[4]/varList$omega[1,1],1),T1[kiter])
+          # T2[kiter] <- min(max(theta[5]/varList$omega[2,2],1),T2[kiter])
+          # T3[kiter] <- min(max(theta[6]/varList$omega[3,3],1),T3[kiter])
+          # varList$omega[1,1] <- varList$omega[1,1]*T1[kiter]
+          # varList$omega[2,2] <- varList$omega[2,2]*T2[kiter]
+          # varList$omega[3,3] <- varList$omega[3,3]*T3[kiter]
+          
+          # varList$pres <- varList$pres*sqrt(T[kiter])
+          
         } else{
           var.eta[Uargs$i1.omega2] <- var.eta[Uargs$i1.omega2]*T[kiter]
         }
@@ -258,6 +274,7 @@
 
     
     if(Dargs$type=="structural") {
+      var.eta<-mydiag(varList$omega)
       theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
     } else{
       theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])

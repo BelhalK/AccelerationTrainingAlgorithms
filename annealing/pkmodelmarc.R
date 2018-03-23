@@ -66,36 +66,39 @@ options.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chai
 pk.sa<-data.frame(saemix(saemix.model,saemix.data,options.sa))
 pk.sa <- cbind(iterations, pk.sa[-1,])
 
-plot2(pk,pk.sa)
 
-optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=2)
+optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=0.05)
 pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
 pknew <- cbind(iterations, pknew[-1,])
 
 
 plot3(pk,pk.sa,pknew)
 
-optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=2.5)
-pknew2<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
-pknew2 <- cbind(iterations, pknew2[-1,])
+# optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=2.5)
+# pknew2<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
+# pknew2 <- cbind(iterations, pknew2[-1,])
 
-optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=1.5)
-pknew3<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
-pknew3 <- cbind(iterations, pknew3[-1,])
+# optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=1.5)
+# pknew3<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
+# pknew3 <- cbind(iterations, pknew3[-1,])
 plot5(pk,pk.sa,pknew,pknew2,pknew3)
 
 
-replicate = 3
+replicate = 5
 
 final.ref <- 0
 final.sa <- 0
 final.an <- 0
+# l = list(c(1,10,1,0,0,0),c(2,5,2,0,0,0),c(3,12,3,0,0,0))
+ka <- runif(replicate, min=0.2, max=2)
+V <- runif(replicate, min=1, max=10)
+k <- runif(replicate, min=0.2, max=2)
 for (m in 1:replicate){
   print(m)
-  l = list(c(1,10,1,0,0,0),c(2,5,2,0,0,0),c(3,12,3,0,0,0))
+  l <- c(ka[m], V[m], k[m])
   
   saemix.model<-saemixModel(model=model1cpt,description="pk",type="structural"
-  ,psi0=matrix(l[[m]],ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(l,ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE), error.model="combined")
@@ -113,7 +116,7 @@ for (m in 1:replicate){
   pk.sa['individual'] <- m
   final.sa <- rbind(final.sa,pk.sa)
 
-  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=2)
+  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=0.05)
   pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
   pknew <- cbind(iterations, pknew[-1,])
   pknew['individual'] <- m
@@ -121,4 +124,11 @@ for (m in 1:replicate){
 
 }
 
+
 diff(final.ref,final.sa,final.an)
+diff(pk,pk.sa,pknew)
+diff(final.ref[final.ref$individual==1,],final.sa[final.sa$individual==1,],final.an[final.an$individual==1,])
+diff(final.ref[final.ref$individual==2,],final.sa[final.sa$individual==2,],final.an[final.an$individual==2,])
+diff(final.ref[final.ref$individual==3,],final.sa[final.sa$individual==3,],final.an[final.an$individual==3,])
+
+

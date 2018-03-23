@@ -95,6 +95,8 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	if (Dargs$error.model=="combined") {
 		# ECO TODO: check and secure (when fpred<0 => NaN, & what happens if bres<0 ???)
 		ABres<-optim(par=varList$pres,fn=ssq,y=Dargs$yM,f=fpred)$par
+		
+		# if (kiter<=opt$nbiter.sa) {
 		if (kiter<=opt$nbiter.saemix[1]) {
 			varList$pres[1]<-max(varList$pres[1]*opt$alpha1.sa,ABres[1])
 			varList$pres[2]<-max(varList$pres[2]*opt$alpha1.sa,ABres[2])

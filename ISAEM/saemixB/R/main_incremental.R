@@ -178,6 +178,8 @@ if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
 
+
+
 nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
 if (saemix.options$sampling=='seq'){
   l <- c(replicate(saemix.options$nbiter.tot,1:Dargs$NM))
@@ -187,6 +189,8 @@ if (saemix.options$sampling=='seq'){
   l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$NM,Dargs$NM,replace=TRUE)))
 }
 ind_rand<-1:nb_replacement
+
+
 
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 

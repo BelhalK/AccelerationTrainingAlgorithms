@@ -116,7 +116,7 @@ delta0  ={distribution=normal, prediction=delta0_pop,  sd=o_delta0}
 ")
 
 
-nobs = 10
+nobs = 20
 tobs<- seq(-20, 50, by=nobs)
 
 reg1 <- list(name='dose',
@@ -170,7 +170,7 @@ D <- exp(lm0)+1
 P0 <- exp(lm0)/D
 P1 <- 1/D
 
-P.obs = (level==0)*P0+(level==1)*P1
+P.obs = log((level==0)*P0+(level==1)*P1)
 
 return(P.obs)
 }
@@ -245,3 +245,4 @@ theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 theo_mix85_scaled$iterations = theo_mix85_scaled$iterations*0.85
 
 graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix85_scaled,theo_mix85_scaled)
+

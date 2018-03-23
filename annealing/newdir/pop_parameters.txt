@@ -53,8 +53,8 @@ k   0 0 1
   Error model: combined , initial values: a=1 b=1 
     No covariate in the model.
     Initial values
-             ka  V k
-Pop.CondInit  3 12 3
+                   ka        V       k
+Pop.CondInit 1.102741 6.875536 1.89034
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -76,18 +76,18 @@ Pop.CondInit  3 12 3
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        0.93    
-[2,] V         7.16    
-[3,] k         0.25    
-[4,] a         0.13    
-[5,] b         0.12    
+[1,] ka         3.6e-08
+[2,] V          1.7e+07
+[3,] k          4.5e+06
+[4,] a         -1.8e-01
+[5,] b          1.0e+20
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.427   
-V  omega2.V  0.056   
-k  omega2.k  0.020   
+ka omega2.ka 5.9e-12 
+V  omega2.V  1.5e-10 
+k  omega2.k  1.6e-07 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
@@ -100,7 +100,7 @@ omega2.k  0         0        1
 ----------------------------------------------------
 
 Likelihood computed by importance sampling
-      -2LL= 734.4355 
-      AIC = 750.4355 
-      BIC = 769.4917 
+      -2LL= 3246.584 
+      AIC = 3262.584 
+      BIC = 3281.64 
 ----------------------------------------------------
