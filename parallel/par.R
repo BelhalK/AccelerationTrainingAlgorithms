@@ -29,6 +29,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/parallel/R")
   source('zzz.R') 
   
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/parallel")
+source('plots.R') 
 warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/parallel/data/warfarin_data.txt", header=T)
 saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
@@ -113,8 +114,9 @@ options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0,0
 rttenew<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew))
 rttenew <- cbind(iterations,rttenew)
 
-options_rttenew2<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0,0,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5))
+options_rttenew2<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(0,0,0,0,2,2,2), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5))
 rttenew2<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew2))
 rttenew2 <- cbind(iterations,rttenew2)
 
-
+graphConvMC_twokernels(rtte,rttenew)
+graphConvMC_twokernels(rtte,rttenew2)

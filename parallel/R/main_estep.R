@@ -107,7 +107,7 @@ if (!(kiter %in% map_range)){
 				
 				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
 				for (i in 1:(Dargs$NM)){
-					Mi <- rnorm(1)*var(etaM[-i,vk2])
+					Mi <- rnorm(1)*sd(etaM[-i,vk2])
 					etaMc[i,vk2]<-etaM[i,vk2]+Mi
 				}
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
@@ -190,7 +190,7 @@ if (!(kiter %in% map_range)){
 				
 				
 				for (i in 1:(Dargs$NM)){
-					Mi <- matrix(rnorm(nrs2), ncol=nrs2)%*%var(etaM[-i,vk2])
+					Mi <- matrix(rnorm(nrs2), ncol=nrs2)%*%chol(var(etaM[-i,vk2]))
 					etaMc[i,vk2]<-etaM[i,vk2]+Mi
 				}
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
