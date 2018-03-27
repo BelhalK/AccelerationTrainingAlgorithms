@@ -74,13 +74,13 @@ pknew <- cbind(iterations, pknew[-1,])
 
 plot3(pk,pk.sa,pknew)
 
-# optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=2.5)
-# pknew2<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
-# pknew2 <- cbind(iterations, pknew2[-1,])
+optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=2.5)
+pknew2<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
+pknew2 <- cbind(iterations, pknew2[-1,])
 
-# optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=1.5)
-# pknew3<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
-# pknew3 <- cbind(iterations, pknew3[-1,])
+optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, an=TRUE,coeff=1.5)
+pknew3<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
+pknew3 <- cbind(iterations, pknew3[-1,])
 plot5(pk,pk.sa,pknew,pknew2,pknew3)
 
 
