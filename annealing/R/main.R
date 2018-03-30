@@ -182,10 +182,10 @@
   T0 <- 0.5
   iter <- 1:saemix.options$nbiter.tot
   coeff <- saemix.options$coeff
-  T <- c(seq(1,1,length=0),
-         seq(1,T0,length=100),
-         seq(T0,1,length=50),
-         seq(1,1,length=1000))
+  # T <- c(seq(1,1,length=0),
+  #        seq(1,T0,length=100),
+  #        seq(T0,1,length=50),
+  #        seq(1,1,length=1000))
   T <- (T0*exp(-coeff*iter)+1)
   # T1 <- (T0*exp(-coeff*iter)+1)
   # T2 <- (T0*exp(-coeff*iter)+1)
