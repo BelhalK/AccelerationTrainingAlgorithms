@@ -43,48 +43,62 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	phi.map<-saemixObject["results"]["mean.phi"]
 
 	
-	# 	#MAP calculation
-	#  for(i in 1:saemixObject["data"]["N"]) {
-	#     isuj<-id.list[i]
-	#     xi<-xind[id==isuj,,drop=FALSE]
-	#     yi<-yobs[id==isuj]
-	#     idi<-rep(1,length(yi))
-	#     mean.phi1<-mean.phiM[i,i1.omega2]
-	#     phii<-saemixObject["results"]["phi"][i,]
-	#     phi1<-phii[i1.omega2]
-	#     phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
-	#     phi.map[i,i1.omega2]<-phi1.opti$par
-	# }
-	# #rep the map nchains time
-	# phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
+		#MAP calculation
 
- #  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-	# map.psi<-data.frame(id=id.list,map.psi)
-	# map.phi<-data.frame(id=id.list,phi.map)
-	# psi_map <- as.matrix(map.psi[,-c(1)])
+  	if (kiter < 50){
+	 for(i in 1:saemixObject["data"]["N"]) {
+	    isuj<-id.list[i]
+	    xi<-xind[id==isuj,,drop=FALSE]
+	    yi<-yobs[id==isuj]
+	    idi<-rep(1,length(yi))
+	    mean.phi1<-mean.phiM[i,i1.omega2]
+	    phii<-saemixObject["results"]["phi"][i,]
+	    phi1<-phii[i1.omega2]
+	    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
+	    phi.map[i,i1.omega2]<-phi1.opti$par
+	}
+	#rep the map nchains time
+	phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
+
+  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+	map.psi<-data.frame(id=id.list,map.psi)
+	map.phi<-data.frame(id=id.list,phi.map)
+	psi_map <- as.matrix(map.psi[,-c(1)])
 	
 	
 	
-	# # print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
-	# # print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
-	# # colMeans(psi_map[block,])
-	# # colMeans(psi_map[l[ind_rand],])
-	# # colMeans(psi_map)
+	# print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
+	# print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
+	# colMeans(psi_map[block,])
+	# colMeans(psi_map[l[ind_rand],])
+	# colMeans(psi_map)
 
-	# mean <- psi_map
-	# for (m in 1:Dargs$NM){
-	# mean[m,] <- colMeans(psi_map)	
-	# }
+	mean <- psi_map
+	for (m in 1:Dargs$NM){
+	mean[m,] <- colMeans(psi_map)	
+	}
 	
 
-	# dist <- data.frame(psi_map - mean)
-	# dist$indiv <- 1:Dargs$NM
-	# dist <- dist[order(dist[,2]),]
-	# block <- dist[1:10,4]	
+	dist <- data.frame(psi_map - mean)
+	dist$indiv <- 1:Dargs$NM
+	dist <- dist[order(dist[,2],decreasing=FALSE),]
+	block <- dist[-(1:8),4]	
+	if ((kiter %% 2) == 0){
+		dist <- dist[order(dist[,2],decreasing=TRUE),]
+	block <- dist[-(1:8),4]
+	}
 
-
-
+	if ((kiter %% 3) == 0){
+		dist <- dist[order(dist[,2],decreasing=FALSE),]
+		block <- dist[-(12:20),4]
+	}
+	print(block)
+} else {
 	block <- setdiff(1:Dargs$NM, l[ind_rand])
+}
+
+
+	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 	if (!(kiter %in% map_range)){

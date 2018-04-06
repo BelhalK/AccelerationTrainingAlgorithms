@@ -58,7 +58,7 @@ model1cpt<-function(psi,id,xidep) {
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,4,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  ,psi0=matrix(c(1,3,0.01,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),fixed.estim=c(0,1,0),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
@@ -135,4 +135,4 @@ theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 theo_mix85_scaled$iterations = theo_mix85_scaled$iterations*0.85
 
-graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix85_scaled,theo_mix85_scaled)
+graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix75_scaled,theo_mix85_scaled)
