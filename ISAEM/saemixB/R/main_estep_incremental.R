@@ -67,11 +67,11 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 	
 	
-	# print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
-	# print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
-	# colMeans(psi_map[block,])
-	# colMeans(psi_map[l[ind_rand],])
-	# colMeans(psi_map)
+	print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
+	print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
+	colMeans(psi_map[block,])
+	colMeans(psi_map[l[ind_rand],])
+	colMeans(psi_map)
 
 	mean <- psi_map
 	for (m in 1:Dargs$NM){
@@ -82,15 +82,15 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	dist <- data.frame(psi_map - mean)
 	dist$indiv <- 1:Dargs$NM
 	dist <- dist[order(dist[,2],decreasing=FALSE),]
-	block <- dist[-(1:8),4]	
+	block <- setdiff(1:Dargs$NM, dist[1:8,4])
 	if ((kiter %% 2) == 0){
 		dist <- dist[order(dist[,2],decreasing=TRUE),]
-	block <- dist[-(1:8),4]
+		block <- setdiff(1:Dargs$NM, dist[1:8,4])
 	}
 
 	if ((kiter %% 3) == 0){
 		dist <- dist[order(dist[,2],decreasing=FALSE),]
-		block <- dist[-(12:20),4]
+		block <- setdiff(1:Dargs$NM, dist[12:20,4])
 	}
 	print(block)
 } else {
@@ -98,7 +98,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 }
 
 
-	
+	block <- setdiff(1:Dargs$NM, l[ind_rand])	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 	if (!(kiter %in% map_range)){
