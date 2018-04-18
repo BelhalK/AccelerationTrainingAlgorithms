@@ -105,7 +105,6 @@ theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incre
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
 
-
 options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
