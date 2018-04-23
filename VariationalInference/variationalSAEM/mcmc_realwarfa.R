@@ -7,11 +7,9 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
-load("realwarfa_mcmc_conv.RData")
-# load("realwarfa_mcmc_conv_var.RData")
 # save.image("realwarfa_mcmc_conv_varwithnew.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Desktop/ongoing_research/CSDA/csda_new/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -31,11 +29,11 @@ setwd("/Users/karimimohammedbelhal/Desktop/ongoing_research/CSDA/csda_new/R")
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Desktop/ongoing_research/CSDA/csda_new")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
 source('graphplot.R')
 
 
-warfa_data <- read.table("/Users/karimimohammedbelhal/Desktop/ongoing_research/CSDA/csda_new/data/warfarin_data.txt", header=T)
+warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/data/warfarin_data.txt", header=T)
 saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
@@ -102,8 +100,8 @@ ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
-options_warfanew2<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,2,2,2),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-new2<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew2)$eta
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,0,0,0,2),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[10]])
