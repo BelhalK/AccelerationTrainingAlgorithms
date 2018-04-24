@@ -94,7 +94,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 L_mcmc=10000
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
@@ -109,6 +109,9 @@ autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
 
 new.obj <- as.mcmc(new[[10]])
 autocorr.plot(new.obj[,1]) + title("Laplace SAEM Autocorrelation")
+
+vi.obj <- as.mcmc(vi[[10]])
+autocorr.plot(vi.obj[,1]) + title("VI SAEM Autocorrelation")
 
 new2.obj <- as.mcmc(new2[[10]])
 autocorr.plot(new2.obj[,1]) + title("new2 Autocorrelation")
@@ -161,8 +164,62 @@ plotmcmc(expecref[,c(4,1:3)],expecnew[,c(4,1:3)],title="mean")
 plotmcmc(sdref[-c(1:10),c(4,1:3)],sdnew[-c(1:10),c(4,1:3)],title="sd")
 
 
+etabarvi <- 1/n*Reduce("+",vi)
+expecvi <- data.frame(apply(etabarvi[-(1:start_interval),], 2, cummean))
+expecvi$iteration <- 1:(L_mcmc-start_interval)
 
+
+sdvi <- 0
+for (i in 1:n){
+  var <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
+  meansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
+  sdvi <- sdvi + sqrt(pmax(zero,var - meansq))
+}
+
+sdvi <- 1/n*sdvi
+sdvi$iteration <- 1:(L_mcmc-start_interval)
+
+plotmcmc(expecref[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
+plotmcmc(expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
+plotconv3(expecref[,c(4,1:3)],expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 #one invdiv
+
+indetabarref <- ref[[i]]
+indexpecref <- data.frame(apply(indetabarref[-(1:start_interval),], 2, cummean))
+indexpecref$iteration <- 1:(L_mcmc-start_interval)
+
+
+indsdref <- 0
+indvar <- data.frame(apply(ref[[i]][-(1:start_interval),]^2, 2, cummean))
+indmeansq <- data.frame(apply(ref[[i]][-(1:start_interval),], 2, cummean))^2
+indsdref <- indsdref + sqrt(pmax(zero,indvar - indmeansq))
+indsdref$iteration <- 1:(L_mcmc-start_interval)
+
+
+indetabarnew <- new[[i]]
+indexpecnew <- data.frame(apply(indetabarnew[-(1:start_interval),], 2, cummean))
+indexpecnew$iteration <- 1:(L_mcmc-start_interval)
+
+
+indsdnew <- 0
+indvar <- data.frame(apply(new[[i]][-(1:start_interval),]^2, 2, cummean))
+indmeansq <- data.frame(apply(new[[i]][-(1:start_interval),], 2, cummean))^2
+indsdnew <- indsdnew + sqrt(pmax(zero,indvar - indmeansq))
+indsdnew$iteration <- 1:(L_mcmc-start_interval)
+
+indetabarvi <- vi[[i]]
+indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
+indexpecvi$iteration <- 1:(L_mcmc-start_interval)
+
+
+indsdvi <- 0
+indvar <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
+indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
+indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
+indsdvi$iteration <- 1:(L_mcmc-start_interval)
+
+plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
+plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvi[,c(4,1:3)],title="mean")
 
 
 start_interval <- 200
