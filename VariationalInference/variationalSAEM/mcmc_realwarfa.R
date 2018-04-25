@@ -183,7 +183,7 @@ plotmcmc(expecref[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 plotmcmc(expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 plotconv3(expecref[,c(4,1:3)],expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 #one invdiv
-
+i = 10
 indetabarref <- ref[[i]]
 indexpecref <- data.frame(apply(indetabarref[-(1:start_interval),], 2, cummean))
 indexpecref$iteration <- 1:(L_mcmc-start_interval)
