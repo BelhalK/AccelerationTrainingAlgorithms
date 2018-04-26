@@ -687,7 +687,6 @@ for (m in 1:saemix.options$L_mcmc) {
 				logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
 				#Log proposal computation
 				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
-				#gradlogq computation
 				
 				
 				for (i in 1:Dargs$NM) {
@@ -699,9 +698,6 @@ for (m in 1:saemix.options$L_mcmc) {
 				grad_cov_elbo[[i]] <- 1/L*Reduce("+", estimcov[[i]])
 				outputGamma[[i]][[k+1]] <- outputGamma[[i]][[k]] + rho*grad_cov_elbo[[i]]
 			}
-			#Gradient ascent along that gradient
-			
-
 
 		}
 
