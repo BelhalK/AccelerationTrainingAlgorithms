@@ -643,10 +643,8 @@ for (m in 1:saemix.options$L_mcmc) {
 			grad_mu_elbo <- 1/L*Reduce("+", estim) 
 			#Gradient ascent along that gradient
 			mu[[k+1]] <- mu[[k]] + rho*grad_mu_elbo
-
-
-			# #Update the proposal covariance
-
+			
+			#Update the proposal covariance
 			sample <- list(etaM,etaM)  #list of samples for monte carlo integration
 			sample1 <- list(etaM,etaM)  #list of samples for gradient computation
 			gradlogq <- list(omega.eta,omega.eta)
@@ -701,10 +699,9 @@ for (m in 1:saemix.options$L_mcmc) {
 
 		}
 
-		
-
 		mu.vi <- mu[[K]]
 		Gamma_.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
+
 		for (i in 1:(Dargs$NM)){
 			Gamma_.vi[[i]] <- outputGamma[[i]][[K]]
 			chol.Gamma.vi[[i]] <- chol(Gamma_.vi[[i]])
