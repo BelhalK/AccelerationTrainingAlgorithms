@@ -708,12 +708,14 @@ for (m in 1:saemix.options$L_mcmc) {
 			inv.Gamma.vi[[i]] <- solve(Gamma_.vi[[i]])
 		}
 
+
 		for (u in 1:opt$nbiter.mcmc[9]) {
 			for (i in 1:(Dargs$NM)){
 			Mi <- rnorm(nb.etas)%*%chol.Gamma.vi[[i]]
 			etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + Mi
 			# etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma.vi[[i]]
 		}
+
 
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
 		if(Dargs$type=="structural"){
