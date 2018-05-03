@@ -30,7 +30,7 @@ mcmc<-function(model,data,control=list()) {
  	betas<-betas.ini<-xinit$betas
   	fixed.psi<-xinit$fixedpsi.ini
   	var.eta<-varList$diag.omega
-  	structural.model<-saemix.model["model"]
+  	# structural.model<-saemix.model["model"]
 
 	# Function to perform MCMC simulation
 	nb.etas<-length(varList$ind.eta)
