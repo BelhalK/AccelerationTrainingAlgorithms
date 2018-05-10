@@ -18,6 +18,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/va
   source('func_plots.R') 
   source('func_simulations.R') 
   source('estep_mcmc.R')
+  source('variationalinference.R')
   source('main.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R') 
@@ -64,18 +65,18 @@ K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-#Warfarin
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-warfa<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfa))
-warfa <- cbind(iterations, warfa)
+# #Warfarin
+# options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+# warfa<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfa))
+# warfa <- cbind(iterations, warfa)
 
 
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(K1))
-warfanew<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfanew))
-warfanew <- cbind(iterations, warfanew)
+# options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(K1))
+# warfanew<-data.frame(saemix(saemix.model_warfa,saemix.data_warfa,options_warfanew))
+# warfanew <- cbind(iterations, warfanew)
 
 
-graphConvMC_twokernels(warfa,warfanew)
+# graphConvMC_twokernels(warfa,warfanew)
 
 
 #compareMCMC
@@ -86,12 +87,6 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
-# saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-#   ,psi0=matrix(c(0.5,7,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-#   byrow=TRUE))
-
 
 L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
@@ -100,8 +95,19 @@ ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,0,0,0,2),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+K=400
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
+
+
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
+        Gamma = variational.post$Gamma,
+        nbiter.mcmc = c(0,0,0,0,0,0,0,0,2),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+
+
+
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[10]])

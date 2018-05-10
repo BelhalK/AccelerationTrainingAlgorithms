@@ -593,119 +593,14 @@ for (m in 1:saemix.options$L_mcmc) {
 		nrs2<-1
 
 		#Initialization
-		
-		mu <- list(etaM,etaM)
-		Gamma <- list(omega.eta,omega.eta)
-
-		# Gamma <- omega.eta
-		# sGamma <- somega
-		K <- 2 #nb iterations gradient ascent
-		L <- 2 #nb iterations MONTE CARLO
-		rho <- 0.00000000001 #gradient ascent stepsize
-		#VI to find the right mean mu (gradient descent along the elbo)
-
-		outputGamma <- list(omega.eta,omega.eta)
-		for (i in 1:Dargs$NM) {
-				outputGamma[[i]] <- list(omega.eta,omega.eta)
-			}
-		for (k in 1:K) {
-			sample <- list(etaM,etaM)  #list of samples for monte carlo integration
-			sample1 <- list(etaM,etaM)  #list of samples for gradient computation
-			estim <- list(etaM,etaM)
-			gradlogq <- etaM
-			sGamma <- Gamma[[k]]
-			for (l in 1:L) {
-				sample[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[k]])
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+sample[[l]]
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-				#Log complete computation
-				logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
-				#Log proposal computation
-				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
-				#gradlogq computation
-				for (j in 1:nb.etas) {
-					sample1[[l]] <- sample[[l]]
-					sample1[[l]][,j] <- sample[[l]][,j] + 0.01
-					gradlogq[,j] <- (0.5*rowSums(sample1[[l]]*(sample1[[l]]%*%sGamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))) / 0.01
-				}
-				estim[[l]] <- sample[[l]]
-				for (i in 1:Dargs$NM) {
-					estim[[l]][i,] <- (logp[i] - logq[i])*gradlogq[i,]
-				}
-
-			}
-
-			grad_mu_elbo <- 1/L*Reduce("+", estim) 
-			#Gradient ascent along that gradient
-			mu[[k+1]] <- mu[[k]] + rho*grad_mu_elbo
-			
-			#Update the proposal covariance
-			sample <- list(etaM,etaM)  #list of samples for monte carlo integration
-			sample1 <- list(etaM,etaM)  #list of samples for gradient computation
-			gradlogq <- list(omega.eta,omega.eta)
-			for (i in 1:Dargs$NM) {
-				gradlogq[[i]] <- omega.eta
-			}
-			estimcov <- gradlogq
-
-			for (i in 1:Dargs$NM) {
-				estimcov[[i]] <- list(omega.eta,omega.eta)
-			}
-
-			for (l in 1:L) {
-				sample[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[k]])
-				for (r in 1:nb.etas) {
-					Gamma1 <- Gamma[[k]]
-					for (j in 1:nb.etas) {
-						Gamma1[r,] <- Gamma[[k]][r,]
-						Gamma1[r,j] <- Gamma1[r,j] + 0.01
-						sGamma1 <- solve(Gamma1)
-						sample1[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma1)
-						
-						temp <- (0.5*rowSums(sample1[[l]]*(sample1[[l]]%*%sGamma1)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma1))) / 0.01
-						for (i in 1:Dargs$NM) {
-							gradlogq[[i]][r,j] <- temp[i]
-						}
-					}
-				}
-
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+sample[[l]]
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-				#Log complete computation
-				logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
-				#Log proposal computation
-				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%sGamma))
-				
-				
-				for (i in 1:Dargs$NM) {
-					estimcov[[i]][[l]] <- (logp[i] - logq[i])*gradlogq[[i]]
-				}
-			}
-			grad_cov_elbo <- gradlogq
-			for (i in 1:Dargs$NM) {
-				grad_cov_elbo[[i]] <- 1/L*Reduce("+", estimcov[[i]])
-				outputGamma[[i]][[k+1]] <- outputGamma[[i]][[k]] + rho*grad_cov_elbo[[i]]
-			}
-
-		}
-
-		mu.vi <- mu[[K]]
-		Gamma_.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
+		mu.vi <- control$mu
+		Gamma <- control$Gamma
+		Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
 
 		for (i in 1:(Dargs$NM)){
-			Gamma_.vi[[i]] <- outputGamma[[i]][[K]]
-			chol.Gamma.vi[[i]] <- chol(Gamma_.vi[[i]])
-			inv.Gamma.vi[[i]] <- solve(Gamma_.vi[[i]])
+			Gamma.vi[[i]] <- Gamma[[i]]
+			chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
+			inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
 		}
 
 
@@ -730,7 +625,6 @@ for (m in 1:saemix.options$L_mcmc) {
 			prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
 
 		}
-		
 		
 		deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 		ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
