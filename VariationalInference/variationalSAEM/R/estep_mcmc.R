@@ -5,7 +5,7 @@ mcmc<-function(model,data,control=list()) {
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
   kiter <- 1
-
+  Gamma.laplace <- NULL
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
   saemix.options<-saemixObject["options"]
   saemix.model<-saemixObject["model"]
@@ -248,6 +248,7 @@ if(opt$nbiter.mcmc[4]>0) {
 			inv.chol.Gamma[[i]] <- solve(chol.Gamma[[i]])
 			inv.Gamma[[i]] <- solve(Gamma[[i]])
 		}
+		Gamma.laplace <- Gamma
 		
   	} else {
   		for(i in 1:saemixObject["data"]["N"]) {
@@ -580,61 +581,60 @@ if(opt$nbiter.mcmc[6]>0) {
 
 #VI with linear model
 if(opt$nbiter.mcmc[9]>0) {
-for (m in 1:saemix.options$L_mcmc) {
-	if(m%%100==0){
-			print(m)
-	} 
-	for (i in 1:(nrow(phiM))) {
-		eta_list[[i]][m,] <- etaM[i,]
+	#Initialization
+	mu.vi <- control$mu
+	Gamma <- control$Gamma
+	Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
+
+	for (i in 1:(Dargs$NM)){
+		Gamma.vi[[i]] <- Gamma[[i]]
+		chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
+		inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
 	}
-		propc <- U.eta
-		prop <- U.eta
-		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-		nrs2<-1
 
-		#Initialization
-		mu.vi <- control$mu
-		Gamma <- control$Gamma
-		Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
-
-		for (i in 1:(Dargs$NM)){
-			Gamma.vi[[i]] <- Gamma[[i]]
-			chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
-			inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
+	for (m in 1:saemix.options$L_mcmc) {
+		if(m%%100==0){
+				print(m)
+		} 
+		for (i in 1:(nrow(phiM))) {
+			eta_list[[i]][m,] <- etaM[i,]
 		}
+			propc <- U.eta
+			prop <- U.eta
+			nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+			nrs2<-1
 
-		for (u in 1:opt$nbiter.mcmc[9]) {
-			for (i in 1:(Dargs$NM)){
-				Mi <- rnorm(nb.etas)%*%chol.Gamma.vi[[i]]
-				etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + Mi
-				# etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma.vi[[i]]
-			}
+			for (u in 1:opt$nbiter.mcmc[9]) {
+				for (i in 1:(Dargs$NM)){
+					Mi <- rnorm(nb.etas)%*%chol.Gamma.vi[[i]]
+					etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + Mi
+				}
 
-			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
-			if(Dargs$type=="structural"){
-				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-			} else{
-				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-			}
-			Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
+				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
+				if(Dargs$type=="structural"){
+					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+				} else{
+					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+				}
+				Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
 
-			for (i in 1:(Dargs$NM)){
-				propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
-				prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
+				for (i in 1:(Dargs$NM)){
+					propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
+					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
+				}
+		
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				# print(length(ind)/Dargs$NM)
+				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
+				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+				U.eta[ind]<-Uc.eta[ind]
 			}
-	
-			deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
-			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			# print(length(ind)/Dargs$NM)
-			etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
-			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-			U.eta[ind]<-Uc.eta[ind]
-		}
 
 	}
 
 }
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-	return(list(eta=eta_list, eta_ref=eta_listref))
+	return(list(eta=eta_list, eta_ref=eta_listref, Gamma=Gamma.laplace))
 }
