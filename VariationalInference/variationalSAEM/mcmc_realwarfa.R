@@ -88,15 +88,18 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=3000
+L_mcmc=1000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
-K=50
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+Gamma<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$Gamma
+
+K=200
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
 variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
 
 
@@ -105,7 +108,6 @@ options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variation
         nbiter.mcmc = c(0,0,0,0,0,0,0,0,2),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
-
 
 
 
@@ -186,7 +188,6 @@ sdvi <- 1/n*sdvi
 sdvi$iteration <- 1:(L_mcmc-start_interval)
 
 plotmcmc(expecref[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
-plotmcmc(expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 plotconv3(expecref[,c(4,1:3)],expecnew[,c(4,1:3)],expecvi[,c(4,1:3)],title="mean")
 #one invdiv
 i = 10

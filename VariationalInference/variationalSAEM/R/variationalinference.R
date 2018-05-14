@@ -4,58 +4,57 @@ variational.inference<-function(model,data,control=list()) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
-  kiter <- 1
-
-  saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
-  saemix.options<-saemixObject["options"]
-  saemix.model<-saemixObject["model"]
-  saemix.data<-saemixObject["data"]
-  saemix.data@ocov<-saemix.data@ocov[saemix.data@data[,"mdv"]==0,,drop=FALSE]
-  saemix.data@data<-saemix.data@data[saemix.data@data[,"mdv"]==0,]
-  saemix.data@ntot.obs<-dim(saemix.data@data)[1]
+kiter <- 1
+saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
+saemix.options<-saemixObject["options"]
+saemix.model<-saemixObject["model"]
+saemix.data<-saemixObject["data"]
+saemix.data@ocov<-saemix.data@ocov[saemix.data@data[,"mdv"]==0,,drop=FALSE]
+saemix.data@data<-saemix.data@data[saemix.data@data[,"mdv"]==0,]
+saemix.data@ntot.obs<-dim(saemix.data@data)[1]
 # Initialising random generator
-  OLDRAND<-TRUE
-  set.seed(saemix.options$seed)
-	#intitialisation
-	# xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
-  xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
-	saemix.model<-xinit$saemix.model
-  	Dargs<-xinit$Dargs
-  	Uargs<-xinit$Uargs
-  	varList<-xinit$varList
-  	phiM<-xinit$phiM
-  	mean.phi<-xinit$mean.phi
-  	DYF<-xinit$DYF
-  	opt<-xinit$opt
- 	betas<-betas.ini<-xinit$betas
-  	fixed.psi<-xinit$fixedpsi.ini
-  	var.eta<-varList$diag.omega
-  	structural.model<-saemix.model["model"]
+OLDRAND<-TRUE
+set.seed(saemix.options$seed)
+#intitialisation
+# xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
+saemix.model<-xinit$saemix.model
+Dargs<-xinit$Dargs
+Uargs<-xinit$Uargs
+varList<-xinit$varList
+phiM<-xinit$phiM
+mean.phi<-xinit$mean.phi
+DYF<-xinit$DYF
+opt<-xinit$opt
+betas<-betas.ini<-xinit$betas
+fixed.psi<-xinit$fixedpsi.ini
+var.eta<-varList$diag.omega
+structural.model<-saemix.model["model"]
 
-	# Function to perform MCMC simulation
-	nb.etas<-length(varList$ind.eta)
-	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
-	omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]
-	omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
-	chol.omega<-try(chol(omega.eta))
-	somega<-solve(omega.eta)
-	
-	# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
-	
-	VK<-rep(c(1:nb.etas),2)
-	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
-	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
-	saemix.options<-saemixObject["options"]
-	map_range <- saemix.options$map.range
+# Function to perform MCMC simulation
+nb.etas<-length(varList$ind.eta)
+domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
+omega.eta<-varList$omega[varList$ind.eta,varList$ind.eta,drop=FALSE]
+omega.eta<-omega.eta-mydiag(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]))+mydiag(domega)
+chol.omega<-try(chol(omega.eta))
+somega<-solve(omega.eta)
 
-	if(Dargs$type=="structural"){
-		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
-	} else{
-		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
-	}
-	
-	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-	phiMc<-phiM
+# "/" dans Matlab = division matricielle, selon la doc "roughly" B*INV(A) (et *= produit matriciel...)
+
+VK<-rep(c(1:nb.etas),2)
+mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
+phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
+saemix.options<-saemixObject["options"]
+map_range <- saemix.options$map.range
+
+if(Dargs$type=="structural"){
+	U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
+} else{
+	U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
+}
+
+etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
+phiMc<-phiM
 
 U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 
@@ -67,7 +66,7 @@ nrs2<-1
 
 #Initialization
 
-L <- 10 #nb iterations MONTE CARLO
+L <- 20 #nb iterations MONTE CARLO
 rho <- 0.00000000001 #gradient ascent stepsize
 #VI to find the right mean mu (gradient descent along the elbo)
 
@@ -78,11 +77,21 @@ for (i in 1:Dargs$NM) {
 }
 K <- control$nbiter.gd
 
+
+#if Gamma fixed to Laplace Gamma
+trueGamma <- control$Gamma.laplace
+
+
 for (k in 1:K) {
+	if (k%%10==0) print(k)
 	sample <- list(etaM,etaM)  #list of samples for monte carlo integration
 	sample1 <- list(etaM,etaM)  #list of samples for gradient computation
 	estim <- list(etaM,etaM)
 	gradlogq <- etaM
+
+	#if Gamma fixed to Laplace Gamma
+	outputGamma[[i]][[k]] <- trueGamma[[i]]
+
 	for (i in 1:Dargs$NM) {
 		sGamma <- outputGamma[[i]][[k]]
 		for (l in 1:L) {
