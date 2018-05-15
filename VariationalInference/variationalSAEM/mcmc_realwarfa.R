@@ -88,7 +88,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=5000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -98,14 +98,14 @@ new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 Gamma<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$Gamma
 
-K=200
+K=100
 variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
 variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
-
+variational.post$mu
 
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
         Gamma = variational.post$Gamma,
-        nbiter.mcmc = c(0,0,0,0,0,0,0,0,2),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.mcmc = c(0,0,0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
