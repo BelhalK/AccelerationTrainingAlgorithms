@@ -81,6 +81,7 @@ options.new<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc =
 theo_new<-data.frame(saemix_incremental(saemix.model,saemix.data,options.new))
 theo_new <- cbind(iterations, theo_new[-1,])
 
+
 graphConvMC_twokernels(theo_ref,theo_new)
 
 options.newincr<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
