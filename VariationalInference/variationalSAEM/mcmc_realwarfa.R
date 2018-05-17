@@ -42,7 +42,7 @@ saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, na
 n <- length(unique(warfa_data$id))
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  tim<-xidep[,2]  
+  tim<-xidep[,2]
   ka<-psi[id,1]
   V<-psi[id,2]
   k<-psi[id,3]
