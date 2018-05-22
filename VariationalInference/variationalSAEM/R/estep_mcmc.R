@@ -326,87 +326,87 @@ for (m in 1:saemix.options$L_mcmc) {
 		eta_list[[i]][m,] <- etaM[i,]
 	}
 
-	for(u in 1:opt$nbiter.mcmc[5]) {
-	# 1er noyau
-		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
-		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-		if(Dargs$type=="structural"){
-			Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-		} else {
-			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-		}
-		deltau<-Uc.y-U.y
-		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-		etaM[ind,]<-etaMc[ind,]
-		U.y[ind]<-Uc.y[ind]
-	}
-	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	# Second stage
+	# for(u in 1:opt$nbiter.mcmc[5]) {
+	# # 1er noyau
+	# 	etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
+	# 	phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+	# 	if(Dargs$type=="structural"){
+	# 		Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+	# 	} else {
+	# 		Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+	# 	}
+	# 	deltau<-Uc.y-U.y
+	# 	ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+	# 	etaM[ind,]<-etaMc[ind,]
+	# 	U.y[ind]<-Uc.y[ind]
+	# }
+	# U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+	# # Second stage
 	
 	
-		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-		nrs2<-1
-		for (u in 1:opt$nbiter.mcmc[5]) {
-			for(vk2 in 1:nb.etas) {
-				etaMc<-etaM
-				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
-				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				if(Dargs$type=="structural"){
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-				} else {
-					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-				}
-				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				etaM[ind,]<-etaMc[ind,]
-				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-				U.eta[ind]<-Uc.eta[ind]
-				nbc2[vk2]<-nbc2[vk2]+length(ind)
-				nt2[vk2]<-nt2[vk2]+Dargs$NM
-			}
-		}
-		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+	# 	nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+	# 	nrs2<-1
+	# 	for (u in 1:opt$nbiter.mcmc[5]) {
+	# 		for(vk2 in 1:nb.etas) {
+	# 			etaMc<-etaM
+	# 			#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
+	# 			etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
+	# 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+	# 			psiMc<-transphi(phiMc,Dargs$transform.par)
+	# 			if(Dargs$type=="structural"){
+	# 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+	# 			} else {
+	# 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+	# 			}
+	# 			Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+	# 			deltu<-Uc.y-U.y+Uc.eta-U.eta
+	# 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+	# 			etaM[ind,]<-etaMc[ind,]
+	# 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+	# 			U.eta[ind]<-Uc.eta[ind]
+	# 			nbc2[vk2]<-nbc2[vk2]+length(ind)
+	# 			nt2[vk2]<-nt2[vk2]+Dargs$NM
+	# 		}
+	# 	}
+	# 	varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	
 	
 
-		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-		nrs2<-kiter%%(nb.etas-1)+2
-		if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
-		for (u in 1:opt$nbiter.mcmc[5]) {
-			if(nrs2<nb.etas) {
-				vk<-c(0,sample(c(1:(nb.etas-1)),nrs2-1))
-				nb.iter2<-nb.etas
-			} else {
-				vk<-0:(nb.etas-1)
-				#        if(nb.etas==1) vk<-c(0)
-				nb.iter2<-1
-			}
-			for(k2 in 1:nb.iter2) {
-				vk2<-VK[k2+vk]
-				etaMc<-etaM
-				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				if(Dargs$type=="structural"){
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-				} else {
-					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-				}
-				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-log(runif(Dargs$NM))))
-				etaM[ind,]<-etaMc[ind,]
-				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-				U.eta[ind]<-Uc.eta[ind]
-				nbc2[vk2]<-nbc2[vk2]+length(ind)
-				nt2[vk2]<-nt2[vk2]+Dargs$NM
-			}
+	# 	nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+	# 	nrs2<-kiter%%(nb.etas-1)+2
+	# 	if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
+	# 	for (u in 1:opt$nbiter.mcmc[5]) {
+	# 		if(nrs2<nb.etas) {
+	# 			vk<-c(0,sample(c(1:(nb.etas-1)),nrs2-1))
+	# 			nb.iter2<-nb.etas
+	# 		} else {
+	# 			vk<-0:(nb.etas-1)
+	# 			#        if(nb.etas==1) vk<-c(0)
+	# 			nb.iter2<-1
+	# 		}
+	# 		for(k2 in 1:nb.iter2) {
+	# 			vk2<-VK[k2+vk]
+	# 			etaMc<-etaM
+	# 			etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
+	# 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+	# 			psiMc<-transphi(phiMc,Dargs$transform.par)
+	# 			if(Dargs$type=="structural"){
+	# 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+	# 			} else {
+	# 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+	# 			}
+	# 			Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+	# 			deltu<-Uc.y-U.y+Uc.eta-U.eta
+	# 			ind<-which(deltu<(-log(runif(Dargs$NM))))
+	# 			etaM[ind,]<-etaMc[ind,]
+	# 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+	# 			U.eta[ind]<-Uc.eta[ind]
+	# 			nbc2[vk2]<-nbc2[vk2]+length(ind)
+	# 			nt2[vk2]<-nt2[vk2]+Dargs$NM
+	# 		}
 			
-		}
-		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+	# 	}
+	# 	varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
 	
 
   	for (u in 1:opt$nbiter.mcmc[4]) {
@@ -451,8 +451,7 @@ for (m in 1:saemix.options$L_mcmc) {
 		# 	propctheo[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-meantheo[i,])*(etaMc[i,varList$ind.eta]-meantheo[i,])%*%inv.Gamma[[i]])- 0.5*log(det(Gamma[[i]]))
 	 #     }
 		# deltutheo<-Uc.y-U.y+Uc.eta-U.eta + proptheo - propctheo
-		
-		# browser()
+	
 		
 
 		deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
@@ -469,115 +468,115 @@ for (m in 1:saemix.options$L_mcmc) {
 }
 
 
-Gamma <- chol.Gamma <- inv.chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
-etaMc <- etaM
-if(opt$nbiter.mcmc[6]>0) {
-for (m in 1:saemix.options$L_mcmc) {
-	if(m%%100==0){
-			print(m)
-	} 
-	for (i in 1:(nrow(phiM))) {
-		eta_list[[i]][m,] <- etaM[i,]
-	}
+# Gamma <- chol.Gamma <- inv.chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
+# etaMc <- etaM
+# if(opt$nbiter.mcmc[6]>0) {
+# for (m in 1:saemix.options$L_mcmc) {
+# 	if(m%%100==0){
+# 			print(m)
+# 	} 
+# 	for (i in 1:(nrow(phiM))) {
+# 		eta_list[[i]][m,] <- etaM[i,]
+# 	}
 
-if(opt$nbiter.mcmc[6]>0) {
-	for(u in 1:opt$nbiter.mcmc[6]) {
-	# 1er noyau
-		for (i in 1:(Dargs$NM)){
-			Gamma[[i]] <- cov(etaM[-i,])
-			chol.Gamma[[i]] <- try(chol(Gamma[[i]]))
-			Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
-			etaMc[i,varList$ind.eta]<- Mi
-		}
-		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-		if(Dargs$type=="structural"){
-			Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-		} else {
-			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-		}
-		deltau<-Uc.y-U.y
-		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
-		etaM[ind,]<-etaMc[ind,]
-		U.y[ind]<-Uc.y[ind]
-	}
-	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	# Second stage
+# if(opt$nbiter.mcmc[6]>0) {
+# 	for(u in 1:opt$nbiter.mcmc[6]) {
+# 	# 1er noyau
+# 		for (i in 1:(Dargs$NM)){
+# 			Gamma[[i]] <- cov(etaM[-i,])
+# 			chol.Gamma[[i]] <- try(chol(Gamma[[i]]))
+# 			Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
+# 			etaMc[i,varList$ind.eta]<- Mi
+# 		}
+# 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+# 		if(Dargs$type=="structural"){
+# 			Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+# 		} else {
+# 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+# 		}
+# 		deltau<-Uc.y-U.y
+# 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+# 		etaM[ind,]<-etaMc[ind,]
+# 		U.y[ind]<-Uc.y[ind]
+# 	}
+# 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+# 	# Second stage
 	
-	if(opt$nbiter.mcmc[7]>0) {
-		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-		nrs2<-1
-		for (u in 1:opt$nbiter.mcmc[7]) {
-			for(vk2 in 1:nb.etas) {
-				etaMc<-etaM
-				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
-				for (i in 1:(Dargs$NM)){
-					Mi <- rnorm(1)*sd(etaM[-i,vk2])
-					etaMc[i,vk2]<-etaM[i,vk2]+Mi
-				}
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				if(Dargs$type=="structural"){
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-				} else {
-					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-				}
-				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				etaM[ind,]<-etaMc[ind,]
-				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-				U.eta[ind]<-Uc.eta[ind]
-				nbc2[vk2]<-nbc2[vk2]+length(ind)
-				nt2[vk2]<-nt2[vk2]+Dargs$NM
-			}
-		}
-		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
-	}
+# 	if(opt$nbiter.mcmc[7]>0) {
+# 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+# 		nrs2<-1
+# 		for (u in 1:opt$nbiter.mcmc[7]) {
+# 			for(vk2 in 1:nb.etas) {
+# 				etaMc<-etaM
+# 				#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
+# 				for (i in 1:(Dargs$NM)){
+# 					Mi <- rnorm(1)*sd(etaM[-i,vk2])
+# 					etaMc[i,vk2]<-etaM[i,vk2]+Mi
+# 				}
+# 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+# 				psiMc<-transphi(phiMc,Dargs$transform.par)
+# 				if(Dargs$type=="structural"){
+# 					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+# 				} else {
+# 					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+# 				}
+# 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+# 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+# 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+# 				etaM[ind,]<-etaMc[ind,]
+# 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+# 				U.eta[ind]<-Uc.eta[ind]
+# 				nbc2[vk2]<-nbc2[vk2]+length(ind)
+# 				nt2[vk2]<-nt2[vk2]+Dargs$NM
+# 			}
+# 		}
+# 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+# 	}
 	
-	if(opt$nbiter.mcmc[8]>0) {
-		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-		nrs2<-kiter%%(nb.etas-1)+2
-		if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
-		for (u in 1:opt$nbiter.mcmc[8]) {
-			if(nrs2<nb.etas) {
-				vk<-c(0,sample(c(1:(nb.etas-1)),nrs2-1))
-				nb.iter2<-nb.etas
-			} else {
-				vk<-0:(nb.etas-1)
-				#        if(nb.etas==1) vk<-c(0)
-				nb.iter2<-1
-			}
-			for(k2 in 1:nb.iter2) {
-				vk2<-VK[k2+vk]
-				etaMc<-etaM
-				for (i in 1:(Dargs$NM)){
-					Mi <- matrix(rnorm(nrs2), ncol=nrs2)%*%chol(var(etaM[-i,vk2]))
-					etaMc[i,vk2]<-etaM[i,vk2]+Mi
-				}
-				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				if(Dargs$type=="structural"){
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
-				} else {
-					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-				}
-				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
-				deltu<-Uc.y-U.y+Uc.eta-U.eta
-				ind<-which(deltu<(-log(runif(Dargs$NM))))
-				etaM[ind,]<-etaMc[ind,]
-				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-				U.eta[ind]<-Uc.eta[ind]
-				nbc2[vk2]<-nbc2[vk2]+length(ind)
-				nt2[vk2]<-nt2[vk2]+Dargs$NM
-			}
+# 	if(opt$nbiter.mcmc[8]>0) {
+# 		nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+# 		nrs2<-kiter%%(nb.etas-1)+2
+# 		if(is.nan(nrs2)) nrs2<-1 # to deal with case nb.etas=1
+# 		for (u in 1:opt$nbiter.mcmc[8]) {
+# 			if(nrs2<nb.etas) {
+# 				vk<-c(0,sample(c(1:(nb.etas-1)),nrs2-1))
+# 				nb.iter2<-nb.etas
+# 			} else {
+# 				vk<-0:(nb.etas-1)
+# 				#        if(nb.etas==1) vk<-c(0)
+# 				nb.iter2<-1
+# 			}
+# 			for(k2 in 1:nb.iter2) {
+# 				vk2<-VK[k2+vk]
+# 				etaMc<-etaM
+# 				for (i in 1:(Dargs$NM)){
+# 					Mi <- matrix(rnorm(nrs2), ncol=nrs2)%*%chol(var(etaM[-i,vk2]))
+# 					etaMc[i,vk2]<-etaM[i,vk2]+Mi
+# 				}
+# 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+# 				psiMc<-transphi(phiMc,Dargs$transform.par)
+# 				if(Dargs$type=="structural"){
+# 					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+# 				} else {
+# 					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+# 				}
+# 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+# 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+# 				ind<-which(deltu<(-log(runif(Dargs$NM))))
+# 				etaM[ind,]<-etaMc[ind,]
+# 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+# 				U.eta[ind]<-Uc.eta[ind]
+# 				nbc2[vk2]<-nbc2[vk2]+length(ind)
+# 				nt2[vk2]<-nt2[vk2]+Dargs$NM
+# 			}
 			
-		}
-		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
-	}
+# 		}
+# 		varList$domega2[,nrs2]<-varList$domega2[,nrs2]*(1+opt$stepsize.rw* (nbc2/nt2-opt$proba.mcmc))
+# 	}
 	
-}
-}
-}
+# }
+# }
+# }
 
 #VI with linear model
 if(opt$nbiter.mcmc[9]>0) {
@@ -719,6 +718,7 @@ if(opt$nbiter.mcmc[9]>0) {
 	#Initialization
 	mu.vi <- control$mu
 	# Gamma <- control$Gamma
+	# mu.vi <- eta_map
 	Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
 
 	for (i in 1:(Dargs$NM)){
@@ -736,6 +736,10 @@ if(opt$nbiter.mcmc[9]>0) {
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
 
+	propc <- U.eta
+	prop <- U.eta
+	nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
+	nrs2<-1
 	for (m in 1:saemix.options$L_mcmc) {
 		if(m%%100==0){
 				print(m)
@@ -743,18 +747,15 @@ if(opt$nbiter.mcmc[9]>0) {
 		for (i in 1:(nrow(phiM))) {
 			eta_list[[i]][m,] <- etaM[i,]
 		}
-			propc <- U.eta
-			prop <- U.eta
-			nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
-			nrs2<-1
-
 			for (u in 1:opt$nbiter.mcmc[9]) {
 				for (i in 1:(Dargs$NM)){
 					Mi <- rnorm(nb.etas)%*%chol.Gamma.vi[[i]]
 					etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + Mi
+					# etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma.vi[[i]]
 				}
 
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
+
 				if(Dargs$type=="structural"){
 					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
 				} else{
@@ -765,14 +766,16 @@ if(opt$nbiter.mcmc[9]>0) {
 				for (i in 1:(Dargs$NM)){
 					propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
 					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
+
 				}
-		
+				
+
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				# print(length(ind)/Dargs$NM)
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
+
 			}
 
 	}

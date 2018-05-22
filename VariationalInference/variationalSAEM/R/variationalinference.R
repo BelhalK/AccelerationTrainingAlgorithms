@@ -66,8 +66,8 @@ nrs2<-1
 
 #Initialization
 
-L <- 10 #nb iterations MONTE CARLO
-rho <- 0.01 #gradient ascent stepsize
+L <- 100 #nb iterations MONTE CARLO
+rho <- 0.0001 #gradient ascent stepsize
 #VI to find the right mean mu (gradient descent along the elbo)
 
 mu <- list(etaM,etaM)
