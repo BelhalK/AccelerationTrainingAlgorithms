@@ -1,6 +1,6 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
 
-variational.inference<-function(model,data,control=list()) {
+variational.inference.linear<-function(model,data,control=list()) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
@@ -67,7 +67,7 @@ nrs2<-1
 #Initialization
 
 L <- 100 #nb iterations MONTE CARLO
-rho <- 0.0001 #gradient ascent stepsize
+rho <- 0.00000001 #gradient ascent stepsize
 #VI to find the right mean mu (gradient descent along the elbo)
 
 mu <- list(etaM,etaM)
@@ -112,18 +112,19 @@ for (k in 1:K) {
 				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))
 				#gradlogq computation
 				for (j in 1:nb.etas) {
-					sample1[[l]] <- sample[[l]]
-					sample1[[l]][,j] <- sample[[l]][,j] + sample[[l]][,j]/100
-					gradlogq[,j] <- (0.5*rowSums(sample1[[l]]*(sample1[[l]]%*%inv.Gamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))) / (sample[[l]][,j]/100)
+					mu2 <- mu[[k]]
+					mu2[,j] <- mu[[k]][,j] + mu[[k]][,j]/100
+					sample2 <- mu2 +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma
+					gradlogq[,j] <- (0.5*rowSums(sample2*(sample2%*%inv.Gamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))) / (mu[[k]][,j]/100)
 				}
 				estim[[l]] <- sample[[l]]
-				estim[[l]][i,] <- (-logp[i] + logq[i])*gradlogq[i,]
+				estim[[l]][i,] <- (logq[i] - logp[i])*gradlogq[i,]
 			}
 		}
 		grad_mu_elbo <- 1/L*Reduce("+", estim) 
 		#Gradient ascent along that gradient
 		
-		mu[[k+1]] <- mu[[k]] + rho*grad_mu_elbo
+		mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
 
 }
 
