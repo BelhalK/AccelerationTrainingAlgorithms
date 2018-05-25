@@ -113,19 +113,19 @@ options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref[-1,])
 
-options.new<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
-  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=100,sampling='seq')
-theo_new<-data.frame(saemix_incremental(saemix.model,saemix.data,options.new))
-theo_new <- cbind(iterations, theo_new[-1,])
+# options.new<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
+#   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=100,sampling='seq')
+# theo_new<-data.frame(saemix_incremental(saemix.model,saemix.data,options.new))
+# theo_new <- cbind(iterations, theo_new[-1,])
 
-graphConvMC_twokernels(theo_ref,theo_new)
+# graphConvMC_twokernels(theo_ref,theo_new)
 
-options.newincr<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
-  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=50,sampling='randompass')
-theo_newincr<-data.frame(saemix_incremental(saemix.model,saemix.data,options.newincr))
-theo_newincr <- cbind(iterations, theo_newincr[-1,])
+# options.newincr<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), nbiter.saemix = c(K1,K2),
+#   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=50,sampling='randompass')
+# theo_newincr<-data.frame(saemix_incremental(saemix.model,saemix.data,options.newincr))
+# theo_newincr <- cbind(iterations, theo_newincr[-1,])
 
-graphConvMC_threekernels(theo_ref,theo_new,theo_newincr)
+# graphConvMC_threekernels(theo_ref,theo_new,theo_newincr)
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
@@ -170,5 +170,6 @@ theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 theo_mix85_scaled$iterations = theo_mix85_scaled$iterations*0.85
 
+graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_scaled)
 graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
 graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix75_scaled,theo_mix85_scaled)
