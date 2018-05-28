@@ -45,7 +45,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 		# MAP calculation
 
-  	if (kiter < 50){
+  	if (kiter < 0){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
 	    xi<-xind[id==isuj,,drop=FALSE]
@@ -86,7 +86,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 	dist <- dist[order(dist[,param],decreasing=TRUE),]
 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
-	browser()
+	
 	# if ((kiter %% 2) == 0){
 	# 	dist <- dist[order(dist[,param],decreasing=TRUE),]
 	# 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
