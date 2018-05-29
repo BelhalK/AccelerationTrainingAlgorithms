@@ -235,7 +235,10 @@ for (m in 1:replicate){
    warfarin.saemix$amount <- 100
    saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
     name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
-
+   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(c(1,3,0.01,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),fixed.estim=c(0,1,0),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE))
 
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
@@ -243,8 +246,8 @@ theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
 theo_ref <- cbind(iterations, theo_ref[-1,])
 
 ML <- theo_ref[,2:8]
-# ML[1:(end+1),]<- theo_ref[end+1,2:10]
-ML[0:end,1:7]<- true_param
+ML[0:end,1:7]<- theo_ref[end,2:8]
+# ML[0:end,1:7]<- true_param
 error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
 theo_ref['individual'] <- m
 final_ref <- rbind(final_ref,theo_ref)
@@ -257,9 +260,9 @@ options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.
 theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental50))
 theo_mix <- cbind(iterations, theo_mix[-1,])
 ML <- theo_ref[,2:8]
-# ML[1:(end+1),]<- theo_ref[end+1,2:10]
-ML[0:end,1:7]<- true_param
-error_mix <- error_mix + (theo_ref[,2:8]-ML)^2
+ML[0:end,1:7]<- theo_mix[end,2:8]
+# ML[0:end,1:7]<- true_param
+error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
 theo_mix['individual'] <- m
 final_mix <- rbind(final_mix,theo_mix)
 
@@ -269,9 +272,9 @@ options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.
 theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 ML <- theo_ref[,2:8]
-# ML[1:(end+1),]<- theo_ref[end+1,2:10]
-ML[0:end,1:7]<- true_param
-error_mix25 <- error_mix25 + (theo_ref[,2:8]-ML)^2
+ML[0:end,1:7]<- theo_mix25[end,2:8]
+# ML[0:end,1:7]<- true_param
+error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
 theo_mix25['individual'] <- m
 final_mix25 <- rbind(final_mix25,theo_mix25)
 
@@ -309,7 +312,7 @@ err_mix_scaled$method <- 'randiter'
 
 
 
-err_mix25$iterations = 1:((K1+K2))
+err_mix25$iterations = seq(1, (end-1), by=1)
 
 err_mix25$algo <- 'ISAEM25'
 err_mix25$method <- 'randiter'
@@ -339,8 +342,6 @@ graphConvMC_se1 <- function(df,df2, df3,title=NULL, ylim=NULL)
   }
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
-
-
 
 
 c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix25[,c(1,3,9)])
