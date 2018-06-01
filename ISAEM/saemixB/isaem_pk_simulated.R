@@ -84,7 +84,7 @@ res <- simulx(model     = model,
               parameter = param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(1,3,by=1)))
+              output    = list(name='y', time=seq(1,10,by=1)))
 
  warfarin.saemix <- res$y
  warfarin.saemix$amount <- 100
@@ -140,6 +140,14 @@ options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.
   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
 theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+
+theo_ref_scaled <- theo_ref
+theo_mix50_scaled <- theo_mix50
+theo_mix25_scaled <- theo_mix25
+theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
+theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
+graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
 
 
 
