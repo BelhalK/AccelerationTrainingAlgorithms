@@ -76,8 +76,8 @@ y = {distribution=normal, prediction=C, sd=a}
 N=100
 
 param   <- c(
-  ka_pop  = 1,    omega_ka  = 0.5,
-  V_pop   = 10,   omega_V   = 0.4,
+  ka_pop  = 1,    omega_ka  = 0.3,
+  V_pop   = 10,   omega_V   = 0.2,
   Cl_pop  = 1,    omega_Cl  = 0.3, a =1)
   
 res <- simulx(model     = model,
@@ -93,7 +93,7 @@ res <- simulx(model     = model,
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,3,0.01,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),fixed.estim=c(0,1,0),
+  ,psi0=matrix(c(1,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
@@ -178,8 +178,8 @@ theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 theo_mix85_scaled$iterations = theo_mix85_scaled$iterations*0.85
 
-graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_scaled)
-graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_scaled)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
 graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix75_scaled,theo_mix85_scaled)
 
 

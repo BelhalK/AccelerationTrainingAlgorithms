@@ -7,6 +7,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
+library(data.table)
 # save.image("realwarfa_mcmc_conv_varwithnew.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
@@ -96,11 +97,14 @@ Gamma<-mcmc(saemix.model,saemix.data,options_warfanew)$Gamma
 # options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 # test<-check.mu.gamma(saemix.model,saemix.data,options_warfanew)
 
-K=100
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
-variational.post<-variational.inference.linear(saemix.model,saemix.data,variational.post.options)
-variational.post$mu
+K=1000
 
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
+variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
+mus <- variational.post$mu
+muss <- transpose(as.data.frame(matrix(unlist(mus), nrow=length(unlist(mus[1])))))
+muss$iteration = 1:(K+1)
+plotmcmc(muss[,c(3,1:2)],muss[,c(3,1:2)],title=paste("mean VI output",i))
 
 
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
@@ -108,6 +112,7 @@ options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variation
         nbiter.mcmc = c(0,0,0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model,saemix.data,options_warfavi)$eta
+
 
 
 start_interval <- 200

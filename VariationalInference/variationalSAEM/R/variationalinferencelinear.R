@@ -82,8 +82,8 @@ K <- control$nbiter.gd
 trueGamma <- control$Gamma.laplace
 Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
 for (i in 1:Dargs$NM) {
-	chol.Gamma <- chol(trueGamma[[i]])
-	inv.Gamma <- solve(trueGamma[[i]])
+	chol.Gamma[[i]] <- chol(trueGamma[[i]])
+	inv.Gamma[[i]] <- solve(trueGamma[[i]])
 }
 
 
@@ -98,7 +98,7 @@ for (k in 1:K) {
 		for (i in 1:Dargs$NM) {
 			
 			for (l in 1:L) {
-				sample[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma
+				sample[[l]] <- mu[[k]] +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma[[i]]
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+sample[[l]]
 				psiMc<-transphi(phiMc,Dargs$transform.par)
 				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
@@ -109,13 +109,13 @@ for (k in 1:K) {
 				#Log complete computation
 				logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
 				#Log proposal computation
-				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))
+				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma[[i]]))
 				#gradlogq computation
 				for (j in 1:nb.etas) {
 					mu2 <- mu[[k]]
 					mu2[,j] <- mu[[k]][,j] + mu[[k]][,j]/100
-					sample2 <- mu2 +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma
-					gradlogq[,j] <- (0.5*rowSums(sample2*(sample2%*%inv.Gamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))) / (mu[[k]][,j]/100)
+					sample2 <- mu2 +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma[[i]]
+					gradlogq[,j] <- (0.5*rowSums(sample2*(sample2%*%inv.Gamma[[i]])) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma[[i]]))) / (mu[[k]][,j]/100)
 				}
 				estim[[l]] <- sample[[l]]
 				estim[[l]][i,] <- (logq[i] - logp[i])*gradlogq[i,]
