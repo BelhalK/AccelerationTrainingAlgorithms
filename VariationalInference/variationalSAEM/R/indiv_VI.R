@@ -42,15 +42,15 @@ indiv.variational.inference<-function(model,data,control=list()) {
 
 	#Initialization
 	L <- 10 #nb iterations MONTE CARLO
-	rho <- 10e-12 #gradient ascent stepsize
+	rho <- 10e-8 #gradient ascent stepsize
 	K <- control$nbiter.gd
 
 	#VI to find the right mean mu (gradient descent along the elbo)
 	i <- 10
 	mu <- list(etaM[i,],etaM[i,])
 	
-	mu[[1]][1] = 20
-	mu[[1]][2] = 0.1
+	mu[[1]][1] = 29
+	mu[[1]][2] = -0.1
 	#if Gamma fixed to Laplace Gamma
 	trueGamma <- control$Gamma.laplace
 	chol.Gamma <- chol(trueGamma[[i]])
@@ -59,7 +59,6 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	for (k in 1:K) {
 		if (k%%10==0) print(k)
 			sample <- list(etaM[i,],etaM[i,])  #list of samples for monte carlo integration
-			sample1 <- list(etaM[i,],etaM[i,])  #list of samples for gradient computation
 			estim <- list(etaM[i,],etaM[i,])
 			gradlogq <- etaM[i,]
 			for (l in 1:L) {
@@ -75,13 +74,13 @@ indiv.variational.inference<-function(model,data,control=list()) {
 				sumDYF <- colSums(DYF)
 				logp <- sumDYF[i] + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
 				#Log proposal computation
-				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))
+				logq <- 0.5*rowSums((sample[[l]] - mu[[k]])*((sample[[l]] - mu[[k]])%*%inv.Gamma))
 				#gradlogq computation
 				for (j in 1:nb.etas) {
 					mu2 <- mu[[k]]
 					mu2[j] <- mu[[k]][j] + mu[[k]][j]/100
-					sample2 <- mu2 +matrix(rnorm(nb.etas), ncol=nb.etas)%*%chol.Gamma
-					gradlogq[j] <- (0.5*rowSums(sample2*(sample2%*%inv.Gamma)) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma))) / (mu[[k]][j]/100)
+					logq2 <- 0.5*rowSums((sample[[l]] - mu2)*((sample[[l]] - mu2)%*%inv.Gamma))
+					gradlogq[j] <- (logq2 - logq) / (mu[[k]][j]/100)
 				}
 				estim[[l]] <- (logq - logp)*gradlogq
 			}

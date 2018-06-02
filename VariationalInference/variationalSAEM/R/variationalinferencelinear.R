@@ -91,10 +91,8 @@ for (k in 1:K) {
 
 	if (k%%10==0) print(k)
 		sample <- list(etaM,etaM)  #list of samples for monte carlo integration
-		sample1 <- list(etaM,etaM)  #list of samples for gradient computation
 		estim <- list(etaM,etaM)
 		gradlogq <- etaM
-
 		for (i in 1:Dargs$NM) {
 			
 			for (l in 1:L) {
@@ -109,13 +107,13 @@ for (k in 1:K) {
 				#Log complete computation
 				logp <- colSums(DYF) + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
 				#Log proposal computation
-				logq <- 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma[[i]]))
+				logq <- 0.5*rowSums((sample[[l]] - mu[[k]])*((sample[[l]] - mu[[k]])%*%inv.Gamma))
 				#gradlogq computation
 				for (j in 1:nb.etas) {
 					mu2 <- mu[[k]]
 					mu2[,j] <- mu[[k]][,j] + mu[[k]][,j]/100
-					sample2 <- mu2 +matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol.Gamma[[i]]
-					gradlogq[,j] <- (0.5*rowSums(sample2*(sample2%*%inv.Gamma[[i]])) - 0.5*rowSums(sample[[l]]*(sample[[l]]%*%inv.Gamma[[i]]))) / (mu[[k]][,j]/100)
+					logq2 <- 0.5*rowSums((sample[[l]] - mu2[[k]])*((sample[[l]] - mu2[[k]])%*%inv.Gamma))
+					gradlogq[j,] <- (logq2 - logq) / (mu[[k]][,j]/100)
 				}
 				estim[[l]] <- sample[[l]]
 				estim[[l]][i,] <- (logq[i] - logp[i])*gradlogq[i,]
