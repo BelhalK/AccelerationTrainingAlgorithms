@@ -114,7 +114,6 @@ options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variation
 vi<-mcmc(saemix.model,saemix.data,options_warfavi)$eta
 
 
-
 start_interval <- 200
 zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 2))
 

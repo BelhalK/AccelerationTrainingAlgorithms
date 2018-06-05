@@ -45,7 +45,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 		# MAP calculation
 
-  	if (kiter < 50){
+  	if (kiter < 20){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
 	    xi<-xind[id==isuj,,drop=FALSE]
@@ -87,10 +87,10 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	dist <- dist[order(dist[,param],decreasing=TRUE),]
 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
 	
-	if ((kiter %% 2) == 0){
-		dist <- dist[order(dist[,param],decreasing=FALSE),]
-		block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
-	}
+	# if ((kiter %% 2) == 0){
+	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
+	# 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
+	# }
 
 	# if ((kiter %% 3) == 0){
 	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
@@ -107,7 +107,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 }
 
 
-	block <- setdiff(1:Dargs$NM, l[ind_rand])	
+	# block <- setdiff(1:Dargs$NM, l[ind_rand])	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 	if (!(kiter %in% map_range)){
