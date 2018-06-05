@@ -45,7 +45,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 		# MAP calculation
 
-  	if (kiter < 0){
+  	if (kiter < 50){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
 	    xi<-xind[id==isuj,,drop=FALSE]
