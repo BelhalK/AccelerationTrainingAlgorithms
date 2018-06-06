@@ -45,7 +45,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	
 		# MAP calculation
 
-  	if (kiter < 20){
+  	if (kiter < 50){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
 	    xi<-xind[id==isuj,,drop=FALSE]
@@ -64,44 +64,49 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	map.psi<-data.frame(id=id.list,map.psi)
 	map.phi<-data.frame(id=id.list,phi.map)
 	psi_map <- as.matrix(map.psi[,-c(1)])
-	
-	
-	
-	# print(colMeans(psi_map[l[ind_rand],])[2] > colMeans(psi_map)[2])
-	# print(colMeans(psi_map[block,])[2] < colMeans(psi_map)[2])
-	# colMeans(psi_map[block,])
-	# colMeans(psi_map[l[ind_rand],])
-	# colMeans(psi_map)
+	phi_map <- as.matrix(map.phi[,-c(1)])
+	eta_map <- phi_map - mean.phiM
 
-	mean <- psi_map
+	weight <- eta_map[,2]
+	gamma = 2
+	
 	for (m in 1:Dargs$NM){
-	mean[m,] <- colMeans(psi_map)	
+		weight[m] <- exp(gamma*eta_map[m,2]^2)
 	}
+	weight <- weight/sum(weight)
+	nb.replacement <- length(ind_rand)
+	ind <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE, prob = weight)
+	block <- setdiff(1:Dargs$NM, ind)
+	# mean <- psi_map
+	# for (m in 1:Dargs$NM){
+	# mean[m,] <- colMeans(psi_map)	
+	# }
 	
 
-	param <- Uargs$ind.fix1
-	nb.replacement <- length(ind_rand)
-	dist <- data.frame(psi_map - mean)
-	dist$indiv <- 1:Dargs$NM
+	# param <- Uargs$ind.fix1
+	# nb.replacement <- length(ind_rand)
+	# dist <- data.frame(psi_map - mean)
+	# dist$indiv <- 1:Dargs$NM
 	
-	dist <- dist[order(dist[,param],decreasing=TRUE),]
-	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
-	
+	# dist <- dist[order(dist[,param],decreasing=FALSE),]
+	# block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
+
 	# if ((kiter %% 2) == 0){
-	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
+	# 	dist <- dist[order(dist[,param],decreasing=TRUE),]
 	# 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
 	# }
 
 	# if ((kiter %% 3) == 0){
 	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
-	# 	block <- setdiff(1:Dargs$NM, dist[100 :200,4])
+	# 	block <- setdiff(1:Dargs$NM, dist[25 :50,4])
 	# }
 
 	# if ((kiter %% 4) == 0){
 	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
-	# 	block <- setdiff(1:Dargs$NM, dist[200 :300,4])
+	# 	block <- setdiff(1:Dargs$NM, dist[51 :75,4])
 	# }
-	print(block)
+	print(kiter)
+	print(ind)
 } else {
 	block <- setdiff(1:Dargs$NM, l[ind_rand])
 }
