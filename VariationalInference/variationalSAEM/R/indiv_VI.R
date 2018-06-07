@@ -41,25 +41,29 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	phiMc<-phiM
 
 	#Initialization
-	L <- 10 #nb iterations MONTE CARLO
-	rho <- 10e-8 #gradient ascent stepsize
+	L <- 100 #nb iterations MONTE CARLO
+	rho <- 10e-10 #gradient ascent stepsize
 	K <- control$nbiter.gd
-
-	#VI to find the right mean mu (gradient descent along the elbo)
 	i <- 10
+	#VI to find the right mean mu (gradient descent along the elbo)
 	mu <- list(etaM[i,],etaM[i,])
 	
-	mu[[1]][1] = 29
-	mu[[1]][2] = -0.1
+	mu[[1]][1] = 169
+	mu[[1]][2] = 1
 	#if Gamma fixed to Laplace Gamma
 	trueGamma <- control$Gamma.laplace
 	chol.Gamma <- chol(trueGamma[[i]])
 	inv.Gamma <- solve(trueGamma[[i]])
 
+	obs <- Dargs$yM[Dargs$IdM==i]
+	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
+	design[,1] <- 1
+	design[,2] <- Dargs$XM[Dargs$IdM==i,]
+
 	for (k in 1:K) {
 		if (k%%10==0) print(k)
 			sample <- list(etaM[i,],etaM[i,])  #list of samples for monte carlo integration
-			estim <- list(etaM[i,],etaM[i,])
+			estim <- list(etaM[i,],etaM[i,]) #noisy gradient of the ELBO
 			gradlogq <- etaM[i,]
 			for (l in 1:L) {
 				sample[[l]] <- mu[[k]] +matrix(rnorm(nb.etas), ncol=nb.etas)%*%chol.Gamma
@@ -85,6 +89,18 @@ indiv.variational.inference<-function(model,data,control=list()) {
 				estim[[l]] <- (logq - logp)*gradlogq
 			}
 			grad_mu_elbo <- 1/L*Reduce("+", estim) 
+			
+			#Gradient ascent along that gradient
+			mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
+	}
+
+	for (k in 1:K) {
+		if (k%%10==0) print(k)
+			browser()
+			first <- omega.eta%*%(mu[[k]] - mean.phiM[i,])
+			second <- omega.eta%*%(mu[[k]] - mean.phiM[i,])
+			grad_mu_elbo <- fist + second
+			
 			#Gradient ascent along that gradient
 			mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
 	}

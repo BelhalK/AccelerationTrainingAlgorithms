@@ -97,8 +97,8 @@ Gamma<-mcmc(saemix.model,saemix.data,options_warfanew)$Gamma
 # options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 # test<-check.mu.gamma(saemix.model,saemix.data,options_warfanew)
 
-K=1000
-
+K=100
+i=10
 variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
 variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
 mus <- variational.post$mu
