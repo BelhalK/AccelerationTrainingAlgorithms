@@ -8,6 +8,7 @@ require(gridExtra)
 require(reshape2)
 library(dplyr)
 library(data.table)
+library(rstan)
 # save.image("realwarfa_mcmc_conv_varwithnew.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
@@ -19,6 +20,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/va
   source('func_plots.R') 
   source('func_simulations.R') 
   source('estep_mcmc.R')
+  source('indiv_VI.R')
   source('variationalinferencelinear.R')
   source('main.R')
   source('main_estep.R')
@@ -97,9 +99,35 @@ Gamma<-mcmc(saemix.model,saemix.data,options_warfanew)$Gamma
 # options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,6,0,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 # test<-check.mu.gamma(saemix.model,saemix.data,options_warfanew)
 
-K=100
+K=10000
 i=10
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
+
+
+model <- 'data {
+          int<lower=0> N;// Number of observations
+          vector[N] age; //predictor
+          vector[N] height;  //response
+          
+          real beta1_pop;
+          real beta2_pop;
+          real<lower=0> omega_beta1;
+          real<lower=0> omega_beta2;
+          real<lower=0>  pres;
+        }
+        parameters {
+          vector[2] beta;
+        }
+        model {
+          //Priors
+          beta[1] ~ normal( beta1_pop , omega_beta1);
+          beta[2] ~ normal( beta2_pop , omega_beta2);
+          height ~ normal(beta[1] + beta[2] * age, 1);
+        }'
+
+
+modelstan <- stan_model(model_name = "oxboys",model_code = model)
+
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma, modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
 mus <- variational.post$mu
 muss <- transpose(as.data.frame(matrix(unlist(mus), nrow=length(unlist(mus[1])))))

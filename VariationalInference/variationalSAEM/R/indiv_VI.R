@@ -59,52 +59,75 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	design[,1] <- 1
 	design[,2] <- Dargs$XM[Dargs$IdM==i,]
-
-	for (k in 1:K) {
-		if (k%%10==0) print(k)
-			sample <- list(etaM[i,],etaM[i,])  #list of samples for monte carlo integration
-			estim <- list(etaM[i,],etaM[i,]) #noisy gradient of the ELBO
-			gradlogq <- etaM[i,]
-			for (l in 1:L) {
-				sample[[l]] <- mu[[k]] +matrix(rnorm(nb.etas), ncol=nb.etas)%*%chol.Gamma
-				phiMc[i,varList$ind.eta]<-mean.phiM[i,varList$ind.eta]+sample[[l]]
-				psiMc<-transphi(phiMc,Dargs$transform.par)
-				fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
-				if(Dargs$error.model=="exponential")
-					fpred<-log(cutoff(fpred))
-				gpred<-error(fpred,varList$pres)
-				DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
-				#Log complete computation
-				sumDYF <- colSums(DYF)
-				logp <- sumDYF[i] + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
-				#Log proposal computation
-				logq <- 0.5*rowSums((sample[[l]] - mu[[k]])*((sample[[l]] - mu[[k]])%*%inv.Gamma))
-				#gradlogq computation
-				for (j in 1:nb.etas) {
-					mu2 <- mu[[k]]
-					mu2[j] <- mu[[k]][j] + mu[[k]][j]/100
-					logq2 <- 0.5*rowSums((sample[[l]] - mu2)*((sample[[l]] - mu2)%*%inv.Gamma))
-					gradlogq[j] <- (logq2 - logq) / (mu[[k]][j]/100)
-				}
-				estim[[l]] <- (logq - logp)*gradlogq
-			}
-			grad_mu_elbo <- 1/L*Reduce("+", estim) 
+	design <- as.matrix(design)
+	# for (k in 1:K) {
+	# 	if (k%%10==0) print(k)
+	# 		sample <- list(etaM[i,],etaM[i,])  #list of samples for monte carlo integration
+	# 		estim <- list(etaM[i,],etaM[i,]) #noisy gradient of the ELBO
+	# 		gradlogq <- etaM[i,]
+	# 		for (l in 1:L) {
+	# 			sample[[l]] <- mu[[k]] +matrix(rnorm(nb.etas), ncol=nb.etas)%*%chol.Gamma
+	# 			phiMc[i,varList$ind.eta]<-mean.phiM[i,varList$ind.eta]+sample[[l]]
+	# 			psiMc<-transphi(phiMc,Dargs$transform.par)
+	# 			fpred<-structural.model(psiMc, Dargs$IdM, Dargs$XM)
+	# 			if(Dargs$error.model=="exponential")
+	# 				fpred<-log(cutoff(fpred))
+	# 			gpred<-error(fpred,varList$pres)
+	# 			DYF[Uargs$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
+	# 			#Log complete computation
+	# 			sumDYF <- colSums(DYF)
+	# 			logp <- sumDYF[i] + 0.5*rowSums(sample[[l]]*(sample[[l]]%*%somega))
+	# 			#Log proposal computation
+	# 			logq <- 0.5*rowSums((sample[[l]] - mu[[k]])*((sample[[l]] - mu[[k]])%*%inv.Gamma))
+	# 			#gradlogq computation
+	# 			for (j in 1:nb.etas) {
+	# 				mu2 <- mu[[k]]
+	# 				mu2[j] <- mu[[k]][j] + mu[[k]][j]/100
+	# 				logq2 <- 0.5*rowSums((sample[[l]] - mu2)*((sample[[l]] - mu2)%*%inv.Gamma))
+	# 				gradlogq[j] <- (logq2 - logq) / (mu[[k]][j]/100)
+	# 			}
+	# 			estim[[l]] <- (logq - logp)*gradlogq
+	# 		}
+	# 		grad_mu_elbo <- 1/L*Reduce("+", estim) 
 			
-			#Gradient ascent along that gradient
-			mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
-	}
+	# 		#Gradient ascent along that gradient
+	# 		mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
+	# }
 
-	for (k in 1:K) {
-		if (k%%10==0) print(k)
-			browser()
-			first <- omega.eta%*%(mu[[k]] - mean.phiM[i,])
-			second <- omega.eta%*%(mu[[k]] - mean.phiM[i,])
-			grad_mu_elbo <- fist + second
+	# k <- 1
+	# first <- t(omega.eta%*%(mu[[k]]- mean.phiM[i,]))
+	# second <- (-t(obs)%*%design - mu[[k]]%*%t(design)%*%design)/varList$pres[1]
+	# grad_mu_elbo <- first + second
 			
-			#Gradient ascent along that gradient
-			mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
-	}
+	# #Gradient ascent along that gradient
+	# mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
+	# for (k in 2:K) {
+	# 	if (k%%10==0) print(k)
+	# 		first <- t(omega.eta%*%(t(mu[[k]])- mean.phiM[i,]))
+	# 		second <- (-t(obs)%*%design - mu[[k]]%*%t(design)%*%design)/varList$ pres[1]
+	# 		grad_mu_elbo <- first + second
+			
+	# 		#Gradient ascent along that gradient
+	# 		mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
+	# }
+	
 
+	## using Rstan package
+	browser()
+	stan.model <- control$modelstan
+	stan_data <- list(N = length(obs),height = obs
+					,age = design[,2],
+					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
+					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
+					pres=sqrt(varList$pres[1]))
+	fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 16, warmup = 10)
+	fit_samples = extract(fit)
+	betas = fit_samples[[1]]
+	psiMstan[i,]<-betas[end(betas)[1],]
+	# browser()
+	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+	etaMstan <- phiMstan[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
+	
 	mu.vi <- mu[[K]]
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
 	return(list(mu=mu))
