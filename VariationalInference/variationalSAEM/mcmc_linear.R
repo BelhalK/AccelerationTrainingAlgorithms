@@ -103,29 +103,29 @@ K=10000
 i=10
 
 
-model <- 'data {
-          int<lower=0> N;// Number of observations
-          vector[N] age; //predictor
-          vector[N] height;  //response
+# model <- 'data {
+#           int<lower=0> N;// Number of observations
+#           vector[N] age; //predictor
+#           vector[N] height;  //response
           
-          real beta1_pop;
-          real beta2_pop;
-          real<lower=0> omega_beta1;
-          real<lower=0> omega_beta2;
-          real<lower=0>  pres;
-        }
-        parameters {
-          vector[2] beta;
-        }
-        model {
-          //Priors
-          beta[1] ~ normal( beta1_pop , omega_beta1);
-          beta[2] ~ normal( beta2_pop , omega_beta2);
-          height ~ normal(beta[1] + beta[2] * age, 1);
-        }'
+#           real beta1_pop;
+#           real beta2_pop;
+#           real<lower=0> omega_beta1;
+#           real<lower=0> omega_beta2;
+#           real<lower=0>  pres;
+#         }
+#         parameters {
+#           vector[2] beta;
+#         }
+#         model {
+#           //Priors
+#           beta[1] ~ normal( beta1_pop , omega_beta1);
+#           beta[2] ~ normal( beta2_pop , omega_beta2);
+#           height ~ normal(beta[1] + beta[2] * age, 1);
+#         }'
 
 
-modelstan <- stan_model(model_name = "oxboys",model_code = model)
+# modelstan <- stan_model(model_name = "oxboys",model_code = model)
 
 variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma, modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
