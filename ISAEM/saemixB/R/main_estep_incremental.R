@@ -68,7 +68,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	eta_map <- phi_map - mean.phiM
 
 	weight <- eta_map[,2]
-	gamma = 2
+	gamma = 1
 	
 	for (m in 1:Dargs$NM){
 		weight[m] <- exp(gamma*eta_map[m,2]^2)
