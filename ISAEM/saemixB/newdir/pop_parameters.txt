@@ -45,8 +45,8 @@ function(psi,id,xidep) {
       parameter names:  Tlag ka V Cl 
       distribution:
      Parameter Distribution Estimated
-[1,] Tlag      log-normal   Estimated
-[2,] ka        log-normal   Fixed    
+[1,] Tlag      log-normal   Fixed    
+[2,] ka        log-normal   Estimated
 [3,] V         log-normal   Fixed    
 [4,] Cl        log-normal   Fixed    
   Variance-covariance matrix:
@@ -83,21 +83,21 @@ Cov.CondInit  0.0  0  0  0
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter   Estimate
-[1,] Tlag         0.27   
-[2,] ka           3.00   
+[1,] Tlag         0.20   
+[2,] ka           1.77   
 [3,] V           10.00   
 [4,] beta_wt(V)   0.00   
 [5,] Cl           2.00   
 [6,] beta_wt(Cl)  0.00   
-[7,] a            0.69   
+[7,] a            0.86   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-Tlag omega2.Tlag 1.19    
-ka   omega2.ka   1.87    
+Tlag omega2.Tlag 0.73    
+ka   omega2.ka   1.39    
 V    omega2.V    0.15    
-Cl   omega2.Cl   9.27    
+Cl   omega2.Cl   9.28    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

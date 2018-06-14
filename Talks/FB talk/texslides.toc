@@ -1,5 +1,0 @@
-\select@language {english}
-\beamer@sectionintoc {1}{Problem}{3}{0}{1}
-\beamer@sectionintoc {2}{Parameter Estimation: SAEM algorithm}{6}{0}{2}
-\beamer@sectionintoc {3}{Inference: MCMC}{8}{0}{3}
-\beamer@sectionintoc {4}{Applications}{10}{0}{4}

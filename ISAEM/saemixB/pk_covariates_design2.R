@@ -76,7 +76,7 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
-  byrow=TRUE),fixed.estim=c(1,0,0,0),covariate.model=t(c(0,0,1,1)),error.model="constant")
+  byrow=TRUE),fixed.estim=c(0,1,0,0),covariate.model=t(c(0,0,1,1)),error.model="constant")
 
 
 K1 = 300
