@@ -104,6 +104,7 @@ saemix<-function(model,data,control=list()) {
     return()
   }
 
+
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
   opt.warn<-getOption("warn")
@@ -404,5 +405,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(list(par=parpop,maps=maps))
+  return(saemixObject)
 }
