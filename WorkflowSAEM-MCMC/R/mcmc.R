@@ -46,7 +46,6 @@ mcmc<-function(model,data,control=list()) {
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 	saemix.options<-saemixObject["options"]
-	map_range <- saemix.options$map.range
 
 	if(Dargs$type=="structural"){
 		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)

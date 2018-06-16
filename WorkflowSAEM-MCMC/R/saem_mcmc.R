@@ -34,8 +34,6 @@ saem.mcmc<-function(model,data,control) {
 
 	#Initialisation
 	
-	
-	
 	Uargs<-xinit$Uargs
 	varList<-xinit$varList
 	phiM<-xinit$phiM

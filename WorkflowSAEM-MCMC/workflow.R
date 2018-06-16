@@ -50,6 +50,7 @@ model1cpt<-function(psi,id,xidep) {
   return(ypred)
 }
 
+
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
@@ -65,22 +66,31 @@ end = K1+K2
 
 #Warfarin
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-warfa<-data.frame(saemix(saemix.model,saemix.data,options_warfa))
-warfa <- cbind(iterations, warfa)
+warfa<-saemix(saemix.model,saemix.data,options_warfa)
 
+# parpop <- warfa["results"]["parpop"]
+
+omega.estimate <- warfa["results"]["omega"]
+res.estimate <- warfa["results"]["respar"]
+parpop.estimate <- warfa["results"]["fixed.effects"]
 
 
 #compareMCMC
+saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(parpop.estimate,ncol=length(parpop.estimate),byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=omega.estimate,
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE))
 
-
-L_mcmc=10000
+L_mcmc=100
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model,saemix.data,options_warfa)$eta
 
 
-L_mcmc=1000
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, map.range=c(0), L_mcmc=L_mcmc)
-ref<-saem.mcmc(saemix.model,saemix.data,options_warfa)
+# # Only using 1 script to do SAEM + MCMC
+# L_mcmc=1000
+# options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, map.range=c(0), L_mcmc=L_mcmc)
+# ref<-saem.mcmc(saemix.model,saemix.data,options_warfa)
 
 
 
