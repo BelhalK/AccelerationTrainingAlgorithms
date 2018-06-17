@@ -110,23 +110,8 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	# 		#Gradient ascent along that gradient
 	# 		mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
 	# }
-	
 
-	## using Rstan package
-	browser()
-	stan.model <- control$modelstan
-	stan_data <- list(N = length(obs),height = obs
-					,age = design[,2],
-					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
-					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
-					pres=sqrt(varList$pres[1]))
-	fit <- sampling(stan.model, data = stan_data,algorithm = "NUTS", chains = 1,iter = 16, warmup = 10)
-	fit_samples = extract(fit)
-	betas = fit_samples[[1]]
-	psiMstan[i,]<-betas[end(betas)[1],]
-	# browser()
-	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-	etaMstan <- phiMstan[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
+	
 	
 	mu.vi <- mu[[K]]
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]

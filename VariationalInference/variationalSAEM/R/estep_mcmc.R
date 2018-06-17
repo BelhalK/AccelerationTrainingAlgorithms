@@ -1,6 +1,6 @@
 ############################### Simulation - MCMC kernels (E-step) #############################
 
-mcmc<-function(model,data,control=list()) {
+mcmc.old<-function(model,data,control=list()) {
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
