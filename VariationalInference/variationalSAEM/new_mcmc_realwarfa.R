@@ -1,3 +1,4 @@
+load("warfa_rstan.RData")
 library("mlxR")
 library("psych")
 library("coda")
@@ -8,7 +9,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
-# save.image("realwarfa_mcmc_conv_varwithnew.RData")
+save.image("warfa_rstan.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
   source('aaa_generics.R') 
@@ -110,7 +111,6 @@ variational.post$mu
 
 model <- 'data {
           int<lower=0> N;// Number of observations
-          vector[N] dose; //predictor
           vector[N] time; //predictor
           vector[N] concentration;  //response
           
@@ -130,16 +130,29 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-          concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), 1);
+          concentration ~ normal(100*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres^2);
         }'
 
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
-options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+
+#using the samples from vb (drawn from candidate KL posterior)
+options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
+#Calculate mu and gamma of ELBO optimization
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
+mu.vi <- variational.post$mu
+Gamma.vi <- variational.post$Gamma
 
 
+#MCMC with VI proposal
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
+        Gamma = variational.post$Gamma,
+        nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
 
 #Autocorrelation
@@ -153,11 +166,14 @@ vb.obj <- as.mcmc(vb[[10]])
 autocorr.plot(vb.obj[,1]) + title("vb SAEM Autocorrelation")
 
 
+vi.obj <- as.mcmc(vi[[10]])
+autocorr.plot(vi.obj[,1]) + title("vb SAEM Autocorrelation")
+
 #MSJD
 mssd(ref[[10]][,1])
 mssd(new[[10]][,1])
 mssd(vb[[10]][,1])
-
+mssd(vi[[10]][,1])
 
 
 
@@ -200,9 +216,21 @@ indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
 indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
 indsdvb$iteration <- 1:(L_mcmc-start_interval)
 
+
+indetabarvi <- vi[[i]]
+indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
+indexpecvi$iteration <- 1:(L_mcmc-start_interval)
+
+
+indsdvi <- 0
+indvar <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
+indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
+indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
+indsdvi$iteration <- 1:(L_mcmc-start_interval)
+
 plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
 plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvb[,c(4,1:3)],title="mean")
-
+plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvi[,c(4,1:3)],title="mean")
 
 
 
@@ -234,12 +262,10 @@ for (dim in 1:3){
   # plotmcmc(qref[[dim]][,c(4,1:3)],qnew[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
-for (dim in 1:3){
-plotmcmc(qref[[dim]][,c(4,1:3)],qnew[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
-}
 
 
-qvb <- list(vb[[i]][1:L_mcmc,],vb[[i]][1:L_mcmc,],vb[[i]][1:L_mcmc,])
+
+qvb <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
 for (dim in 1:3){
   print(dim)
   for (k in 1:L_mcmc){
@@ -251,6 +277,19 @@ for (dim in 1:3){
   # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
+
+
+qvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:3){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], 0.05)
+    qvi[[dim]][k,2] <- quantile(vi[[i]][1:k,dim], 0.5)
+    qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], 0.95)
+  }
+  qvi[[dim]]$iteration <- 1:L_mcmc
+  # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
+}
 
 
 plotquantile <- function(df,df2, title=NULL, ylim=NULL)
@@ -312,6 +351,21 @@ quantvb <- rbind(q1vb[-c(1:burn),],q2vb[-c(1:burn),],q3vb[-c(1:burn),])
 
 colnames(quantvb)<-c("iteration","ka","V","k","quantile")
 
+
+
+q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
+q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2],qvi[[3]][,2]))
+q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
+q1vi$quantile <- 1
+q2vi$quantile <- 2
+q3vi$quantile <- 3
+quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
+
+
+colnames(quantvi)<-c("iteration","ka","V","k","quantile")
+
+
+
 plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
  G <- (ncol(df)-2)/3
@@ -336,7 +390,8 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 
-plotquantile3(quantref[1:29700,],quantnew[1:29700,],quantvb)
+plotquantile3(quantref,quantnew,quantvb)
+plotquantile3(quantref,quantnew,quantvi)
 # gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = 0.95, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 
 geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)

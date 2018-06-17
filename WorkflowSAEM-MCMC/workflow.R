@@ -74,7 +74,8 @@ omega.estimate <- warfa["results"]["omega"]
 res.estimate <- warfa["results"]["respar"]
 parpop.estimate <- warfa["results"]["fixed.effects"]
 
-
+save.image("outputsaem.RData")
+load("outputsaem.RData")
 #compareMCMC
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(parpop.estimate,ncol=length(parpop.estimate),byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),

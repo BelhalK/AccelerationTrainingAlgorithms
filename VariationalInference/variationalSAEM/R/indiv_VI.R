@@ -7,7 +7,8 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	kiter <- 1
 	saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
 	saemix.options<-saemixObject["options"]
-	saemix.model<-saemixObject["model"]
+  	saemix.model<-saemixObject["model"]
+  	saemix.data<-saemixObject["data"]
 	# Initialising random generator
 	OLDRAND<-TRUE
 	set.seed(saemix.options$seed)
@@ -40,26 +41,62 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 
+	etaMc<-etaM
+  	saemix.options$map <- TRUE
+  	saemixObject["results"]["omega"] <- omega.eta
+  	saemixObject["results"]["mean.phi"] <- mean.phi
+  	saemixObject["results"]["phi"] <- phiM
+  	i1.omega2<-varList$ind.eta
+    iomega.phi1<-solve(saemixObject["results"]["omega"][i1.omega2,i1.omega2])
+  	id<-saemixObject["data"]["data"][,saemixObject["data"]["name.group"]]
+  	xind<-saemixObject["data"]["data"][,saemixObject["data"]["name.predictors"], drop=FALSE]
+  	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
+  	id.list<-unique(id)
+  	phi.map<-saemixObject["results"]["mean.phi"]
+
+	for(i in 1:saemixObject["data"]["N"]) {
+	    isuj<-id.list[i]
+	    xi<-xind[id==isuj,,drop=FALSE]
+	    yi<-yobs[id==isuj]
+	    idi<-rep(1,length(yi))
+	    mean.phi1<-mean.phiM[i,i1.omega2]
+	    phii<-saemixObject["results"]["phi"][i,]
+	    phi1<-phii[i1.omega2]
+	    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
+	    phi.map[i,i1.omega2]<-phi1.opti$par
+	}
+	#rep the map nchains time
+	phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
+
+	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+	map.psi<-data.frame(id=id.list,map.psi)
+	map.phi<-data.frame(id=id.list,phi.map)
+	psi_map <- as.matrix(map.psi[,-c(1)])
+	phi_map <- as.matrix(map.phi[,-c(1)])
+	eta_map <- phi_map - mean.phiM
+
+
 	#Initialization
 	L <- 100 #nb iterations MONTE CARLO
 	rho <- 10e-10 #gradient ascent stepsize
 	K <- control$nbiter.gd
 	i <- 10
 	#VI to find the right mean mu (gradient descent along the elbo)
-	mu <- list(etaM[i,],etaM[i,])
+	# mu <- list(etaM[i,],etaM[i,])
 	
-	mu[[1]][1] = 169
-	mu[[1]][2] = 1
-	#if Gamma fixed to Laplace Gamma
-	trueGamma <- control$Gamma.laplace
-	chol.Gamma <- chol(trueGamma[[i]])
-	inv.Gamma <- solve(trueGamma[[i]])
+	# mu[[1]][1] = 169
+	# mu[[1]][2] = 1
+	# #if Gamma fixed to Laplace Gamma
+	# trueGamma <- control$Gamma.laplace
+	# chol.Gamma <- chol(trueGamma[[i]])
+	# inv.Gamma <- solve(trueGamma[[i]])
 
-	obs <- Dargs$yM[Dargs$IdM==i]
-	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-	design[,1] <- 1
-	design[,2] <- Dargs$XM[Dargs$IdM==i,]
-	design <- as.matrix(design)
+	# obs <- Dargs$yM[Dargs$IdM==i]
+	# design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
+	# design[,1] <- 1
+	# design[,2] <- Dargs$XM[Dargs$IdM==i,]
+	# design <- as.matrix(design)
+
 	# for (k in 1:K) {
 	# 	if (k%%10==0) print(k)
 	# 		sample <- list(etaM[i,],etaM[i,])  #list of samples for monte carlo integration
@@ -111,9 +148,62 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	# 		mu[[k+1]] <- mu[[k]] - rho*grad_mu_elbo
 	# }
 
+###LINEAR
+	# i <- 10
+	# obs <- Dargs$yM[Dargs$IdM==i]
+	# design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
+	# design[,1] <- 1
+	# design[,2] <- Dargs$XM[Dargs$IdM==i,]
+	# design <- as.matrix(design)
 	
+	# stan.model <- control$modelstan
+	# stan_data <- list(N = length(obs),height = obs
+	# 				,age = design[,2],
+	# 				beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
+	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
+	# 				pres=sqrt(varList$pres[1]))
+	# # fit <- sampling(stan.model, data = stan_data)
+	# fit <- vb(stan.model, data = stan_data, iter = 50000)
+	# fit_samples = extract(fit)
 	
-	mu.vi <- mu[[K]]
-	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-	return(list(mu=mu))
+	# psiMstan <- tail(fit_samples$beta,L_mcmc)
+	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+	# etaMstan <- phiMstan
+	# etaMstan[,1] <- phiMstan[,1] - mean.phiM[,1]
+	# etaMstan[,2] <- phiMstan[,2] - mean.phiM[,2]
+
+###WARFA
+	i <- 10
+	obs <- Dargs$yM[Dargs$IdM==i]
+	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
+	design[,1] <- Dargs$XM[1,1]
+	design[,2] <- Dargs$XM[Dargs$IdM==i,2]
+	design <- as.matrix(design)
+	
+	mean.psiM <- transphi(mean.phiM,saemixObject["model"]["transform.par"])
+	stan.model <- control$modelstan
+	browser()
+	stan_data <- list(N = length(obs),concentration = obs
+					,time = design[,2],
+					beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],beta3_pop=mean.psiM[i,3],
+					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
+					pres=sqrt(varList$pres[1]))
+
+	fit <- vb(stan.model, data = stan_data, iter = 10000)
+	fit_samples = extract(fit)
+	
+	phiMstan <- tail(fit_samples$beta,L_mcmc)
+	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+	etaMstan <- phiMstan
+	etaMstan[,1] <- phiMstan[,1] - mean.phiM[i,1]
+	etaMstan[,2] <- phiMstan[,2] - mean.phiM[i,2]
+	etaMstan[,3] <- phiMstan[,3] - mean.phiM[i,3]
+	
+
+	eta_map[i,]
+	colMeans(etaMstan)
+	mu <- colMeans(etaMstan)
+	Gamma <- cov(etaMstan)
+	
+	return(list(mu=mu, Gamma = Gamma))
 }

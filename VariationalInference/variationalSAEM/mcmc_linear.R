@@ -106,20 +106,6 @@ K=10000
 i=10
 
 
-#Variational posterior parameters estimation
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
-variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
-mus <- variational.post$mu
-muss <- transpose(as.data.frame(matrix(unlist(mus), nrow=length(unlist(mus[1])))))
-muss$iteration = 1:(K+1)
-plotmcmc(muss[,c(3,1:2)],muss[,c(3,1:2)],title=paste("mean VI output",i))
-
-#MCMC with VI proposal
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
-        Gamma = variational.post$Gamma,
-        nbiter.mcmc = c(0,0,0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
-        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-vi<-mcmc(saemix.model,saemix.data,options_warfavi)$eta
 
 
 #RSTAN VB
@@ -147,13 +133,23 @@ model <- 'data {
 
 
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
+
+#using the samples from vb (drawn from candidate KL posterior)
 options.vb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 vb<-mcmc(saemix.model,saemix.data,options.vb)$eta
 
-# m <- stan_model(model_code = 'parameters {real y;} model {y ~ normal(0,1);}')
-# f <- sampling(modelstan)
-# fit_samples = extract(f)
-# fit_samples$y[1]
+#Calculate mu and gamma of ELBO optimization
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
+mu.vi <- variational.post$mu
+Gamma.vi <- variational.post$Gamma
+
+#MCMC with VI proposal
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
+        Gamma = variational.post$Gamma,
+        nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+vi<-mcmc(saemix.model,saemix.data,options_warfavi)$eta
 
 
 #Autocorrelation
@@ -166,6 +162,9 @@ autocorr.plot(new.obj[,1]) + title("Laplace SAEM Autocorrelation")
 vb.obj <- as.mcmc(vb[[10]])
 autocorr.plot(vb.obj[,1]) + title("VI SAEM Autocorrelation")
 
+
+vi.obj <- as.mcmc(vi[[10]])
+autocorr.plot(vi.obj[,1]) + title("VI SAEM Autocorrelation")
 
 #MSJD
 mssd(ref[[10]][,1])
@@ -212,6 +211,16 @@ indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
 indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
 indsdvb$iteration <- 1:(L_mcmc-start_interval)
 
+indetabarvi <- vi[[i]]
+indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
+indexpecvi$iteration <- 1:(L_mcmc-start_interval)
+
+
+indsdvi <- 0
+indvar <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
+indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
+indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
+indsdvi$iteration <- 1:(L_mcmc-start_interval)
 
 # indetabarvi <- vi[[i]]
 # indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
@@ -226,7 +235,7 @@ indsdvb$iteration <- 1:(L_mcmc-start_interval)
 
 plotmcmc(indexpecref[,c(3,1:2)],indexpecnew[,c(3,1:2)],title=paste("mean",i))
 plotconv3(indexpecref[,c(3,1:2)],indexpecnew[,c(3,1:2)],indexpecvb[,c(3,1:2)],title="mean")
-
+plotconv3(indexpecref[,c(3,1:2)],indexpecnew[,c(3,1:2)],indexpecvi[,c(3,1:2)],title="mean")
 
 #Quantiles plot
 
@@ -268,6 +277,18 @@ for (dim in 1:2){
     qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], 0.95)
   }
   qvb[[dim]]$iteration <- 1:L_mcmc
+  # plotmcmc(qref[[dim]][,c(4,1:3)],qnew2[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
+}
+
+qvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:2){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], 0.05)
+    qvi[[dim]][k,2] <- quantile(vi[[i]][1:k,dim], 0.5)
+    qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], 0.95)
+  }
+  qvi[[dim]]$iteration <- 1:L_mcmc
   # plotmcmc(qref[[dim]][,c(4,1:3)],qnew2[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
@@ -332,6 +353,18 @@ quantvb <- rbind(q1vb[-c(1:burn),],q2vb[-c(1:burn),],q3vb[-c(1:burn),])
 
 colnames(quantvb)<-c("iteration","A","B","quantile")
 
+
+q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1]))
+q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2]))
+q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3]))
+q1vi$quantile <- 1
+q2vi$quantile <- 2
+q3vi$quantile <- 3
+quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
+
+
+colnames(quantvi)<-c("iteration","A","B","quantile")
+
 plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
  G <- (ncol(df)-2)/3
@@ -357,3 +390,5 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 }
 
 plotquantile3(quantref,quantnew,quantvb)
+plotquantile3(quantref,quantnew,quantvi)
+

@@ -387,6 +387,7 @@ for (m in 1:saemix.options$L_mcmc) {
 
 #VI with linear model
 if(opt$nbiter.mcmc[5]>0) {
+	#Initialization
 	etaMc<-etaM
 	propc <- U.eta
 	prop <- U.eta
@@ -404,137 +405,21 @@ if(opt$nbiter.mcmc[5]>0) {
   	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
   	id.list<-unique(id)
   	phi.map<-saemixObject["results"]["mean.phi"]
-
-  	if(Dargs$type=="structural"){
-  		for(i in 1:saemixObject["data"]["N"]) {
-		    isuj<-id.list[i]
-		    xi<-xind[id==isuj,,drop=FALSE]
-		    yi<-yobs[id==isuj]
-		    idi<-rep(1,length(yi))
-		    mean.phi1<-mean.phiM[i,i1.omega2]
-		    phii<-saemixObject["results"]["phi"][i,]
-		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
-		    phi.map[i,i1.omega2]<-phi1.opti$par
-		}
-		#rep the map nchains time
-		phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
-
-	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-		map.psi<-data.frame(id=id.list,map.psi)
-		map.phi<-data.frame(id=id.list,phi.map)
-		psi_map <- as.matrix(map.psi[,-c(1)])
-		phi_map <- as.matrix(map.phi[,-c(1)])
-		eta_map <- phi_map - mean.phiM
-		fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		gradf <- matrix(0L, nrow = length(fpred1), ncol = nb.etas) 
-
-		for (j in 1:nb.etas) {
-			psi_map2 <- psi_map
-			psi_map2[,j] <- psi_map[,j]+psi_map[,j]/1000
-			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			for (i in 1:(Dargs$NM)){
-				r = which(Dargs$IdM==i)
-				gradf[r,j] <- (fpred2[r] - fpred1[r])/(psi_map[i,j]/1000)
-			}
-		}
-
-		gradh <- list(omega.eta,omega.eta)
-		for (i in 1:Dargs$NM){
-			gradh[[i]] <- gradh[[1]]
-		}
-		for (j in 1:nb.etas) {
-			phi_map2 <- phi_map
-			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/1000
-			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-			for (i in 1:(Dargs$NM)){
-				gradh[[i]][,j] <- (psi_map2[i,] - psi_map[i,])/(phi_map[i,]/1000)
-			}
-		}
-		
-		#calculation of the covariance matrix of the proposal
-		Gamma <- chol.Gamma <- inv.chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
-		for (i in 1:(Dargs$NM)){
-			r = which(Dargs$IdM==i)
-	        temp <- gradf[r,]%*%gradh[[i]]
-			Gamma[[i]] <- solve(t(temp)%*%temp/(varList$pres[1])^2+solve(omega.eta))
-			# chol.Gamma[[i]] <- chol(Gamma[[i]])
-			# inv.chol.Gamma[[i]] <- solve(chol.Gamma[[i]])
-			# inv.Gamma[[i]] <- solve(Gamma[[i]])
-		}
-		Gamma.laplace <- Gamma
-		
-		
-  	} else {
-  		for(i in 1:saemixObject["data"]["N"]) {
-		    isuj<-id.list[i]
-		    xi<-xind[id==isuj,,drop=FALSE]
-		#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
-		    yi<-yobs[id==isuj]
-		    idi<-rep(1,length(yi))
-		    mean.phi1<-mean.phiM[i,i1.omega2]
-		    phii<-saemixObject["results"]["phi"][i,]
-		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_d, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
-		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
-		    phi.map[i,i1.omega2]<-phi1.opti$par
-		}
-		#rep the map nchains time
-		phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ] 
-	  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-		map.psi<-data.frame(id=id.list,map.psi)
-		map.phi<-data.frame(id=id.list,phi.map)
-
-		psi_map <- as.matrix(map.psi[,-c(1)])
-		phi_map <- as.matrix(map.phi[,-c(1)])
-		eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
-		
-		#gradient at the map estimation
-		gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
-
-		for (j in 1:nb.etas) {
-			phi_map2 <- phi_map
-			phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
-			psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			DYF[Uargs$ind.ioM]<- fpred1
-			l1<-colSums(DYF)
-			fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			DYF[Uargs$ind.ioM]<- fpred2
-			l2<-colSums(DYF)
-
-			for (i in 1:(Dargs$NM)){
-				gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
-			}
-		}
-	#calculation of the covariance matrix of the proposal
-		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-		DYF[Uargs$ind.ioM]<- fpred
-		denom <- colSums(DYF)
-		
-		Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
-		z <- matrix(0L, nrow = length(fpred), ncol = 1) 
-		for (i in 1:(Dargs$NM)){
-			Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
-			# chol.Gamma[[i]] <- chol(Gamma[[i]])
-			# inv.Gamma[[i]] <- solve(Gamma[[i]])
-		}
-
-  	}
-	#Initialization
-	mu.vi <- control$mu
+	etaM <- mean.phiM
+	mu.vi <- mean.phiM
 	# Gamma <- control$Gamma
 	# mu.vi <- eta_map
 	Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
 
 	for (i in 1:(Dargs$NM)){
-		Gamma.vi[[i]] <- Gamma[[i]]
+		Gamma.vi[[i]] <- control$Gamma
 		chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
 		inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
+
+		etaM[i,] <- control$mu
+		mu.vi[i,]<- control$mu
 	}
 
-	etaM <- mu.vi
   	phiM<-etaM+mean.phiM
   	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
   	if(Dargs$type=="structural"){
@@ -551,6 +436,7 @@ if(opt$nbiter.mcmc[5]>0) {
 		if(m%%100==0){
 				print(m)
 		} 
+		
 		for (i in 1:(nrow(phiM))) {
 			eta_list[[i]][m,] <- etaM[i,]
 		}
@@ -589,7 +475,7 @@ if(opt$nbiter.mcmc[5]>0) {
 
 }
 
-#VI with rstan
+#Vb with rstan
 if(opt$nbiter.mcmc[6]>0) {
 ## using Rstan package
 	#Initialization
@@ -606,8 +492,9 @@ if(opt$nbiter.mcmc[6]>0) {
 	# 				beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
 	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 	# 				pres=sqrt(varList$pres[1]))
-	# # f <- vb(stan.model,data = stan_data)
-	# fit <- sampling(stan.model, data = stan_data)
+	# browser()
+	# # fit <- sampling(stan.model, data = stan_data)
+	# fit <- vb(stan.model, data = stan_data, iter = 50000)
 	# fit_samples = extract(fit)
 	
 	# psiMstan <- tail(fit_samples$beta,L_mcmc)
@@ -615,35 +502,41 @@ if(opt$nbiter.mcmc[6]>0) {
 	# etaMstan <- phiMstan
 	# etaMstan[,1] <- phiMstan[,1] - mean.phiM[,1]
 	# etaMstan[,2] <- phiMstan[,2] - mean.phiM[,2]
+	# colMeans(etaMstan)
+
 	# # browser()
 	# for (i in 1:(nrow(phiM))) {
 	# 		eta_list[[i]] <- etaMstan
 	# }
-	browser()
+	
 
 	i <- 10
+	browser()
 	obs <- Dargs$yM[Dargs$IdM==i]
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-	design[,1] <- 1
-	design[,2] <- Dargs$XM[Dargs$IdM==i,]
+	design[,1] <- Dargs$XM[1,1]
+	design[,2] <- Dargs$XM[Dargs$IdM==i,2]
 	design <- as.matrix(design)
 	
 	stan.model <- control$modelstan
-	stan_data <- list(N = length(obs),height = obs
-					,age = design[,2],
-					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
-					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
+	stan_data <- list(N = length(obs),concentration = obs
+					,time = design[,2],
+					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],beta3_pop=mean.phiM[i,3],
+					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
-	# f <- vb(stan.model,data = stan_data)
-	fit <- sampling(stan.model, data = stan_data)
+
+	fit <- vb(stan.model, data = stan_data, iter = 2000)
 	fit_samples = extract(fit)
 	
-	psiMstan <- tail(fit_samples$beta,L_mcmc)
-	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+	phiMstan <- tail(fit_samples$beta,L_mcmc)
+	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	etaMstan <- phiMstan
-	etaMstan[,1] <- phiMstan[,1] - mean.phiM[,1]
-	etaMstan[,2] <- phiMstan[,2] - mean.phiM[,2]
-	# browser()
+	etaMstan[,1] <- phiMstan[,1] - mean.phiM[i,1]
+	etaMstan[,2] <- phiMstan[,2] - mean.phiM[i,2]
+	etaMstan[,3] <- phiMstan[,3] - mean.phiM[i,3]
+	colMeans(etaMstan)
+	eta_map[10,]
+
 	for (i in 1:(nrow(phiM))) {
 			eta_list[[i]] <- etaMstan
 	}
