@@ -9,7 +9,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
-save.image("warfa_rstan.RData")
+# save.image("warfa_rstan.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
   source('aaa_generics.R') 
@@ -22,6 +22,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/va
   source('estep_mcmc.R')
   source('variationalinference.R')
   source('main.R')
+  source('indiv_vi.R') 
   source('mcmc_final.R')
   source('main_estep.R')
   source('main_initialiseMainAlgo.R') 
@@ -29,7 +30,6 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/va
   source('SaemixData.R')
   source('SaemixModel.R') 
   source('SaemixRes.R') 
-  # source('SaemixRes_c.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
   source('graphplot.R')
@@ -91,7 +91,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=100
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -108,6 +108,23 @@ variational.post$mu
 
 
 #RSTAN VB
+
+model1cpt<-function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  time<-xidep[,2]
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
+  return(ypred)
+}
+
+saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE))
 
 model <- 'data {
           int<lower=0> N;// Number of observations
@@ -130,22 +147,18 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-          concentration ~ normal(100*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres^2);
+          concentration ~ normal(100*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
 
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
-#using the samples from vb (drawn from candidate KL posterior)
-options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
-vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
 #Calculate mu and gamma of ELBO optimization
 variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
 mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
-
 
 #MCMC with VI proposal
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
@@ -154,6 +167,10 @@ options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variation
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
+
+#using the samples from vb (drawn from candidate KL posterior)
+options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[10]])

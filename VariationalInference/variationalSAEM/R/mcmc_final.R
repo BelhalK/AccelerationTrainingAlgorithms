@@ -385,7 +385,7 @@ for (m in 1:saemix.options$L_mcmc) {
 }
 
 
-#VI with linear model
+#VI with vb method outputs (mu and gamma)
 if(opt$nbiter.mcmc[5]>0) {
 	#Initialization
 	etaMc<-etaM
