@@ -54,11 +54,11 @@ model1cpt<-function(psi,id,xidep) {
   return(ypred)
 }
 
-saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE))
+# saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+#   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+#   byrow=TRUE))
 
 
 ##RUNS
@@ -98,33 +98,20 @@ ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,1,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-Gamma<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$Gamma
 
-K=100
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
-variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
-variational.post$mu
+
+#Hand made ADVI
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,1,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+maps<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)
+Gammamap <- maps$Gamma
+etamap <- maps$map
+# K=100
+# variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
+# variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
+# variational.post$mu
 
 
 #RSTAN VB
-
-model1cpt<-function(psi,id,xidep) { 
-  dose<-xidep[,1]
-  time<-xidep[,2]
-  ka<-psi[id,1]
-  V<-psi[id,2]
-  k<-psi[id,3]
-
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
-  return(ypred)
-}
-
-saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE))
 
 model <- 'data {
           int<lower=0> N;// Number of observations
@@ -140,7 +127,7 @@ model <- 'data {
           real<lower=0>  pres;
         }
         parameters {
-          vector[3] beta;
+          vector<lower=0>[3] beta;
         }
         model {
           //Priors
@@ -160,17 +147,30 @@ variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_war
 mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
 
-#MCMC with VI proposal
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=variational.post$mu,
-        Gamma = variational.post$Gamma,
+#MCMC with maps
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=etamap,
+        Gamma = Gammamap,
         nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
 
-#using the samples from vb (drawn from candidate KL posterior)
-options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
-vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
+#MCMC with maps
+i <- 10
+test <- etamap
+test[i,] <- etamap[i,] +0.05
+eta.vi <- etamap
+Gammavi <- Gammamap
+eta.vi[i,] <- mu.vi
+Gammavi[[i]] <- Gamma.vi
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
+        nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+
+# #using the samples from vb (drawn from candidate KL posterior)
+# options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+# vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[10]])
@@ -179,9 +179,8 @@ autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
 new.obj <- as.mcmc(new[[10]])
 autocorr.plot(new.obj[,1]) + title("Laplace SAEM Autocorrelation")
 
-vb.obj <- as.mcmc(vb[[10]])
-autocorr.plot(vb.obj[,1]) + title("vb SAEM Autocorrelation")
-
+# vb.obj <- as.mcmc(vb[[10]])
+# autocorr.plot(vb.obj[,1]) + title("vb SAEM Autocorrelation")
 
 vi.obj <- as.mcmc(vi[[10]])
 autocorr.plot(vi.obj[,1]) + title("vb SAEM Autocorrelation")
@@ -222,16 +221,16 @@ indmeansq <- data.frame(apply(new[[i]][-(1:start_interval),], 2, cummean))^2
 indsdnew <- indsdnew + sqrt(pmax(zero,indvar - indmeansq))
 indsdnew$iteration <- 1:(L_mcmc-start_interval)
 
-indetabarvb <- vb[[i]]
-indexpecvb <- data.frame(apply(indetabarvb[-(1:start_interval),], 2, cummean))
-indexpecvb$iteration <- 1:(L_mcmc-start_interval)
+# indetabarvb <- vb[[i]]
+# indexpecvb <- data.frame(apply(indetabarvb[-(1:start_interval),], 2, cummean))
+# indexpecvb$iteration <- 1:(L_mcmc-start_interval)
 
 
-indsdvb <- 0
-indvar <- data.frame(apply(vb[[i]][-(1:start_interval),]^2, 2, cummean))
-indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
-indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
-indsdvb$iteration <- 1:(L_mcmc-start_interval)
+# indsdvb <- 0
+# indvar <- data.frame(apply(vb[[i]][-(1:start_interval),]^2, 2, cummean))
+# indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
+# indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
+# indsdvb$iteration <- 1:(L_mcmc-start_interval)
 
 
 indetabarvi <- vi[[i]]
@@ -245,8 +244,8 @@ indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
 indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
 indsdvi$iteration <- 1:(L_mcmc-start_interval)
 
-plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
-plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvb[,c(4,1:3)],title="mean")
+# plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
+# plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvb[,c(4,1:3)],title="mean")
 plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvi[,c(4,1:3)],title="mean")
 
 
@@ -282,17 +281,17 @@ for (dim in 1:3){
 
 
 
-qvb <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
-for (dim in 1:3){
-  print(dim)
-  for (k in 1:L_mcmc){
-    qvb[[dim]][k,1] <- quantile(vb[[i]][1:k,dim], 0.05)
-    qvb[[dim]][k,2] <- quantile(vb[[i]][1:k,dim], 0.5)
-    qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], 0.95)
-  }
-  qvb[[dim]]$iteration <- 1:L_mcmc
-  # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
-}
+# qvb <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+# for (dim in 1:3){
+#   print(dim)
+#   for (k in 1:L_mcmc){
+#     qvb[[dim]][k,1] <- quantile(vb[[i]][1:k,dim], 0.05)
+#     qvb[[dim]][k,2] <- quantile(vb[[i]][1:k,dim], 0.5)
+#     qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], 0.95)
+#   }
+#   qvb[[dim]]$iteration <- 1:L_mcmc
+#   # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
+# }
 
 
 
@@ -351,22 +350,21 @@ q2new$quantile <- 2
 q3new$quantile <- 3
 quantnew <- rbind(q1new[-c(1:burn),],q2new[-c(1:burn),],q3new[-c(1:burn),])
 
-
 colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
-plotquantile(quantref,quantnew)
+# plotquantile(quantref,quantnew)
 
 
 
-q1vb <- data.frame(cbind(iteration,qvb[[1]][,1],qvb[[2]][,1],qvb[[3]][,1]))
-q2vb <- data.frame(cbind(iteration,qvb[[1]][,2],qvb[[2]][,2],qvb[[3]][,2]))
-q3vb <- data.frame(cbind(iteration,qvb[[1]][,3],qvb[[2]][,3],qvb[[3]][,3]))
-q1vb$quantile <- 1
-q2vb$quantile <- 2
-q3vb$quantile <- 3
-quantvb <- rbind(q1vb[-c(1:burn),],q2vb[-c(1:burn),],q3vb[-c(1:burn),])
+# q1vb <- data.frame(cbind(iteration,qvb[[1]][,1],qvb[[2]][,1],qvb[[3]][,1]))
+# q2vb <- data.frame(cbind(iteration,qvb[[1]][,2],qvb[[2]][,2],qvb[[3]][,2]))
+# q3vb <- data.frame(cbind(iteration,qvb[[1]][,3],qvb[[2]][,3],qvb[[3]][,3]))
+# q1vb$quantile <- 1
+# q2vb$quantile <- 2
+# q3vb$quantile <- 3
+# quantvb <- rbind(q1vb[-c(1:burn),],q2vb[-c(1:burn),],q3vb[-c(1:burn),])
 
 
-colnames(quantvb)<-c("iteration","ka","V","k","quantile")
+# colnames(quantvb)<-c("iteration","ka","V","k","quantile")
 
 
 
@@ -377,8 +375,6 @@ q1vi$quantile <- 1
 q2vi$quantile <- 2
 q3vi$quantile <- 3
 quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
-
-
 colnames(quantvi)<-c("iteration","ka","V","k","quantile")
 
 
@@ -407,9 +403,9 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 
-plotquantile3(quantref,quantnew,quantvb)
+# plotquantile3(quantref,quantnew,quantvb)
 plotquantile3(quantref,quantnew,quantvi)
-# gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = 0.95, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 
-geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)
-geweke.plot(mcmc.list(as.mcmc(new[[10]])), frac1=0.1, frac2=0.5)
+# gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = 0.95, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
+# geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)
+# geweke.plot(mcmc.list(as.mcmc(new[[10]])), frac1=0.1, frac2=0.5)

@@ -56,7 +56,7 @@ mcmc<-function(model,data,control=list()) {
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
-
+	eta_map <- etaM
 
 	eta_listref <- list(as.data.frame(matrix(nrow = saemix.options$L_mcmc,ncol = ncol(phiM))))
 
@@ -345,30 +345,7 @@ for (m in 1:saemix.options$L_mcmc) {
 		for (i in 1:(Dargs$NM)){
 			propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.Gamma[[i]])
 			prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.Gamma[[i]])
-
-			# propc[i] <- -sum(log(dt((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.chol.Gamma[[i]],df,log=FALSE)))
-			# prop[i] <- -sum(log(dt((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.chol.Gamma[[i]],df,log=FALSE)))
 		}
-		
-		
-
-		# logincomplete<- matrix(0L, nrow = Dargs$NM, ncol = 1) 
-		# meantheo<- matrix(0L, nrow = Dargs$NM, ncol = 2) 
-		# z <- matrix(0L, nrow = length(fpred1), ncol = 1) 
-		# proptheo <- prop
-		# propctheo <- prop
-		# for (i in 1:(Dargs$NM)){
-		#r = which(Dargs$IdM==i)
-	 #        vary <- gradf[r,]%*%omega.eta%*%t(gradf[r,])+diag((varList$pres[1])^2,length(r))
-		# 	meany <- gradf[r,]%*%mean.phi[i,]
-		# 	svary <- solve(vary)
-		# 	logincomplete[i] <- 0.5*rowSums(t((Dargs$yM[r]-meany))*(t((Dargs$yM[r]-meany))%*%svary)) - 0.5*log(det(vary))
-		# 	meantheo[i,] <- t(Gamma[[i]]%*%t(gradf[r,])%*%(Dargs$yM[r]-meany))
-		# 	proptheo[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-meantheo[i,])*(etaM[i,varList$ind.eta]-meantheo[i,])%*%inv.Gamma[[i]])- 0.5*log(det(Gamma[[i]]))
-		# 	propctheo[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-meantheo[i,])*(etaMc[i,varList$ind.eta]-meantheo[i,])%*%inv.Gamma[[i]])- 0.5*log(det(Gamma[[i]]))
-	 #     }
-		# deltutheo<-Uc.y-U.y+Uc.eta-U.eta + proptheo - propctheo
-	
 		
 
 		deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
@@ -386,6 +363,7 @@ for (m in 1:saemix.options$L_mcmc) {
 
 
 #VI with vb method outputs (mu and gamma)
+
 if(opt$nbiter.mcmc[5]>0) {
 	#Initialization
 	etaMc<-etaM
@@ -407,17 +385,15 @@ if(opt$nbiter.mcmc[5]>0) {
   	phi.map<-saemixObject["results"]["mean.phi"]
 	etaM <- mean.phiM
 	mu.vi <- mean.phiM
-	# Gamma <- control$Gamma
-	# mu.vi <- eta_map
 	Gamma.vi <- chol.Gamma.vi <- inv.Gamma.vi <- list(omega.eta,omega.eta)
 
 	for (i in 1:(Dargs$NM)){
-		Gamma.vi[[i]] <- control$Gamma
+		Gamma.vi[[i]] <- control$Gamma[[i]]
 		chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
 		inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
 
-		etaM[i,] <- control$mu
-		mu.vi[i,]<- control$mu
+		etaM[i,] <- control$mu[i,]
+		mu.vi[i,]<- control$mu[i,]
 	}
 
   	phiM<-etaM+mean.phiM
@@ -444,7 +420,6 @@ if(opt$nbiter.mcmc[5]>0) {
 				for (i in 1:(Dargs$NM)){
 					Mi <- rnorm(nb.etas)%*%chol.Gamma.vi[[i]]
 					etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + Mi
-					# etaMc[i,varList$ind.eta]<- mu.vi[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma.vi[[i]]
 				}
 
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
@@ -461,16 +436,15 @@ if(opt$nbiter.mcmc[5]>0) {
 					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-mu.vi[i,varList$ind.eta])%*%inv.Gamma.vi[[i]])
 
 				}
-				
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				print(length(ind)/Dargs$NM)
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
 
 			}
-
 	}
 
 }
@@ -545,5 +519,5 @@ if(opt$nbiter.mcmc[6]>0) {
 }
 
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-	return(list(eta=eta_list, eta_ref=eta_listref, Gamma=Gamma.laplace))
+	return(list(eta=eta_list, eta_ref=eta_listref, Gamma=Gamma.laplace, map = eta_map))
 }

@@ -69,7 +69,7 @@ Cov.CondInit  0.0  0  0  0
     Algorithms: estimation only
     Number of iterations:  K1=300, K2=100 
     Number of chains:  1 
-    Seed:  3456 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -84,20 +84,20 @@ Cov.CondInit  0.0  0  0  0
 ----------------------------------------------------
      Parameter   Estimate
 [1,] Tlag         0.20   
-[2,] ka           1.77   
+[2,] ka           0.88   
 [3,] V           10.00   
 [4,] beta_wt(V)   0.00   
 [5,] Cl           2.00   
 [6,] beta_wt(Cl)  0.00   
-[7,] a            0.86   
+[7,] a            0.26   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-Tlag omega2.Tlag 0.73    
-ka   omega2.ka   1.39    
+Tlag omega2.Tlag 2.57    
+ka   omega2.ka   0.32    
 V    omega2.V    0.15    
-Cl   omega2.Cl   9.28    
+Cl   omega2.Cl   9.03    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
