@@ -8,6 +8,9 @@
 #' algorithm proposed by Kuhn and Lavielle (see reference). Details of the
 #' algorithm can be found in the pdf file accompanying the package.
 #' 
+#' @name saemix
+#' @aliases initialiseMainAlgo mstep estep
+#' 
 #' @param model an object of class SaemixModel, created by a call to the
 #' function \code{\link{saemixModel}}
 #' @param data an object of class SaemixData, created by a call to the function
@@ -61,7 +64,7 @@
 #' 
 #' # Not run (strict time constraints for CRAN)
 #' # saemix.fit<-saemix(saemix.model,saemix.data,list(seed=632545,directory="newtheo",
-#' # save=FALSE,save.graphs=FALSE))
+#' # save=FALSE,save.graphs=FALSE), type="structural")
 #' 
 #' # Prints a summary of the results
 #' # print(saemix.fit)
@@ -74,8 +77,8 @@
 #' 
 #' 
 #' @export saemix
-saemix_stan<-function(model,data,control=list()) {
-library("mlxR")
+
+saemixmaps<-function(model,data,control=list()) {
 
 # Convergence plots during fit (special function, not user-level)
   convplot.infit<-function(allpar,K1,niter=0) {
@@ -101,16 +104,13 @@ library("mlxR")
     return()
   }
 
-
   saemixObject<-new(Class="SaemixObject",data=data,model=model,options=control)
 #  saemixObject<-new(Class="SaemixObject",data=saemix.data, model=saemix.model,options=saemix.options)
-  
   opt.warn<-getOption("warn")
-
   if(!saemixObject["options"]$warnings) options(warn=-1)
 
+
   saemix.options<-saemixObject["options"]
-  saemix.options$nb.chains <- control$nb.chains
   saemix.model<-saemixObject["model"]
   saemix.data<-saemixObject["data"]
   saemix.data@ocov<-saemix.data@ocov[saemix.data@data[,"mdv"]==0,,drop=FALSE]
@@ -127,8 +127,8 @@ library("mlxR")
 ############################################
   
 # Initialisation - creating several lists with necessary information extracted (Uargs, Dargs, opt,varList, suffStat)
+
   xinit<-initialiseMainAlgo(saemix.data,saemix.model,saemix.options)
-  
   saemix.model<-xinit$saemix.model
   Dargs<-xinit$Dargs
   Uargs<-xinit$Uargs
@@ -140,13 +140,20 @@ library("mlxR")
   betas<-betas.ini<-xinit$betas
   fixed.psi<-xinit$fixedpsi.ini
   var.eta<-varList$diag.omega
-  theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+  if (Dargs$type=="structural"){
+    theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+    parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
+    colnames(parpop)<-c(saemix.model["name.modpar"], saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
+    allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
+    colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
+  } else{
+    theta0<-c(fixed.psi,var.eta[Uargs$i1.omega2])
+    parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)))
+    colnames(parpop)<-c(saemix.model["name.modpar"], saemix.model["name.random"])
+    allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)))
+    colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"])
+  }
 
-  
-  parpop<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1),ncol=(Uargs$nb.parameters+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
-  colnames(parpop)<-c(saemix.model["name.modpar"], saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
-  allpar<-matrix(data=0,nrow=(saemix.options$nbiter.tot+1), ncol=(Uargs$nb.betas+length(Uargs$i1.omega2)+length(saemix.model["indx.res"])))
-  colnames(allpar)<-c(saemix.model["name.fixed"],saemix.model["name.random"], saemix.model["name.res"][saemix.model["indx.res"]])
   parpop[1,]<-theta0
   allpar[1,]<-xinit$allpar0
   
@@ -170,7 +177,12 @@ library("mlxR")
 if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
+maps.iter <- 10
+  maps <- list(as.data.frame(matrix(nrow = maps.iter,ncol = ncol(phiM))))
 
+  for (i in 1:(nrow(phiM))) {
+    maps[[i]] <- as.data.frame(matrix(nrow = maps.iter,ncol = ncol(phiM)))
+  }
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 # SAEM convergence plots
@@ -194,18 +206,19 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   }
 
 	# E-step
-  xmcmc<-estep_stan(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+  
+  
+  xmcmc<-estepmaps(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,maps)
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
-
+  maps <- xmcmc$maps
   #  psiM<-transphi(phiM,saemix.model["transform.par"])
   
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    
-  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,saemixObject)
+  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
   	varList<-xstoch$varList
   	mean.phi<-xstoch$mean.phi
   	phi<-xstoch$phi
@@ -219,14 +232,21 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   	l1<-betas.ini
   	l1[Uargs$indx.betaI]<-fixed.psi
   	l1[Uargs$indx.betaC]<-betaC
-    varList$pres[Uargs$ind.res] = 1
-  	allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+     if(Dargs$type=="structural") {
+      allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+    } else{
+      allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2])
+    }
   } else { #end of loop on if (stepsize[kiter]>0)
     allpar[(kiter+1),]<-allpar[kiter,]
   }
-  theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+     if(Dargs$type=="structural") {
+      theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+    } else{
+      theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
+    }
+    
   parpop[(kiter+1),]<-theta
-
 # End of loop on kiter
 }
 
@@ -269,7 +289,11 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
   saemix.model["indx.omega"]<-Uargs$i1.omega2
 
 # Filling in result object
-    saemix.res<-new(Class="SaemixRes",name.fixed=saemix.model["name.fixed"], name.random=saemix.model["name.random"],name.res=saemix.model["name.res"], fixed.effects=c(fixed.effects),fixed.psi=c(fixed.psi),betas=betas,betaC=betaC, omega=varList$omega,respar=varList$pres,cond.mean.phi=cond.mean.phi,cond.var.phi=cond.var.phi, mean.phi=mean.phi, phi=phi,phi.samp=phi.samp,parpop=parpop,allpar=allpar,MCOV=varList$MCOV)
+  if(Dargs$type=="structural") {
+    saemix.res<-new(Class="SaemixRes",name.fixed=saemix.model["name.fixed"], name.random=saemix.model["name.random"],name.res=saemix.model["name.res"], fixed.effects=c(fixed.effects),fixed.psi=c(fixed.psi),betas=betas,betaC=betaC, omega=varList$omega,respar=varList$pres,cond.mean.phi=cond.mean.phi,cond.var.phi=cond.var.phi, mean.phi=mean.phi, phi=phi,phi.samp=phi.samp,parpop=parpop,allpar=allpar,MCOV=varList$MCOV,modeltype="structural")
+  }else{
+    saemix.res<-new(Class="SaemixRes",name.fixed=saemix.model["name.fixed"], name.random=saemix.model["name.random"],name.res=saemix.model["name.res"], fixed.effects=c(fixed.effects),fixed.psi=c(fixed.psi),betas=betas,betaC=betaC, omega=varList$omega,cond.mean.phi=cond.mean.phi,cond.var.phi=cond.var.phi, mean.phi=mean.phi, phi=phi,phi.samp=phi.samp,parpop=parpop,allpar=allpar,MCOV=varList$MCOV,modeltype="likelihood")
+  }
   saemix.res["indx.res"]<-Uargs$ind.res
   saemix.res["indx.fix"]<-Uargs$indx.betaI
   saemix.res["indx.cov"]<-Uargs$indx.betaC
@@ -287,10 +311,11 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 # ECO TODO check
 # a la fin: mais verifier, pe pb de distribution ??? ie allpar sur l'echelle des betas et pas parpop ? a verifier
 # saemix.res["allpar"]<-allpar
-# saemix.res["parpop"]<-allpar[,-c(indx.betaC)]
+# saemix.res["parpop"]<-allpar[,-c(Uargs$indx.betaC)]
 
 #### Final computations
 # Compute the MAP estimates of the PSI_i's 
+
   if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
 
 # Compute the Fisher Information Matrix & update saemix.res
@@ -325,6 +350,7 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
        }
      }
    }
+
   if(saemix.options$save) {
     namres<-ifelse(saemix.options$directory=="","pop_parameters.txt", file.path(saemix.options$directory,"pop_parameters.txt"))
     xtry<-try(sink(namres))
@@ -366,7 +392,6 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 #    default.saemix.plots(saemixObject)
 
     dev.off()
-    
     if(saemix.options$directory=="") namgr<-"individual_fits.ps" else
       namgr<-file.path(saemix.options$directory,"individual_fits.ps")
     postscript(namgr,horizontal=FALSE)
@@ -379,5 +404,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(parpop)
+  return(list(par=parpop,maps=maps))
 }

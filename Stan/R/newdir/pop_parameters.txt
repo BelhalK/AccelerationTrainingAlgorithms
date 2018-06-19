@@ -4,65 +4,64 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset oxboys.saemix 
-    Structured data: height ~ age | Subject 
-    Predictor: age (yr) 
+Dataset warfarin.saemix 
+    Structured data: y ~ amount + time | id 
+    X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     26 
-    number of observations: 234 
-    average/min/max nb obs: 9.00  /  9  /  9 
+    number of subjects:     30 
+    number of observations: 330 
+    average/min/max nb obs: 11.00  /  11  /  11 
 First 10 lines of data:
-   Subject     age height mdv cens occ ytype
-1        1 -1.0000  140.5   0    0   1     1
-2        1 -0.7479  143.4   0    0   1     1
-3        1 -0.4630  144.8   0    0   1     1
-4        1 -0.1643  147.1   0    0   1     1
-5        1 -0.0027  147.7   0    0   1     1
-6        1  0.2466  150.2   0    0   1     1
-7        1  0.5562  151.7   0    0   1     1
-8        1  0.7781  153.3   0    0   1     1
-9        1  0.9945  155.8   0    0   1     1
-10       2 -1.0000  136.9   0    0   1     1
+   id amount time          y mdv cens occ ytype
+1   1    100    0 -0.1287322   0    0   1     1
+2   1    100    1 10.4954140   0    0   1     1
+3   1    100    2 10.8273847   0    0   1     1
+4   1    100    3 11.6835478   0    0   1     1
+5   1    100    4 13.7256113   0    0   1     1
+6   1    100    5 12.1944009   0    0   1     1
+7   1    100    6 12.4363837   0    0   1     1
+8   1    100    7 12.7811213   0    0   1     1
+9   1    100    8 11.9346229   0    0   1     1
+10  1    100    9 12.5585644   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear model
-function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (2 columns, base and slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  base<-psi[id,1]
-  slope<-psi[id,2]
-  f<-base+slope*x
-  return(f)
+  Model function:  warfarin  Model type:  structural
+function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  k<-psi[id,3]
+
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
+  return(ypred)
 }
-  Nb of parameters: 2 
-      parameter names:  base slope 
+  Nb of parameters: 3 
+      parameter names:  ka V k 
       distribution:
      Parameter Distribution Estimated
-[1,] base      log-normal   Estimated
-[2,] slope     log-normal   Estimated
+[1,] ka        log-normal   Estimated
+[2,] V         log-normal   Estimated
+[3,] k         log-normal   Estimated
   Variance-covariance matrix:
-      base slope
-base     1     0
-slope    0     1
+   ka V k
+ka  1 0 0
+V   0 1 0
+k   0 0 1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             base slope
-Pop.CondInit  140     1
+             ka V k
+Pop.CondInit  1 7 1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=40, K2=1 
+    Number of iterations:  K1=400, K2=100 
     Number of chains:  1 
-    Seed:  395246 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -76,18 +75,21 @@ Pop.CondInit  140     1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] base      149.2   
-[2,] slope       6.3   
-[3,] a           1.0   
+[1,] ka        0.33    
+[2,] V         4.39    
+[3,] k         0.11    
+[4,] a         1.91    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-      Parameter    Estimate
-base  omega2.base  0.0029  
-slope omega2.slope 0.0624  
+   Parameter Estimate
+ka omega2.ka 3.1e-15 
+V  omega2.V  3.2e-02 
+k  omega2.k  5.0e-08 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.base omega2.slope
-omega2.base  1           0           
-omega2.slope 0           1           
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       
