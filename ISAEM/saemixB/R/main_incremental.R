@@ -191,6 +191,8 @@ if (saemix.options$sampling=='seq'){
 ind_rand<-1:nb_replacement
 
 
+summary <- as.data.frame(matrix(nrow = nrow(mean.phi),ncol = saemix.options$nbiter.tot))
+chosen <- as.data.frame(matrix(nrow = nrow(mean.phi),ncol = saemix.options$nbiter.tot))
 
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
@@ -218,6 +220,14 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
   if (kiter <= saemix.options$nbiter.tot){
     xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
+    eta_map <- xmcmc$map
+    summary[,kiter] <- eta_map[,1]
+    indchosen <- xmcmc$indchosen
+    block <- setdiff(1:Dargs$NM, indchosen)
+
+    chosen[block,kiter] <- 0
+    chosen[indchosen,kiter] <- 1
+
     ind_rand <- ind_rand + nb_replacement
   }else{
     xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
@@ -414,6 +424,6 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
   }
 
   options(warn=opt.warn)
-
-  return(parpop)
+  # return(parpop)
+  return(list(param = parpop, summary = summary[,1:30], chosen = chosen[,1:30]))
 }

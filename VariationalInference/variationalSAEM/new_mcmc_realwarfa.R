@@ -147,7 +147,7 @@ variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_war
 mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
 
-#MCMC with maps
+#IMH with maps (new kernel)
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=etamap,
         Gamma = Gammamap,
         nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
@@ -155,7 +155,7 @@ options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=etamap,
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
 
-#MCMC with maps
+#IMH with ADVI outputs
 i <- 10
 test <- etamap
 test[i,] <- etamap[i,] +0.05

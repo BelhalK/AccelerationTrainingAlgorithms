@@ -188,7 +188,11 @@ indiv.variational.inference<-function(model,data,control=list()) {
 					beta1_pop=mean.psiM[i,1],beta2_pop=mean.psiM[i,2],beta3_pop=mean.psiM[i,3],
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
-
+	# stan_data <- list(N = length(obs),concentration = obs
+	# 				,time = design[-1,2],
+	# 				beta1_pop=psi_map[i,1],beta2_pop=psi_map[i,2],beta3_pop=psi_map[i,3],
+	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
+	# 				pres=sqrt(varList$pres[1]))
 
 	fit <- vb(stan.model, data = stan_data, iter = 100000)
 	fit_samples = extract(fit)
@@ -199,7 +203,7 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[i,1]
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[i,2]
 	etaMstan[,3] <- phiMstan[,3] - mean.phiM[i,3]
-	
+	browser()
 	eta_map[i,]
 	colMeans(etaMstan)
 	mu <- colMeans(etaMstan)

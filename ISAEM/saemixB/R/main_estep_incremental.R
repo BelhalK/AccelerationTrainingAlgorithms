@@ -41,8 +41,8 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	yobs<-saemixObject["data"]["data"][,saemixObject["data"]["name.response"]]
   	id.list<-unique(id)
   	phi.map<-saemixObject["results"]["mean.phi"]
-
-	
+  	eta_map <- phi.map
+  	ind_chosen <- l[ind_rand]
 		# MAP calculation
   	if (kiter < 30 && length(ind_rand)!=Dargs$NM){
 	 for(i in 1:saemixObject["data"]["N"]) {
@@ -66,7 +66,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	phi_map <- as.matrix(map.phi[,-c(1)])
 	eta_map <- phi_map - mean.phiM
 
-	weight <- eta_map[,2]
+	weight <- eta_map[,1]
 	gamma = 1
 	
 	for (m in 1:Dargs$NM){
@@ -74,46 +74,29 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	}
 	weight <- weight/sum(weight)
 	nb.replacement <- length(ind_rand)
-	ind <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE, prob = weight)
-	block <- setdiff(1:Dargs$NM, ind)
-	# mean <- psi_map
-	# for (m in 1:Dargs$NM){
-	# mean[m,] <- colMeans(psi_map)	
-	# }
 	
+	indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE, prob = weight)
+	# indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE)
+	block <- setdiff(1:Dargs$NM, indchosen)
 
-	# param <- Uargs$ind.fix1
-	# nb.replacement <- length(ind_rand)
-	# dist <- data.frame(psi_map - mean)
-	# dist$indiv <- 1:Dargs$NM
-	
-	# dist <- dist[order(dist[,param],decreasing=FALSE),]
-	# block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
-
-	# if ((kiter %% 2) == 0){
-	# 	dist <- dist[order(dist[,param],decreasing=TRUE),]
-	# 	block <- setdiff(1:Dargs$NM, dist[1:nb.replacement,4])
-	# }
-
-	# if ((kiter %% 3) == 0){
-	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
-	# 	block <- setdiff(1:Dargs$NM, dist[25 :50,4])
-	# }
-
-	# if ((kiter %% 4) == 0){
-	# 	dist <- dist[order(dist[,param],decreasing=FALSE),]
-	# 	block <- setdiff(1:Dargs$NM, dist[51 :75,4])
-	# }
 	print(kiter)
-	print(ind)
+	print(indchosen)
+	# print(length(indchosen))
+	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
+	# etaM[indchosen,] <- eta_map[indchosen,]
+	phiMc<-phiM
+
+
 } else {
+	indchosen <- 1:Dargs$NM
 	block <- setdiff(1:Dargs$NM, l[ind_rand])
+	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
+	phiMc<-phiM
 }
 
 
 	# block <- setdiff(1:Dargs$NM, l[ind_rand])	
-	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-	phiMc<-phiM
+	
 	if (!(kiter %in% map_range)){
 		for(u in 1:opt$nbiter.mcmc[1]) { # 1er noyau
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
@@ -127,6 +110,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 			
 			deltau[block] = 1000000
 			ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
+			# print(length(ind)/length(indchosen))
 			etaM[ind,]<-etaMc[ind,]
 			U.y[ind]<-Uc.y[ind]
 		}
@@ -152,6 +136,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 					deltu<-Uc.y-U.y+Uc.eta-U.eta
 					deltu[block] = 1000000
 					ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+					# print(length(ind)/length(indchosen))
 					etaM[ind,]<-etaMc[ind,]
 					U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 					U.eta[ind]<-Uc.eta[ind]
@@ -190,6 +175,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 					deltu<-Uc.y-U.y+Uc.eta-U.eta
 					deltu[block] = 1000000
 					ind<-which(deltu<(-log(runif(Dargs$NM))))
+					# print(length(ind)/length(indchosen))
 					etaM[ind,]<-etaMc[ind,]
 					#        if(kiter<20 | (kiter>150 & kiter<170)) {
 					#        	cat("kiter=",kiter,length(ind),"  varList$ind.eta=",varList$ind.eta,"  nrs2=",nrs2,"\n")
@@ -387,5 +373,5 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	}
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM))
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, map = eta_map, indchosen = indchosen))
 }
