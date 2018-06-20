@@ -4,7 +4,7 @@ source('R/mcmc.R')
 source('R/func_aux.R') 
 source('R/main_initialiseMainAlgo.R') 
 source('R/SaemixModel.R') 
-source('R/SaemixObject.R') 
+
 
 warfa_data <- read.table("data/warfarin_data.txt", header=T)
 saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
@@ -23,7 +23,8 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 
-saemix.model<-saemixModel(model=model1cpt,description="warfarin",psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),type="structural",
+saemix.model<-saemixModel(model=model1cpt,description="warfarin",psi0=matrix(c(1,7,1,0,0,0),
+  ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),type="structural",
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
