@@ -4,7 +4,7 @@ source('R/mcmc.R')
 source('R/func_aux.R') 
 source('R/main_initialiseMainAlgo.R') 
 source('R/SaemixModel.R') 
-
+source('R/SaemixObject.R') 
 
 warfa_data <- read.table("data/warfarin_data.txt", header=T)
 saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
@@ -58,7 +58,7 @@ saemix.model.mcmc<-saemixModel(model=model1cpt,description="warfarin",type="stru
   byrow=TRUE))
 
 L_mcmc=100
-options.mcmc<-list(seed=39546,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0))
+options.mcmc<-list(seed=39546,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0),nb.chains=1)
 sates<-mcmc(saemix.model.mcmc,saemix.data,options.mcmc)$eta
 ####################
 
