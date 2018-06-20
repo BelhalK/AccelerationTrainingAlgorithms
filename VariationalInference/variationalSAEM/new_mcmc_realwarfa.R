@@ -140,7 +140,7 @@ model <- 'data {
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
-
+ 
 #Calculate mu and gamma of ELBO optimization
 variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
