@@ -485,7 +485,6 @@ if(opt$nbiter.mcmc[6]>0) {
 	
 
 	i <- 10
-	browser()
 	obs <- Dargs$yM[Dargs$IdM==i]
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	design[,1] <- Dargs$XM[1,1]
@@ -500,6 +499,7 @@ if(opt$nbiter.mcmc[6]>0) {
 					pres=sqrt(varList$pres[1]))
 
 	fit <- vb(stan.model, data = stan_data, iter = 2000)
+	# fit <- sampling(stan.model, data = stan_data, iter = 2000,algorithm = "HMC")
 	fit_samples = extract(fit)
 	
 	phiMstan <- tail(fit_samples$beta,L_mcmc)

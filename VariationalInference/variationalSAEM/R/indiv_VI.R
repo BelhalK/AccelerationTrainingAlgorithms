@@ -174,6 +174,7 @@ indiv.variational.inference<-function(model,data,control=list()) {
 
 ###WARFA
 	i <- 10
+	browser()
 	obs <- Dargs$yM[Dargs$IdM==i]
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	design[,1] <- Dargs$XM[1,1]
@@ -203,7 +204,6 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[i,1]
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[i,2]
 	etaMstan[,3] <- phiMstan[,3] - mean.phiM[i,3]
-	browser()
 	eta_map[i,]
 	colMeans(etaMstan)
 	mu <- colMeans(etaMstan)

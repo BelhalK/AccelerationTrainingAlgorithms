@@ -134,7 +134,7 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-          concentration ~ normal(100*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
+          concentration ~ normal(123*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
 
 
@@ -142,7 +142,7 @@ modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
  
 #Calculate mu and gamma of ELBO optimization
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
 mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
