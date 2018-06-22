@@ -498,6 +498,7 @@ if(opt$nbiter.mcmc[6]>0) {
 					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],beta3_pop=mean.phiM[i,3],
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
+
 	fit <- sampling(stan.model, data = stan_data, iter = 10000,algorithm = "HMC") #can try "HMC", "Fixed_param"
 	fit_samples = extract(fit)
 	

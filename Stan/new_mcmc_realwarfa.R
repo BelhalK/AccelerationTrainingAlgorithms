@@ -126,7 +126,7 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-          concentration ~ normal(100*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
+          concentration ~ normal(123*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
 
 
