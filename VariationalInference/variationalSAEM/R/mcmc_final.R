@@ -498,8 +498,8 @@ if(opt$nbiter.mcmc[6]>0) {
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
 
-	fit <- vb(stan.model, data = stan_data, iter = 2000)
-	# fit <- sampling(stan.model, data = stan_data, iter = 2000,algorithm = "HMC")
+	# fit <- vb(stan.model, data = stan_data, iter = 2000)
+	fit <- sampling(stan.model, data = stan_data, iter = 2000,algorithm = "NUTS")
 	fit_samples = extract(fit)
 	
 	phiMstan <- tail(fit_samples$beta,L_mcmc)

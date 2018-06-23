@@ -1,0 +1,17 @@
+
+
+
+[INDIVIDUAL]
+input = {base_pop, slope_pop,  omega_base, omega_slope}
+DEFINITION:
+base = {distribution=normal, reference=base_pop, sd=omega_base}
+slope  = {distribution=normal, reference=slope_pop,  sd=omega_slope }
+
+
+[LONGITUDINAL]
+input = {base, slope,a}
+EQUATION:
+C = base + slope*t
+DEFINITION:
+y = {distribution=normal, prediction=C, sd=a}
+

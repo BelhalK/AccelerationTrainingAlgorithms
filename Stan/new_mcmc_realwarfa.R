@@ -94,7 +94,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -140,24 +140,25 @@ vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
 # options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 # vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
+i <- 10
 #Autocorrelation
-rwm.obj <- as.mcmc(ref[[10]])
+rwm.obj <- as.mcmc(ref[[i]])
 autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
 
-new.obj <- as.mcmc(new[[10]])
+new.obj <- as.mcmc(new[[i]])
 autocorr.plot(new.obj[,1]) + title("Laplace SAEM Autocorrelation")
 
-# vb.obj <- as.mcmc(vb[[10]])
+# vb.obj <- as.mcmc(vb[[i]])
 # autocorr.plot(vb.obj[,1]) + title("vb SAEM Autocorrelation")
 
-vi.obj <- as.mcmc(vi[[10]])
+vi.obj <- as.mcmc(vi[[i]])
 autocorr.plot(vi.obj[,1]) + title("vb SAEM Autocorrelation")
 
 #MSJD
-mssd(ref[[10]][,1])
-mssd(new[[10]][,1])
-# mssd(vb[[10]][,1])
-mssd(vi[[10]][,1])
+mssd(ref[[i]][,1])
+mssd(new[[i]][,1])
+# mssd(vb[[i]][,1])
+mssd(vi[[i]][,1])
 
 
 
@@ -189,7 +190,6 @@ for (dim in 1:3){
     qnew[[dim]][k,3] <- quantile(new[[i]][1:k,dim], 0.95)
   }
   qnew[[dim]]$iteration <- 1:L_mcmc
-  # plotmcmc(qref[[dim]][,c(4,1:3)],qnew[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
 
@@ -204,7 +204,6 @@ for (dim in 1:3){
 #     qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], 0.95)
 #   }
 #   qvb[[dim]]$iteration <- 1:L_mcmc
-#   # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 # }
 
 
@@ -218,32 +217,8 @@ for (dim in 1:3){
     qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], 0.95)
   }
   qvi[[dim]]$iteration <- 1:L_mcmc
-  # plotmcmc(qref[[dim]][,c(4,1:3)],qvb[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
-
-plotquantile <- function(df,df2, title=NULL, ylim=NULL)
-{
- G <- (ncol(df)-2)/3
-  df$quantile <- as.factor(df$quantile)
-  df2$quantile <- as.factor(df2$quantile)
-  ylim <-rep(ylim,each=2)
-  graf <- vector("list", ncol(df)-2)
-  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-  for (j in (2:(ncol(df)-1)))
-  {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+
-      xlab("")+scale_x_log10()+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
-                           size=15, angle=0),
-          axis.text.y = element_text(face="bold", color="black", 
-                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=20)) 
-    if (!is.null(ylim))
-      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
-    graf[[o[j]]] <- grafj
-
-  }
-  do.call("grid.arrange", c(graf, ncol=3, top=title))
-}
 
 iteration <- 1:L_mcmc
 burn <- 100
@@ -291,31 +266,6 @@ q3vi$quantile <- 3
 quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 colnames(quantvi)<-c("iteration","ka","V","k","quantile")
 
-
-
-plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
-{
- G <- (ncol(df)-2)/3
-  df$quantile <- as.factor(df$quantile)
-  df2$quantile <- as.factor(df2$quantile)
-  df3$quantile <- as.factor(df3$quantile)
-  ylim <-rep(ylim,each=2)
-  graf <- vector("list", ncol(df)-2)
-  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-  for (j in (2:(ncol(df)-1)))
-  {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=1)+
-      xlab("")+scale_x_log10()+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
-                           size=15, angle=0),
-          axis.text.y = element_text(face="bold", color="black", 
-                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=20)) 
-    if (!is.null(ylim))
-      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
-    graf[[o[j]]] <- grafj
-
-  }
-  do.call("grid.arrange", c(graf, ncol=3, top=title))
-}
 
 # plotquantile3(quantref,quantnew,quantvb)
 plotquantile3(quantref,quantnew,quantvi)
