@@ -90,7 +90,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=100
+N=50
 
 param   <- c(
   base_pop  = 140,    omega_base  = 0.5,
@@ -123,7 +123,8 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",type="s
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(0,0),covariance.model=matrix(c(0.2,0,0,0.2),ncol=2,byrow=TRUE),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
-L_mcmc=1000
+
+L_mcmc=5000
 #RWM mcmc
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model,saemix.data,options_warfa)$eta_ref
@@ -131,6 +132,13 @@ ref<-mcmc(saemix.model,saemix.data,options_warfa)$eta_ref
 #New kernel mcmc
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model,saemix.data,options_warfanew)$eta
+
+#MALA
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.0001
+  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
+  , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
+  , map.range=c(0))
+mala<-mcmc(saemix.model,saemix.data,options.mala)$eta
 
 
 #RSTAN 
@@ -156,7 +164,6 @@ model <- 'data {
           height ~ normal(beta[1] + beta[2] * age, 1);
         }'
 
-
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
 
 #NUTS using rstan
@@ -165,7 +172,9 @@ vi<-mcmc(saemix.model,saemix.data,options.vi)$eta
 
 
 
-i <- 2
+
+
+i <- 19
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
 autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
@@ -177,15 +186,17 @@ autocorr.plot(new.obj[,1]) + title("Laplace SAEM Autocorrelation")
 vi.obj <- as.mcmc(vi[[i]])
 autocorr.plot(vi.obj[,1]) + title("VI SAEM Autocorrelation")
 
+
+mala.obj <- as.mcmc(mala[[i]])
+autocorr.plot(mala.obj[,1]) + title("mala SAEM Autocorrelation")
+
 #MSJD
 mssd(ref[[i]][,1])
 mssd(new[[i]][,1])
-mssd(vi[[i]][,1])
-
+# mssd(vi[[i]][,1])
+mssd(mala[[i]][,1])
 
 #quantiles
-
-i <- 2
 qref <- list(ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,])
 for (dim in 1:2){
   print(dim)
@@ -223,6 +234,18 @@ for (dim in 1:2){
   # plotmcmc(qref[[dim]][,c(4,1:3)],qnew2[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
 }
 
+qmala <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:2){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qmala[[dim]][k,1] <- quantile(mala[[i]][1:k,dim], 0.05)
+    qmala[[dim]][k,2] <- quantile(mala[[i]][1:k,dim], 0.5)
+    qmala[[dim]][k,3] <- quantile(mala[[i]][1:k,dim], 0.95)
+  }
+  qmala[[dim]]$iteration <- 1:L_mcmc
+  # plotmcmc(qref[[dim]][,c(4,1:3)],qnew2[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
+}
+
 
 
 iteration <- 1:L_mcmc
@@ -257,9 +280,21 @@ q2vi$quantile <- 2
 q3vi$quantile <- 3
 quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 
-
 colnames(quantvi)<-c("iteration","A","B","quantile")
 
+
+q1mala <- data.frame(cbind(iteration,qmala[[1]][,1],qmala[[2]][,1]))
+q2mala <- data.frame(cbind(iteration,qmala[[1]][,2],qmala[[2]][,2]))
+q3mala <- data.frame(cbind(iteration,qmala[[1]][,3],qmala[[2]][,3]))
+q1mala$quantile <- 1
+q2mala$quantile <- 2
+q3mala$quantile <- 3
+quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
+
+
+colnames(quantmala)<-c("iteration","A","B","quantile")
+
+plotquantile3(quantref,quantnew,quantmala)
 
 plotquantile3(quantref,quantnew,quantvi)
 

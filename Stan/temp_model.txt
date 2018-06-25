@@ -7,7 +7,6 @@ DEFINITION:
 base = {distribution=normal, reference=base_pop, sd=omega_base}
 slope  = {distribution=normal, reference=slope_pop,  sd=omega_slope }
 
-
 [LONGITUDINAL]
 input = {base, slope,a}
 EQUATION:
