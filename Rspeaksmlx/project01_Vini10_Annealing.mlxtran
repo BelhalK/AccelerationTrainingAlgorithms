@@ -1,0 +1,60 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'joint_data.csv'
+delimiter = comma
+header = {id, time, amt, y, ytype, weight, gender, group}
+
+[CONTENT]
+id = {use=identifier}
+time = {use=time}
+amt = {use=amount}
+y = {use=observation, name=y1, yname='1', type=continuous}
+ytype = {use=observationtype}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {ka_pop, omega_ka, V_pop, omega_V, k_pop, omega_k}
+
+DEFINITION:
+ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+k = {distribution=logNormal, typical=k_pop, sd=omega_k}
+
+[LONGITUDINAL]
+input = {a, b}
+
+file = 'lib:oral1_1cpt_kaVk.txt'
+
+DEFINITION:
+y1 = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
+
+<FIT>
+data = y1
+model = y1
+
+<PARAMETER>
+V_pop = {value=10, method=MLE}
+a = {value=1, method=MLE}
+b = {value=0.3, method=MLE}
+k_pop = {value=1, method=MLE}
+ka_pop = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = none )
+fim(method = Linearization)
+logLikelihood(method = Linearization)
+plotResult(run = false,method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'project_Vini10_Annealing'
+autochains = no
+
