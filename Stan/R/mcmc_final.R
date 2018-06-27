@@ -450,27 +450,28 @@ if(opt$nbiter.mcmc[5]>0) {
 if(opt$nbiter.mcmc[6]>0) {
 ## using Rstan package
 ###Linear
-	#Initialization
-	# i <- 2
-	# obs <- Dargs$yM[Dargs$IdM==i]
+	# indiv <- control$indiv.index
+	# obs <- Dargs$yM[Dargs$IdM==indiv]
 	# design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	# design[,1] <- 1
-	# design[,2] <- Dargs$XM[Dargs$IdM==i,]
+	# design[,2] <- Dargs$XM[Dargs$IdM==indiv,]
 	# design <- as.matrix(design)
 	
 	# stan.model <- control$modelstan
 	# stan_data <- list(N = length(obs),height = obs
 	# 				,age = design[,2],
-	# 				beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
+	# 				beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],
 	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 	# 				pres=sqrt(varList$pres[1]))
 	
 	# warmup <- 1000
-	# fit <- sampling(stan.model, data = stan_data, iter = 3*L_mcmc+warmup,init = phiM[i,],
+	# fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,init = phiM[indiv,],
 	# 	warmup = warmup,chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
 	# fit_samples = extract(fit)
 	
-	# psiMstan <- tail(fit_samples$beta,L_mcmc)
+	# # browser()
+	# # psiMstan <- tail(fit_samples$beta,L_mcmc)
+	# psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	# etaMstan <- phiMstan
 	# etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
@@ -478,42 +479,38 @@ if(opt$nbiter.mcmc[6]>0) {
 	# colMeans(etaMstan)
 
 	# # browser()
-	# for (i in 1:(nrow(phiM))) {
-	# 		eta_list[[i]] <- etaMstan
-	# }
+	# eta_list[[indiv]] <- etaMstan
+
 	
 # ###WARFA
-	i <- 10
+	indiv <- control$indiv.index
 	
-	obs <- Dargs$yM[Dargs$IdM==i]
+	obs <- Dargs$yM[Dargs$IdM==indiv]
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-	design[,1] <- Dargs$XM[1,1]
-	design[,2] <- Dargs$XM[Dargs$IdM==i,2]
+	design[,1] <- Dargs$XM[Dargs$IdM==indiv,1]
+	design[,2] <- Dargs$XM[Dargs$IdM==indiv,2]
 	design <- as.matrix(design)
 	
 	stan.model <- control$modelstan
 	stan_data <- list(N = length(obs),concentration = obs
-					,time = design[,2],
-					beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],beta3_pop=mean.phiM[i,3],
+					,time = design[,2], dose = design[1,1],
+					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
 
 	warmup <- 1000
-	fit <- sampling(stan.model, data = stan_data, iter = 2*L_mcmc,warmup = warmup,chains = 1,algorithm = "HMC") #can try "HMC", "Fixed_param"
+	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
+		chains = 1,algorithm = "HMC") #can try "HMC", "Fixed_param"
 	fit_samples = extract(fit)
-	psiMstan <- tail(fit_samples$beta,L_mcmc)
+	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	
 	etaMstan <- phiMstan
 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
 	etaMstan[,3] <- phiMstan[,3] - mean.phiM[1,3]
-	# colMeans(etaMstan)
-	# eta_map[10,]
-
-	for (i in 1:(nrow(phiM))) {
-			eta_list[[i]] <- etaMstan
-	}
+	eta_list[[indiv]] <- as.data.frame(etaMstan)
+	
 	
 
 }

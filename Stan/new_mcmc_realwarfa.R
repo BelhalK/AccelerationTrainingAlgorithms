@@ -9,7 +9,8 @@ require(reshape2)
 library(dplyr)
 library(data.table)
 library(rstan)
-# save.image("vb_linear.RData")
+load("hmc_quantile.RData")
+# save.image("hmc_quantile.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('aaa_generics.R') 
@@ -94,13 +95,19 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
+#MALA
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.00001
+  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
+  , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
+  , map.range=c(0))
+mala<-mcmc(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
 
 
 #RSTAN VB
@@ -108,6 +115,7 @@ new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 model <- 'data {
           int<lower=0> N;// Number of observations
           vector[N] time; //predictor
+          real dose; //predictor
           vector[N] concentration;  //response
           
           real beta1_pop;
@@ -126,21 +134,24 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-          concentration ~ normal(123*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
+          concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
+
 
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
-options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+i <- 5
+options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
+  nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
+  modelstan = modelstan, indiv.index = i)
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
-
 # #using the samples from vb (drawn from candidate KL posterior)
 # options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 # vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
 
-i <- 10
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
 autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
@@ -161,21 +172,23 @@ mssd(new[[i]][,1])
 mssd(vi[[i]][,1])
 
 
-
 start_interval <- 200
 zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 3))
 
 
 #quantiles
+qlow <- 0.2
+qmed <- 0.5
+qhigh <- 0.8
 
-i <- 10
+
 qref <- list(ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,])
 for (dim in 1:3){
   print(dim)
   for (k in 1:L_mcmc){
-    qref[[dim]][k,1] <- quantile(ref[[i]][1:k,dim], 0.05)
-    qref[[dim]][k,2] <- quantile(ref[[i]][1:k,dim], 0.5)
-    qref[[dim]][k,3] <- quantile(ref[[i]][1:k,dim], 0.95)
+    qref[[dim]][k,1] <- quantile(ref[[i]][1:k,dim], qlow)
+    qref[[dim]][k,2] <- quantile(ref[[i]][1:k,dim], qmed)
+    qref[[dim]][k,3] <- quantile(ref[[i]][1:k,dim], qhigh)
   }
   qref[[dim]]$iteration <- 1:L_mcmc
 }
@@ -185,9 +198,9 @@ qnew <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
 for (dim in 1:3){
   print(dim)
   for (k in 1:L_mcmc){
-    qnew[[dim]][k,1] <- quantile(new[[i]][1:k,dim], 0.05)
-    qnew[[dim]][k,2] <- quantile(new[[i]][1:k,dim], 0.5)
-    qnew[[dim]][k,3] <- quantile(new[[i]][1:k,dim], 0.95)
+    qnew[[dim]][k,1] <- quantile(new[[i]][1:k,dim], qlow)
+    qnew[[dim]][k,2] <- quantile(new[[i]][1:k,dim], qmed)
+    qnew[[dim]][k,3] <- quantile(new[[i]][1:k,dim], qhigh)
   }
   qnew[[dim]]$iteration <- 1:L_mcmc
 }
@@ -199,25 +212,39 @@ for (dim in 1:3){
 # for (dim in 1:3){
 #   print(dim)
 #   for (k in 1:L_mcmc){
-#     qvb[[dim]][k,1] <- quantile(vb[[i]][1:k,dim], 0.05)
-#     qvb[[dim]][k,2] <- quantile(vb[[i]][1:k,dim], 0.5)
-#     qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], 0.95)
+#     qvb[[dim]][k,1] <- quantile(vb[[i]][1:k,dim], qlow)
+#     qvb[[dim]][k,2] <- quantile(vb[[i]][1:k,dim], qmed)
+#     qvb[[dim]][k,3] <- quantile(vb[[i]][1:k,dim], qhigh)
 #   }
 #   qvb[[dim]]$iteration <- 1:L_mcmc
 # }
 
 
 
-qvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+qvi <- list(vi[[i]][1:L_mcmc,],vi[[i]][1:L_mcmc,],vi[[i]][1:L_mcmc,])
 for (dim in 1:3){
   print(dim)
   for (k in 1:L_mcmc){
-    qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], 0.05)
-    qvi[[dim]][k,2] <- quantile(vi[[i]][1:k,dim], 0.5)
-    qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], 0.95)
+    qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], qlow)
+    qvi[[dim]][k,2] <- quantile(vi[[i]][1:k,dim], qmed)
+    qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], qhigh)
   }
   qvi[[dim]]$iteration <- 1:L_mcmc
 }
+
+
+qmala <- list(mala[[i]][1:L_mcmc,],mala[[i]][1:L_mcmc,],mala[[i]][1:L_mcmc,])
+for (dim in 1:3){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qmala[[dim]][k,1] <- quantile(mala[[i]][1:k,dim], qlow)
+    qmala[[dim]][k,2] <- quantile(mala[[i]][1:k,dim], qmed)
+    qmala[[dim]][k,3] <- quantile(mala[[i]][1:k,dim], qhigh)
+  }
+  qmala[[dim]]$iteration <- 1:L_mcmc
+  # plotmcmc(qref[[dim]][,c(4,1:3)],qnew2[[dim]][,c(4,1:3)],title=paste("quantiles",i,"dim", dim))
+}
+
 
 
 iteration <- 1:L_mcmc
@@ -256,7 +283,6 @@ colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
 # colnames(quantvb)<-c("iteration","ka","V","k","quantile")
 
 
-
 q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
 q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2],qvi[[3]][,2]))
 q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
@@ -267,9 +293,24 @@ quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 colnames(quantvi)<-c("iteration","ka","V","k","quantile")
 
 
+
+q1mala <- data.frame(cbind(iteration,qmala[[1]][,1],qmala[[2]][,1],qmala[[3]][,1]))
+q2mala <- data.frame(cbind(iteration,qmala[[1]][,2],qmala[[2]][,2],qmala[[3]][,2]))
+q3mala <- data.frame(cbind(iteration,qmala[[1]][,3],qmala[[2]][,3],qmala[[3]][,3]))
+q1mala$quantile <- 1
+q2mala$quantile <- 2
+q3mala$quantile <- 3
+quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
+
+
+colnames(quantmala)<-c("iteration","ka","V","k","quantile")
+
+
 # plotquantile3(quantref,quantnew,quantvb)
 plotquantile3(quantref,quantnew,quantvi)
+plotquantile3(quantref,quantnew,quantmala)
 
-# gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = 0.95, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
+
+# gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = qhigh, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 # geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)
 # geweke.plot(mcmc.list(as.mcmc(new[[10]])), frac1=0.1, frac2=0.5)

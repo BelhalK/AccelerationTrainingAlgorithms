@@ -124,7 +124,7 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",type="s
   transform.par=c(0,0),covariance.model=matrix(c(0.2,0,0,0.2),ncol=2,byrow=TRUE),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
-L_mcmc=5000
+L_mcmc=1000
 #RWM mcmc
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model,saemix.data,options_warfa)$eta_ref
@@ -174,7 +174,7 @@ vi<-mcmc(saemix.model,saemix.data,options.vi)$eta
 
 
 
-i <- 19
+i <- 10
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
 autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
