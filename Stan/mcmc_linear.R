@@ -166,8 +166,12 @@ model <- 'data {
 
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
 
+i <- 10
 #NUTS using rstan
-options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
+  nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),
+   modelstan = modelstan, indiv.index = i)
 vi<-mcmc(saemix.model,saemix.data,options.vi)$eta
 
 
@@ -295,6 +299,5 @@ quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 colnames(quantmala)<-c("iteration","A","B","quantile")
 
 plotquantile3(quantref,quantnew,quantmala)
-
 plotquantile3(quantref,quantnew,quantvi)
 
