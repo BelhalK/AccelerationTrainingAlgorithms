@@ -500,7 +500,7 @@ if(opt$nbiter.mcmc[6]>0) {
 
 	warmup <- 1000
 	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
-		chains = 1,algorithm = "HMC") #can try "HMC", "Fixed_param"
+		chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
 	fit_samples = extract(fit)
 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
