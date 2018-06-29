@@ -174,7 +174,7 @@ indiv.variational.inference<-function(model,data,control=list()) {
 
 ###WARFA
 	i <- 10
-	browser()
+	# browser()
 	obs <- Dargs$yM[Dargs$IdM==i]
 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	design[,1] <- Dargs$XM[1,1]

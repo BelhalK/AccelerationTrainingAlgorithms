@@ -95,7 +95,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=10000
+L_mcmc=1000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -103,10 +103,11 @@ options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc 
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
 #MALA
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.00001
+i <- 10
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.01
   ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
   , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
-  , map.range=c(0))
+  , map.range=c(0), indiv.index = i)
 mala<-mcmc(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
 
 
@@ -142,12 +143,13 @@ model <- 'data {
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
-i <- 5
+i <- 10
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+
 # #using the samples from vb (drawn from candidate KL posterior)
 # options_warfavb<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,1,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 # vb<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavb)$eta
@@ -168,7 +170,7 @@ autocorr.plot(vi.obj[,1]) + title("vb SAEM Autocorrelation")
 #MSJD
 mssd(ref[[i]][,1])
 mssd(new[[i]][,1])
-# mssd(vb[[i]][,1])
+# mssd(mala[[i]][,1])
 mssd(vi[[i]][,1])
 
 
@@ -306,9 +308,12 @@ quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 colnames(quantmala)<-c("iteration","ka","V","k","quantile")
 
 
+plotquantile3(quantnew,quantnew,quantvi)
 # plotquantile3(quantref,quantnew,quantvb)
 plotquantile3(quantref,quantnew,quantvi)
 plotquantile3(quantref,quantnew,quantmala)
+
+plotquantile4(quantref,quantnew,quantvi,quantmala)
 
 
 # gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = qhigh, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)

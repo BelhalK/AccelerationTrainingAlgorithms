@@ -9,7 +9,8 @@ require(reshape2)
 library(dplyr)
 library(data.table)
 library(rstan)
-# save.image("vb_linear.RData")
+# save.image("mala_linear.RData")
+load("mala_linear.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('aaa_generics.R') 
@@ -117,14 +118,14 @@ saemix.model<-saemixModel(model=growth.linear,description="Linear model",type="s
 # linear<-data.frame(saemix(saemix.model,saemix.data,options))
 # linear <- cbind(iterations, linear)
 
-
+i <- 10
 
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",type="structural",
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
   transform.par=c(0,0),covariance.model=matrix(c(0.2,0,0,0.2),ncol=2,byrow=TRUE),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
-L_mcmc=1000
+L_mcmc=5000
 #RWM mcmc
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model,saemix.data,options_warfa)$eta_ref
@@ -134,10 +135,10 @@ options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc 
 new<-mcmc(saemix.model,saemix.data,options_warfanew)$eta
 
 #MALA
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.0001
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.01
   ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
   , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
-  , map.range=c(0))
+  , map.range=c(0), indiv.index = i)
 mala<-mcmc(saemix.model,saemix.data,options.mala)$eta
 
 
@@ -166,7 +167,7 @@ model <- 'data {
 
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
 
-i <- 10
+
 #NUTS using rstan
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),
@@ -178,7 +179,7 @@ vi<-mcmc(saemix.model,saemix.data,options.vi)$eta
 
 
 
-i <- 10
+
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
 autocorr.plot(rwm.obj[,1]) + title("RWM SAEM Autocorrelation")
@@ -301,3 +302,4 @@ colnames(quantmala)<-c("iteration","A","B","quantile")
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantvi)
 
+plotquantile4(quantref,quantnew,quantvi, quantmala)

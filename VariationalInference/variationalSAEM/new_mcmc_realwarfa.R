@@ -91,7 +91,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=100
+L_mcmc=1000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -99,16 +99,23 @@ options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc 
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
 
-
-#Hand made ADVI
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,1,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-maps<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)
-Gammamap <- maps$Gamma
-etamap <- maps$map
+# #Hand made ADVI
+# options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=2,nbiter.mcmc = c(0,0,0,1,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+# maps<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)
+# Gammamap <- maps$Gamma
+# etamap <- maps$map
 # K=100
 # variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.gd = c(K),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),Gamma.laplace=Gamma)
 # variational.post<-variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
 # variational.post$mu
+
+# #IMH with maps (new kernel)
+# options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=etamap,
+#         Gamma = Gammamap,
+#         nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+#         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+# vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+
 
 
 #RSTAN VB
@@ -140,25 +147,19 @@ model <- 'data {
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
- 
+
 #Calculate mu and gamma of ELBO optimization
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
 variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
 mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
 
-#IMH with maps (new kernel)
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=etamap,
-        Gamma = Gammamap,
-        nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
-        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
-
-#IMH with ADVI outputs
+#Independent sampler with ADVI outputs
 i <- 10
-test <- etamap
-test[i,] <- etamap[i,] +0.05
+# test <- etamap
+# test[i,] <- etamap[i,] +0.05
 eta.vi <- etamap
 Gammavi <- Gammamap
 eta.vi[i,] <- mu.vi
@@ -196,57 +197,57 @@ mssd(vi[[10]][,1])
 start_interval <- 200
 zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 3))
 
-#one invdiv
-i = 10
-indetabarref <- ref[[i]]
-indexpecref <- data.frame(apply(indetabarref[-(1:start_interval),], 2, cummean))
-indexpecref$iteration <- 1:(L_mcmc-start_interval)
+# #one invdiv
+# i = 10
+# indetabarref <- ref[[i]]
+# indexpecref <- data.frame(apply(indetabarref[-(1:start_interval),], 2, cummean))
+# indexpecref$iteration <- 1:(L_mcmc-start_interval)
 
 
-indsdref <- 0
-indvar <- data.frame(apply(ref[[i]][-(1:start_interval),]^2, 2, cummean))
-indmeansq <- data.frame(apply(ref[[i]][-(1:start_interval),], 2, cummean))^2
-indsdref <- indsdref + sqrt(pmax(zero,indvar - indmeansq))
-indsdref$iteration <- 1:(L_mcmc-start_interval)
+# indsdref <- 0
+# indvar <- data.frame(apply(ref[[i]][-(1:start_interval),]^2, 2, cummean))
+# indmeansq <- data.frame(apply(ref[[i]][-(1:start_interval),], 2, cummean))^2
+# indsdref <- indsdref + sqrt(pmax(zero,indvar - indmeansq))
+# indsdref$iteration <- 1:(L_mcmc-start_interval)
 
 
-indetabarnew <- new[[i]]
-indexpecnew <- data.frame(apply(indetabarnew[-(1:start_interval),], 2, cummean))
-indexpecnew$iteration <- 1:(L_mcmc-start_interval)
+# indetabarnew <- new[[i]]
+# indexpecnew <- data.frame(apply(indetabarnew[-(1:start_interval),], 2, cummean))
+# indexpecnew$iteration <- 1:(L_mcmc-start_interval)
 
 
-indsdnew <- 0
-indvar <- data.frame(apply(new[[i]][-(1:start_interval),]^2, 2, cummean))
-indmeansq <- data.frame(apply(new[[i]][-(1:start_interval),], 2, cummean))^2
-indsdnew <- indsdnew + sqrt(pmax(zero,indvar - indmeansq))
-indsdnew$iteration <- 1:(L_mcmc-start_interval)
+# indsdnew <- 0
+# indvar <- data.frame(apply(new[[i]][-(1:start_interval),]^2, 2, cummean))
+# indmeansq <- data.frame(apply(new[[i]][-(1:start_interval),], 2, cummean))^2
+# indsdnew <- indsdnew + sqrt(pmax(zero,indvar - indmeansq))
+# indsdnew$iteration <- 1:(L_mcmc-start_interval)
 
-# indetabarvb <- vb[[i]]
-# indexpecvb <- data.frame(apply(indetabarvb[-(1:start_interval),], 2, cummean))
-# indexpecvb$iteration <- 1:(L_mcmc-start_interval)
-
-
-# indsdvb <- 0
-# indvar <- data.frame(apply(vb[[i]][-(1:start_interval),]^2, 2, cummean))
-# indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
-# indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
-# indsdvb$iteration <- 1:(L_mcmc-start_interval)
+# # indetabarvb <- vb[[i]]
+# # indexpecvb <- data.frame(apply(indetabarvb[-(1:start_interval),], 2, cummean))
+# # indexpecvb$iteration <- 1:(L_mcmc-start_interval)
 
 
-indetabarvi <- vi[[i]]
-indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
-indexpecvi$iteration <- 1:(L_mcmc-start_interval)
+# # indsdvb <- 0
+# # indvar <- data.frame(apply(vb[[i]][-(1:start_interval),]^2, 2, cummean))
+# # indmeansq <- data.frame(apply(vb[[i]][-(1:start_interval),], 2, cummean))^2
+# # indsdvb <- indsdvb + sqrt(pmax(zero,indvar - indmeansq))
+# # indsdvb$iteration <- 1:(L_mcmc-start_interval)
 
 
-indsdvi <- 0
-indvar <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
-indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
-indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
-indsdvi$iteration <- 1:(L_mcmc-start_interval)
+# indetabarvi <- vi[[i]]
+# indexpecvi <- data.frame(apply(indetabarvi[-(1:start_interval),], 2, cummean))
+# indexpecvi$iteration <- 1:(L_mcmc-start_interval)
 
-# plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
-# plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvb[,c(4,1:3)],title="mean")
-plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvi[,c(4,1:3)],title="mean")
+
+# indsdvi <- 0
+# indvar <- data.frame(apply(vi[[i]][-(1:start_interval),]^2, 2, cummean))
+# indmeansq <- data.frame(apply(vi[[i]][-(1:start_interval),], 2, cummean))^2
+# indsdvi <- indsdvi + sqrt(pmax(zero,indvar - indmeansq))
+# indsdvi$iteration <- 1:(L_mcmc-start_interval)
+
+# # plotmcmc(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],title=paste("mean",i))
+# # plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvb[,c(4,1:3)],title="mean")
+# plotconv3(indexpecref[,c(4,1:3)],indexpecnew[,c(4,1:3)],indexpecvi[,c(4,1:3)],title="mean")
 
 
 

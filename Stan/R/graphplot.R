@@ -86,6 +86,35 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 
+
+
+plotquantile4 <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
+{
+ G <- (ncol(df)-2)/3
+  df$quantile <- as.factor(df$quantile)
+  df2$quantile <- as.factor(df2$quantile)
+  df3$quantile <- as.factor(df3$quantile)
+  df4$quantile <- as.factor(df4$quantile)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=1)+geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="green",linetype = 2,size=1)+
+      xlab("")+scale_x_log10()+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=15, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=20)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=3, top=title))
+}
+
+
+
 plotconv <- function(df,df2, title=NULL, ylim=NULL)
 {
   G <- (ncol(df)-2)/3
