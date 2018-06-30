@@ -594,19 +594,21 @@ if(opt$nbiter.mcmc[6]>0) {
 	fit_samples = extract(fit)
 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	browser()
-	# psiMstan[1000,]
-	# psiMstan[1,]
-	# colMeans(psiMstan)
-	# psi_map[indiv,]
-
+	psiMstan[1000,]
+	psiMstan[1,]
+	colMeans(psiMstan)
+	eta_map[indiv,]
+	psi_map[indiv,]
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-	
+	colMeans(phiMstan)
+
 	etaMstan <- phiMstan
 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
 	etaMstan[,3] <- phiMstan[,3] - mean.phiM[1,3]
 	eta_list[[indiv]] <- as.data.frame(etaMstan)
 	
+	colMeans(etaMstan)
 
 }
 
