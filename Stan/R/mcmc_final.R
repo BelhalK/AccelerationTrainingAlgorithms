@@ -568,7 +568,7 @@ if(opt$nbiter.mcmc[6]>0) {
 	# etaMstan <- phiMstan
 	# etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
 	# etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
-	# # browser()
+	# # browser() 
 	# eta_list[[indiv]] <- etaMstan
 
 	
