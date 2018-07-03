@@ -101,27 +101,28 @@ theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
 
 theo_mix50 <- data.frame(theo50$param)
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
-summary <- theo50$summary
-chosen <- data.frame(theo50$chosen)
 
-kiter <- 30
+# summary <- theo50$summary
+# chosen <- data.frame(theo50$chosen)
 
-test <- t(summary)
-test <- data.frame(test)
-test$iterations <- 1:kiter
-df <- melt(test ,  id.vars = 'iterations')
+# kiter <- 30
+
+# test <- t(summary)
+# test <- data.frame(test)
+# test$iterations <- 1:kiter
+# df <- melt(test ,  id.vars = 'iterations')
 
 
-current <- theo_mix50[1:kiter,2]
-chosen <- t(chosen)
-chosen <- data.frame(chosen)
-chosen$iterations <- 1:kiter
-df.chosen <- melt(chosen ,  id.vars = 'iterations')
-df$chosen <- df.chosen$value
+# current <- theo_mix50[1:kiter,2]
+# chosen <- t(chosen)
+# chosen <- data.frame(chosen)
+# chosen$iterations <- 1:kiter
+# df.chosen <- melt(chosen ,  id.vars = 'iterations')
+# df$chosen <- df.chosen$value
 
-ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen))+ 
-  geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[end,2]), color = "red")+ 
-  geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[1:kiter,2]), color = "yellow")+ theme_bw()
+# ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen))+ 
+#   geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[end,2]), color = "red")+ 
+#   geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[1:kiter,2]), color = "yellow")+ theme_bw()
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
@@ -179,6 +180,8 @@ theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 
 graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix50_scaled)
+
+graphConvMC_threekernels(theo_mix25_scaled,theo_mix50_scaled,theo_mix25_scaled)
 ###NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL#######NEW KERNEL####
 
 

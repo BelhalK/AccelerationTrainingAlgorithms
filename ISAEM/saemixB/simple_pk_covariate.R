@@ -38,7 +38,7 @@ require(gridExtra)
 require(reshape2)
 
 warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/warfarin_data.txt", header=T)
-saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
 
@@ -57,13 +57,13 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),fixed.estim=c(0,0,1,0),
+  ,psi0=matrix(c(0.2,3,10,2),ncol=4,byrow=TRUE, dimnames=list(NULL, c("Tlag","ka","V","Cl"))),fixed.estim=c(0,1,0,0),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4, 
   byrow=TRUE),covariate.model=matrix(c(0,0,1,1),ncol=4,byrow=TRUE),error.model="constant")
 
 
-K1 = 700
+K1 = 300
 K2 = 100
 iterations = 0:(K1+K2-1)
 end = K1+K2
@@ -71,6 +71,44 @@ batchsize25 = 25
 batchsize50 = 50
 
 seed0=3456
+
+
+###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
+
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0),
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
+ map.range=c(1:4), nb.replacement=100,sampling='seq')
+theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
+theo_ref <- data.frame(theo_ref$param)
+theo_ref <- cbind(iterations, theo_ref[-1,])
+
+
+
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
+theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+theo_mix50 <- data.frame(theo50$param)
+theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+
+
+options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+theo_mix25 <- data.frame(theo_mix25$param)
+theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+
+
+theo_ref_scaled <- theo_ref
+theo_mix50_scaled <- theo_mix50
+theo_mix25_scaled <- theo_mix25
+theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
+theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
+graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
+
+###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
@@ -212,7 +250,7 @@ y1 = {distribution=normal, prediction=Cc, sd=a}
 ")
 
 
-N <- 400
+N <- 200
 populationParameter   <- c(Tlag_pop= Tlag_true, omega_Tlag= o_Tlag,
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
