@@ -1,29 +1,18 @@
 
 
-[COVARIATE]
-input = wt
-
-EQUATION:
-lw70 = log(wt/70)
 
 [INDIVIDUAL]
-input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, beta_V_lw70, lw70, omega_V, Cl_pop, beta_Cl_lw70, omega_Cl}
-
+input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
 DEFINITION:
-Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
-ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
-V = {distribution=lognormal, typical=V_pop, covariate=lw70, coefficient=beta_V_lw70, sd=omega_V}
-Cl = {distribution=lognormal, typical=Cl_pop, covariate=lw70, coefficient=beta_Cl_lw70, sd=omega_Cl}
+ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
+V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
+Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
+
 
 [LONGITUDINAL]
-input =  {Tlag, ka, V, Cl,a}
-
+input = {ka, V, Cl,a}
 EQUATION:
-Cc = pkmodel(Tlag, ka, V, Cl)
-
-OUTPUT:
-output = {Cc}
-
+C = pkmodel(ka,V,Cl)
 DEFINITION:
-y1 = {distribution=normal, prediction=Cc, sd=a}
+y = {distribution=normal, prediction=C, sd=a}
 

@@ -244,55 +244,58 @@ error_mix25 <- 0
 
 true_param <- data.frame("ka" = ka_true, "V" = V_true, "Cl" = Cl_true, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
 seed0 = 39546
-replicate = 5
+replicate = 2
 for (m in 1:replicate){
 
-  model <- inlineModel("
+model <- inlineModel("
 
 
-  [INDIVIDUAL]
-  input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
-  DEFINITION:
-  ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
-  V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
-  Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
+[INDIVIDUAL]
+input = {ka_pop, V_pop, Cl_pop, omega_ka, omega_V, omega_Cl}
+DEFINITION:
+ka = {distribution=lognormal, reference=ka_pop, sd=omega_ka}
+V  = {distribution=lognormal, reference=V_pop,  sd=omega_V }
+Cl = {distribution=lognormal, reference=Cl_pop, sd=omega_Cl}
 
 
-  [LONGITUDINAL]
-  input = {ka, V, Cl,a}
-  EQUATION:
-  C = pkmodel(ka,V,Cl)
-  DEFINITION:
-  y = {distribution=normal, prediction=C, sd=a}
-  ")
+[LONGITUDINAL]
+input = {ka, V, Cl,a}
+EQUATION:
+C = pkmodel(ka,V,Cl)
+DEFINITION:
+y = {distribution=normal, prediction=C, sd=a}
+")
 
-  N=100
+N=100
 
-  param   <- c(
-    ka_pop  = 1,    omega_ka  = 0.5,
-    V_pop   = 10,   omega_V   = 0.4,
-    Cl_pop  = 1,    omega_Cl  = 0.3, a =1)
-    
-  res <- simulx(model     = model,
-                parameter = param,
-                treatment = list(time=0, amount=100),
-                group     = list(size=N, level='individual'),
-                output    = list(name='y', time=seq(1,3,by=1)))
+param   <- c(
+  ka_pop  = 1,    omega_ka  = 0.3,
+  V_pop   = 10,   omega_V   = 0.2,
+  Cl_pop  = 1,    omega_Cl  = 0.3, a =1)
+  
+res <- simulx(model     = model,
+              parameter = param,
+              treatment = list(time=0, amount=100),
+              group     = list(size=N, level='individual'),
+              output    = list(name='y', time=seq(1,10,by=1)))
 
-   warfarin.saemix <- res$y
-   warfarin.saemix$amount <- 100
-   saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-    name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
-   saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,3,0.01,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),fixed.estim=c(0,1,0),
+ warfarin.saemix <- res$y
+ warfarin.saemix$amount <- 100
+ saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
+
+# Default model, no covariate
+saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(c(1,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(0,1,0),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
-
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
-theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,2),
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
+ map.range=c(1:4), nb.replacement=100,sampling='seq')
+theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
+theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
-
 ML <- theo_ref[,2:8]
 ML[0:end,1:7]<- theo_ref[end,2:8]
 # ML[0:end,1:7]<- true_param
@@ -302,29 +305,19 @@ final_ref <- rbind(final_ref,theo_ref)
 
 
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
-theo_mix<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental50))
-theo_mix <- cbind(iterations, theo_mix[-1,])
-ML <- theo_ref[,2:8]
-ML[0:end,1:7]<- theo_mix[end,2:8]
-# ML[0:end,1:7]<- true_param
-error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
-theo_mix['individual'] <- m
-final_mix <- rbind(final_mix,theo_mix)
 
-options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
-theo_mix25<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental25))
-theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
+theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+theo_mix50 <- data.frame(theo50$param)
+theo_mix50 <- cbind(iterations, theo_mix50[-1,])
 ML <- theo_ref[,2:8]
-ML[0:end,1:7]<- theo_mix25[end,2:8]
+ML[0:end,1:7]<- theo_mix50[end,2:8]
 # ML[0:end,1:7]<- true_param
-error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
-theo_mix25['individual'] <- m
-final_mix25 <- rbind(final_mix25,theo_mix25)
+error_mix <- error_mix + (theo_mix50[,2:8]-ML)^2
+theo_mix50['individual'] <- m
+final_mix <- rbind(final_mix,theo_mix50)
 
 }
 
@@ -332,15 +325,15 @@ final_mix25 <- rbind(final_mix25,theo_mix25)
 
 error_rwm <- 1/replicate*error_rwm
 error_mix <- 1/replicate*error_mix
-error_mix25 <- 1/replicate*error_mix25
+error_mix50_gamma2 <- 1/replicate*error_mix
 
 err_rwm<- theo_ref[-1,]
 err_mix<- theo_ref[-1,]
-err_mix25<- theo_ref[-1,]
+err_mix50_gamma2<- theo_ref[-1,]
 
 err_rwm[,2:8] <- error_rwm[-1,]
 err_mix[,2:8] <- error_mix[-1,]
-err_mix25[,2:8] <- error_mix25[-1,]
+err_mix50_gamma2[,2:8] <- error_mix50_gamma2[-1,]
 
 
 err_rwm_scaled <- err_rwm
@@ -360,10 +353,10 @@ err_mix_scaled$method <- 'randiter'
 
 
 
-err_mix25$iterations = seq(1, (end-1), by=1)
+err_mix50_gamma2$iterations = seq(1, (end-1), by=1)
 
-err_mix25$algo <- 'ISAEM25'
-err_mix25$method <- 'randiter'
+err_mix50_gamma2$algo <- 'ISAEM25'
+err_mix50_gamma2$method <- 'randiter'
 
 
 graphConvMC_se1 <- function(df,df2, df3,title=NULL, ylim=NULL)
@@ -392,8 +385,8 @@ graphConvMC_se1 <- function(df,df2, df3,title=NULL, ylim=NULL)
 }
 
 
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix25[,c(1,3,9)])
-d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix_scaled[,c(1,6,9)],err_mix25[,c(1,6,9)])
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix50_gamma2[,c(1,3,9)])
+d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix_scaled[,c(1,6,9)],err_mix50_gamma2[,c(1,6,9)])
 
 
 save <- grid.arrange(c,d, ncol=2)
