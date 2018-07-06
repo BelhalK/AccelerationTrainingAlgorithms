@@ -96,7 +96,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -113,32 +113,6 @@ mala<-mcmc(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
 
 
 #RSTAN VB
-
-# model <- 'data {
-#           int<lower=0> N;// Number of observations
-#           vector[N] time; //predictor
-#           real dose; //predictor
-#           vector[N] concentration;  //response
-          
-#           real beta1_pop;
-#           real beta2_pop;
-#           real beta3_pop;
-#           real<lower=0> omega_beta1;
-#           real<lower=0> omega_beta2;
-#           real<lower=0> omega_beta3;
-#           real<lower=0>  pres;
-#         }
-#         parameters {
-#           vector<lower=0>[3] beta;
-#         }
-#         model {
-#           //Priors
-#           beta[1] ~ lognormal( beta1_pop , omega_beta1);
-#           beta[2] ~ lognormal( beta2_pop , omega_beta2);
-#           beta[3] ~ lognormal( beta3_pop , omega_beta3);
-#           concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
-#         }'
-
 
 model <- 'data {
           int<lower=0> N;// Number of observations
@@ -159,10 +133,10 @@ model <- 'data {
         }
         model {
           //Priors
-          beta[1] ~ normal( beta1_pop , omega_beta1);
-          beta[2] ~ normal( beta2_pop , omega_beta2);
-          beta[3] ~ normal( beta3_pop , omega_beta3);
-          concentration ~ normal(dose*exp(beta[1])/(exp(beta[2])*(exp(beta[1])-exp(beta[3])))*(exp(-exp(beta[3])*time)-exp(-exp(beta[1])*time)), pres);
+          beta[1] ~ lognormal( beta1_pop , omega_beta1);
+          beta[2] ~ lognormal( beta2_pop , omega_beta2);
+          beta[3] ~ lognormal( beta3_pop , omega_beta3);
+          concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
@@ -176,27 +150,28 @@ options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
 vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
 
 
-# #ADVI for VI post outputs
-# #Calculate mu and gamma of ELBO optimization
-# variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
-#  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), modelstan = modelstan)
+#ADVI for VI post outputs
+#Calculate mu and gamma of ELBO optimization
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),
+  modelstan = modelstan, indiv.index = i)
 
-# variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
-# mu.vi <- variational.post$mu
-# Gamma.vi <- variational.post$Gamma
-
-# # #using the output of ADVI (drawn from candidate KL posterior)
-# i <- 10
-# # test <- etamap
-# # test[i,] <- etamap[i,] +0.05
-# eta.vi <- etamap
-# Gammavi <- Gammamap
-# eta.vi[i,] <- mu.vi
-# Gammavi[[i]] <- Gamma.vi
-# options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
-#         nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1, nbiter.saemix = c(K1,K2),
-#         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-# advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
+mu.vi <- variational.post$mu
+Gamma.vi <- variational.post$Gamma
+etamap <- variational.post$map
+Gammamap <- variational.post$Gammamap
+# #using the output of ADVI (drawn from candidate KL posterior)
+# test <- etamap
+# test[i,] <- etamap[i,] +0.05
+eta.vi <- etamap
+Gammavi <- Gammamap
+eta.vi[i,] <- mu.vi
+Gammavi[[i]] <- Gamma.vi
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=mu.vi,Gamma = Gamma.vi,
+        nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
@@ -350,7 +325,7 @@ quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 colnames(quantmala)<-c("iteration","ka","V","k","quantile")
 
 plotquantile3(quantnew,quantnew,quantvi)
-# plotquantile3(quantref,quantnew,quantadvi)
+plotquantile3(quantref,quantnew,quantadvi)
 plotquantile3(quantref,quantnew,quantvi)
 
 

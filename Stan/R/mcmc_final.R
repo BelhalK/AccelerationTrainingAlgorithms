@@ -214,7 +214,6 @@ if(opt$nbiter.mcmc[4]>0) {
 		eta_map <- phi_map - mean.phiM
 		fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
 		gradf <- matrix(0L, nrow = length(fpred1), ncol = nb.etas) 
-
 		for (j in 1:nb.etas) {
 			psi_map2 <- psi_map
 			psi_map2[,j] <- psi_map[,j]+psi_map[,j]/1000
@@ -524,7 +523,7 @@ if(opt$nbiter.mcmc[5]>0) {
 			
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			print(which(ind==indiv))
+			# print(which(ind==indiv))
 			# print(length(ind)/Dargs$NM)
 			# print(ind)
 			etaM[ind,]<-etaMc[ind,]
@@ -535,7 +534,7 @@ if(opt$nbiter.mcmc[5]>0) {
 		}
 	}
 }
-#Vb with rstan
+#NUTS with rstan
 if(opt$nbiter.mcmc[6]>0) {
 	# etaMc<-etaM
 	# propc <- U.eta
@@ -635,61 +634,60 @@ if(opt$nbiter.mcmc[6]>0) {
 	# eta_list[[indiv]] <- etaMstan
 
 	
-# # ###WARFA
-# 	indiv <- control$indiv.index
-# 	obs <- Dargs$yM[Dargs$IdM==indiv]
-# 	dose <- unique(Dargs$XM[Dargs$IdM==indiv,1])
-# 	time <- Dargs$XM[Dargs$IdM==indiv,2]
-# 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
-# 	stan.model <- control$modelstan
-# 	stan_data <- list(N = length(obs),concentration = obs
-# 					,time = time, dose = dose,
-# 					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
-# 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
-# 					pres=sqrt(varList$pres[1]))
-# 	warmup <- 1000
-# 	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
-# 		chains = 1,algorithm = "NUTS", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
-# 	fit_samples = extract(fit)
-# 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
-# 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-# 	etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
-# 	eta_list[[indiv]] <- as.data.frame(etaMstan)
-
-##RTTE
+# ###WARFA
 	indiv <- control$indiv.index
 	obs <- Dargs$yM[Dargs$IdM==indiv]
-	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-	design[,1] <- 1
-	design[,2] <- Dargs$XM[Dargs$IdM==indiv,1]
-	design <- as.matrix(design)
-
-	stan.model <- control$modelstan
+	dose <- unique(Dargs$XM[Dargs$IdM==indiv,1])
+	time <- Dargs$XM[Dargs$IdM==indiv,2]
 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
+	stan.model <- control$modelstan
 	stan_data <- list(N = length(obs),concentration = obs
-					,time = design[,2],
-					lambda_pop=mean.psiM[indiv,1],beta_pop=mean.psiM[indiv,2],
-					omega_lambda=omega.eta[1,1],omega_beta=omega.eta[2,2])
-
-	browser()
+					,time = time, dose = dose,
+					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
+					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
+					pres=sqrt(varList$pres[1]))
 	warmup <- 1000
-	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,init = psiM[indiv,],
-		warmup = warmup,chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
+	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
+		chains = 1,algorithm = "NUTS", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
 	fit_samples = extract(fit)
-
-	# psiMstan <- tail(fit_samples$beta,L_mcmc)
 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-	etaMstan <- phiMstan
-	etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
-	etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
-	eta_list[[indiv]] <- etaMstan
+	etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
+	eta_list[[indiv]] <- as.data.frame(etaMstan)
+
+# ##RTTE
+# 	indiv <- control$indiv.index
+# 	obs <- Dargs$yM[Dargs$IdM==indiv]
+# 	design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
+# 	design[,1] <- 1
+# 	design[,2] <- Dargs$XM[Dargs$IdM==indiv,1]
+# 	design <- as.matrix(design)
+
+# 	stan.model <- control$modelstan
+# 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
+# 	stan_data <- list(N = length(obs),concentration = obs
+# 					,time = design[,2],
+# 					lambda_pop=mean.psiM[indiv,1],beta_pop=mean.psiM[indiv,2],
+# 					omega_lambda=omega.eta[1,1],omega_beta=omega.eta[2,2])
+
+	
+# 	warmup <- 1000
+# 	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,init = psiM[indiv,],
+# 		warmup = warmup,chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
+# 	fit_samples = extract(fit)
+
+# 	# psiMstan <- tail(fit_samples$beta,L_mcmc)
+# 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
+# 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
+# 	etaMstan <- phiMstan
+# 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
+# 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
+# 	eta_list[[indiv]] <- etaMstan
 
 }
 
 
 #Using ADVI outputs for Independent sampler (mu and gamma)
-
 if(opt$nbiter.mcmc[7]>0) {
 	#Initialization
 	etaMc<-etaM
@@ -717,11 +715,11 @@ if(opt$nbiter.mcmc[7]>0) {
 		Gamma.vi[[i]] <- control$Gamma[[i]]
 		chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
 		inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
-
-		etaM[i,] <- control$mu[i,]
-		mu.vi[i,]<- control$mu[i,]
 	}
-
+	
+	etaM <- control$mu
+	mu.vi<- control$mu
+  	
   	phiM<-etaM+mean.phiM
   	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
   	if(Dargs$type=="structural"){

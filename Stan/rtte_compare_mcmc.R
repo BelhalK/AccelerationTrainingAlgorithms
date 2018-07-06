@@ -118,10 +118,7 @@ mala<-mcmc(saemix.model_rtte,saemix.data_rtte,options.mala)$eta
 
 model <- 'data {
           int<lower=0> N_obs;// Number of observations
-          int<lower=0> N_cens;// Number of observations
-          vector[N_obs] time; //predictor
-          vector[N_obs] y_obs;  //response
-          vector[N_cens] y_cens;  //response
+          vector[N_obs] time; //obs
           
           real<lower=0> lambda_pop;
           real<lower=0> beta_pop;
@@ -136,8 +133,7 @@ model <- 'data {
           //Priors
           param[1] ~ lognormal( lambda_pop , omega_lambda);
           param[2] ~ lognormal( beta_pop , omega_beta);
-          y_obs ~ weibull(param[1], param[2]);
-          y_cens ~ increment_log_prob(weibull_ccdf_log(param[1], param[2]));
+          time ~ weibull(param[1], param[2]);
         }'
 
 

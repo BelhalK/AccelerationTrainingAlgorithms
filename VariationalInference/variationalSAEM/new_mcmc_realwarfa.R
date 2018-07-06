@@ -1,4 +1,4 @@
-load("quantvarinf")
+load("quantvarinf.RData")
 library("mlxR")
 library("psych")
 library("coda")
