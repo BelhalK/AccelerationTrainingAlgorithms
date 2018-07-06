@@ -641,14 +641,16 @@ if(opt$nbiter.mcmc[6]>0) {
 	time <- Dargs$XM[Dargs$IdM==indiv,2]
 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	stan.model <- control$modelstan
+	
 	stan_data <- list(N = length(obs),concentration = obs
 					,time = time, dose = dose,
 					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
+
 	warmup <- 1000
 	fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
-		chains = 1,algorithm = "NUTS", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
+		chains = 1,algorithm = "HMC", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
 	fit_samples = extract(fit)
 	psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
@@ -716,7 +718,7 @@ if(opt$nbiter.mcmc[7]>0) {
 		chol.Gamma.vi[[i]] <- chol(Gamma.vi[[i]])
 		inv.Gamma.vi[[i]] <- solve(Gamma.vi[[i]])
 	}
-	
+
 	etaM <- control$mu
 	mu.vi<- control$mu
   	

@@ -122,7 +122,7 @@ i <- 10
 
 saemix.model<-saemixModel(model=growth.linear,description="Linear model",type="structural",
   psi0=matrix(c(140,1),ncol=2,byrow=TRUE,dimnames=list(NULL,c("base","slope"))),
-  transform.par=c(0,0),covariance.model=matrix(c(0.2,0,0,0.2),ncol=2,byrow=TRUE),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
+  transform.par=c(1,1),covariance.model=matrix(c(0.2,0,0,0.2),ncol=2,byrow=TRUE),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE), 
   error.model="constant")
 
 L_mcmc=5000
@@ -160,12 +160,20 @@ model <- 'data {
         }
         model {
           //Priors
-          beta[1] ~ normal( beta1_pop , omega_beta1);
-          beta[2] ~ normal( beta2_pop , omega_beta2);
+          beta[1] ~ lognormal( beta1_pop , omega_beta1);
+          beta[2] ~ lognormal( beta2_pop , omega_beta2);
           height ~ normal(beta[1] + beta[2] * age, 1);
         }'
 
 modelstan <- stan_model(model_name = "oxboys",model_code = model)
+
+
+#Calculate mu and gamma of ELBO optimization
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),
+  modelstan = modelstan, indiv.index = i)
+
+variational.post<-indiv.variational.inference(saemix.model,saemix.data,variational.post.options)
 
 
 #NUTS using rstan

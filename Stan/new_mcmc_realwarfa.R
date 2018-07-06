@@ -162,16 +162,21 @@ Gamma.vi <- variational.post$Gamma
 etamap <- variational.post$map
 Gammamap <- variational.post$Gammamap
 # #using the output of ADVI (drawn from candidate KL posterior)
-# test <- etamap
-# test[i,] <- etamap[i,] +0.05
+test <- etamap
+# test[i,] <- etamap[i,] +0.01
+test[i,] <- mu.vi
 eta.vi <- etamap
 Gammavi <- Gammamap
 eta.vi[i,] <- mu.vi
-Gammavi[[i]] <- Gamma.vi
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=mu.vi,Gamma = Gamma.vi,
+# Gammavi[[i]] <- Gamma.vi
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=test,Gamma = Gammavi,
         nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+
+(mu.vi - etamap[i,])/(etamap[i,])
+norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
+(Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
@@ -229,16 +234,16 @@ for (dim in 1:3){
 
 
 
-# qadvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
-# for (dim in 1:3){
-#   print(dim)
-#   for (k in 1:L_mcmc){
-#     qadvi[[dim]][k,1] <- quantile(advi[[i]][1:k,dim], qlow)
-#     qadvi[[dim]][k,2] <- quantile(advi[[i]][1:k,dim], qmed)
-#     qadvi[[dim]][k,3] <- quantile(advi[[i]][1:k,dim], qhigh)
-#   }
-#   qadvi[[dim]]$iteration <- 1:L_mcmc
-# }
+qadvi <- list(advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,])
+for (dim in 1:3){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qadvi[[dim]][k,1] <- quantile(advi[[i]][1:k,dim], qlow)
+    qadvi[[dim]][k,2] <- quantile(advi[[i]][1:k,dim], qmed)
+    qadvi[[dim]][k,3] <- quantile(advi[[i]][1:k,dim], qhigh)
+  }
+  qadvi[[dim]]$iteration <- 1:L_mcmc
+}
 
 
 
@@ -292,16 +297,16 @@ colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
 
 
 
-# q1advi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
-# q2advi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
-# q3advi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
-# q1advi$quantile <- 1
-# q2advi$quantile <- 2
-# q3advi$quantile <- 3
-# quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
+q1advi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
+q2advi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
+q3advi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
+q1advi$quantile <- 1
+q2advi$quantile <- 2
+q3advi$quantile <- 3
+quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
 
 
-# colnames(quantadvi)<-c("iteration","ka","V","k","quantile")
+colnames(quantadvi)<-c("iteration","ka","V","k","quantile")
 
 
 q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
@@ -310,8 +315,8 @@ q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
 q1vi$quantile <- 1
 q2vi$quantile <- 2
 q3vi$quantile <- 3
-quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
-colnames(quantvi)<-c("iteration","ka","V","k","quantile")
+quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
+colnames(quantnuts)<-c("iteration","ka","V","k","quantile")
 
 
 
@@ -324,17 +329,12 @@ q3mala$quantile <- 3
 quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 colnames(quantmala)<-c("iteration","ka","V","k","quantile")
 
-plotquantile3(quantnew,quantnew,quantvi)
+plotquantile3(quantref,quantnew,quantmala)
+plotquantile3(quantref,quantnew,quantnuts)
 plotquantile3(quantref,quantnew,quantadvi)
-plotquantile3(quantref,quantnew,quantvi)
 
 
-plotquantile4(quantref,quantnew,quantvi,quantmala)
-
-savemala <- plotquantile3(quantref,quantnew,quantmala)
-
-savenuts <- plotquantile3(quantref,quantnew,quantvi)
-
+plotquantile4(quantref,quantnew,quantnuts,quantmala)
 
 # gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = qhigh, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 # geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)

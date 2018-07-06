@@ -185,23 +185,22 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	# }
 
 ###LINEAR
-	# i <- 10
-	# obs <- Dargs$yM[Dargs$IdM==i]
+	# indiv <- control$indiv.index
+	# obs <- Dargs$yM[Dargs$IdM==indiv]
 	# design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
 	# design[,1] <- 1
-	# design[,2] <- Dargs$XM[Dargs$IdM==i,]
+	# design[,2] <- Dargs$XM[Dargs$IdM==indiv,]
 	# design <- as.matrix(design)
-	
+	# mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	# stan.model <- control$modelstan
 	# stan_data <- list(N = length(obs),height = obs
 	# 				,age = design[,2],
-	# 				beta1_pop=mean.phiM[i,1],beta2_pop=mean.phiM[i,2],
+	# 				beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],
 	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
 	# 				pres=sqrt(varList$pres[1]))
 	# # fit <- sampling(stan.model, data = stan_data)
 	# fit <- vb(stan.model, data = stan_data, iter = 50000)
 	# fit_samples = extract(fit)
-	
 	# psiMstan <- tail(fit_samples$beta,L_mcmc)
 	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	# etaMstan <- phiMstan
@@ -215,14 +214,15 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	time <- Dargs$XM[Dargs$IdM==indiv,2]
 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	stan.model <- control$modelstan
+	
 	stan_data <- list(N = length(obs),concentration = obs
 					,time = time, dose = dose,
-					beta1_pop=mean.psiM[indiv,1],beta2_pop=mean.psiM[indiv,2],beta3_pop=mean.psiM[indiv,3],
+					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
 					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
 					pres=sqrt(varList$pres[1]))
 	fit <- vb(stan.model, data = stan_data, iter = 100000)
 	fit_samples = extract(fit)
-	
+
 	psiMstan <- tail(fit_samples$beta,L_mcmc)
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	etaMstan <- phiMstan
@@ -230,7 +230,6 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[i,2]
 	etaMstan[,3] <- phiMstan[,3] - mean.phiM[i,3]
 	eta_map[indiv,]
-
 	colMeans(etaMstan)
 	mu <- colMeans(etaMstan)
 	Gamma <- cov(etaMstan)
