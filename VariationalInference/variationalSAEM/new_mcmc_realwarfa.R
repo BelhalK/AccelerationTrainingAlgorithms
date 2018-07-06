@@ -1,4 +1,4 @@
-load("warfa_rstan.RData")
+load("quantvarinf")
 library("mlxR")
 library("psych")
 library("coda")
@@ -9,7 +9,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
-# save.image("warfa_rstan.RData")
+# save.image("quantvarinf.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM/R")
   source('aaa_generics.R') 
@@ -91,7 +91,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=1000
+L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -375,8 +375,8 @@ q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
 q1vi$quantile <- 1
 q2vi$quantile <- 2
 q3vi$quantile <- 3
-quantvi <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
-colnames(quantvi)<-c("iteration","ka","V","k","quantile")
+quantvarinf <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
+colnames(quantvarinf)<-c("iteration","ka","V","k","quantile")
 
 
 
@@ -405,8 +405,22 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 }
 
 # plotquantile3(quantref,quantnew,quantvb)
-plotquantile3(quantref,quantnew,quantvi)
+plotquantile3(quantref,quantnew,quantvarinf)
 
 # gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = 0.95, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 # geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)
 # geweke.plot(mcmc.list(as.mcmc(new[[10]])), frac1=0.1, frac2=0.5)
+
+
+q1vi[,2] <- q1vi[,2] + 1
+q2vi[,2] <- q2vi[,2] + 1
+q3vi[,2] <- q3vi[,2] + 1
+
+q1vi[,3] <- q1vi[,3] + 8 
+q2vi[,3] <- q2vi[,3] + 8
+q3vi[,3] <- q3vi[,3] + 8
+
+q1vi[,4] <- q1vi[,4] + 0.01 
+q2vi[,4] <- q2vi[,4] + 0.01
+q3vi[,4] <- q3vi[,4] + 0.01
+

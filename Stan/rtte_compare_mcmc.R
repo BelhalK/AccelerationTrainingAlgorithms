@@ -137,7 +137,7 @@ model <- 'data {
           param[1] ~ lognormal( lambda_pop , omega_lambda);
           param[2] ~ lognormal( beta_pop , omega_beta);
           y_obs ~ weibull(param[1], param[2]);
-          y_cens ~ increment_log_prob(weibull_ccdf_log(param[1], param[2]))
+          y_cens ~ increment_log_prob(weibull_ccdf_log(param[1], param[2]));
         }'
 
 

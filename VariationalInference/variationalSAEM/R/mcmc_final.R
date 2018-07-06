@@ -439,7 +439,7 @@ if(opt$nbiter.mcmc[5]>0) {
 
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-				print(length(ind)/Dargs$NM)
+				# print(length(ind)/Dargs$NM)
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 				U.eta[ind]<-Uc.eta[ind]
