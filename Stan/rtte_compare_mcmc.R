@@ -116,29 +116,70 @@ mala<-mcmc(saemix.model_rtte,saemix.data_rtte,options.mala)$eta
 
 
 
-model <- 'data {
-          int<lower=0> N_obs;// Number of observations
-          vector[N_obs] time; //obs
-          
-          real<lower=0> lambda_pop;
-          real<lower=0> beta_pop;
-          real<lower=0> omega_lambda;
-          real<lower=0> omega_beta;
-        }
-        parameters {
-          vector<lower=0>[2] param;
-        }
+# model <- 'data {
+#   int<lower=1> N_e; // Number of total observed events
+#   int<lower=1> N_c; // Number of total censoring times ( = # observation units)
+#   vector<lower=0>[N_e] event_times; // Times of event occurrence
+#   vector<lower=0>[N_c] cens_times; // Censoring times (maybe just N copies of T_c?)
+#   real<lower=0> alpha_pop;
+#   real<lower=0> sigma_pop;
+#   real<lower=0> omega_alpha;
+#   real<lower=0> omega_sigma;
+# }
+# parameters {
+#   real<lower=0> alpha; // Weibull shape
+#   real<lower=0> sigma; // Weibull scale
+# }
+# model {
+#   // prior
+#   alpha ~ lognormal(alpha_pop, omega_alpha);
+#   sigma ~ lognormal(sigma_pop, omega_sigma);
+  
+#   // likelihood
+#   for (n_e in 1:N_e) {
+#     target += weibull_lpdf(event_times[n_e] | alpha, sigma) - 
+#               weibull_lccdf(event_times[n_e] | alpha, sigma);
+#   } 
+#   for (n_c in 1:N_c) {
+#     target += weibull_lccdf(cens_times[n_c] | alpha, sigma);
+#   }
+# }'
 
-        model {
-          //Priors
-          param[1] ~ lognormal( lambda_pop , omega_lambda);
-          param[2] ~ lognormal( beta_pop , omega_beta);
-          time ~ weibull(param[1], param[2]);
-        }'
+
+model <- 'data {
+  int<lower=1> N_e; // Number of total observed events
+  int<lower=1> N_c; // Number of total censoring times ( = # observation units)
+  vector<lower=0>[N_e] event_times; // Times of event occurrence
+  int<lower=0> cens_times; // Censoring times (maybe just N copies of T_c?)
+  real<lower=0> alpha_pop;
+  real<lower=0> sigma_pop;
+  real<lower=0> omega_alpha;
+  real<lower=0> omega_sigma;
+}
+
+parameters {
+  vector<lower=0>[2] beta;
+}
+
+model {
+  // prior
+  beta[1] ~ lognormal(alpha_pop, omega_alpha);
+  beta[2] ~ lognormal(sigma_pop, omega_sigma);
+  
+  // likelihood
+  for (n_e in 1:N_e) {
+    target += weibull_lpdf(event_times[n_e] | beta[1], beta[1]) - 
+              weibull_lccdf(event_times[n_e] | beta[1], beta[1]);
+  } 
+
+  target += weibull_lccdf(cens_times | beta[1], beta[1]);
+
+}'
 
 
 
 modelstan <- stan_model(model_name = "rtte",model_code = model)
+
 
 #NUTS using rstan
 i <- 2
@@ -148,6 +189,31 @@ options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   modelstan = modelstan, indiv.index = i)
 vi<-mcmc(saemix.model_rtte,saemix.data_rtte,options.vi)$eta
 
+
+
+#ADVI for VI post outputs
+#Calculate mu and gamma of ELBO optimization
+variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),
+  modelstan = modelstan, indiv.index = i)
+
+variational.post<-indiv.variational.inference(saemix.model_rtte,saemix.data_rtte,variational.post.options)
+mu.vi <- variational.post$mu
+Gamma.vi <- variational.post$Gamma
+etamap <- variational.post$map
+Gammamap <- variational.post$Gammamap
+# #using the output of ADVI (drawn from candidate KL posterior)
+test <- etamap
+# test[i,] <- etamap[i,] +0.01
+test[i,] <- mu.vi
+eta.vi <- etamap
+Gammavi <- Gammamap
+eta.vi[i,] <- mu.vi
+# Gammavi[[i]] <- Gamma.vi
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=test,Gamma = Gammavi,
+        nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+advi<-mcmc(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
 
 
 
@@ -229,33 +295,31 @@ quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 
 
 
-q1ref[,2] <- q1ref[,2] + 10 
-q2ref[,2] <- q2ref[,2] + 10
-q3ref[,2] <- q3ref[,2] + 10
-
-q1new[,2] <- q1new[,2] + 10
-q2new[,2] <- q2new[,2] + 10
-q3new[,2] <- q3new[,2] + 10
-
-q1mala[,2] <- q1mala[,2] + 10
-q2mala[,2] <- q2mala[,2] + 10
-q3mala[,2] <- q3mala[,2] + 10
-
-
-q1ref[,3] <- q1ref[,3] + 3 
-q2ref[,3] <- q2ref[,3] + 3
-q3ref[,3] <- q3ref[,3] + 3
-
-q1new[,3] <- q1new[,3] + 3
-q2new[,3] <- q2new[,3] + 3
-q3new[,3] <- q3new[,3] + 3
-
-q1mala[,3] <- q1mala[,3] + 3
-q2mala[,3] <- q2mala[,3] + 3
-q3mala[,3] <- q3mala[,3] + 3
-
-
 colnames(quantref) <- colnames(quantnew)<-colnames(quantmala)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
 
+
+plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
+{
+ G <- (ncol(df)-2)/3
+  df$quantile <- as.factor(df$quantile)
+  df2$quantile <- as.factor(df2$quantile)
+  df3$quantile <- as.factor(df3$quantile)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=1)+
+      xlab("")+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+                           size=15, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=15, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", face="bold", size=20)) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+
+  }
+  do.call("grid.arrange", c(graf, ncol=2, top=title))
+}
 plotquantile3(quantref,quantnew,quantmala)
 
