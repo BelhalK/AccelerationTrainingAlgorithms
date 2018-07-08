@@ -660,26 +660,22 @@ if(opt$nbiter.mcmc[6]>0) {
 	} else {
 	##RTTE
 		indiv <- control$indiv.index
-		obs <- Dargs$yM[Dargs$IdM==indiv]
-		design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-		design[,1] <- 1
-		design[,2] <- Dargs$XM[Dargs$IdM==indiv,1]
-		design <- as.matrix(design)
-
 		stan.model <- control$modelstan
+		T <- Dargs$XM[Dargs$IdM==indiv,1]
+		T_c <- 20
+		event_times <- T[!(T %in% c(0, T_c))]
+		cens_times <- T[T == T_c]
+		N_e <- length(event_times)
+		N_c <- length(cens_times)
 		mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
-		stan_data <- list(N = length(obs),concentration = obs
-						,time = design[,2],
-						lambda_pop=mean.psiM[indiv,1],beta_pop=mean.psiM[indiv,2],
-						omega_lambda=omega.eta[1,1],omega_beta=omega.eta[2,2])
-
-		
+		stan_data <- list(N_e = N_e, N_c = N_c
+						,event_times = event_times, cens_times = cens_times,
+						alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
+						omega_alpha=omega.eta[1,1],omega_sigma=omega.eta[2,2])
 		warmup <- 1000
-		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,init = psiM[indiv,],
-			warmup = warmup,chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
+		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
+			chains = 1,algorithm = "HMC") 
 		fit_samples = extract(fit)
-
-		# psiMstan <- tail(fit_samples$beta,L_mcmc)
 		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 		etaMstan <- phiMstan
