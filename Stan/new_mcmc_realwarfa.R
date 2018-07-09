@@ -35,7 +35,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('SaemixRes.R') 
   # source('SaemixRes_c.R') 
   source('SaemixObject.R') 
-  source('zzz.R') 
+  source('zzz.R')
   source('graphplot.R')
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan")
@@ -91,22 +91,29 @@ end = K1+K2
 
 saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(0.7,7.51,0.0178),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(0.2,0,0,0,0.18,0,0,0,0.03),ncol=3,byrow=TRUE),
+  transform.par=c(1,1,1),omega.init=matrix(c(0.5,0,0,0,0.2,0,0,0,0.03),ncol=3,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
+# saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+#   ,psi0=matrix(c(1,8,0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1),omega.init=matrix(c(0.2,0,0,0,0.18,0,0,0,0.03),ncol=3,byrow=TRUE),
+#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+#   byrow=TRUE))
+
 
 L_mcmc=10000
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
 #MALA
+
 i <- 10
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.01
-  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.002
+  ,gamma.val=0.1,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0,0),nb.chains=1
   , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
   , map.range=c(0), indiv.index = i)
 mala<-mcmc(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
@@ -136,13 +143,14 @@ model <- 'data {
           beta[1] ~ lognormal( beta1_pop , omega_beta1);
           beta[2] ~ lognormal( beta2_pop , omega_beta2);
           beta[3] ~ lognormal( beta3_pop , omega_beta3);
+
           concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
         }'
 
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
-i <- 10
+i <- 4
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
@@ -161,22 +169,25 @@ mu.vi <- variational.post$mu
 Gamma.vi <- variational.post$Gamma
 etamap <- variational.post$map
 Gammamap <- variational.post$Gammamap
+
 # #using the output of ADVI (drawn from candidate KL posterior)
-test <- etamap
-# test[i,] <- etamap[i,] +0.01
-test[i,] <- mu.vi
+# test <- etamap
+# # test[i,] <- etamap[i,] +0.01
+# test[i,] <- mu.vi
 eta.vi <- etamap
 Gammavi <- Gammamap
-eta.vi[i,] <- mu.vi
+# eta.vi[i,] <- mu.vi
 # Gammavi[[i]] <- Gamma.vi
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=test,Gamma = Gammavi,
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
         nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
-(mu.vi - etamap[i,])/(etamap[i,])
+abs(mu.vi - etamap[i,])/abs(etamap[i,])
 norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
+abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
 (Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
+
 
 #Autocorrelation
 rwm.obj <- as.mcmc(ref[[i]])
@@ -230,8 +241,6 @@ for (dim in 1:3){
   }
   qnew[[dim]]$iteration <- 1:L_mcmc
 }
-
-
 
 
 qadvi <- list(advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,])
@@ -293,20 +302,7 @@ q3new$quantile <- 3
 quantnew <- rbind(q1new[-c(1:burn),],q2new[-c(1:burn),],q3new[-c(1:burn),])
 
 colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
-# plotquantile(quantref,quantnew)
 
-
-
-q1advi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
-q2advi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
-q3advi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
-q1advi$quantile <- 1
-q2advi$quantile <- 2
-q3advi$quantile <- 3
-quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
-
-
-colnames(quantadvi)<-c("iteration","ka","V","k","quantile")
 
 
 q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
@@ -317,6 +313,38 @@ q2vi$quantile <- 2
 q3vi$quantile <- 3
 quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 colnames(quantnuts)<-c("iteration","ka","V","k","quantile")
+
+
+### both VI output
+q1advi.full <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
+q2advi.full <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
+q3advi.full <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
+q1advi.full$quantile <- 1
+q2advi.full$quantile <- 2
+q3advi.full$quantile <- 3
+quantadvi.full <- rbind(q1advi.full[-c(1:burn),],q2advi.full[-c(1:burn),],q3advi.full[-c(1:burn),])
+colnames(quantadvi.full)<-c("iteration","ka","V","k","quantile")
+
+### only mu vi
+q1advi.onlymuvi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
+q2advi.onlymuvi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
+q3advi.onlymuvi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
+q1advi.onlymuvi$quantile <- 1
+q2advi.onlymuvi$quantile <- 2
+q3advi.onlymuvi$quantile <- 3
+quantadvi.onlymuvi <- rbind(q1advi.onlymuvi[-c(1:burn),],q2advi.onlymuvi[-c(1:burn),],q3advi.onlymuvi[-c(1:burn),])
+colnames(quantadvi.onlymuvi)<-c("iteration","ka","V","k","quantile")
+
+### only gamma vi
+q1advi.onlygammavi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
+q2advi.onlygammavi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
+q3advi.onlygammavi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
+q1advi.onlygammavi$quantile <- 1
+q2advi.onlygammavi$quantile <- 2
+q3advi.onlygammavi$quantile <- 3
+quantadvi.onlygammavi <- rbind(q1advi.onlygammavi[-c(1:burn),],q2advi.onlygammavi[-c(1:burn),],q3advi.onlygammavi[-c(1:burn),])
+colnames(quantadvi.onlygammavi)<-c("iteration","ka","V","k","quantile")
+
 
 
 
@@ -331,8 +359,10 @@ colnames(quantmala)<-c("iteration","ka","V","k","quantile")
 
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantnuts)
-plotquantile3(quantref,quantnew,quantadvi)
 
+plotquantile3(quantref,quantnew,quantadvi.full)
+plotquantile3(quantref,quantnew,quantadvi.onlymuvi)
+plotquantile3(quantref,quantnew,quantadvi.onlygammavi)
 
 plotquantile4(quantref,quantnew,quantnuts,quantmala)
 

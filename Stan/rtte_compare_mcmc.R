@@ -8,6 +8,7 @@ require(gridExtra)
 require(reshape2)
 library(dplyr)
 library(rstan)
+load("rtte_mala.RData")
 # save.image("rtte_mala.RData")
 # save.image("rtte_mcmc_conv.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
@@ -39,7 +40,6 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan")
 
-load("rtte_mala.RData")
 ###RTTE
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/research/CSDA/csda_new2/data/rtte_data.csv", header=T, sep=",")
 # timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/data/rttellis.csv", header=T, sep=",")
@@ -93,13 +93,14 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
 
 
 saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
-  psi0=matrix(c(10.17122,4.577724),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(10,3),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(1,1),covariance.model=matrix(c(0.3,0,0,0.3),ncol=2, 
+  transform.par=c(1,1),omega.init=matrix(c(0.3,0,0,0.3),ncol=2,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
 
 
-L_mcmc=10000
+L_mcmc=6000
 options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rtte)$eta_ref
 
@@ -148,9 +149,9 @@ mala<-mcmc(saemix.model_rtte,saemix.data_rtte,options.mala)$eta
 
 model <- 'data {
   int<lower=1> N_e; // Number of total observed events
-  int<lower=1> N_c; // Number of total censoring times ( = # observation units)
+  int<lower=1> N_c; // Number of total censoring times 
   vector<lower=0>[N_e] event_times; // Times of event occurrence
-  int<lower=0> cens_times; // Censoring times (maybe just N copies of T_c?)
+  int<lower=0> cens_times; // Censoring times
   real<lower=0> alpha_pop;
   real<lower=0> sigma_pop;
   real<lower=0> omega_alpha;
@@ -168,23 +169,21 @@ model {
   
   // likelihood
   for (n_e in 1:N_e) {
-    target += weibull_lpdf(event_times[n_e] | beta[1], beta[1]) - 
-              weibull_lccdf(event_times[n_e] | beta[1], beta[1]);
+    target += weibull_lpdf(event_times[n_e] | beta[1], beta[2]) - 
+              weibull_lccdf(event_times[n_e] | beta[1], beta[2]);
   } 
 
-  target += weibull_lccdf(cens_times | beta[1], beta[1]);
+  target += weibull_lccdf(cens_times | beta[1], beta[2]);
 
 }'
-
-
 
 modelstan <- stan_model(model_name = "rtte",model_code = model)
 
 
 #NUTS using rstan
-i <- 2
+i <- 3
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
-  nbiter.mcmc = c(0,0,0,0,0,1),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
 vi<-mcmc(saemix.model_rtte,saemix.data_rtte,options.vi)$eta
@@ -223,9 +222,9 @@ zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 2))
 
 
 #quantiles
-qlow <- 0.2
+qlow <- 0.1
 qmed <- 0.5
-qhigh <- 0.8
+qhigh <- 0.9
 
 
 qref <- list(ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,])
@@ -263,6 +262,17 @@ for (dim in 1:2){
   qmala[[dim]]$iteration <- 1:L_mcmc
 }
 
+qvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:2){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], qlow)
+    qvi[[dim]][k,2] <- quantile(vi[[i]][1:k,dim], qmed)
+    qvi[[dim]][k,3] <- quantile(vi[[i]][1:k,dim], qhigh)
+  }
+  qvi[[dim]]$iteration <- 1:L_mcmc
+}
+
 
 
 iteration <- 1:L_mcmc
@@ -294,9 +304,16 @@ q3mala$quantile <- 3
 quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 
 
+q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1]))
+q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2]))
+q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3]))
+q1vi$quantile <- 1
+q2vi$quantile <- 2
+q3vi$quantile <- 3
+quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 
 colnames(quantref) <- colnames(quantnew)<-colnames(quantmala)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
-
+colnames(quantnuts)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
 
 plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
@@ -321,5 +338,6 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   }
   do.call("grid.arrange", c(graf, ncol=2, top=title))
 }
-plotquantile3(quantref,quantnew,quantmala)
 
+plotquantile3(quantref,quantnew,quantmala)
+plotquantile3(quantref,quantnew,quantnuts)

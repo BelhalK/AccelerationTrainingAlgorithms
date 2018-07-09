@@ -200,7 +200,10 @@ if(opt$nbiter.mcmc[4]>0) {
 		    mean.phi1<-mean.phiM[i,i1.omega2]
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
-		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
+		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,
+		    	xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, 
+		    	trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], 
+		    	pres=varList$pres, err=saemixObject["model"]["error.model"])
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		}
 		#rep the map nchains time
@@ -210,6 +213,7 @@ if(opt$nbiter.mcmc[4]>0) {
 		map.psi<-data.frame(id=id.list,map.psi)
 		map.phi<-data.frame(id=id.list,phi.map)
 		psi_map <- as.matrix(map.psi[,-c(1)])
+		# browser()
 		phi_map <- as.matrix(map.phi[,-c(1)])
 		eta_map <- phi_map - mean.phiM
 		fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
@@ -261,7 +265,6 @@ if(opt$nbiter.mcmc[4]>0) {
 		    phii<-saemixObject["results"]["phi"][i,]
 		    phi1<-phii[i1.omega2]
 		    phi1.opti<-optim(par=phi1, fn=conditional.distribution_d, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
-		    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
 		    phi.map[i,i1.omega2]<-phi1.opti$par
 		}
 		#rep the map nchains time
@@ -325,6 +328,7 @@ for (m in 1:saemix.options$L_mcmc) {
 	} 
 	for (i in 1:(nrow(phiM))) {
 		eta_list[[i]][m,] <- etaM[i,]
+		# eta_list[[i]][m,] <- psiM[i,]
 	}
 
   	for (u in 1:opt$nbiter.mcmc[4]) {
@@ -334,7 +338,6 @@ for (m in 1:saemix.options$L_mcmc) {
 			etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + Mi
 			# etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma[[i]]
 		}
-
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
 		psiMc<-transphi(phiMc,Dargs$transform.par)
 		if(Dargs$type=="structural"){
@@ -354,6 +357,8 @@ for (m in 1:saemix.options$L_mcmc) {
 		ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 		# print(length(ind)/Dargs$NM)
 		etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
+		phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
+		psiM<-transphi(phiM,Dargs$transform.par)
 		# psiM[ind,varList$ind.eta]<-psiMc[ind,varList$ind.eta]
 		U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 		U.eta[ind]<-Uc.eta[ind]
@@ -438,6 +443,8 @@ if(opt$nbiter.mcmc[5]>0) {
 		U.y<-compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
+
+	count <- 0
 	for (m in 1:saemix.options$L_mcmc) {
 		if(m%%100==0){
 			print(m)
@@ -523,6 +530,9 @@ if(opt$nbiter.mcmc[5]>0) {
 			
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + P - Pc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			if (length(which(ind==indiv))>0){
+				count <- count +1
+			}
 			# print(which(ind==indiv))
 			# print(length(ind)/Dargs$NM)
 			# print(ind)
@@ -533,6 +543,7 @@ if(opt$nbiter.mcmc[5]>0) {
 			nt2<-nt2+Dargs$NM
 		}
 	}
+	browser()
 }
 #NUTS with rstan
 if(opt$nbiter.mcmc[6]>0) {
@@ -608,29 +619,31 @@ if(opt$nbiter.mcmc[6]>0) {
 ###Linear
 	# indiv <- control$indiv.index
 	# obs <- Dargs$yM[Dargs$IdM==indiv]
-	# design <- as.data.frame(matrix(0, ncol = ncol(etaM), nrow = length(obs)))
-	# design[,1] <- 1
-	# design[,2] <- Dargs$XM[Dargs$IdM==indiv,]
-	# design <- as.matrix(design)
+	# age <- Dargs$XM[Dargs$IdM==indiv,]
+	
 	
 	# stan.model <- control$modelstan
+
+
+	# # stan_data <- list(N = length(obs),height = obs
+	# # 				,age = age,
+	# # 				beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],
+	# # 				omega_beta1=sqrt(omega.eta[1,1]),omega_beta2=sqrt(omega.eta[2,2]),
+	# # 				pres=sqrt(varList$pres[1]))
+
 	# stan_data <- list(N = length(obs),height = obs
-	# 				,age = design[,2],
-	# 				beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],
-	# 				omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],
+	# 				,age = age,
+	# 				beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
+	# 				omega_beta1=sqrt(omega.eta[1,1]),omega_beta2=sqrt(omega.eta[2,2]),omega_beta3=sqrt(omega.eta[3,3]),
 	# 				pres=sqrt(varList$pres[1]))
 	
 	# warmup <- 1000
 	# fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,init = phiM[indiv,],
 	# 	warmup = warmup,chains = 1,algorithm = "NUTS") #can try "HMC", "Fixed_param"
 	# fit_samples = extract(fit)
-	
-	# # psiMstan <- tail(fit_samples$beta,L_mcmc)
 	# psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 	# phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-	# etaMstan <- phiMstan
-	# etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
-	# etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
+	# etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 	# eta_list[[indiv]] <- etaMstan
 
 	if(Dargs$type=="structural"){
@@ -645,16 +658,20 @@ if(opt$nbiter.mcmc[6]>0) {
 		stan_data <- list(N = length(obs),concentration = obs
 						,time = time, dose = dose,
 						beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
-						omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
+						omega_beta1=sqrt(omega.eta[1,1]),omega_beta2=sqrt(omega.eta[2,2]),omega_beta3=sqrt(omega.eta[3,3]),
 						pres=sqrt(varList$pres[1]))
+
 
 		warmup <- 1000
 		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
-			chains = 1,algorithm = "HMC", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
+			chains = 1,algorithm = "NUTS", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
+		# browser()
 		fit_samples = extract(fit)
 		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 		etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
+		colMeans(etaMstan)
+		eta_map[indiv,]
 		eta_list[[indiv]] <- as.data.frame(etaMstan)
 	
 	} else {
@@ -671,10 +688,11 @@ if(opt$nbiter.mcmc[6]>0) {
 		stan_data <- list(N_e = N_e, N_c = N_c
 						,event_times = event_times, cens_times = cens_times,
 						alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
-						omega_alpha=omega.eta[1,1],omega_sigma=omega.eta[2,2])
+						omega_alpha=sqrt(omega.eta[1,1]),omega_sigma=sqrt(omega.eta[2,2]))
 		warmup <- 1000
+
 		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
-			chains = 1,algorithm = "HMC") 
+			chains = 1,algorithm = "NUTS") 
 		fit_samples = extract(fit)
 		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)

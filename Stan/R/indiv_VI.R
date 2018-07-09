@@ -24,7 +24,6 @@ indiv.variational.inference<-function(model,data,control=list()) {
 	DYF<-xinit$DYF
 	opt<-xinit$opt
 	structural.model<-saemix.model["model"]
-
 	# Function to perform MCMC simulation
 	nb.etas<-length(varList$ind.eta)
 	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
@@ -120,11 +119,10 @@ if(Dargs$type=="structural"){
 	time <- Dargs$XM[Dargs$IdM==indiv,2]
 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	stan.model <- control$modelstan
-	
 	stan_data <- list(N = length(obs),concentration = obs
 					,time = time, dose = dose,
 					beta1_pop=mean.phiM[indiv,1],beta2_pop=mean.phiM[indiv,2],beta3_pop=mean.phiM[indiv,3],
-					omega_beta1=omega.eta[1,1],omega_beta2=omega.eta[2,2],omega_beta3=omega.eta[3,3],
+					omega_beta1=sqrt(omega.eta[1,1]),omega_beta2=sqrt(omega.eta[2,2]),omega_beta3=sqrt(omega.eta[3,3]),
 					pres=sqrt(varList$pres[1]))
 	fit <- vb(stan.model, data = stan_data, iter = 100000)
 	fit_samples = extract(fit)
@@ -231,19 +229,20 @@ if(Dargs$type=="likelihood"){
 	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	stan_data <- list(N_e = N_e, N_c = N_c
 					,event_times = event_times, cens_times = cens_times,
-					alpha_pop=mean.psiM[indiv,1],sigma_pop=mean.psiM[indiv,2],
-					omega_alpha=omega.eta[1,1],omega_sigma=omega.eta[2,2])
+					alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
+					omega_alpha=sqrt(omega.eta[1,1]),omega_sigma=sqrt(omega.eta[2,2]))
 
-	fit <- vb(stan.model, data = stan_data, iter = 100000)
+	fit <- vb(stan.model, data = stan_data)
 	fit_samples = extract(fit)
-
 	psiMstan <- tail(fit_samples$beta,L_mcmc)
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 	etaMstan <- phiMstan
 	etaMstan[,1] <- phiMstan[,1] - mean.phiM[indiv,1]
 	etaMstan[,2] <- phiMstan[,2] - mean.phiM[indiv,2]
-	eta_map[indiv,]
-	colMeans(etaMstan)
+	print(eta_map[indiv,])
+	print(colMeans(etaMstan))
+	colMeans(phiMstan)
+	browser()
 	mu <- colMeans(etaMstan)
 	Gamma <- cov(etaMstan)
 }
