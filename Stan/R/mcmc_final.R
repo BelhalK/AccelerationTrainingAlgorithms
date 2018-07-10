@@ -543,7 +543,6 @@ if(opt$nbiter.mcmc[5]>0) {
 			nt2<-nt2+Dargs$NM
 		}
 	}
-	browser()
 }
 #NUTS with rstan
 if(opt$nbiter.mcmc[6]>0) {
@@ -690,15 +689,13 @@ if(opt$nbiter.mcmc[6]>0) {
 						alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
 						omega_alpha=sqrt(omega.eta[1,1]),omega_sigma=sqrt(omega.eta[2,2]))
 		warmup <- 1000
-
+		browser()
 		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
 			chains = 1,algorithm = "NUTS") 
 		fit_samples = extract(fit)
 		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-		etaMstan <- phiMstan
-		etaMstan[,1] <- phiMstan[,1] - mean.phiM[1,1]
-		etaMstan[,2] <- phiMstan[,2] - mean.phiM[1,2]
+		etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 		eta_list[[indiv]] <- etaMstan
 	}
 }

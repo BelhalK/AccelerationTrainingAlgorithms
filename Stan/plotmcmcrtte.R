@@ -10,8 +10,8 @@ library(dplyr)
 library(data.table)
 library(rstan)
 
-load("rtte_mala.RData")
-
+# load("rtte_mala.RData")
+load("rtte_mala_indiv.RData")
 
 
 q1ref[,2] <- q1ref[,2] + 10
@@ -26,7 +26,6 @@ q3new[,2] <- q3new[,2] + 10
 q1mala[,2] <- q1mala[,2] + 10
 q2mala[,2] <- q2mala[,2] + 10
 q3mala[,2] <- q3mala[,2] + 10
-
 
 
 q1ref[,3] <- q1ref[,3] + 3 
@@ -160,3 +159,5 @@ ggsave(save, file="newpics/quant_tte.pdf", width = 900, height = 450, units = "m
 # save = plotquantile(quantref,quantnew,quantadvi)
 # save = grid.arrange(save,ncol=1)
 # ggsave(save, file="newpics/quantadvi.pdf", width = 900, height = 450, units = "mm")
+
+

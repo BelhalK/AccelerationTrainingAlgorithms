@@ -89,25 +89,34 @@ end = K1+K2
 
 #compareMCMC
 
-saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.7,7.51,0.0178),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(0.5,0,0,0,0.2,0,0,0,0.03),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE))
-
 # saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-#   ,psi0=matrix(c(1,8,0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-#   transform.par=c(1,1,1),omega.init=matrix(c(0.2,0,0,0,0.18,0,0,0,0.03),ncol=3,byrow=TRUE),
+#   ,psi0=matrix(c(0.7,7.51,0.0178),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1),omega.init=matrix(c(0.5,0,0,0,0.2,0,0,0,0.03),ncol=3,byrow=TRUE),
 #   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
 #   byrow=TRUE))
+
+saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+  ,psi0=matrix(c(1,8,0.01),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+  transform.par=c(1,1,1),omega.init=matrix(c(0.2,0,0,0,0.18,0,0,0,0.03),ncol=3,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE))
 
 
 L_mcmc=10000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
+
+
+
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
+
+
+
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)
+new<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
 #MALA
 
@@ -150,7 +159,7 @@ model <- 'data {
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
-i <- 4
+i <- 10
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 

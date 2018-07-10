@@ -242,7 +242,6 @@ if(Dargs$type=="likelihood"){
 	print(eta_map[indiv,])
 	print(colMeans(etaMstan))
 	colMeans(phiMstan)
-	browser()
 	mu <- colMeans(etaMstan)
 	Gamma <- cov(etaMstan)
 }

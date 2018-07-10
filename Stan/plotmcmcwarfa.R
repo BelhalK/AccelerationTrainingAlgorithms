@@ -9,7 +9,8 @@ require(reshape2)
 library(dplyr)
 library(data.table)
 library(rstan)
-load("hmc_quantile.RData")
+# load("hmc_quantile.RData")
+load("hmc_quantile_indiv.RData")
 
 l <- c(1,8,0.01)
 for (d in 2:4){
@@ -34,13 +35,13 @@ for (d in 2:4){
   q2advi.full[,d] <- q2advi.full[,d] + l[d-1]
   q3advi.full[,d] <- q3advi.full[,d] + l[d-1]
 
-  q1advi.onlymuvi[,d] <- q1advi.onlymuvi[,d] + l[d-1] 
-  q2advi.onlymuvi[,d] <- q2advi.onlymuvi[,d] + l[d-1]
-  q3advi.onlymuvi[,d] <- q3advi.onlymuvi[,d] + l[d-1]
+  # q1advi.onlymuvi[,d] <- q1advi.onlymuvi[,d] + l[d-1] 
+  # q2advi.onlymuvi[,d] <- q2advi.onlymuvi[,d] + l[d-1]
+  # q3advi.onlymuvi[,d] <- q3advi.onlymuvi[,d] + l[d-1]
 
-  q1advi.onlygammavi[,d] <- q1advi.onlygammavi[,d] + l[d-1] 
-  q2advi.onlygammavi[,d] <- q2advi.onlygammavi[,d] + l[d-1]
-  q3advi.onlygammavi[,d] <- q3advi.onlygammavi[,d] + l[d-1]
+  # q1advi.onlygammavi[,d] <- q1advi.onlygammavi[,d] + l[d-1] 
+  # q2advi.onlygammavi[,d] <- q2advi.onlygammavi[,d] + l[d-1]
+  # q3advi.onlygammavi[,d] <- q3advi.onlygammavi[,d] + l[d-1]
 
 }
 
@@ -51,8 +52,8 @@ quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 
 quantadvi.full <- rbind(q1advi.full[-c(1:burn),],q2advi.full[-c(1:burn),],q3advi.full[-c(1:burn),])
-quantadvi.onlymuvi <- rbind(q1advi.onlymuvi[-c(1:burn),],q2advi.onlymuvi[-c(1:burn),],q3advi.onlymuvi[-c(1:burn),])
-quantadvi.onlygammavi <- rbind(q1advi.onlygammavi[-c(1:burn),],q2advi.onlygammavi[-c(1:burn),],q3advi.onlygammavi[-c(1:burn),])
+# quantadvi.onlymuvi <- rbind(q1advi.onlymuvi[-c(1:burn),],q2advi.onlymuvi[-c(1:burn),],q3advi.onlymuvi[-c(1:burn),])
+# quantadvi.onlygammavi <- rbind(q1advi.onlygammavi[-c(1:burn),],q2advi.onlygammavi[-c(1:burn),],q3advi.onlygammavi[-c(1:burn),])
 
 colnames(quantmala) <-colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
 colnames(quantnuts) <-c("iteration","ka","V","k","quantile")
@@ -132,6 +133,14 @@ plotq3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
+
+
+colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
+save1 = plotq1(quantref[,c(1,2,5)],quantnew[,c(1,2,5)],quantnew[,c(1,2,5)])
+save2 = plotq2(quantref[,c(1,3,5)],quantnew[,c(1,3,5)],quantnew[,c(1,3,5)])
+save3 = plotq3(quantref[,c(1,4,5)],quantnew[,c(1,4,5)],quantnew[,c(1,4,5)])
+save <- grid.arrange(save1,save2,save3, ncol=3)
+ggsave(save, file="newpics/quant_pk.pdf", width = 900, height = 450, units = "mm")
 
 
 colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")

@@ -7,9 +7,10 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 library(dplyr)
-library(data.table)
 library(rstan)
-
+# load("testttenuts.RData")
+# save.image("testttenuts.RData")
+# setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('aaa_generics.R') 
@@ -38,170 +39,114 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan")
 
+###RTTE
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/research/CSDA/csda_new2/data/rtte_data.csv", header=T, sep=",")
+# timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/data/rttellis.csv", header=T, sep=",")
+timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
+saemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
+n <- length(unique(timetoevent.saemix$id))
 
-
-warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/data/warfarin_data.txt", header=T)
-saemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
-
-
-n <- length(unique(warfa_data$id))
-model1cpt<-function(psi,id,xidep) { 
-  dose<-xidep[,1]
-  time<-xidep[,2]
-  ka<-psi[id,1]
-  V<-psi[id,2]
-  k<-psi[id,3]
-
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
-  return(ypred)
+timetoevent.model<-function(psi,id,xidep) {
+T<-xidep[,1]
+y<-xidep[,2]
+N <- nrow(psi)
+Nj <- length(T)
+censoringtime = 20
+lambda <- psi[id,1]
+beta <- psi[id,2]
+init <- which(T==0)
+cens <- which(T==censoringtime)
+ind <- setdiff(1:Nj, append(init,cens))
+hazard <- (beta/lambda)*(T/lambda)^(beta-1)
+H <- (T/lambda)^beta
+logpdf <- rep(0,Nj)
+logpdf[cens] <- -H[cens] + H[cens-1]
+logpdf[ind] <- -H[ind] + H[ind-1] + log(hazard[ind])
+return(logpdf)
 }
 
-# saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-#   ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-#   byrow=TRUE))
-
-
-##RUNS
-
-K1 = 400
+K1 = 200
 K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-#compareMCMC
+# #Weibull
+# options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+# rtte<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rtte))
+# rtte <- cbind(iterations, rtte)
 
-saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(0.7,7.51,0.0178),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(0,0,0),omega.init=matrix(c(0.2,0,0,0,0.18,0,0,0,0.03),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+
+# options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,map.range=c(1:5))
+# rttenew<-data.frame(saemix(saemix.model_rtte,saemix.data_rtte,options_rttenew))
+# rtte <- cbind(iterations, rtte)
+
+
+
+saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
+  psi0=matrix(c(10,3),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  c("lambda","beta"))), 
+  transform.par=c(0,0),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE),
+  covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
 
+i <- 5
+L_mcmc=1000
 
-L_mcmc=6000
-#REF RWM
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
-
-#Laplace proposal
-options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-new<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
-
+options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,
+  L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1,
+   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
+   map.range=c(0), indiv.index = i)
+new<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rttenew)$eta
 
 model <- 'data {
-          int<lower=0> N;// Number of observations
-          vector[N] time; //predictor
-          real dose; //predictor
-          vector[N] concentration;  //response
-          
-          real beta1_pop;
-          real beta2_pop;
-          real beta3_pop;
-          real<lower=0> omega_beta1;
-          real<lower=0> omega_beta2;
-          real<lower=0> omega_beta3;
-          real<lower=0>  pres;
-        }
-        parameters {
-          vector<lower=0>[3] beta;
-        }
-        model {
-          //Priors
-          beta[1] ~ normal( beta1_pop , omega_beta1);
-          beta[2] ~ normal( beta2_pop , omega_beta2);
-          beta[3] ~ normal( beta3_pop , omega_beta3);
-          concentration ~ normal(dose*beta[1]/(beta[2]*(beta[1]-beta[3]))*(exp(-beta[3]*time)-exp(-beta[1]*time)), pres);
-        }'
+  int<lower=1> N_e; // Number of total observed events
+  int<lower=1> N_c; // Number of total censoring times 
+  vector<lower=0>[N_e] event_times; // Times of event occurrence
+  int<lower=0> cens_times; // Censoring times
+  real<lower=0> alpha_pop;
+  real<lower=0> sigma_pop;
+  real<lower=0> omega_alpha;
+  real<lower=0> omega_sigma;
+}
 
-modelstan <- stan_model(model_name = "warfarin",model_code = model)
+parameters {
+  vector<lower=0>[2] beta;
+}
 
+model {
+  // prior
+  beta[1] ~ normal(alpha_pop, omega_alpha);
+  beta[2] ~ normal(sigma_pop, omega_sigma);
+  
+  // likelihood
+  for (n_e in 1:N_e) {
+    target += weibull_lpdf(event_times[n_e] | beta[1], beta[2]) - 
+              weibull_lccdf(event_times[n_e] | beta[1], beta[2]);
+  } 
+
+  target += weibull_lccdf(cens_times | beta[1], beta[2]);
+
+}'
+
+modelstan <- stan_model(model_name = "rtte",model_code = model)
 #NUTS using rstan
-i <- 10
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
-vi<-mcmc(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+vi<-mcmc(saemix.model_rtte,saemix.data_rtte,options.vi)$eta
 
-#MALA
-i <- 10
-options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.00001
-  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0,0),nb.chains=1
-  , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
-  , map.range=c(0), indiv.index = i)
-mala<-mcmc(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
-
-
-#ADVI
-variational.post.options<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nb.chains=1,
- nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),
-  modelstan = modelstan, indiv.index = i)
-
-variational.post<-indiv.variational.inference(saemix.model_warfa,saemix.data_warfa,variational.post.options)
-mu.vi <- variational.post$mu
-Gamma.vi <- variational.post$Gamma
-etamap <- variational.post$map
-Gammamap <- variational.post$Gammamap
-
-# #using the output of ADVI (drawn from candidate KL posterior)
-eta.vi <- etamap
-Gammavi <- Gammamap
-eta.vi[i,] <- mu.vi
-Gammavi[[i]] <- Gamma.vi
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
-        nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
-        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
-
-#Autocorrelation
-rwm.obj <- as.mcmc(ref[[i]])
-autocorr.plot(rwm.obj[,1]) + title("RWM Autocorrelation")
-
-new.obj <- as.mcmc(new[[i]])
-autocorr.plot(new.obj[,1]) + title("Laplace Autocorrelation")
-
-advi.obj <- as.mcmc(advi[[i]])
-autocorr.plot(advi.obj[,1]) + title("advi Autocorrelation")
-
-vi.obj <- as.mcmc(vi[[i]])
-autocorr.plot(vi.obj[,1]) + title("NUTS Autocorrelation")
-
-mala.obj <- as.mcmc(mala[[i]])
-autocorr.plot(mala.obj[,1]) + title("MALA Autocorrelation")
-
-#MSJD
-mssd(ref[[i]][,1])
-mssd(new[[i]][,1])
-mssd(advi[[i]][,1])
-mssd(vi[[i]][,1])
-mssd(mala[[i]][,1])
 
 start_interval <- 200
-zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 3))
-
+zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 2))
 
 #quantiles
-qlow <- 0.2
+qlow <- 0.1
 qmed <- 0.5
-qhigh <- 0.8
-
-
-qref <- list(ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,])
-for (dim in 1:3){
-  print(dim)
-  for (k in 1:L_mcmc){
-    qref[[dim]][k,1] <- quantile(ref[[i]][1:k,dim], qlow)
-    qref[[dim]][k,2] <- quantile(ref[[i]][1:k,dim], qmed)
-    qref[[dim]][k,3] <- quantile(ref[[i]][1:k,dim], qhigh)
-  }
-  qref[[dim]]$iteration <- 1:L_mcmc
-}
-
+qhigh <- 0.9
 
 qnew <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
-for (dim in 1:3){
+for (dim in 1:2){
   print(dim)
   for (k in 1:L_mcmc){
     qnew[[dim]][k,1] <- quantile(new[[i]][1:k,dim], qlow)
@@ -211,22 +156,8 @@ for (dim in 1:3){
   qnew[[dim]]$iteration <- 1:L_mcmc
 }
 
-
-
-qadvi <- list(advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,],advi[[i]][1:L_mcmc,])
-for (dim in 1:3){
-  print(dim)
-  for (k in 1:L_mcmc){
-    qadvi[[dim]][k,1] <- quantile(advi[[i]][1:k,dim], qlow)
-    qadvi[[dim]][k,2] <- quantile(advi[[i]][1:k,dim], qmed)
-    qadvi[[dim]][k,3] <- quantile(advi[[i]][1:k,dim], qhigh)
-  }
-  qadvi[[dim]]$iteration <- 1:L_mcmc
-}
-
-
-qvi <- list(vi[[i]][1:L_mcmc,],vi[[i]][1:L_mcmc,],vi[[i]][1:L_mcmc,])
-for (dim in 1:3){
+qvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:2){
   print(dim)
   for (k in 1:L_mcmc){
     qvi[[dim]][k,1] <- quantile(vi[[i]][1:k,dim], qlow)
@@ -236,72 +167,28 @@ for (dim in 1:3){
   qvi[[dim]]$iteration <- 1:L_mcmc
 }
 
-qmala <- list(mala[[i]][1:L_mcmc,],mala[[i]][1:L_mcmc,],mala[[i]][1:L_mcmc,])
-for (dim in 1:3){
-  print(dim)
-  for (k in 1:L_mcmc){
-    qmala[[dim]][k,1] <- quantile(mala[[i]][1:k,dim], qlow)
-    qmala[[dim]][k,2] <- quantile(mala[[i]][1:k,dim], qmed)
-    qmala[[dim]][k,3] <- quantile(mala[[i]][1:k,dim], qhigh)
-  }
-  qmala[[dim]]$iteration <- 1:L_mcmc
-}
 
 
 iteration <- 1:L_mcmc
 burn <- 100
-q1ref <- data.frame(cbind(iteration,qref[[1]][,1],qref[[2]][,1],qref[[3]][,1]))
-q2ref <- data.frame(cbind(iteration,qref[[1]][,2],qref[[2]][,2],qref[[3]][,2]))
-q3ref <- data.frame(cbind(iteration,qref[[1]][,3],qref[[2]][,3],qref[[3]][,3]))
-q1ref$quantile <- 1
-q2ref$quantile <- 2
-q3ref$quantile <- 3
-quantref <- rbind(q1ref[-c(1:burn),],q2ref[-c(1:burn),],q3ref[-c(1:burn),])
 
-
-q1new <- data.frame(cbind(iteration,qnew[[1]][,1],qnew[[2]][,1],qnew[[3]][,1]))
-q2new <- data.frame(cbind(iteration,qnew[[1]][,2],qnew[[2]][,2],qnew[[3]][,2]))
-q3new <- data.frame(cbind(iteration,qnew[[1]][,3],qnew[[2]][,3],qnew[[3]][,3]))
+q1new <- data.frame(cbind(iteration,qnew[[1]][,1],qnew[[2]][,1]))
+q2new <- data.frame(cbind(iteration,qnew[[1]][,2],qnew[[2]][,2]))
+q3new <- data.frame(cbind(iteration,qnew[[1]][,3],qnew[[2]][,3]))
 q1new$quantile <- 1
 q2new$quantile <- 2
 q3new$quantile <- 3
 quantnew <- rbind(q1new[-c(1:burn),],q2new[-c(1:burn),],q3new[-c(1:burn),])
 
-colnames(quantref) <- colnames(quantnew)<-c("iteration","ka","V","k","quantile")
-
-
-q1advi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1],qadvi[[3]][,1]))
-q2advi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2],qadvi[[3]][,2]))
-q3advi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3],qadvi[[3]][,3]))
-q1advi$quantile <- 1
-q2advi$quantile <- 2
-q3advi$quantile <- 3
-quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
-colnames(quantadvi)<-c("iteration","ka","V","k","quantile")
-
-
-q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
-q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2],qvi[[3]][,2]))
-q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
+q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1]))
+q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2]))
+q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3]))
 q1vi$quantile <- 1
 q2vi$quantile <- 2
 q3vi$quantile <- 3
 quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
-colnames(quantnuts)<-c("iteration","ka","V","k","quantile")
 
-q1mala <- data.frame(cbind(iteration,qmala[[1]][,1],qmala[[2]][,1],qmala[[3]][,1]))
-q2mala <- data.frame(cbind(iteration,qmala[[1]][,2],qmala[[2]][,2],qmala[[3]][,2]))
-q3mala <- data.frame(cbind(iteration,qmala[[1]][,3],qmala[[2]][,3],qmala[[3]][,3]))
-q1mala$quantile <- 1
-q2mala$quantile <- 2
-q3mala$quantile <- 3
-quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
-colnames(quantmala)<-c("iteration","ka","V","k","quantile")
+colnames(quantnew) <- colnames(quantnuts)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
 
 
-plotquantile3(quantref,quantnew,quantnuts)
-plotquantile3(quantref,quantnew,quantadvi)
-plotquantile3(quantref,quantnew,quantmala)
-plotquantile4(quantref,quantnew,quantnuts, quantadvi)
-plotquantile4(quantref,quantnew,quantnuts, quantmala)
-
+plotquantile3(quantnew,quantnew,quantnuts)

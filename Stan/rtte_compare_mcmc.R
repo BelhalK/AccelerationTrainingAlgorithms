@@ -8,9 +8,10 @@ require(gridExtra)
 require(reshape2)
 library(dplyr)
 library(rstan)
+# load("rtte_mala_indiv.RData")
 load("rtte_mala.RData")
 # save.image("rtte_mala.RData")
-# save.image("rtte_mcmc_conv.RData")
+# save.image("rtte_mala_indiv.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
@@ -99,22 +100,26 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
   covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
 
+i <- 2
+L_mcmc=10000
 
-L_mcmc=6000
-options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-ref<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rtte)$eta_ref
+options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0),indiv.index = i)
+ref<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rtte)$eta
 
-options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
+options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,
+  L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1,
+   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
+   map.range=c(0), indiv.index = i)
 new<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rttenew)$eta
 
 
-i <- 2
+
 options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.01
-  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0),nb.chains=1
+  ,gamma.val=0.0001,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0,0),nb.chains=1
   , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
   , map.range=c(0), indiv.index = i)
 mala<-mcmc(saemix.model_rtte,saemix.data_rtte,options.mala)$eta
-
 
 
 # model <- 'data {
@@ -178,10 +183,7 @@ model {
 }'
 
 modelstan <- stan_model(model_name = "rtte",model_code = model)
-
-
 #NUTS using rstan
-i <- 3
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
@@ -212,7 +214,7 @@ eta.vi[i,] <- mu.vi
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=test,Gamma = Gammavi,
         nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-advi<-mcmc(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
+advi<-mcmc.indiv(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
 
 
 
@@ -339,5 +341,6 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=2, top=title))
 }
 
+plotquantile3(quantref,quantnew,quantnew)
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantnuts)
