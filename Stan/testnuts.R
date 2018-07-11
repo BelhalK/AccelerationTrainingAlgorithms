@@ -52,8 +52,8 @@ y<-xidep[,2]
 N <- nrow(psi)
 Nj <- length(T)
 censoringtime = 20
-lambda <- psi[id,1]
-beta <- psi[id,2]
+beta <- psi[id,1]
+lambda <- psi[id,2]
 init <- which(T==0)
 cens <- which(T==censoringtime)
 ind <- setdiff(1:Nj, append(init,cens))
@@ -83,7 +83,7 @@ end = K1+K2
 
 
 saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
-  psi0=matrix(c(10,3),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+  psi0=matrix(c(3,10),ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
   transform.par=c(0,0),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE),
   covariance.model=matrix(c(1,0,0,1),ncol=2, 
@@ -98,37 +98,66 @@ options_rttenew<-list(seed=39546,map=F,fim=F,ll.is=F,
    map.range=c(0), indiv.index = i)
 new<-mcmc(saemix.model_rtte,saemix.data_rtte,options_rttenew)$eta
 
+# model <- 'data {
+#   int<lower=1> N_e; // Number of total observed events
+#   int<lower=1> N_c; // Number of total censoring times 
+#   vector<lower=0>[N_e] event_times; // Times of event occurrence
+#   int<lower=0> cens_times; // Censoring times
+#   real<lower=0> alpha_pop;
+#   real<lower=0> sigma_pop;
+#   real<lower=0> omega_alpha;
+#   real<lower=0> omega_sigma;
+# }
+
+# parameters {
+#   vector<lower=0>[2] beta;
+# }
+
+# model {
+#   // prior
+#   beta[1] ~ normal(alpha_pop, omega_alpha);
+#   beta[2] ~ normal(sigma_pop, omega_sigma);
+  
+#   // likelihood
+#   for (n_e in 1:N_e) {
+#     target += weibull_lpdf(event_times[n_e] | beta[1], beta[2]) - 
+#               weibull_lccdf(event_times[n_e] | beta[1], beta[2]);
+#   } 
+
+#   target += weibull_lccdf(cens_times | beta[1], beta[2]);
+
+# }'
+
+
 model <- 'data {
   int<lower=1> N_e; // Number of total observed events
-  int<lower=1> N_c; // Number of total censoring times 
+  int<lower=1> N_c; // Number of total censoring time
   vector<lower=0>[N_e] event_times; // Times of event occurrence
-  int<lower=0> cens_times; // Censoring times
-  real<lower=0> alpha_pop;
-  real<lower=0> sigma_pop;
-  real<lower=0> omega_alpha;
-  real<lower=0> omega_sigma;
+  int<lower=0> cens_times; // Censoring time
+  real<lower=0> beta_pop;
+  real<lower=0> lambda_pop;
+  real<lower=0> omega_beta;
+  real<lower=0> omega_lambda;
 }
 
 parameters {
-  vector<lower=0>[2] beta;
+  vector<lower=0>[2] param;
 }
 
 model {
   // prior
-  beta[1] ~ normal(alpha_pop, omega_alpha);
-  beta[2] ~ normal(sigma_pop, omega_sigma);
+  param[1] ~ normal(beta_pop, omega_beta);
+  param[2] ~ normal(lambda_pop, omega_lambda);
   
   // likelihood
-  for (n_e in 1:N_e) {
-    target += weibull_lpdf(event_times[n_e] | beta[1], beta[2]) - 
-              weibull_lccdf(event_times[n_e] | beta[1], beta[2]);
-  } 
-
-  target += weibull_lccdf(cens_times | beta[1], beta[2]);
-
+  target += weibull_lpdf(event_times | param[1], param[2]) - 
+            weibull_lccdf(event_times | param[1], param[2]) +
+            weibull_lccdf(cens_times | param[1], param[2]);
 }'
 
+
 modelstan <- stan_model(model_name = "rtte",model_code = model)
+
 #NUTS using rstan
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),

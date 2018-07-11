@@ -683,17 +683,16 @@ if(opt$nbiter.mcmc[6]>0) {
 		cens_times <- T[T == T_c]
 		N_e <- length(event_times)
 		N_c <- length(cens_times)
-		mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 		stan_data <- list(N_e = N_e, N_c = N_c
 						,event_times = event_times, cens_times = cens_times,
-						alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
-						omega_alpha=sqrt(omega.eta[1,1]),omega_sigma=sqrt(omega.eta[2,2]))
+						beta_pop=mean.phiM[indiv,2],lambda_pop=mean.phiM[indiv,1],
+						omega_beta=sqrt(omega.eta[2,2]),omega_lambda=sqrt(omega.eta[1,1]))
 		warmup <- 1000
-		browser()
+		# browser()
 		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
 			chains = 1,algorithm = "NUTS") 
 		fit_samples = extract(fit)
-		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
+		psiMstan <- fit_samples$param[seq(1,6*L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 		etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 		eta_list[[indiv]] <- etaMstan

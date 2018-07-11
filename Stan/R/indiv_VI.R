@@ -226,21 +226,16 @@ if(Dargs$type=="likelihood"){
 	cens_times <- T[T == T_c]
 	N_e <- length(event_times)
 	N_c <- length(cens_times)
-	mean.psiM <- transphi(mean.phiM,Dargs$transform.par)
 	stan_data <- list(N_e = N_e, N_c = N_c
 					,event_times = event_times, cens_times = cens_times,
-					alpha_pop=mean.phiM[indiv,1],sigma_pop=mean.phiM[indiv,2],
-					omega_alpha=sqrt(omega.eta[1,1]),omega_sigma=sqrt(omega.eta[2,2]))
-
+					beta_pop=mean.phiM[indiv,2],lambda_pop=mean.phiM[indiv,1],
+					omega_beta=sqrt(omega.eta[2,2]),omega_lambda=sqrt(omega.eta[1,1]))
+	warmup <- 1000
 	fit <- vb(stan.model, data = stan_data)
 	fit_samples = extract(fit)
-	psiMstan <- tail(fit_samples$beta,L_mcmc)
+	psiMstan <- tail(fit_samples$param,L_mcmc)
 	phiMstan<-transpsi(psiMstan,Dargs$transform.par)
-	etaMstan <- phiMstan
-	etaMstan[,1] <- phiMstan[,1] - mean.phiM[indiv,1]
-	etaMstan[,2] <- phiMstan[,2] - mean.phiM[indiv,2]
-	print(eta_map[indiv,])
-	print(colMeans(etaMstan))
+	etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 	colMeans(phiMstan)
 	mu <- colMeans(etaMstan)
 	Gamma <- cov(etaMstan)

@@ -10,45 +10,61 @@ library(dplyr)
 library(data.table)
 library(rstan)
 
-# load("rtte_mala.RData")
-load("rtte_mala_indiv.RData")
+load("rtte_mala.RData")
+# load("rtte_mala_indiv.RData")
 
 
-q1ref[,2] <- q1ref[,2] + 10
-q2ref[,2] <- q2ref[,2] + 10
-q3ref[,2] <- q3ref[,2] + 10
+q1ref[,2] <- q1ref[,2] + 3
+q2ref[,2] <- q2ref[,2] + 3
+q3ref[,2] <- q3ref[,2] + 3
 
-q1new[,2] <- q1new[,2] + 10
-q2new[,2] <- q2new[,2] + 10
-q3new[,2] <- q3new[,2] + 10
-
-
-q1mala[,2] <- q1mala[,2] + 10
-q2mala[,2] <- q2mala[,2] + 10
-q3mala[,2] <- q3mala[,2] + 10
+q1new[,2] <- q1new[,2] + 3
+q2new[,2] <- q2new[,2] + 3
+q3new[,2] <- q3new[,2] + 3
 
 
-q1ref[,3] <- q1ref[,3] + 3 
-q2ref[,3] <- q2ref[,3] + 3
-q3ref[,3] <- q3ref[,3] + 3
+q1mala[,2] <- q1mala[,2] + 3
+q2mala[,2] <- q2mala[,2] + 3
+q3mala[,2] <- q3mala[,2] + 3
 
-q1new[,3] <- q1new[,3] + 3
-q2new[,3] <- q2new[,3] + 3
-q3new[,3] <- q3new[,3] + 3
+q1vi[,2] <- q1vi[,2] + 3
+q2vi[,2] <- q2vi[,2] + 3
+q3vi[,2] <- q3vi[,2] + 3
 
-q1mala[,3] <- q1mala[,3] + 3
-q2mala[,3] <- q2mala[,3] + 3
-q3mala[,3] <- q3mala[,3] + 3
+q1advi[,2] <- q1advi[,2] + 3
+q2advi[,2] <- q2advi[,2] + 3
+q3advi[,2] <- q3advi[,2] + 3
 
+q1ref[,3] <- q1ref[,3] + 10 
+q2ref[,3] <- q2ref[,3] + 10
+q3ref[,3] <- q3ref[,3] + 10
+
+q1new[,3] <- q1new[,3] + 10
+q2new[,3] <- q2new[,3] + 10
+q3new[,3] <- q3new[,3] + 10
+
+q1mala[,3] <- q1mala[,3] + 10
+q2mala[,3] <- q2mala[,3] + 10
+q3mala[,3] <- q3mala[,3] + 10
+
+q1vi[,3] <- q1vi[,3] + 10
+q2vi[,3] <- q2vi[,3] + 10
+q3vi[,3] <- q3vi[,3] + 10
+
+q1advi[,3] <- q1advi[,3] + 10
+q2advi[,3] <- q2advi[,3] + 10
+q3advi[,3] <- q3advi[,3] + 10
 
 
 quantref <- rbind(q1ref[-c(1:burn),],q2ref[-c(1:burn),],q3ref[-c(1:burn),])
 quantnew <- rbind(q1new[-c(1:burn),],q2new[-c(1:burn),],q3new[-c(1:burn),])
 quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
+quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
+quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
 
-colnames(quantref) <- colnames(quantnew)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
-colnames(quantmala) <-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
-
+colnames(quantref) <- colnames(quantnew)<-c("iteration",expression(paste(beta)),expression(paste(lambda)),"quantile")
+colnames(quantadvi) <-colnames(quantmala) <-c("iteration",expression(paste(beta)),expression(paste(lambda)),"quantile")
+colnames(quantnuts) <-c("iteration",expression(paste(beta)),expression(paste(lambda)),"quantile")
 
 
 
@@ -119,11 +135,23 @@ plotquant2<- function(df,df2, title=NULL, ylim=NULL)
 }
 
 
-save = plotquantile(quantref,quantnew,quantmala)
+save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantmala[,c(1,3,2,4)])
 save = grid.arrange(save,ncol=1)
 ggsave(save, file="newpics/quantmala.pdf", width = 900, height = 450, units = "mm")
 
-save = plotquant2(quantref,quantnew)
+
+save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantnuts[,c(1,3,2,4)])
+save = grid.arrange(save,ncol=1)
+ggsave(save, file="newpics/quantnuts.pdf", width = 900, height = 450, units = "mm")
+
+
+save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantadvi[,c(1,3,2,4)])
+save = grid.arrange(save,ncol=1)
+ggsave(save, file="newpics/quantadvi.pdf", width = 900, height = 450, units = "mm")
+
+
+
+save = plotquant2(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)])
 save = grid.arrange(save,ncol=1)
 ggsave(save, file="newpics/quant_tte.pdf", width = 900, height = 450, units = "mm")
 
@@ -160,4 +188,10 @@ ggsave(save, file="newpics/quant_tte.pdf", width = 900, height = 450, units = "m
 # save = grid.arrange(save,ncol=1)
 # ggsave(save, file="newpics/quantadvi.pdf", width = 900, height = 450, units = "mm")
 
+
+
+abs(mu.vi - etamap[i,])/abs(etamap[i,])
+norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
+abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
+(Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
 

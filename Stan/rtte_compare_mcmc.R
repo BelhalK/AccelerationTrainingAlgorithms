@@ -67,11 +67,11 @@ logpdf[ind] <- -H[ind] + H[ind-1] + log(hazard[ind])
 return(logpdf)
 }
 
-saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
-  psi0=matrix(c(2,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
-  c("lambda","beta"))), 
-  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
-  byrow=TRUE))
+# saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
+#   psi0=matrix(c(2,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   
+#   c("lambda","beta"))), 
+#   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
+#   byrow=TRUE))
 
 
 ##RUNS
@@ -151,36 +151,32 @@ mala<-mcmc(saemix.model_rtte,saemix.data_rtte,options.mala)$eta
 #   }
 # }'
 
-
 model <- 'data {
   int<lower=1> N_e; // Number of total observed events
-  int<lower=1> N_c; // Number of total censoring times 
+  int<lower=1> N_c; // Number of total censoring time
   vector<lower=0>[N_e] event_times; // Times of event occurrence
-  int<lower=0> cens_times; // Censoring times
-  real<lower=0> alpha_pop;
-  real<lower=0> sigma_pop;
-  real<lower=0> omega_alpha;
-  real<lower=0> omega_sigma;
+  int<lower=0> cens_times; // Censoring time
+  real<lower=0> beta_pop;
+  real<lower=0> lambda_pop;
+  real<lower=0> omega_beta;
+  real<lower=0> omega_lambda;
 }
 
 parameters {
-  vector<lower=0>[2] beta;
+  vector<lower=0>[2] param;
 }
 
 model {
   // prior
-  beta[1] ~ lognormal(alpha_pop, omega_alpha);
-  beta[2] ~ lognormal(sigma_pop, omega_sigma);
+  param[2] ~ lognormal(beta_pop, omega_beta);
+  param[1] ~ lognormal(lambda_pop, omega_lambda);
   
   // likelihood
-  for (n_e in 1:N_e) {
-    target += weibull_lpdf(event_times[n_e] | beta[1], beta[2]) - 
-              weibull_lccdf(event_times[n_e] | beta[1], beta[2]);
-  } 
-
-  target += weibull_lccdf(cens_times | beta[1], beta[2]);
-
+  target += weibull_lpdf(event_times | param[2], param[1]) - 
+            weibull_lccdf(event_times | param[2], param[1]) +
+            weibull_lccdf(cens_times | param[2], param[1]);
 }'
+
 
 modelstan <- stan_model(model_name = "rtte",model_code = model)
 #NUTS using rstan
@@ -204,17 +200,15 @@ Gamma.vi <- variational.post$Gamma
 etamap <- variational.post$map
 Gammamap <- variational.post$Gammamap
 # #using the output of ADVI (drawn from candidate KL posterior)
-test <- etamap
-# test[i,] <- etamap[i,] +0.01
-test[i,] <- mu.vi
+
 eta.vi <- etamap
 Gammavi <- Gammamap
 eta.vi[i,] <- mu.vi
-# Gammavi[[i]] <- Gamma.vi
-options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=test,Gamma = Gammavi,
+Gammavi[[i]] <- Gamma.vi
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
         nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
-advi<-mcmc.indiv(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
+advi<-mcmc(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
 
 
 
@@ -275,6 +269,16 @@ for (dim in 1:2){
   qvi[[dim]]$iteration <- 1:L_mcmc
 }
 
+qadvi <- list(new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,],new[[i]][1:L_mcmc,])
+for (dim in 1:2){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qadvi[[dim]][k,1] <- quantile(advi[[i]][1:k,dim], qlow)
+    qadvi[[dim]][k,2] <- quantile(advi[[i]][1:k,dim], qmed)
+    qadvi[[dim]][k,3] <- quantile(advi[[i]][1:k,dim], qhigh)
+  }
+  qadvi[[dim]]$iteration <- 1:L_mcmc
+}
 
 
 iteration <- 1:L_mcmc
@@ -314,9 +318,18 @@ q2vi$quantile <- 2
 q3vi$quantile <- 3
 quantnuts <- rbind(q1vi[-c(1:burn),],q2vi[-c(1:burn),],q3vi[-c(1:burn),])
 
+
+q1advi <- data.frame(cbind(iteration,qadvi[[1]][,1],qadvi[[2]][,1]))
+q2advi <- data.frame(cbind(iteration,qadvi[[1]][,2],qadvi[[2]][,2]))
+q3advi <- data.frame(cbind(iteration,qadvi[[1]][,3],qadvi[[2]][,3]))
+q1advi$quantile <- 1
+q2advi$quantile <- 2
+q3advi$quantile <- 3
+quantadvi <- rbind(q1advi[-c(1:burn),],q2advi[-c(1:burn),],q3advi[-c(1:burn),])
+
 colnames(quantref) <- colnames(quantnew)<-colnames(quantmala)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
 colnames(quantnuts)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
-
+colnames(quantadvi)<-c("iteration",expression(paste(lambda)),expression(paste(beta)),"quantile")
 plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 {
  G <- (ncol(df)-2)/3
@@ -344,3 +357,4 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
 plotquantile3(quantref,quantnew,quantnew)
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantnuts)
+plotquantile3(quantref,quantnew,quantadvi)
