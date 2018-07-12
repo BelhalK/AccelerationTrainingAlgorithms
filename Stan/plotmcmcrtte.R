@@ -113,13 +113,13 @@ plotquant2<- function(df,df2, title=NULL, ylim=NULL)
   for (j in (2:(ncol(df)-1)))
   {
     if (j<3){
-      grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=0.8) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 1,size=0.8)+
+      grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="red",size=0.8) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",linetype = 1,size=0.8)+
       xlab("iteration")+ theme_bw() +ylab(expression(paste(lambda[i])))
       grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=34), 
                  axis.title=element_text(size=40),
                    panel.border = element_rect(colour = "black", fill=NA, size=2))
     }else{
-      grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=0.8) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 1,size=0.8)+
+      grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="red",size=0.8) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",linetype = 1,size=0.8)+
       xlab("iteration")+ theme_bw() +ylab(expression(paste(beta[i])))
       grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=34), 
                  axis.title=element_text(size=40),
@@ -135,17 +135,17 @@ plotquant2<- function(df,df2, title=NULL, ylim=NULL)
 }
 
 
-save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantmala[,c(1,3,2,4)])
+save = plotquant2(quantnew[,c(1,3,2,4)],quantmala[,c(1,3,2,4)])
 save = grid.arrange(save,ncol=1)
 ggsave(save, file="newpics/quantmala.pdf", width = 900, height = 450, units = "mm")
 
 
-save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantnuts[,c(1,3,2,4)])
+save = plotquant2(quantnew[,c(1,3,2,4)],quantnuts[,c(1,3,2,4)])
 save = grid.arrange(save,ncol=1)
 ggsave(save, file="newpics/quantnuts.pdf", width = 900, height = 450, units = "mm")
 
 
-save = plotquantile(quantref[,c(1,3,2,4)],quantnew[,c(1,3,2,4)],quantadvi[,c(1,3,2,4)])
+save = plotquant2(quantnew[,c(1,3,2,4)],quantadvi[,c(1,3,2,4)])
 save = grid.arrange(save,ncol=1)
 ggsave(save, file="newpics/quantadvi.pdf", width = 900, height = 450, units = "mm")
 
@@ -189,9 +189,16 @@ ggsave(save, file="newpics/quant_tte.pdf", width = 900, height = 450, units = "m
 # ggsave(save, file="newpics/quantadvi.pdf", width = 900, height = 450, units = "mm")
 
 
+mu.vi + c(10,3)
+etamap[i,] + c(10,3)
+
+Gamma.vi
+Gammamap[[i]]
+
+
 
 abs(mu.vi - etamap[i,])/abs(etamap[i,])
 norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
-abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
+abs(Gamma.vi - Gammamap[[i]])/abs(Gamma.vi[[i]])
 (Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
 

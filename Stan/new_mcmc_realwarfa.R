@@ -365,7 +365,7 @@ q2mala$quantile <- 2
 q3mala$quantile <- 3
 quantmala <- rbind(q1mala[-c(1:burn),],q2mala[-c(1:burn),],q3mala[-c(1:burn),])
 colnames(quantmala)<-c("iteration","ka","V","k","quantile")
-
+plotquantile3(quantnew,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantnuts)
 
@@ -378,3 +378,11 @@ plotquantile4(quantref,quantnew,quantnuts,quantmala)
 # gelman.plot(mcmc.list(as.mcmc(ref[[10]])), bin.width = 10, max.bins = 50,confidence = qhigh, transform = FALSE, autoburnin=TRUE, auto.layout = TRUE)
 # geweke.plot(mcmc.list(as.mcmc(ref[[10]])), frac1=0.1, frac2=0.5)
 # geweke.plot(mcmc.list(as.mcmc(new[[10]])), frac1=0.1, frac2=0.5)
+mu.vi + c(1,8,0.01)
+etamap[i,]+ c(1,8,0.01)
+Gamma.vi
+Gammamap[[i]]
+abs(mu.vi - etamap[i,])/abs(etamap[i,])
+norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
+abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
+(Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])

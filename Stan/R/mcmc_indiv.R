@@ -508,8 +508,8 @@ mcmc.indiv<-function(model,data,control=list()) {
 				nt2<-nt2+Dargs$NM
 			}
 		}
-
 	}
+
 	#NUTS with rstan
 	if(opt$nbiter.mcmc[6]>0) {
 		# etaMc<-etaM
