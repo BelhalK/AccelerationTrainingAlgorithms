@@ -102,7 +102,7 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-L_mcmc=10000
+L_mcmc=30000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 ref<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta_ref
 
@@ -180,22 +180,20 @@ etamap <- variational.post$map
 Gammamap <- variational.post$Gammamap
 
 # #using the output of ADVI (drawn from candidate KL posterior)
-# test <- etamap
-# # test[i,] <- etamap[i,] +0.01
-# test[i,] <- mu.vi
 eta.vi <- etamap
 Gammavi <- Gammamap
-# eta.vi[i,] <- mu.vi
-# Gammavi[[i]] <- Gamma.vi
+eta.vi[i,] <- mu.vi
+Gammavi[[i]] <- Gamma.vi
+
 options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
         nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
         nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
 advi<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
 
-abs(mu.vi - etamap[i,])/abs(etamap[i,])
-norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
-abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
-(Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
+# abs(mu.vi - etamap[i,])/abs(etamap[i,])
+# norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
+# abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
+# (Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
 
 
 #Autocorrelation
@@ -223,9 +221,9 @@ zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 3))
 
 
 #quantiles
-qlow <- 0.2
+qlow <- 0.1
 qmed <- 0.5
-qhigh <- 0.8
+qhigh <- 0.9
 
 
 qref <- list(ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,],ref[[i]][1:L_mcmc,])
@@ -368,7 +366,7 @@ colnames(quantmala)<-c("iteration","ka","V","k","quantile")
 plotquantile3(quantnew,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantnuts)
-
+plotquantile3(quantnew,quantnew,quantadvi.full)
 plotquantile3(quantref,quantnew,quantadvi.full)
 plotquantile3(quantref,quantnew,quantadvi.onlymuvi)
 plotquantile3(quantref,quantnew,quantadvi.onlygammavi)
