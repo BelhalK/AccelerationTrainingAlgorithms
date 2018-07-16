@@ -90,22 +90,9 @@ batchsize50 = 50
 
 seed0=3456
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(0,0,0,6), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
 theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options)$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
-
-
-
-# options.new<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,6), 
-#   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(1:3), nb.replacement=100,sampling='seq')
-# theo_new<-data.frame(saemix_incremental(saemix.model,saemix.data,options.new))
-# theo_new <- cbind(iterations, theo_new)
-
-# graphConvMC_twokernels(theo_ref,theo_new)
-
-# options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(0,0,0,6), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
-# theo_ref<-data.frame(saemix_incremental(saemix.model,saemix.data,options))
-# theo_ref <- cbind(iterations, theo_ref[-1,])
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(0,0,0,6), 
