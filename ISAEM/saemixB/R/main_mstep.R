@@ -1,5 +1,5 @@
 ################## Stochastic approximation - compute sufficient statistics (M-step) #####################
-mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat) {
+mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement) {
 	# M-step - stochastic approximation
 	# Input: kiter, Uargs, structural.model, DYF, phiM (unchanged)
 	# Output: varList, phi, betas, suffStat (changed)
@@ -23,6 +23,24 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	# overall speed similar
 	#    phi<-aperm(array(phiM,c(N,nchains,3)),c(1,3,2))
+	
+	if (kiter <= 3){ #if rwm
+
+		# weight <- eta_map[,1]
+		# gamma = saemix.options$gamma
+		
+		# for (m in 1:Dargs$NM){
+		# 	weight[m] <- exp(gamma*eta_map[m,2]^2)
+		# 	# weight[m] <- exp(gamma*eta_map[m,2])
+		# }
+		ordered <- sort(phi[,,1][,2], decreasing = TRUE)
+		# indchosen <- sample(1:Dargs$NM, size = nb_replacement, replace = FALSE)
+		indchosen <- which(phi[,,1][,2] >= ordered[nb_replacement])
+		block <- setdiff(1:Dargs$NM, indchosen)
+		
+		phi[,,1][block,2] = 0
+	}
+
 	stat1<-apply(phi[,varList$ind.eta,,drop=FALSE],c(1,2),sum) # sum on columns ind.eta of phi, across 3rd dimension
 	stat2<-matrix(data=0,nrow=nb.etas,ncol=nb.etas)
 	stat3<-apply(phi**2,c(1,2),sum) #  sum on phi**2, across 3rd dimension
