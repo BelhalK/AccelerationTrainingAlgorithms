@@ -44,7 +44,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	eta_map <- phi.map
   	indchosen <- l[ind_rand]
 # Sampling strategy (MAP calculation)
-if (kiter <= 20){ #if rwm
+if (kiter <= 0){ #if rwm
   	# if (kiter <= length(map_range) && length(ind_rand)!=Dargs$NM){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
@@ -258,6 +258,7 @@ if (kiter <= 20){ #if rwm
 				r <- r+sum(as.matrix(z) != 0L)
 	            z[r] <- gradf[r,1]
 				Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+				# Gamma[[i]] <- omega.eta
 			}
 
 			if (kiter <= length(map_range)){
@@ -285,6 +286,7 @@ if (kiter <= 20){ #if rwm
 					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
 				}
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				deltu[block] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs

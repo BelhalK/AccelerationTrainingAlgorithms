@@ -74,7 +74,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=200
+N=2000
 
 param   <- c(
   ka_pop  = 1,    omega_ka  = 0.3,
@@ -94,7 +94,7 @@ res <- simulx(model     = model,
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(0,1,0),
+  ,psi0=matrix(c(3,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
@@ -124,34 +124,34 @@ theo_ref <- cbind(iterations, theo_ref[-1,])
 # theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
-theo_mix50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-theo_mix50 <- data.frame(theo_mix50$param)
-theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+# options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
+#                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
+#                           nbiter.burn =0, nb.replacement=50,sampling='randompass')
+# theo_mix50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+# theo_mix50 <- data.frame(theo_mix50$param)
+# theo_mix50 <- cbind(iterations, theo_mix50[-1,])
 
 
-options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
-theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
-theo_mix25 <- data.frame(theo_mix25$param)
-theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+# options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+#   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
+#   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+# theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+# theo_mix25 <- data.frame(theo_mix25$param)
+# theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
-theo_ref_scaled <- theo_ref
-theo_mix25_scaled <- theo_mix25
-theo_mix50_scaled <- theo_mix50
-theo_mix75_scaled <- theo_mix75
-theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
-theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
-theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
-theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
+# theo_ref_scaled <- theo_ref
+# theo_mix25_scaled <- theo_mix25
+# theo_mix50_scaled <- theo_mix50
+# theo_mix75_scaled <- theo_mix75
+# theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+# theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
+# theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
+# theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 
-graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
 
-graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
-graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
+# graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
 
 ###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
 
@@ -188,6 +188,8 @@ theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
 
+graphConvMC_threekernels(theo_ref,theo_mix50,theo_mix25)
+graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix25_scaled)
 ###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
 
 

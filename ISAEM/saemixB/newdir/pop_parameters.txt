@@ -8,21 +8,21 @@ Dataset warfarin.saemix
     Structured data: y ~ amount + time | id 
     X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     200 
-    number of observations: 2000 
+    number of subjects:     2000 
+    number of observations: 20000 
     average/min/max nb obs: 10.00  /  10  /  10 
 First 10 lines of data:
    id amount time        y mdv cens occ ytype
-1   1    100    1 4.407794   0    0   1     1
-2   1    100    2 7.519911   0    0   1     1
-3   1    100    3 6.115228   0    0   1     1
-4   1    100    4 6.311595   0    0   1     1
-5   1    100    5 6.198622   0    0   1     1
-6   1    100    6 7.098888   0    0   1     1
-7   1    100    7 7.095581   0    0   1     1
-8   1    100    8 6.844560   0    0   1     1
-9   1    100    9 6.286646   0    0   1     1
-10  1    100   10 7.204672   0    0   1     1
+1   1    100    1 4.708779   0    0   1     1
+2   1    100    2 7.276264   0    0   1     1
+3   1    100    3 6.529768   0    0   1     1
+4   1    100    4 8.060821   0    0   1     1
+5   1    100    5 5.871984   0    0   1     1
+6   1    100    6 6.588718   0    0   1     1
+7   1    100    7 6.286853   0    0   1     1
+8   1    100    8 5.490380   0    0   1     1
+9   1    100    9 6.119488   0    0   1     1
+10  1    100   10 3.281123   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
@@ -42,9 +42,9 @@ function(psi,id,xidep) {
       parameter names:  ka V Cl 
       distribution:
      Parameter Distribution Estimated
-[1,] ka        log-normal   Fixed    
+[1,] ka        log-normal   Estimated
 [2,] V         log-normal   Estimated
-[3,] Cl        log-normal   Fixed    
+[3,] Cl        log-normal   Estimated
   Variance-covariance matrix:
    ka V Cl
 ka  1 0  0
@@ -54,7 +54,7 @@ Cl  0 0  1
     No covariate in the model.
     Initial values
              ka V  Cl
-Pop.CondInit  1 3 0.1
+Pop.CondInit  3 3 0.1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
@@ -75,17 +75,17 @@ Pop.CondInit  1 3 0.1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         1.0    
-[2,] V         10.5    
-[3,] Cl         0.1    
-[4,] a          1.0    
+[1,] ka         1      
+[2,] V         10      
+[3,] Cl         1      
+[4,] a          1      
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 0.071   
-V  omega2.V  0.062   
-Cl omega2.Cl 5.061   
+ka omega2.ka 0.077   
+V  omega2.V  0.040   
+Cl omega2.Cl 0.099   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
