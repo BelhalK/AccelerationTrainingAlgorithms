@@ -74,7 +74,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=2000
+N=200
 
 param   <- c(
   ka_pop  = 1,    omega_ka  = 0.3,
@@ -186,7 +186,7 @@ theo_mix25_scaled <- theo_mix25
 theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
 theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
-graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
+graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
 
 graphConvMC_threekernels(theo_ref,theo_mix50,theo_mix25)
 graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix25_scaled)
@@ -239,12 +239,11 @@ o_V <- 0.2  #o^2=0.04
 o_Cl <- 0.3  #o^2=0.09
 
 error_rwm <- 0
-error_mix <- 0
-error_mix2 <- 0
-error_mix20 <- 0
+error_mix50 <- 0
+error_mix25 <- 0
+error_mix75 <- 0
 
-
-K1 = 500
+K1 = 200
 K2 = 100
 iterations = 0:(K1+K2-1)
 end = K1+K2
@@ -252,10 +251,10 @@ batchsize25 = 25
 batchsize50 = 50
 
 
-
+map_range = 1:4
 true_param <- data.frame("ka" = ka_true, "V" = V_true, "Cl" = Cl_true, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
 seed0 = 39546
-replicate = 20
+replicate = 6
 for (m in 1:replicate){
 
 model <- inlineModel("
@@ -277,12 +276,12 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=100
+N=200
 
 param   <- c(
   ka_pop  = ka_true,    omega_ka  = o_ka,
   V_pop   = V_true,   omega_V   = o_V,
-  Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =1)
+  Cl_pop  = Cl_true,    omega_Cl  = o_Cl, a =a_true)
   
 res <- simulx(model     = model,
               parameter = param,
@@ -297,13 +296,14 @@ res <- simulx(model     = model,
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(1,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(0,1,0),
+  ,psi0=matrix(c(3,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,2),
+
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,2),
  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
- map.range=c(1:4), nb.replacement=100,sampling='seq', gamma= 0)
+ map.range=c(map_range), nb.replacement=100,sampling='seq', gamma= 0)
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
 theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
@@ -312,92 +312,89 @@ ML[0:end,1:7]<- theo_ref[end,2:8]
 # ML[0:end,1:7]<- true_param
 error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
 theo_ref['individual'] <- m
-final_ref <- rbind(final_ref,theo_ref)
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 0.2)
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(map_range),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
 theo_mix50 <- data.frame(theo50$param)
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+
 ML <- theo_ref[,2:8]
 ML[0:end,1:7]<- theo_mix50[end,2:8]
 # ML[0:end,1:7]<- true_param
-error_mix <- error_mix + (theo_mix50[,2:8]-ML)^2
+error_mix50 <- error_mix50 + (theo_mix50[,2:8]-ML)^2
 theo_mix50['individual'] <- m
-final_mix <- rbind(final_mix,theo_mix50)
 
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 2)
-theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-theo_mix50 <- data.frame(theo50$param)
-theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(map_range),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+theo_mix25 <- data.frame(theo_mix25$param)
+theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+
+
 ML <- theo_ref[,2:8]
-ML[0:end,1:7]<- theo_mix50[end,2:8]
+ML[0:end,1:7]<- theo_mix25[end,2:8]
 # ML[0:end,1:7]<- true_param
-error_mix2 <- error_mix2 + (theo_mix50[,2:8]-ML)^2
-theo_mix50['individual'] <- m
-final_mix <- rbind(final_mix,theo_mix50)
+error_mix25 <- error_mix25 + (theo_mix25[,2:8]-ML)^2
+theo_mix25['individual'] <- m
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 20)
-theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-theo_mix50 <- data.frame(theo50$param)
-theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(map_range),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
+theo_mix75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
+theo_mix75 <- data.frame(theo_mix75$param)
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
+
+
 ML <- theo_ref[,2:8]
-ML[0:end,1:7]<- theo_mix50[end,2:8]
+ML[0:end,1:7]<- theo_mix75[end,2:8]
 # ML[0:end,1:7]<- true_param
-error_mix20 <- error_mix20 + (theo_mix50[,2:8]-ML)^2
-theo_mix50['individual'] <- m
-final_mix <- rbind(final_mix,theo_mix50)
+error_mix75 <- error_mix75 + (theo_mix75[,2:8]-ML)^2
+theo_mix75['individual'] <- m
+
 
 }
 
 
-
 error_rwm <- 1/replicate*error_rwm
-error_mix <- 1/replicate*error_mix
+error_mix25 <- 1/replicate*error_mix25
+error_mix50 <- 1/replicate*error_mix50
+error_mix75 <- 1/replicate*error_mix75
 
-err_rwm<- theo_ref[-1,]
-err_mix<- theo_ref[-1,]
+err_rwm<- theo_ref
+err_mix25<- theo_ref
+err_mix50<- theo_ref
+err_mix75<- theo_ref
 
-err_rwm[,2:8] <- error_rwm[-1,]
-err_mix[,2:8] <- error_mix[-1,]
-
+err_rwm[,2:8] <- error_rwm
+err_mix25[,2:8] <- error_mix25
+err_mix50[,2:8] <- error_mix50
+err_mix75[,2:8] <- error_mix75
 
 
 err_rwm_scaled <- err_rwm
-err_rwm_scaled$iterations = seq(1, 4*(end-1), by=4)
+err_rwm_scaled$iterations = err_rwm_scaled$iterations*1
 
-err_mix_scaled <- err_mix
-err_mix_scaled$iterations = seq(1, 2*(end-1), by=2)
+
+err_mix25_scaled <- err_mix25
+err_mix25_scaled$iterations = err_mix25_scaled$iterations*0.25
+
+
+err_mix50_scaled <- err_mix50
+err_mix50_scaled$iterations = err_mix50_scaled$iterations*0.5
+
+err_mix75_scaled <- err_mix75
+err_mix75_scaled$iterations = err_mix75_scaled$iterations*0.75
 
 err_rwm_scaled$algo <- 'SAEM'
-err_rwm_scaled$method <- 'randiter'
-
-err_mix_scaled$algo <- 'ISAEM50 gamma 0.2'
-err_mix_scaled$method <- 'randiter'
-
-
-
-error_mix50_gamma2 <- 1/replicate*error_mix2
-err_mix50_gamma2<- theo_ref[-1,]
-err_mix50_gamma2[,2:8] <- error_mix50_gamma2[-1,]
-err_mix50_gamma2$iterations = seq(1, (end-1), by=1)
-err_mix50_gamma2$algo <- 'ISAEM50 gamma 2'
-err_mix50_gamma2$method <- 'randiter'
-
-
-error_mix50_gamma20 <- 1/replicate*error_mix20
-err_mix50_gamma20<- theo_ref[-1,]
-err_mix50_gamma20[,2:8] <- error_mix50_gamma20[-1,]
-err_mix50_gamma20$iterations = seq(1, (end-1), by=1)
-err_mix50_gamma20$algo <- 'ISAEM50 gamma 20'
-err_mix50_gamma20$method <- 'randiter'
+err_mix25_scaled$algo <- 'ISAEM25'
+err_mix50_scaled$algo <- 'ISAEM50'
+err_mix75_scaled$algo <- 'ISAEM75'
 
 graphConvMC_se1 <- function(df,df2, df3,df4,title=NULL, ylim=NULL)
 {
@@ -413,7 +410,7 @@ graphConvMC_se1 <- function(df,df2, df3,df4,title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",size=0.8) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="blue",linetype = 1,size=0.8)+
     geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="red",linetype = 1,size=0.8)+geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="yellow",linetype = 1,size=0.8)+
-      xlab("iteration") +scale_x_log10(breaks= c(10,100,200))+ ylab(expression(paste(E(V[pop]))))  
+      xlab("iteration") +scale_x_log10()+ ylab(expression(paste(E(V[pop]))))  
       grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=34), 
                  axis.title=element_text(size=40),
                    panel.border = element_rect(colour = "black", fill=NA, size=2))
@@ -425,9 +422,11 @@ graphConvMC_se1 <- function(df,df2, df3,df4,title=NULL, ylim=NULL)
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)])
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix_scaled[,c(1,3,9)],err_mix50_gamma2[,c(1,3,9)],err_mix50_gamma20[,c(1,3,9)])
-d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix_scaled[,c(1,6,9)],err_mix50_gamma2[,c(1,6,9)],err_mix50_gamma20[,c(1,6,9)])
+
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,2,9)],err_mix25_scaled[,c(1,2,9)],err_mix50_scaled[,c(1,2,9)],err_mix50_scaled[,c(1,2,9)])
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix25_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)])
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix75_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)])
+d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix25_scaled[,c(1,6,9)],err_mix50_scaled[,c(1,6,9)],err_mix50_scaled[,c(1,6,9)])
 
 
 save <- grid.arrange(c,d, ncol=2)
