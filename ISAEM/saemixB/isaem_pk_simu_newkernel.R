@@ -254,7 +254,7 @@ batchsize50 = 50
 map_range = 1:4
 true_param <- data.frame("ka" = ka_true, "V" = V_true, "Cl" = Cl_true, "omega2.ka"=o_ka^2 ,"omega2.V"= o_V^2,"omega2.Cl"= o_Cl^2, "a" = a_true)
 seed0 = 39546
-replicate = 6
+replicate = 20
 for (m in 1:replicate){
 
 model <- inlineModel("
@@ -423,10 +423,9 @@ graphConvMC_se1 <- function(df,df2, df3,df4,title=NULL, ylim=NULL)
 }
 
 
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,2,9)],err_mix25_scaled[,c(1,2,9)],err_mix50_scaled[,c(1,2,9)],err_mix50_scaled[,c(1,2,9)])
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix25_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)])
-c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix75_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)])
-d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix25_scaled[,c(1,6,9)],err_mix50_scaled[,c(1,6,9)],err_mix50_scaled[,c(1,6,9)])
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,2,9)],err_mix25_scaled[,c(1,2,9)],err_mix50_scaled[,c(1,2,9)],err_mix75_scaled[,c(1,2,9)])
+c <- graphConvMC_se1(err_rwm_scaled[,c(1,3,9)],err_mix25_scaled[,c(1,3,9)],err_mix50_scaled[,c(1,3,9)],err_mix75_scaled[,c(1,3,9)])
+d <- graphConvMC_se1(err_rwm_scaled[,c(1,6,9)],err_mix25_scaled[,c(1,6,9)],err_mix50_scaled[,c(1,6,9)],err_mix75_scaled[,c(1,6,9)])
 
 
 save <- grid.arrange(c,d, ncol=2)
