@@ -261,11 +261,11 @@ if (kiter <= 0){ #if rwm
 				# Gamma[[i]] <- omega.eta
 			}
 
-			if (kiter <= length(map_range)){
-				etaM[indchosen,] <- eta_map[indchosen,]
-			}
+			# if (kiter <= length(map_range)){
+			# 	etaM[indchosen,] <- eta_map[indchosen,]
+			# }
 
-			# etaM <- eta_map
+			etaM <- eta_map
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta
@@ -286,6 +286,7 @@ if (kiter <= 0){ #if rwm
 					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
 				}
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				# browser()
 				deltu[block] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
@@ -293,89 +294,89 @@ if (kiter <= 0){ #if rwm
 				U.eta[ind]<-Uc.eta[ind]
 			}
 		} else{
-			#MAP calculation
-		 #  	for(i in 1:saemixObject["data"]["N"]) {
-			#     isuj<-id.list[i]
-			#     xi<-xind[id==isuj,,drop=FALSE]
-			# #    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
-			#     yi<-yobs[id==isuj]
-			#     idi<-rep(1,length(yi))
-			#     mean.phi1<-mean.phiM[i,i1.omega2]
-			#     phii<-saemixObject["results"]["phi"][i,]
-			#     phi1<-phii[i1.omega2]
-			#     phi1.opti<-optim(par=phi1, fn=conditional.distribution_d, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
-			#     # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
-			#     phi.map[i,i1.omega2]<-phi1.opti$par
-			# }
-			# #rep the map nchains time
-			# phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ] 
-		 #  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
-			# map.psi<-data.frame(id=id.list,map.psi)
-			# map.phi<-data.frame(id=id.list,phi.map)
+			# MAP calculation
+		  	for(i in 1:saemixObject["data"]["N"]) {
+			    isuj<-id.list[i]
+			    xi<-xind[id==isuj,,drop=FALSE]
+			#    if(is.null(dim(xi))) xi<-matrix(xi,ncol=1)
+			    yi<-yobs[id==isuj]
+			    idi<-rep(1,length(yi))
+			    mean.phi1<-mean.phiM[i,i1.omega2]
+			    phii<-saemixObject["results"]["phi"][i,]
+			    phi1<-phii[i1.omega2]
+			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_d, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"])
+			    # phi1.opti<-optim(par=phi1, fn=conditional.distribution, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=saemixObject["results"]["respar"], err=saemixObject["model"]["error.model"],control = list(maxit = 2))
+			    phi.map[i,i1.omega2]<-phi1.opti$par
+			}
+			#rep the map nchains time
+			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ] 
+		  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
+			map.psi<-data.frame(id=id.list,map.psi)
+			map.phi<-data.frame(id=id.list,phi.map)
 
-			# psi_map <- as.matrix(map.psi[,-c(1)])
-			# phi_map <- as.matrix(map.phi[,-c(1)])
-			# eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
+			psi_map <- as.matrix(map.psi[,-c(1)])
+			phi_map <- as.matrix(map.phi[,-c(1)])
+			eta_map <- phi_map[,varList$ind.eta] - mean.phiM[,varList$ind.eta]
 			
-			# #gradient at the map estimation
-			# gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
+			#gradient at the map estimation
+			gradp <- matrix(0L, nrow = Dargs$NM, ncol = nb.etas) 
 
-			# for (j in 1:nb.etas) {
-			# 	phi_map2 <- phi_map
-			# 	phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
-			# 	psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-			# 	fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			# 	DYF[Uargs$ind.ioM]<- fpred1
-			# 	l1<-colSums(DYF)
-			# 	fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-			# 	DYF[Uargs$ind.ioM]<- fpred2
-			# 	l2<-colSums(DYF)
+			for (j in 1:nb.etas) {
+				phi_map2 <- phi_map
+				phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+				psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
+				fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+				DYF[Uargs$ind.ioM]<- fpred1
+				l1<-colSums(DYF)
+				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
+				DYF[Uargs$ind.ioM]<- fpred2
+				l2<-colSums(DYF)
 
-			# 	for (i in 1:(Dargs$NM)){
-			# 		gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
-			# 	}
-			# }
+				for (i in 1:(Dargs$NM)){
+					gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
+				}
+			}
 
-			# #calculation of the covariance matrix of the proposal
-			# fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			# DYF[Uargs$ind.ioM]<- fpred
-			# denom <- colSums(DYF)
+			#calculation of the covariance matrix of the proposal
+			fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			DYF[Uargs$ind.ioM]<- fpred
+			denom <- colSums(DYF)
 			
-			# Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
-			# z <- matrix(0L, nrow = length(fpred), ncol = 1) 
-			# for (i in 1:(Dargs$NM)){
-			# 	Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
-			# 	chol.Gamma[[i]] <- chol(Gamma[[i]])
-			# 	inv.Gamma[[i]] <- solve(Gamma[[i]])
-			# }
+			Gamma <- chol.Gamma <- inv.Gamma <- list(omega.eta,omega.eta)
+			z <- matrix(0L, nrow = length(fpred), ncol = 1) 
+			for (i in 1:(Dargs$NM)){
+				Gamma[[i]] <- solve(gradp[i,]%*%t(gradp[i,])/denom[i]^2+solve(omega.eta))
+				chol.Gamma[[i]] <- chol(Gamma[[i]])
+				inv.Gamma[[i]] <- solve(Gamma[[i]])
+			}
 			
-			# etaM <- eta_map
-			# for (u in 1:opt$nbiter.mcmc[4]) {
-			# 	etaMc<-etaM
-			# 	propc <- U.eta
-			# 	prop <- U.eta
-			# 	#generate candidate eta
-			# 	for (i in 1:(Dargs$NM)){
-			# 		Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
-			# 		etaMc[i,]<- eta_map[i,] +Mi
-			# 	}
-			# 	phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
+			etaM <- eta_map
+			for (u in 1:opt$nbiter.mcmc[4]) {
+				etaMc<-etaM
+				propc <- U.eta
+				prop <- U.eta
+				#generate candidate eta
+				for (i in 1:(Dargs$NM)){
+					Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
+					etaMc[i,]<- eta_map[i,] +Mi
+				}
+				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 
-			# 	Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
-			# 	Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
+				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				
-			# 	for (i in 1:(Dargs$NM)){
-			# 		propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%inv.Gamma[[i]])
-			# 		prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%inv.Gamma[[i]])
-			# 	}
+				for (i in 1:(Dargs$NM)){
+					propc[i] <- 0.5*rowSums((etaMc[i,]-eta_map[i,])*(etaMc[i,]-eta_map[i,])%*%inv.Gamma[[i]])
+					prop[i] <- 0.5*rowSums((etaM[i,]-eta_map[i,])*(etaM[i,]-eta_map[i,])%*%inv.Gamma[[i]])
+				}
 
-			# 	deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
-			# 	deltu[block] = 1000000
-			# 	ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
-			# 	etaM[ind]<-etaMc[ind]
-			# 	U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
-			# 	U.eta[ind]<-Uc.eta[ind]
-			# }
+				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+				deltu[block] = 1000000
+				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+				etaM[ind]<-etaMc[ind]
+				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+				U.eta[ind]<-Uc.eta[ind]
+			}
 		}
 	}
 	
