@@ -4,62 +4,74 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset warfarin.saemix 
-    Structured data: y ~ amount + time | id 
-    X variable for graphs: time () 
+Dataset cat_data.saemix 
+    Structured data: y ~ y + dose + time | id 
+    X variable for graphs: y () 
 Dataset characteristics:
-    number of subjects:     200 
-    number of observations: 2000 
-    average/min/max nb obs: 10.00  /  10  /  10 
+    number of subjects:     600 
+    number of observations: 4800 
+    average/min/max nb obs: 8.00  /  8  /  8 
 First 10 lines of data:
-   id amount time        y mdv cens occ ytype
-1   1    100    1 5.742935   0    0   1     1
-2   1    100    2 5.292078   0    0   1     1
-3   1    100    3 7.085942   0    0   1     1
-4   1    100    4 4.817370   0    0   1     1
-5   1    100    5 6.255056   0    0   1     1
-6   1    100    6 6.574216   0    0   1     1
-7   1    100    7 6.763722   0    0   1     1
-8   1    100    8 5.244088   0    0   1     1
-9   1    100    9 5.118255   0    0   1     1
-10  1    100   10 3.330979   0    0   1     1
+   id y dose time y.1 mdv cens occ ytype
+1   1 0    0  -20   0   0    0   1     1
+2   1 0    0  -10   0   0    0   1     1
+3   1 1    0    0   1   0    0   1     1
+4   1 1   10   10   1   0    0   1     1
+5   1 1   10   20   1   0    0   1     1
+6   1 1   10   30   1   0    0   1     1
+7   1 1   10   40   1   0    0   1     1
+8   1 1   10   50   1   0    0   1     1
+9   2 0    0  -20   0   0    0   1     1
+10  2 0    0  -10   0   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  warfarin  Model type:  structural
-function(psi,id,xidep) { 
-  dose<-xidep[,1]
-  time<-xidep[,2]  
-  ka<-psi[id,1]
-  V<-psi[id,2]
-  Cl<-psi[id,3]
-  k <- Cl/V
-  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
-  return(ypred)
+  Model function:  cat model  Model type:  likelihood
+function(psi,id,xidep) {
+level<-xidep[,1]
+dose<-xidep[,2]
+time<-xidep[,3]
+
+beta0 <- psi[id,1]
+
+gamma0 <- psi[id,2]
+
+delta0 <- psi[id,3]
+
+lm0 <- beta0+gamma0*time + delta0*dose
+
+D <- exp(lm0)+1
+
+P0 <- exp(lm0)/D
+P1 <- 1/D
+
+P.obs = log((level==0)*P0+(level==1)*P1)
+
+return(P.obs)
 }
   Nb of parameters: 3 
-      parameter names:  ka V Cl 
+      parameter names:  beta0 gamma0 delta0 
       distribution:
      Parameter Distribution Estimated
-[1,] ka        log-normal   Estimated
-[2,] V         log-normal   Estimated
-[3,] Cl        log-normal   Estimated
+[1,] beta0     normal       Estimated
+[2,] gamma0    normal       Estimated
+[3,] delta0    normal       Estimated
   Variance-covariance matrix:
-   ka V Cl
-ka  1 0  0
-V   0 1  0
-Cl  0 0  1
+       beta0 gamma0 delta0
+beta0      1      0      0
+gamma0     0      1      0
+delta0     0      0      1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             ka V  Cl
-Pop.CondInit  3 3 0.1
+             beta0 gamma0 delta0
+Pop.CondInit    -3      1      3
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=200, K2=100 
+    Number of iterations:  K1=500, K2=100 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -75,21 +87,20 @@ Pop.CondInit  3 3 0.1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         0.98   
-[2,] V         10.02   
-[3,] Cl         0.99   
-[4,] a          0.97   
+[1,] beta0     -3.14   
+[2,] gamma0    -0.77   
+[3,] delta0     0.76   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-   Parameter Estimate
-ka omega2.ka 0.054   
-V  omega2.V  0.036   
-Cl omega2.Cl 0.077   
+       Parameter     Estimate
+beta0  omega2.beta0  0.00012 
+gamma0 omega2.gamma0 0.10458 
+delta0 omega2.delta0 0.04731 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.Cl
-omega2.ka 1         0        0        
-omega2.V  0         1        0        
-omega2.Cl 0         0        1        
+              omega2.beta0 omega2.gamma0 omega2.delta0
+omega2.beta0  1            0             0            
+omega2.gamma0 0            1             0            
+omega2.delta0 0            0             1            

@@ -29,9 +29,9 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/va
   source('main_mstep.R') 
   source('SaemixData.R')
   source('SaemixModel.R') 
-  source('SaemixRes.R') 
-  source('SaemixObject.R') 
-  source('zzz.R') 
+  source('SaemixRes.R')
+  source('SaemixObject.R')
+  source('zzz.R')e
   source('graphplot.R')
 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/VariationalInference/variationalSAEM")
