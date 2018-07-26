@@ -218,8 +218,8 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 	# E-step
 
-  # if (kiter <= saemix.options$nbiter.tot){
-  if (kiter <= 110){
+  if (kiter <= saemix.options$nbiter.tot){
+  # if (kiter <= 110){
     xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
     eta_map <- xmcmc$map
     summary[,kiter] <- eta_map[,1]
