@@ -38,7 +38,7 @@ plotq1 <- function(df,df2, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",size=2, linetype=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",size=3, linetype="dotted")+
       xlab("iteration") + theme_bw() +ylab(expression(paste(ka[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
@@ -62,7 +62,7 @@ plotq2 <- function(df,df2, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",size=2, linetype=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",size=3, linetype="dotted")+
       xlab("iteration")+  theme_bw() +ylab(expression(paste(V[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
@@ -86,7 +86,7 @@ plotq3 <- function(df,df2, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",size=2, linetype=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",size=3, linetype="dotted")+
       xlab("iteration")+  theme_bw() +ylab(expression(paste(k[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
@@ -122,7 +122,7 @@ plotq1_3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="red",size=3, linetype="dotted") +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",size=2, linetype="solid")+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="blue",size=2, linetype="dashed")+
       xlab("iteration")+  theme_bw() +ylab(expression(paste(ka[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
@@ -147,7 +147,7 @@ plotq2_3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="red",size=3, linetype="dotted") +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",size=2, linetype="solid")+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="blue",size=2, linetype="dashed")+
       xlab("iteration")+  theme_bw() +ylab(expression(paste(V[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
@@ -172,7 +172,7 @@ plotq3_3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   {
     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="red",size=3, linetype="dotted") +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",size=2, linetype="solid")+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="blue",size=2, linetype="dashed")+
       xlab("iteration")+  theme_bw() +ylab(expression(paste(k[i])))
-    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=46), 
+    grafj <- grafj + theme_bw() + theme(legend.position = "none", axis.text=element_text(size=32), 
                  axis.title=element_text(size=48),
                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))
     if (!is.null(ylim))
