@@ -106,7 +106,7 @@ save2 = plotq2(quantref[iter,c(1,3,5)],quantnew[iter,c(1,3,5)])
 save3 = plotq3(quantref[iter,c(1,4,5)],quantnew[iter,c(1,4,5)])
 save <- grid.arrange(save1,save2,save3, ncol=3)
 ggsave(save, file="baysmpics/quantref3.pdf", width = 900, height = 450, units = "mm")
-
+# ggsave(save, file="testpics/quantref.pdf", width = 500, height = 250, units = "mm")
 
 
 plotq1_3 <- function(df,df2,df3, title=NULL, ylim=NULL)
