@@ -222,18 +222,18 @@ theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
 
 
-# options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-#   nbiter.mcmc = c(2,2,2,2),map.range=map_range, nbiter.saemix = c(K1,K2),displayProgress=TRUE,
-#   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
-# theo_mix75<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental75))
-# theo_mix75 <- cbind(iterations, theo_mix75[-1,])
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,2),map.range=map_range, nbiter.saemix = c(K1,K2),displayProgress=TRUE,
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
+theo_mix75<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental75))
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
-# options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-#   nbiter.mcmc = c(2,2,2,2),map.range=map_range, nbiter.saemix = c(K1,K2),displayProgress=TRUE,
-#   nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='randompass')
-# theo_mix85<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental85))
-# theo_mix85 <- cbind(iterations, theo_mix85[-1,])
+options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,2),map.range=map_range, nbiter.saemix = c(K1,K2),displayProgress=TRUE,
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='randompass')
+theo_mix85<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental85))
+theo_mix85 <- cbind(iterations, theo_mix85[-1,])
 
 
 theo_ref_scaled <- theo_ref
