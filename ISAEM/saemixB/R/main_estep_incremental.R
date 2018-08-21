@@ -96,10 +96,6 @@ if (kiter <= 0){ #if rwm
 	phiMc<-phiM
 }
 
-
-
-
-	
 	# block <- setdiff(1:Dargs$NM, l[ind_rand])	
 	
 	if (!(kiter %in% map_range)){
