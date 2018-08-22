@@ -22,7 +22,6 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=Uargs$nchains)
 	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	
-	
 	# if (kiter <= 3){ #if rwm
 
 	# 	# weight <- eta_map[,1]
