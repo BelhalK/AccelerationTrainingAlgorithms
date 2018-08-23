@@ -88,7 +88,7 @@ res <- simulx(model     = model,
               output    = list(name='y', time=seq(1,10,by=1)))
 
  warfarin.saemix <- res$y
- warfarin.saemix$amount <- 100
+ warfarin.saemix$amount <- 10
  saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
 
