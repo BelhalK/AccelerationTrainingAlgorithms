@@ -41,7 +41,7 @@ delta0  ={distribution=normal, prediction=delta0_pop,  sd=o_delta0}
 ")
 
 
-nobs = 5
+nobs = 15
 tobs<- seq(-20, 50, by=nobs)
 
 reg1 <- list(name='dose',

@@ -4,77 +4,82 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset yield.saemix 
-    Structured data: yield ~ dose | site 
-    Predictor: dose (kg/ha) 
-    covariates: soil.nitrogen (kg/ha) 
+Dataset cat_data.saemix 
+    Structured data: y ~ y + dose + time | id 
+    X variable for graphs: y () 
 Dataset characteristics:
-    number of subjects:     37 
-    number of observations: 224 
-    average/min/max nb obs: 6.05  /  5  /  8 
+    number of subjects:     600 
+    number of observations: 4800 
+    average/min/max nb obs: 8.00  /  8  /  8 
 First 10 lines of data:
-   site dose yield soil.nitrogen mdv cens occ ytype
-1  1901    0  6.70            70   0    0   1     1
-2  1901   70  8.58            70   0    0   1     1
-3  1901  120 10.56            70   0    0   1     1
-4  1901  170 11.54            70   0    0   1     1
-5  1901  220 10.63            70   0    0   1     1
-6  1901  270 11.54            70   0    0   1     1
-7  1902    0  6.98            80   0    0   1     1
-8  1902   70  9.94            80   0    0   1     1
-9  1902  120 10.56            80   0    0   1     1
-10 1902  170 11.07            80   0    0   1     1
+   id y dose time y.1 mdv cens occ ytype
+1   1 0    0  -20   0   0    0   1     1
+2   1 1    0  -10   1   0    0   1     1
+3   1 1    0    0   1   0    0   1     1
+4   1 0   10   10   0   0    0   1     1
+5   1 0   10   20   0   0    0   1     1
+6   1 1   10   30   1   0    0   1     1
+7   1 1   10   40   1   0    0   1     1
+8   1 1   10   50   1   0    0   1     1
+9   2 0    0  -20   0   0    0   1     1
+10  2 0    0  -10   0   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  Linear plus plateau model
+  Model function:  cat model  Model type:  likelihood
 function(psi,id,xidep) {
-# input:
-#   psi : matrix of parameters (3 columns, ymax, xmax, slope)
-#   id : vector of indices 
-#   xidep : dependent variables (same nb of rows as length of id)
-# returns:
-#   a vector of predictions of length equal to length of id
-  x<-xidep[,1]
-  ymax<-psi[id,1]
-  xmax<-psi[id,2]
-  slope<-psi[id,3]
-  f<-ymax+slope*(x-xmax)
-#  cat(length(f),"  ",length(ymax),"\n")
-  f[x>xmax]<-ymax[x>xmax]
-  return(f)
+level<-xidep[,1]
+dose<-xidep[,2]
+time<-xidep[,3]
+
+beta0 <- psi[id,1]
+
+gamma0 <- psi[id,2]
+
+delta0 <- psi[id,3]
+
+lm0 <- beta0+gamma0*time + delta0*dose
+
+D <- exp(lm0)+1
+
+P0 <- exp(lm0)/D
+P1 <- 1/D
+
+P.obs = log((level==0)*P0+(level==1)*P1)
+
+return(P.obs)
 }
   Nb of parameters: 3 
-      parameter names:  Ymax Xmax slope 
+      parameter names:  beta0 gamma0 delta0 
       distribution:
      Parameter Distribution Estimated
-[1,] Ymax      normal       Estimated
-[2,] Xmax      normal       Estimated
-[3,] slope     normal       Estimated
+[1,] beta0     normal       Estimated
+[2,] gamma0    normal       Estimated
+[3,] delta0    normal       Estimated
   Variance-covariance matrix:
-      Ymax Xmax slope
-Ymax     1    0     0
-Xmax     0    1     0
-slope    0    0     1
+       beta0 gamma0 delta0
+beta0      1      0      0
+gamma0     0      1      0
+delta0     0      0      1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-             Ymax Xmax slope
-Pop.CondInit    8  100   0.2
+             beta0 gamma0 delta0
+Pop.CondInit    -3      1      3
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=300, K2=50 
-    Number of chains:  2 
-    Seed:  395436 
+    Number of iterations:  K1=500, K2=100 
+    Number of chains:  1 
+    Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
     Input/output
         save the results to a file:  TRUE 
-        save the graphs to files:  TRUE 
+        save the graphs to files:  FALSE 
         directory where results should be saved:  newdir 
 ----------------------------------------------------
 ----                  Results                   ----
@@ -82,21 +87,20 @@ Pop.CondInit    8  100   0.2
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] Ymax       8.89   
-[2,] Xmax      19.37   
-[3,] slope      0.16   
-[4,] a          0.71   
+[1,] beta0     -3.56   
+[2,] gamma0    -0.82   
+[3,] delta0     0.86   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-      Parameter    Estimate
-Ymax  omega2.Ymax  1.1e+00 
-Xmax  omega2.Xmax  1.2e-06 
-slope omega2.slope 2.8e-03 
+       Parameter     Estimate
+beta0  omega2.beta0  0.027   
+gamma0 omega2.gamma0 0.094   
+delta0 omega2.delta0 0.060   
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-             omega2.Ymax omega2.Xmax omega2.slope
-omega2.Ymax  1           0           0           
-omega2.Xmax  0           1           0           
-omega2.slope 0           0           1           
+              omega2.beta0 omega2.gamma0 omega2.delta0
+omega2.beta0  1            0             0            
+omega2.gamma0 0            1             0            
+omega2.delta0 0            0             1            
