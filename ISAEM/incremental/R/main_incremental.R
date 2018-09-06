@@ -180,13 +180,13 @@ print(date())
 
 
 
-nb_replacement = round(saemix.options$nb.replacement*Dargs$NM/100)
+nb_replacement = round(saemix.options$nb.replacement*Dargs$N/100)
 if (saemix.options$sampling=='seq'){
-  l <- c(replicate(saemix.options$nbiter.tot,1:Dargs$NM))
+  l <- c(replicate(saemix.options$nbiter.tot,1:Dargs$N))
 } else if(saemix.options$sampling=='randompass'){
-  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$NM,Dargs$NM,replace=FALSE)))
+  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$N,Dargs$N,replace=FALSE)))
 } else if(saemix.options$sampling=='randomiter'){
-  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$NM,Dargs$NM,replace=TRUE)))
+  l <- c(replicate(saemix.options$nbiter.tot,sample(1:Dargs$N,Dargs$N,replace=TRUE)))
 }
 ind_rand<-1:nb_replacement
 
@@ -220,19 +220,21 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
   if (kiter <= saemix.options$nbiter.tot){
   # if (kiter <= 110){
+    browser()
     xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
-    eta_map <- xmcmc$map
-    summary[,kiter] <- eta_map[,1]
-    indchosen <- xmcmc$indchosen
-    block <- setdiff(1:Dargs$NM, indchosen)
+    # eta_map <- xmcmc$map
+    # summary[,kiter] <- eta_map[,1]
+    # indchosen <- xmcmc$indchosen
+    # block <- setdiff(1:Dargs$NM, indchosen)
 
-    chosen[block,kiter] <- 0
-    chosen[indchosen,kiter] <- 1
+    # chosen[block,kiter] <- 0
+    # chosen[indchosen,kiter] <- 1
 
     ind_rand <- ind_rand + nb_replacement
   }else{
     xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   }
+
 
   # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
   varList<-xmcmc$varList

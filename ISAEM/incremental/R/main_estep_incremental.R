@@ -26,7 +26,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
-	browser()
+
 	saemix.options<-saemixObject["options"]
   	saemix.model<-saemixObject["model"]
   	saemix.data<-saemixObject["data"]
@@ -89,9 +89,16 @@ if (kiter <= 0){ #if rwm
 	phiMc<-phiM
 
 } else {
-	indchosen <- 1:Dargs$NM
-	block <- setdiff(1:Dargs$NM, l[ind_rand])
-
+	
+	#indchosen <- 1:Dargs$NM
+	block <- NULL
+	for (m in 1:Uargs$nchains){	
+		block <- list.append(block,setdiff(1:Dargs$N, l[ind_rand])+(m-1)*Dargs$N)
+	}
+	chosen <- NULL
+	for (m in 1:Uargs$nchains){	
+		chosen <- list.append(chosen, l[ind_rand]+(m-1)*Dargs$N)
+	}
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 }
@@ -108,7 +115,6 @@ if (kiter <= 0){ #if rwm
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 			}
 			deltau<-Uc.y-U.y
-			
 			deltau[block] = 1000000
 			ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 			# print(length(ind)/length(indchosen))
@@ -208,7 +214,9 @@ if (kiter <= 0){ #if rwm
 
 		if(Dargs$type=="structural"){
 			#MAP calculation
-		 	for(i in 1:saemixObject["data"]["N"]) {
+		 	# for(i in 1:saemixObject["data"]["N"]) {
+			
+			for(i in l[ind_rand]) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
 			    yi<-yobs[id==isuj]
@@ -221,7 +229,6 @@ if (kiter <= 0){ #if rwm
 			}
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
-
 		  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
 			map.psi<-data.frame(id=id.list,map.psi)
 			map.phi<-data.frame(id=id.list,phi.map)
@@ -261,14 +268,14 @@ if (kiter <= 0){ #if rwm
 			# 	etaM[indchosen,] <- eta_map[indchosen,]
 			# }
 
-			etaM <- eta_map
+			etaM[chosen,] <- eta_map[chosen,]
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta
 				prop <- U.eta
 				#generate candidate eta
 					
-				for (i in 1:(Dargs$NM)){
+				for (i in chosen){
 					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
 					etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] +M[i,]
 				}
@@ -277,12 +284,12 @@ if (kiter <= 0){ #if rwm
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
 				Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
 
-				for (i in 1:(Dargs$NM)){
+				# for (i in 1:(Dargs$NM)){
+				for (i in chosen){
 					propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
 					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
 				}
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
-				# browser()
 				deltu[block] = 1000000
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
