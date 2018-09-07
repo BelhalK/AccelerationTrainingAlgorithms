@@ -194,88 +194,95 @@ ind_rand<-1:nb_replacement
 summary <- as.data.frame(matrix(nrow = nrow(mean.phi),ncol = saemix.options$nbiter.tot))
 chosen <- as.data.frame(matrix(nrow = nrow(mean.phi),ncol = saemix.options$nbiter.tot))
 
-for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
+start_time <- Sys.time()
+end_time <- Sys.time()
+duration <- end_time - start_time
+kiter = 0
 
-# SAEM convergence plots
-	if(kiter%%saemix.options$nbdisplay==0) {
-    cat(".")
-    if(saemix.options$displayProgress)    
-      try(convplot.infit(allpar,saemix.options$nbiter.saemix[1],niter=(kiter-2)))
-  }
-# Burn-in - resetting sufficient statistics
-  if(opt$flag.fmin && kiter==saemix.options$nbiter.sa) {
-  	Uargs$COV1<-Uargs$COV[,Uargs$ind.fix11]
-  	ind.prov<-!(varList$ind.eta %in% Uargs$i0.omega2)
-  	varList$domega2<-varList$domega2[ind.prov,ind.prov,drop=FALSE] # keep in domega2 only indices of parameters with IIV
-  	varList$ind0.eta<-Uargs$i0.omega2
-  	varList$ind.eta<-1:(Uargs$nb.parameters)  	
-  	if(length(varList$ind0.eta)>0) varList$ind.eta<-varList$ind.eta[!(varList$ind.eta %in% varList$ind0.eta)] # update ind.eta, now only parameters with IIV
-  	Uargs$nb.etas<-length(varList$ind.eta)
-  	suffStat$statphi1<-0
-  	suffStat$statphi2<-0
-  	suffStat$statphi3<-0
-  }
-
-	# E-step
-
-  if (kiter <= saemix.options$nbiter.tot){
-  # if (kiter <= 110){
-    browser()
-    xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
-    # eta_map <- xmcmc$map
-    # summary[,kiter] <- eta_map[,1]
-    # indchosen <- xmcmc$indchosen
-    # block <- setdiff(1:Dargs$NM, indchosen)
-
-    # chosen[block,kiter] <- 0
-    # chosen[indchosen,kiter] <- 1
-
-    ind_rand <- ind_rand + nb_replacement
-  }else{
-    xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
-  }
-
-
-  # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
-  varList<-xmcmc$varList
-  DYF<-xmcmc$DYF
-  phiM<-xmcmc$phiM
-  
-  # M-step
-  if(opt$stepsize[kiter]>0) {
-############# Stochastic Approximation
-  	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement)
-  	varList<-xstoch$varList
-  	mean.phi<-xstoch$mean.phi
-  	phi<-xstoch$phi
-  	betas<-xstoch$betas
-  	suffStat<-xstoch$suffStat
-  	
-  	beta.I<-betas[Uargs$indx.betaI]
-  	fixed.psi<-transphi(matrix(beta.I,nrow=1),saemix.model["transform.par"])
-  	betaC<-betas[Uargs$indx.betaC]
-  	var.eta<-mydiag(varList$omega)
-  	l1<-betas.ini
-  	l1[Uargs$indx.betaI]<-fixed.psi
-  	l1[Uargs$indx.betaC]<-betaC
-     if(Dargs$type=="structural") {
-      allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
-    } else{
-      allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2])
+duration <- end_time - start_time
+while (duration <10){
+  duration <- end_time - start_time
+  kiter = kiter + 1
+  # SAEM convergence plots
+  	if(kiter%%saemix.options$nbdisplay==0) {
+      cat(".")
+      if(saemix.options$displayProgress)    
+        try(convplot.infit(allpar,saemix.options$nbiter.saemix[1],niter=(kiter-2)))
     }
-  } else { #end of loop on if (stepsize[kiter]>0)
-    allpar[(kiter+1),]<-allpar[kiter,]
-  }
-     if(Dargs$type=="structural") {
-      theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
-    } else{
-      theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
+  # Burn-in - resetting sufficient statistics
+    if(opt$flag.fmin && kiter==saemix.options$nbiter.sa) {
+    	Uargs$COV1<-Uargs$COV[,Uargs$ind.fix11]
+    	ind.prov<-!(varList$ind.eta %in% Uargs$i0.omega2)
+    	varList$domega2<-varList$domega2[ind.prov,ind.prov,drop=FALSE] # keep in domega2 only indices of parameters with IIV
+    	varList$ind0.eta<-Uargs$i0.omega2
+    	varList$ind.eta<-1:(Uargs$nb.parameters)  	
+    	if(length(varList$ind0.eta)>0) varList$ind.eta<-varList$ind.eta[!(varList$ind.eta %in% varList$ind0.eta)] # update ind.eta, now only parameters with IIV
+    	Uargs$nb.etas<-length(varList$ind.eta)
+    	suffStat$statphi1<-0
+    	suffStat$statphi2<-0
+    	suffStat$statphi3<-0
     }
 
-  parpop[(kiter+1),]<-theta
-# End of loop on kiter
+  	# E-step
+
+    if (kiter <= saemix.options$nbiter.tot){
+    # if (kiter <= 110){
+    
+      xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
+      # eta_map <- xmcmc$map
+      # summary[,kiter] <- eta_map[,1]
+      # indchosen <- xmcmc$indchosen
+      # block <- setdiff(1:Dargs$NM, indchosen)
+
+      # chosen[block,kiter] <- 0
+      # chosen[indchosen,kiter] <- 1
+
+      ind_rand <- ind_rand + nb_replacement
+    }else{
+      xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+    }
+
+
+    # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+    varList<-xmcmc$varList
+    DYF<-xmcmc$DYF
+    phiM<-xmcmc$phiM
+    
+    # M-step
+    if(opt$stepsize[kiter]>0) {
+  ############# Stochastic Approximation
+    	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement)
+    	varList<-xstoch$varList
+    	mean.phi<-xstoch$mean.phi
+    	phi<-xstoch$phi
+    	betas<-xstoch$betas
+    	suffStat<-xstoch$suffStat
+    	
+    	beta.I<-betas[Uargs$indx.betaI]
+    	fixed.psi<-transphi(matrix(beta.I,nrow=1),saemix.model["transform.par"])
+    	betaC<-betas[Uargs$indx.betaC]
+    	var.eta<-mydiag(varList$omega)
+    	l1<-betas.ini
+    	l1[Uargs$indx.betaI]<-fixed.psi
+    	l1[Uargs$indx.betaC]<-betaC
+       if(Dargs$type=="structural") {
+        allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+      } else{
+        allpar[(kiter+1),]<-c(l1,var.eta[Uargs$i1.omega2])
+      }
+    } else { #end of loop on if (stepsize[kiter]>0)
+      allpar[(kiter+1),]<-allpar[kiter,]
+    }
+       if(Dargs$type=="structural") {
+        theta<-c(fixed.psi,var.eta[Uargs$i1.omega2],varList$pres[Uargs$ind.res])
+      } else{
+        theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
+      }
+
+    parpop[(kiter+1),]<-theta
+  # End of loop on kiter
+  end_time <- Sys.time()
 }
-
 
 etaM<-xmcmc$etaM # only need etaM here (re-created in estep otherwise)
 cat("\n    Minimisation finished\n")

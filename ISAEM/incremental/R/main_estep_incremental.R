@@ -264,11 +264,8 @@ if (kiter <= 0){ #if rwm
 				# Gamma[[i]] <- omega.eta
 			}
 
-			# if (kiter <= length(map_range)){
-			# 	etaM[indchosen,] <- eta_map[indchosen,]
-			# }
-
-			etaM[chosen,] <- eta_map[chosen,]
+			etaM <- eta_map
+			# etaM[chosen,] <- eta_map[chosen,]
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta
