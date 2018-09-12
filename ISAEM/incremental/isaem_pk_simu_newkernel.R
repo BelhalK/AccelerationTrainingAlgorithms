@@ -122,7 +122,7 @@ theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
   nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(1:4),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=50,sampling='randompass')
 theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25 <- data.frame(theo_mix25$param)
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
