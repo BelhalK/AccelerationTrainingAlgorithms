@@ -1,0 +1,105 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset PD1.saemix 
+    Structured data: response ~ dose | subject 
+    Predictor: dose (mg) 
+    covariates: gender (-) 
+      reference class for covariate gender :  0 
+Dataset characteristics:
+    number of subjects:     100 
+    number of observations: 266 
+    average/min/max nb obs: 2.66  /  2  /  3 
+First 10 lines of data:
+   subject dose response gender mdv cens occ ytype
+1        1    0  11.2870      1   0    0   1     1
+2        1   10  63.6114      1   0    0   1     1
+4        2    0  15.0514      1   0    0   1     1
+5        2   10  39.5296      1   0    0   1     1
+7        3    0  25.5390      1   0    0   1     1
+8        3   10  58.0035      1   0    0   1     1
+10       4    0  22.1446      1   0    0   1     1
+11       4   10  30.7108      1   0    0   1     1
+13       5    0  33.5551      1   0    0   1     1
+14       5   10  68.7681      1   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  Emax model
+function(psi,id,xidep) {
+# input:
+# psi : matrix of parameters (3 columns, E0, Emax, EC50)
+# id : vector of indices
+# xidep : dependent variables (same nb of rows as length of id)
+# returns:
+# a vector of predictions of length equal to length of id
+dose<-xidep[,1]
+e0<-psi[id,1]
+emax<-psi[id,2]
+e50<-psi[id,3]
+f<-e0+emax*dose/(e50+dose)
+return(f)
+}
+  Nb of parameters: 3 
+      parameter names:  E0 Emax EC50 
+      distribution:
+     Parameter Distribution Estimated
+[1,] E0        log-normal   Estimated
+[2,] Emax      log-normal   Estimated
+[3,] EC50      log-normal   Estimated
+  Variance-covariance matrix:
+     E0 Emax EC50
+E0    1    0    0
+Emax  0    1    0
+EC50  0    0    1
+  Error model: constant , initial values: a=1 
+  Covariate model:
+       [,1] [,2] [,3]
+gender    0    0    1
+    Initial values
+             E0 Emax EC50
+Pop.CondInit 20  300   20
+Cov.CondInit  0    0    0
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=200, K2=100 
+    Number of chains:  1 
+    Seed:  39546 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter         Estimate
+[1,] E0                 22.47  
+[2,] Emax              103.57  
+[3,] EC50                9.75  
+[4,] beta_gender(EC50)   0.46  
+[5,] a                   4.61  
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+     Parameter   Estimate
+E0   omega2.E0   0.150   
+Emax omega2.Emax 0.294   
+EC50 omega2.EC50 0.037   
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+            omega2.E0 omega2.Emax omega2.EC50
+omega2.E0   1         0           0          
+omega2.Emax 0         1           0          
+omega2.EC50 0         0           1          
