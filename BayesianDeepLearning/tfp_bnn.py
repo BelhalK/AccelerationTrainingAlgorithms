@@ -57,7 +57,7 @@ flags.DEFINE_float("learning_rate",
                    default=0.001,
                    help="Initial learning rate.")
 flags.DEFINE_integer("max_steps",
-                     default=6000,
+                     default=300,
                      help="Number of training steps to run.")
 flags.DEFINE_integer("batch_size",
                      default=128,
@@ -72,7 +72,7 @@ flags.DEFINE_string(
                          "bayesian_neural_network/"),
     help="Directory to put the model's fit.")
 flags.DEFINE_integer("viz_steps",
-                     default=400,
+                     default=100,
                      help="Frequency at which save visualizations.")
 flags.DEFINE_integer("num_monte_carlo",
                      default=50,
@@ -82,6 +82,8 @@ flags.DEFINE_bool("fake_data",
                   help="If true, uses fake data. Defaults to real data.")
 
 FLAGS = flags.FLAGS
+import sys
+FLAGS(sys.argv, known_only=True)
 
 
 def plot_weight_posteriors(names, qm_vals, qs_vals, fname):
