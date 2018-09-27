@@ -1,0 +1,27 @@
+********************************************************************************
+*                        bolusMixed_project.mlxtran                            *
+*                        September 26, 2018 at 17:00:52                        *
+*                        Monolix version : 5.0.1                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+V_pop                          :        10
+k_pop                          :    0.0708
+Vm_pop                         :      3.17
+Km_pop                         :      3.39
+
+Standard Deviation of the Random Effects -
+omega_V                        :     0.188
+omega_k                        :     0.162
+omega_Vm                       :     0.124
+omega_Km                       :     0.399
+
+Error Model Parameters -------------------
+a                              :       0.1
+
+Elapsed time (seconds) :       13
+CPU time     (seconds) :       61
+ _______________________________________________________________________________
+

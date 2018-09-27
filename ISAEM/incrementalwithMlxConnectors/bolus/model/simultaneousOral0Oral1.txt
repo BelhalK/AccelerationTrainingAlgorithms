@@ -1,0 +1,14 @@
+DESCRIPTION: Simultaneous independent zero and first order model with parameters: Fr, Tk0, ka, V, Cl
+
+[LONGITUDINAL]
+input = {Fr, Tk0, ka, V, Cl}
+
+PK:
+compartment(amount=Ac)
+absorption(Tk0, p=Fr)
+absorption(ka, p=1-Fr)
+elimination(k=Cl/V)
+Cc=Ac/V
+
+OUTPUT:
+output = Cc

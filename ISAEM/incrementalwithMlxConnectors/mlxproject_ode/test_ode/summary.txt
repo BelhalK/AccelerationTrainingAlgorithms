@@ -1,0 +1,27 @@
+********************************************************************************
+*                        test_ode.mlxtran                                      *
+*                        September 25, 2018 at 18:02:23                        *
+*                        Monolix version : 5.0.1                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+r_pop                          :    0.0895
+alpha_pop                      :      1.13
+V_pop                          :         2
+Cl_pop                         :     0.629
+
+Standard Deviation of the Random Effects -
+omega_r                        :     0.137
+omega_alpha                    :    0.0289
+omega_V                        :     0.126
+omega_Cl                       :     0.182
+
+Error Model Parameters -------------------
+a                              :     0.862
+
+Elapsed time (seconds) :       11
+CPU time     (seconds) :       57
+ _______________________________________________________________________________
+

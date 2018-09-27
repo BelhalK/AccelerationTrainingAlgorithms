@@ -1,0 +1,10 @@
+DESCRIPTION: transit time PK model with parameters: Mtt, ktr, ka, V, Cl
+
+[LONGITUDINAL]
+input = {Mtt, Ktr, ka, V, Cl}
+
+EQUATION:
+Cc = pkmodel(Mtt, Ktr, ka, V, Cl)
+
+OUTPUT:
+output = Cc

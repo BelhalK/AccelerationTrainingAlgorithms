@@ -1,0 +1,59 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/bolus1_data.txt'
+delimiter = tab
+header = {id, time, amt, y}
+
+[CONTENT]
+id = {use=identifier}
+time = {use=time}
+amt = {use=amount}
+y = {use=observation, name=y, type=continuous}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {V_pop, omega_V, Vm_pop, omega_Vm, Km_pop, omega_Km, k_pop, omega_k}
+
+DEFINITION:
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+Vm = {distribution=logNormal, typical=Vm_pop, sd=omega_Vm}
+Km = {distribution=logNormal, typical=Km_pop, sd=omega_Km}
+k = {distribution=logNormal, typical=k_pop, sd=omega_k}
+
+[LONGITUDINAL]
+input = {a}
+file = 'model/bolusMixed.txt'
+
+DEFINITION:
+y = {distribution=logNormal, prediction=Cc, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+Km_pop = {value=3, method=MLE}
+V_pop = {value=10, method=MLE}
+Vm_pop = {value=5, method=MLE}
+a = {value=1, method=MLE}
+k_pop = {value=0.1, method=MLE}
+omega_Km = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_Vm = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = Linearization)
+logLikelihood(run = false,method = Linearization)
+plotResult(method = {outputplot, indfits, obspred, vpc, npc, residualsscatter, residualsdistribution, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, blq, predictiondistribution, likelihoodcontribution, categorizedoutput, saemresults, condmeanresults, fisher, likelihoodresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'bolusMixed_project'
+

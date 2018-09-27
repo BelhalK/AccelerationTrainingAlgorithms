@@ -1,0 +1,60 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'oral_data.txt'
+delimiter = tab
+header = {id, time, amt, y}
+
+[CONTENT]
+id = {use=identifier}
+time = {use=time}
+amt = {use=amount}
+y = {use=observation, name=y, type=continuous}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {r_pop, omega_r, alpha_pop, omega_alpha, V_pop, omega_V, Cl_pop, omega_Cl}
+
+DEFINITION:
+r = {distribution=logNormal, typical=r_pop, sd=omega_r}
+alpha = {distribution=logNormal, typical=alpha_pop, sd=omega_alpha}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
+
+[LONGITUDINAL]
+input = {a}
+
+file = 'oral_mlx.txt'
+
+DEFINITION:
+y = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+Cl_pop = {value=1, method=MLE}
+V_pop = {value=1, method=MLE}
+a = {value=1, method=MLE}
+alpha_pop = {value=1, method=MLE}
+omega_Cl = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_alpha = {value=1, method=MLE}
+omega_r = {value=1, method=MLE}
+r_pop = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(run = false,method = none )
+fim(run = false,method = Linearization)
+logLikelihood(run = false,method = Linearization)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'test_ode'
+

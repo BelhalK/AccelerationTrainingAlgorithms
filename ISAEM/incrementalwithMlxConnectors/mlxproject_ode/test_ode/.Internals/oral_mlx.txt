@@ -1,0 +1,16 @@
+DESCRIPTION: PK model with alpha-order absorption process
+
+[LONGITUDINAL]
+input = {r, alpha, V, Cl}
+
+PK:
+depot(target = Ad)
+
+EQUATION:
+dAd = Ad^alpha
+ddt_Ad = -r*dAd
+ddt_Ac = r*Ad - (Cl/V)*Ac
+Cc = Ac/V
+
+OUTPUT:
+output = Cc

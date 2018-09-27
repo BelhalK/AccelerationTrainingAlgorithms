@@ -1,0 +1,16 @@
+DESCRIPTION: PK model for intravenous injection with
+  - 1 compartment 
+  - combination of linear and Michaelis Menten elimination
+
+[LONGITUDINAL]
+input = {V, k, Vm, Km}
+
+PK:
+depot(target = Ac)
+
+EQUATION:
+ddt_Ac = -Vm*Ac/(V*Km+Ac) - k*Ac
+Cc=Ac/V
+
+OUTPUT:
+output = Cc
