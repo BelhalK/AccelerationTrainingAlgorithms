@@ -62,10 +62,20 @@ model1cpt<-function(psi,id,xidep) {
 
 
 
+library("mlxR")
 
-warfa_data <- read.table("mlxproject_ode/oral_data_saemix.txt", header=T)
-saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amt","time"),name.response=c("y"), name.X="time")
+
+
+warfa_data <- readDatamlx(project = project.file)
+treat <- warfa_data$treatment[,c(3)]
+warfa.saemix <- cbind(warfa_data$y,treat)
+saemix.data<-saemixData(name.data=warfa.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("treat","time"),name.response=c("y"), name.X="time")
+
+
+# warfa_data <- read.table("mlxproject_ode/oral_data_saemix.txt", header=T)
+# saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+#   name.predictors=c("treat","time"),name.response=c("y"), name.X="time")
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
@@ -73,14 +83,26 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE))
 
 
-K1 = 1000
-K2 = 500
+K1 = 100
+K2 = 50
 iterations = 1:(K1+K2)
 end = K1+K2
 batchsize25 = 25
 batchsize50 = 50
 
 seed0=3456
+
+
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,0),
+ nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
+ map.range=c(0), nb.replacement=100,sampling='seq')
+theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
+theo_ref <- data.frame(theo_ref$param)
+theo_ref <- cbind(iterations, theo_ref[-1,])
+row_sub_ref  = apply(theo_ref, 1, function(row) all(row !=0 ))
+theo_ref <- theo_ref[row_sub_ref,]
+theo_ref$algo <- 'full'
+theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 
 

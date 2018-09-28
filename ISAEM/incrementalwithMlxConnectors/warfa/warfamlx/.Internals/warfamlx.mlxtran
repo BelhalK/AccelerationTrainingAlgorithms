@@ -22,12 +22,12 @@ V = {distribution=logNormal, typical=V_pop, sd=omega_V}
 Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
 
 [LONGITUDINAL]
-input = {a, b}
+input = {a}
 
 file = 'warfa_mlx.txt'
 
 DEFINITION:
-y1 = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
+y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
 
 <FIT>
 data = y1
@@ -37,7 +37,6 @@ model = y1
 Cl_pop = {value=1, method=MLE}
 V_pop = {value=1, method=MLE}
 a = {value=1, method=MLE}
-b = {value=0.3, method=MLE}
 ka_pop = {value=1, method=MLE}
 omega_Cl = {value=1, method=MLE}
 omega_V = {value=1, method=MLE}

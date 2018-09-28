@@ -361,11 +361,12 @@ compute.Uy_d<-function(b0,phiM,args,Dargs,DYF) {
   return(U)
 }
 
-compute.LLy_c<-function(phiM,pres,args,Dargs,DYF) {
+compute.LLy_c<-function(phiM,pres,args,Dargs,DYF,chosen) {
   psiM<-transphi(phiM,Dargs$transform.par)
   tempsiM <- cbind(unique(Dargs$IdM), psiM)
   colnames(tempsiM) <- c("id",names(args$i1.omega))
-  fpred <- computePredictions(data.frame(tempsiM))$Cc
+  fpred <- Dargs$yM
+  fpred[which(Dargs$IdM %in% chosen)] <- computePredictions(data.frame(tempsiM)[chosen,], individualIds=chosen)$Cc
   # fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
   if(Dargs$error.model=="exponential")
      fpred<-log(cutoff(fpred))
@@ -391,7 +392,7 @@ conditional.distribution_c<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,m
   # fi<-model(psii,idi,xi)
   tempsii <- cbind(unique(idi), psii)
   colnames(tempsii) <- c("id",colnames(iomega))
-  fi <- computePredictions(data.frame(tempsii))$Cc
+  fi <- computePredictions(data.frame(tempsii), individualIds=idi)$Cc
   if(err=="exponential")
     fi<-log(cutoff(fi))
   gi<-error(fi,pres)      #    cutoff((pres[1]+pres[2]*abs(fi)))

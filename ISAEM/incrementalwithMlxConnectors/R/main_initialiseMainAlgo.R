@@ -216,13 +216,12 @@ initialiseMainAlgo<-function(saemix.data,saemix.model,saemix.options) {
 		etaM[itest.phi,]<-etaMc[itest.phi,]
 		phiM[itest.phi,]<-phiMc[itest.phi,]
 		psiM<-transphi(phiM,saemix.model["transform.par"])
-
+		# browser()
 		tempsiM <- cbind(itest.phi, psiM)
 		colnames(tempsiM) <- c("id",colnames(omega))
 		fpred <- computePredictions(data.frame(tempsiM))$Cc
-		browser()
-		computePredictions(data.frame(tempsiM), individualIds = c(2))$Cc
-		structural.model(psiM, IdM[IdM==2], XM[which(IdM==2),])
+		# computePredictions(data.frame(tempsiM)[1,], individualIds = c(2))$Cc
+		# structural.model(psiM, IdM[IdM==2], XM[which(IdM==2),])
 		# fpred<-structural.model(psiM, IdM, XM)
 		inan<-(is.na(fpred)+is.infinite(fpred)+(Im(fpred)!=0))
 		itest.phi<-unique(IdM[inan])

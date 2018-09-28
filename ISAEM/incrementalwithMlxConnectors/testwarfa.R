@@ -27,7 +27,6 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incrementalwithMl
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incrementalwithMlxConnectors")
 
 library("rlist")
-# library("mlxR")
 library(MlxConnectors)
 initializeMlxConnectors(software = "monolix")
 library("psych")
@@ -37,16 +36,10 @@ library(abind)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
-require(madness)
+
+library("mlxR")
 
 
-project.file <- "warfa/warfamlx.mlxtran"
-loadProject(project.file)
-getEstimatedPopulationParameters()
-
-
-computePredictions(getEstimatedIndividualParameters()$saem)
-computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
@@ -60,14 +53,26 @@ model1cpt<-function(psi,id,xidep) {
 }
 
 
+# warfa_data <- read.table("warfa/data/warfarin_data.txt", header=T)
+
+project.file <- "warfarinmlx/warfarinPK_project.mlxtran"
+# project.file <- "warfarinmlx/new.mlxtran"
+loadProject(project.file)
+
+# warfa_data <- readDatamlx(project = project.file)
+# treat <- warfa_data$treatment[,c(3)]
+# warfarin.saemix <- cbind(warfa_data$y_1,treat)
+
+warfa_data <- readDatamlx(project = project.file)
+treat <- warfa_data$treatment[,c(1,3)]
+warfarin.saemix <- merge(treat ,warfa_data$y_1,by="id")
+warfarin.saemix <- warfarin.saemix[order(warfarin.saemix$id),]
 
 
-warfa_data <- read.table("warfa/data/warfarin_data.txt", header=T)
-# warfa_data <- read.table("warfa/data/warfarin_datatest_csv.csv", header=T)
-saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
+saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y_1"), name.X="time")
 
-# Default model, no covariate
+
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
   ,psi0=matrix(c(1,1,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
@@ -92,7 +97,7 @@ theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
 row_sub_ref  = apply(theo_ref, 1, function(row) all(row !=0 ))
 theo_ref <- theo_ref[row_sub_ref,]
-theo_ref$algo <- 'full'
+theo_ref$algo <- 'full'""
 theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 

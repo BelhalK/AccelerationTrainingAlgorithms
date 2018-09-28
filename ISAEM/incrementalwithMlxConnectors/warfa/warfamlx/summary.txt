@@ -1,26 +1,25 @@
 ********************************************************************************
 *                        warfamlx.mlxtran                                      *
-*                        September 27, 2018 at 00:14:57                        *
+*                        September 27, 2018 at 09:52:42                        *
 *                        Monolix version : 5.0.1                               *
 ********************************************************************************
 
 POPULATION PARAMETERS ESTIMATION _______________________________________________
 
 Fixed Effects ----------------------------
-ka_pop                         :     0.225
-V_pop                          :      9.23
-Cl_pop                         :     0.712
+ka_pop                         :    0.0593
+V_pop                          :  1.85e-06
+Cl_pop                         :     0.837
 
 Standard Deviation of the Random Effects -
-omega_ka                       :     0.712
-omega_V                        :     0.106
-omega_Cl                       :     0.312
+omega_ka                       :     0.164
+omega_V                        :       4.1
+omega_Cl                       :      0.39
 
 Error Model Parameters -------------------
-a                              :  2.22e-16
-b                              :     0.656
+a                              :      2.78
 
-Elapsed time (seconds) :        5
-CPU time     (seconds) :       15
+Elapsed time (seconds) :      2.8
+CPU time     (seconds) :       10
  _______________________________________________________________________________
 

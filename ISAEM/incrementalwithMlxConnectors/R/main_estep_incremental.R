@@ -21,11 +21,6 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	saemix.options<-saemixObject["options"]
 	map_range <- saemix.options$map.range
 
-	if(Dargs$type=="structural"){
-		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
-	} else{
-		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
-	}
 
 	saemix.options<-saemixObject["options"]
   	saemix.model<-saemixObject["model"]
@@ -103,6 +98,12 @@ if (kiter <= 0){ #if rwm
 	phiMc<-phiM
 }
 
+if(Dargs$type=="structural"){
+		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,chosen)
+	} else{
+		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
+}
+
 	# block <- setdiff(1:Dargs$NM, l[ind_rand])	
 	
 	if (!(kiter %in% map_range)){
@@ -110,7 +111,7 @@ if (kiter <= 0){ #if rwm
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			if(Dargs$type=="structural"){
-				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 			} else {
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 			}
@@ -135,7 +136,7 @@ if (kiter <= 0){ #if rwm
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 					psiMc<-transphi(phiMc,Dargs$transform.par)
 					if(Dargs$type=="structural"){
-						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 					} else {
 						Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 					}
@@ -174,7 +175,7 @@ if (kiter <= 0){ #if rwm
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 					psiMc<-transphi(phiMc,Dargs$transform.par)
 					if(Dargs$type=="structural"){
-						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 					} else {
 						Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 					}
@@ -224,9 +225,11 @@ if (kiter <= 0){ #if rwm
 			    mean.phi1<-mean.phiM[i,i1.omega2]
 			    phii<-saemixObject["results"]["phi"][i,]
 			    phi1<-phii[i1.omega2]
+			    browser()
 			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 			}
+
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
 		  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
@@ -252,7 +255,6 @@ if (kiter <= 0){ #if rwm
 					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
 				}
 			}
-			browser()
 
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)

@@ -39,6 +39,7 @@ require(gridExtra)
 require(reshape2)
 require(madness)
 
+library("mlxR")
 
 project.file <- "bolus/bolusMixed_project.mlxtran"
 loadProject(project.file)
@@ -61,14 +62,19 @@ model1cpt<-function(psi,id,xidep) {
 
 
 
+bolus_data <- readDatamlx(project = project.file)
+treat <- bolus_data$treatment[,c(3)]
+bolus.saemix <- cbind(bolus_data$y,treat)
 
-warfa_data <- read.table("bolus/data/bolus1_data.txt", header=T)
-saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amt","time"),name.response=c("y"), name.X="time")
+
+# warfa_data <- read.table("bolus/data/bolus1_data.txt", header=T)
+
+saemix.data<-saemixData(name.data=bolus.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("treat","time"),name.response=c("y"), name.X="time")
 
 # Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(10,0.1,5,3),ncol=4,byrow=TRUE, dimnames=list(NULL, c("V","k","Vm","Km"))),fixed.estim=c(1,1,1,1),
+  ,psi0=matrix(c(5,0.1,5,3),ncol=4,byrow=TRUE, dimnames=list(NULL, c("V","k","Vm","Km"))),fixed.estim=c(1,1,1,1),
   transform.par=c(1,1,1,1),omega.init=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1),ncol=4,byrow=TRUE))
 
 
