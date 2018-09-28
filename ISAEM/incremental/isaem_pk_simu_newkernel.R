@@ -37,8 +37,7 @@ require(gridExtra)
 require(reshape2)
 
 
-# warfa_data <- read.table("/Users/karimimohammedbelhal/Desktop/csda_new/data/warfarin_data.txt", header=T)
-
+require(madness)
 
 
 model1cpt<-function(psi,id,xidep) { 
@@ -51,6 +50,8 @@ model1cpt<-function(psi,id,xidep) {
   ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
   return(ypred)
 }
+
+
 
 model <- inlineModel("
 

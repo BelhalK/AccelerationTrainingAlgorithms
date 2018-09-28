@@ -252,6 +252,7 @@ if (kiter <= 0){ #if rwm
 					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
 				}
 			}
+			browser()
 
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)
