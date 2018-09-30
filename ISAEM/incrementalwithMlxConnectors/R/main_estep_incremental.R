@@ -217,7 +217,7 @@ if(Dargs$type=="structural"){
 			#MAP calculation
 		 	# for(i in 1:saemixObject["data"]["N"]) {
 			
-			for(i in l[ind_rand]) {
+			for(i in chosen) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
 			    yi<-yobs[id==isuj]
@@ -247,9 +247,14 @@ if(Dargs$type=="structural"){
 				phi_map2 <- phi_map
 				phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
 				psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
-				fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-				fpred2<-structural.model(psi_map2, Dargs$IdM, Dargs$XM)
-				for (i in 1:(Dargs$NM)){
+				tempsi_map <- cbind(unique(Dargs$IdM), psi_map)
+				tempsi_map2 <- cbind(unique(Dargs$IdM), psi_map2)
+				colnames(tempsi_map) <- c("id",colnames(omega.eta))
+				colnames(tempsi_map2) <- c("id",colnames(omega.eta))
+				fpred1 <- fpred2 <- Dargs$yM
+				fpred1[chosen]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)$Cc
+				fpred2[chosen]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)$Cc
+				for (i in chosen){
 					r = 1:sum(Dargs$IdM == i)
 	                r = r+sum(as.matrix(gradf[,j]) != 0L)
 					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
@@ -281,7 +286,7 @@ if(Dargs$type=="structural"){
 				}
 
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
-				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 				Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
 
 				# for (i in 1:(Dargs$NM)){
