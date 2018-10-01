@@ -1,0 +1,100 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'BCEL_VAR.txt'
+delimiter = semicolumn
+header = {GROUP, ID, TIME, Y, MDV}
+
+[CONTENT]
+GROUP = {use=covariate, type=categorical}
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=y1, ytype=1, type=continuous}
+MDV = {use=missingDependentVariable}
+
+<MODEL>
+
+[COVARIATE]
+input = GROUP
+GROUP = {type=categorical, categories={1, 2, 3, 4, 5}}
+
+DEFINITION:
+tGROUP =
+{
+  transform = GROUP,
+  categories = {
+    1 = 1,
+    2 = 2,
+    3 = 3,
+    4 = 4,
+    5 = 5
+  },
+  reference = 4
+}
+
+[INDIVIDUAL]
+input = {iB_pop, omega_iB, actB_pop, beta_actB_tGROUP_1, beta_actB_tGROUP_2, beta_actB_tGROUP_3, beta_actB_tGROUP_5, tGROUP, omega_actB, uB_pop, h_pop, omega_h}
+tGROUP = {type=categorical, categories={1, 2, 3, 4, 5}}
+
+DEFINITION:
+iB = {distribution=lognormal, typical=iB_pop, sd=omega_iB}
+actB = {distribution=lognormal, typical=actB_pop, covariate=tGROUP, coefficient={beta_actB_tGROUP_1, beta_actB_tGROUP_2, beta_actB_tGROUP_3, 0, beta_actB_tGROUP_5}, sd=omega_actB}
+uB = {distribution=lognormal, typical=uB_pop, no-variability}
+h = {distribution=lognormal, typical=h_pop, sd=omega_h}
+
+[LONGITUDINAL]
+input = a
+
+file = './Bcel model actB.txt'
+
+DEFINITION:
+y1 = {distribution=normal, prediction=B, errorModel=constant(a)}
+
+<FIT>
+data = y1
+model = y1
+
+<PARAMETER>
+iB_pop = {value=1, method=MLE}
+omega_iB = {value=1, method=MLE}
+actB_pop = {value=1, method=MLE}
+beta_actB_tGROUP_1 = {value=0, method=MLE}
+beta_actB_tGROUP_2 = {value=0, method=MLE}
+beta_actB_tGROUP_3 = {value=0, method=MLE}
+beta_actB_tGROUP_5 = {value=0, method=MLE}
+omega_actB = {value=1, method=MLE}
+uB_pop = {value=1, method=MLE}
+h_pop = {value=1, method=MLE}
+omega_h = {value=1, method=MLE}
+a = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = conditionalMode)
+fim(method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+plotResult()
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'iBactBhrcovactB'
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+burningiterations = 100
+exploratoryiterations = 1000
+mixturesinitbeta = 1
+kdisp = 10
+
+LL:
+optimizedsimulations = 100000
+
+INDIVIDUAL:
+miniterations = 10000
+

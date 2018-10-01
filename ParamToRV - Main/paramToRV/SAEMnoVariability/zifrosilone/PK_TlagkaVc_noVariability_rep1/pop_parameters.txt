@@ -1,0 +1,54 @@
+******************************************************************
+*      PK_TlagkaVc_noVariability.mlxtran
+*      May 31, 2017 at 19:47:19
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter     s.e. (lin)   r.s.e.(%) 
+Tlag_pop    :   0.145         0.085          58    
+ka_pop      :    0.17         0.017          10    
+V_pop       :    36.1           8.5          24    
+alpha_pop   :    3.96           2.1          54    
+beta_pop    :   0.645          0.14          22    
+
+omega_Tlag  :    1.43          0.36          25    
+omega_ka    :   0.219         0.076          35    
+omega_V     :   0.547          0.12          23    
+omega_alpha :       0           -           -      
+omega_beta  :       0           -           -      
+
+a           :   0.327         0.027           8    
+
+______________________________________________
+correlation matrix of the estimates(linearization)
+
+Tlag_pop       1             
+ka_pop     -0.07       1          
+V_pop      -0.19    0.42       1       
+alpha_pop   0.18   -0.14   -0.26       1    
+beta_pop   -0.13    0.04    0.12   -0.98       1 
+
+Eigenvalues (min, max, max/min): 0.0094  2.2  2.3e+002
+
+omega_Tlag      1          
+omega_ka       -0       1       
+omega_V         0    0.01       1    
+a           -0.03   -0.16   -0.05       1 
+
+Eigenvalues (min, max, max/min): 0.83  1.2  1.4
+
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 31.7 seconds. 
+CPU time is 46.3 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by linearization
+
+-2 x log-likelihood:                   -45.58 
+Akaike Information Criteria   (AIC):   -27.58 
+Bayesian Information Criteria (BIC):   -23.21 
+______________________________________________________________

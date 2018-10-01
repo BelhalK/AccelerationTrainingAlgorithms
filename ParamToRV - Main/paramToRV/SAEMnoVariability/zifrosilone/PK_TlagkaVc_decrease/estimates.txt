@@ -1,0 +1,12 @@
+           ; parameter
+   Tlag_pop;   0.15780
+     ka_pop;   0.17986
+      V_pop;  40.01443
+  alpha_pop;   1.03072
+   beta_pop;   0.99339
+ omega_Tlag;   1.33858
+   omega_ka;   0.22973
+    omega_V;   0.36522
+omega_alpha;   0.00000
+ omega_beta;   0.00000
+          a;   0.32762

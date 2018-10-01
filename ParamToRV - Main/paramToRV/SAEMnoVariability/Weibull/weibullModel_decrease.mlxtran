@@ -1,0 +1,58 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'lung_cancer_.csv'
+delimiter = comma
+header = {ID, TIME, Y, age, sex, ecog, karnoPH, karnoPAT}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=Event, ytype=1, type=event}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Te_pop, omega_Te, p_pop}
+
+DEFINITION:
+Te = {distribution=lognormal, typical=Te_pop, sd=omega_Te}
+p = {distribution=lognormal, typical=p_pop, no-variability}
+
+[LONGITUDINAL]
+file = 'models/weibull_model_singleEvent.txt'
+
+<FIT>
+data = Event
+model = Event
+
+<PARAMETER>
+Te_pop = {value=300, method=MLE}
+omega_Te = {value=1, method=MLE}
+p_pop = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+fim(method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'weibullModel_decrease'
+autochains = no
+
+POPULATION:
+smoothingiterations = 100
+exploratoryiterations = 300
+variability = Decreasing
+mixturesinitbeta = 1
+kdisp = 20
+
+LL:
+fixedsimulations = 5000
+optimizedsimulations = 500
+

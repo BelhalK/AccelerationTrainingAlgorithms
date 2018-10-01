@@ -1,0 +1,13 @@
+DESCRIPTION: Weibull model for time-to-event data (single event per individual). Te is the scale parameter (characteristic time), and p is the shape parameter.
+
+[LONGITUDINAL]
+input = {Te, p}
+
+EQUATION:
+h = p/Te * (t/Te)^(p-1)
+
+DEFINITION:
+Event = {type=event, maxEventNumber=1, hazard=h}
+
+OUTPUT:
+output = {Event}

@@ -1,0 +1,63 @@
+********************************************************************************
+*                        project_decrease.mlxtran                              *
+*                        November 27, 2017 at 17:49:19                         *
+*                        Monolix version : 5.0.0                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+p0_pop                         :     0.267
+alpha_pop                      :    0.0351
+tau_pop                        :      70.5
+
+Standard Deviation of the Random Effects -
+omega_alpha                    :     0.526
+omega_tau                      :      6.75
+
+Error Model Parameters -------------------
+a                              :   0.00999
+
+Elapsed time (seconds) :       17
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+              min        Q1    median        Q3       max
+p0    :     0.263     0.267     0.267     0.267     0.272
+alpha :   0.00786    0.0246    0.0367    0.0503     0.144
+tau   :      54.5      65.5      70.3      74.9      88.9
+
+Elapsed time (seconds) :     3.9
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+              min        Q1    median        Q3       max
+p0    :     0.263     0.267     0.267     0.267     0.272
+alpha :   0.00786    0.0246    0.0367    0.0503     0.144
+tau   :      54.5      65.5      70.3      74.9      88.9
+
+Elapsed time (seconds) :     3.9
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                (is)
+
+-2 x log-likelihood                 :       -7954.50
+Akaike Information Criteria   (AIC) :       -7942.50
+Bayesian Information Criteria (BIC) :       -7921.37
+
+Elapsed time              (seconds) :             12
+
+
+[Importance Sampling] Standard error        : 0.354
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+ _______________________________________________________________________________

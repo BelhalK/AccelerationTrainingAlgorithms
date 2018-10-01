@@ -1,0 +1,25 @@
+DESCRIPTION: generalized gamma model for time-to-event data (single event per individual). Te is the scale parameter (characteristic time), p and alpha are shape parameters.
+
+[LONGITUDINAL]
+input = {Te, alpha, p}
+
+EQUATION:
+; re-parameterization
+Teprime = Te * exp(gammaln(alpha/p) - gammaln((alpha+1)/p))
+
+; calculation of the incomplete gamma function via integration
+t_0 = 0
+incompleteGamma_0 = 0
+ddt_incompleteGamma = p/Teprime * (t/Teprime)^(alpha-1) * exp(-(t/Teprime)^p) 
+
+; hazard
+h = p/Teprime * (t/Teprime)^(alpha-1)*exp(-(t/Teprime)^p)  / (exp(gammaln(alpha/p)) - incompleteGamma)
+
+; saturation to prevent h to go to negative values:
+hsat = max(h,0)
+
+DEFINITION:
+Event = {type=event, maxEventNumber=1, hazard=hsat}
+
+OUTPUT:
+output = {Event}

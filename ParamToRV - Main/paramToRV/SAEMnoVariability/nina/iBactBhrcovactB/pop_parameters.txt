@@ -1,0 +1,27 @@
+******************************************************************
+*      model1_project.mlxtran
+*      June 26, 2017 at 11:53:29
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+            parameter 
+Ad0_pop   : 2.61e+003 
+Ac0_pop   :  1.8e+003 
+ka_pop    : 1.24e+004 
+k_pop     :    2e-209 
+
+omega_Ad0 :     0.998 
+omega_Ac0 :      1.02 
+omega_ka  :       5.9 
+omega_k   :       117 
+
+a         : 2.69e-008 
+b         :     0.401 
+
+
+Population parameters estimation...
+
+Elapsed time is 74.4 seconds. 
+CPU time is 228 seconds. 

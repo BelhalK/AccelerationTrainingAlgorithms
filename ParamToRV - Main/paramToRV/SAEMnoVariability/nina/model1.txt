@@ -1,0 +1,17 @@
+[LONGITUDINAL]
+input = {Ad0, Ac0, ka, k}
+
+EQUATION:
+t0 = 0
+Ad_0 = Ad0
+Ac_0 = Ac0
+if Ad>0
+  Rd = ka*(Ad^1)
+else
+  Rd = 0
+end
+ddt_Ad = - Rd
+ddt_Ac = Rd - k*Ac
+
+OUTPUT:
+output = {Ac}

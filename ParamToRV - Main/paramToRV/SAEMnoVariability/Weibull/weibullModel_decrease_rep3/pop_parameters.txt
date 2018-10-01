@@ -1,0 +1,35 @@
+******************************************************************
+*      weibullModel_decrease.mlxtran
+*      June 01, 2017 at 11:20:50
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+           parameter     s.e. (s.a.)   r.s.e.(%) 
+Te_pop   :     369            24            7    
+p_pop    :    2.29           NaN          NaN    
+
+omega_Te :   0.753         0.091           12    
+omega_p  :       0           -            -      
+
+______________________________________________
+The F.I.M was not correctly estimated by (Stochastic Approximation): There are NaN or Inf coefficients
+______________________________________________
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 34.2 seconds. 
+CPU time is 96.6 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by Importance Sampling
+Sampling distribution for the random effects: t with 5 d.f
+
+-2 x log-likelihood:                   2326.02 (0.19)
+Akaike Information Criteria   (AIC):   2332.02 (0.19)
+Bayesian Information Criteria (BIC):   2342.31 (0.19)
+
+Elapsed time is 31.7 seconds. 
+CPU time is 104 seconds. 
+______________________________________________________________

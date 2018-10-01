@@ -1,0 +1,30 @@
+[LONGITUDINAL]
+input = {Emax, T50, etaBSVEmax, etaBTAVEmax, Narm}
+Narm = {use=regressor}
+
+
+EQUATION:
+
+; transform Emax to tEmax (normally distributed) 
+tEmax = logit(Emax)
+
+
+; adding the random effects (RE) due to between-study variability and between arm variability, on the transformed parameters 
+tEmaxRE = tEmax + etaBSVEmax + etaBTAVEmax/sqrt(Narm)
+
+
+; transforming back to have EmaxRE with logit distribution (values between 0 and 1) 
+EmaxRE = 1 / (1+ exp(-tEmaxRE) )
+
+
+; defining the effect
+ACR20 = EmaxRE * (t / (T50 + t))
+
+; adding a saturation to avoid taking logit(0) (undefined) when t=0
+ACR20sat = max(ACR20, 0.01)
+
+; transforming the effect ACR20 in the same way as the data
+pred = logit(ACR20sat)*sqrt(Narm)
+
+OUTPUT:
+output = pred

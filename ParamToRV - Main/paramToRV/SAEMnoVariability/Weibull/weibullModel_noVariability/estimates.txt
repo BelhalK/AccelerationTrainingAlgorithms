@@ -1,0 +1,5 @@
+        ; parameter
+  Te_pop; 420.37274
+   p_pop;   1.49142
+omega_Te;   0.46360
+ omega_p;   0.00000

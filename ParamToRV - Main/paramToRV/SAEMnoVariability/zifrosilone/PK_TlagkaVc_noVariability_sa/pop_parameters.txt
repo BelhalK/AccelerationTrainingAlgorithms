@@ -1,0 +1,82 @@
+******************************************************************
+*      PK_TlagkaVc_noVariability_sa.mlxtran
+*      June 01, 2017 at 10:29:07
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter 
+Tlag_pop    :    0.12   
+ka_pop      :   0.168   
+V_pop       :    35.5   
+alpha_pop   :    4.13   
+beta_pop    :   0.636   
+
+omega_Tlag  :    1.63   
+omega_ka    :    0.21   
+omega_V     :   0.552   
+omega_alpha :       0   
+omega_beta  :       0   
+
+a           :   0.327   
+
+
+Population parameters estimation...
+
+Elapsed time is 40.7 seconds. 
+CPU time is 56.4 seconds. 
+******************************************************************
+*      PK_TlagkaVc_noVariability_sa.mlxtran
+*      June 01, 2017 at 10:29:09
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter     s.e. (lin)   r.s.e.(%) 
+Tlag_pop    :    0.12         0.082          68    
+ka_pop      :   0.168         0.016          10    
+V_pop       :    35.5           8.4          24    
+alpha_pop   :    4.13           2.2          52    
+beta_pop    :   0.636          0.14          22    
+
+omega_Tlag  :    1.63          0.41          26    
+omega_ka    :    0.21         0.076          36    
+omega_V     :   0.552          0.12          23    
+omega_alpha :       0           -           -      
+omega_beta  :       0           -           -      
+
+a           :   0.327         0.027           8    
+
+______________________________________________
+correlation matrix of the estimates(linearization)
+
+Tlag_pop       1             
+ka_pop     -0.06       1          
+V_pop      -0.17    0.43       1       
+alpha_pop   0.17   -0.15   -0.27       1    
+beta_pop   -0.13    0.05    0.13   -0.98       1 
+
+Eigenvalues (min, max, max/min): 0.0097  2.2  2.3e+002
+
+omega_Tlag      1          
+omega_ka       -0       1       
+omega_V         0    0.01       1    
+a           -0.03   -0.17   -0.05       1 
+
+Eigenvalues (min, max, max/min): 0.82  1.2  1.4
+
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 41 seconds. 
+CPU time is 57.2 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by linearization
+
+-2 x log-likelihood:                   -46.37 
+Akaike Information Criteria   (AIC):   -28.37 
+Bayesian Information Criteria (BIC):   -24.01 
+______________________________________________________________

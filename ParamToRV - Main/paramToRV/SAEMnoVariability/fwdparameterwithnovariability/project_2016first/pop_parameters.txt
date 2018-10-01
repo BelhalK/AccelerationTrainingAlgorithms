@@ -1,0 +1,24 @@
+******************************************************************
+*      project_2016first.mlxtran
+*      January 10, 2018 at 14:41:32
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter 
+p0_pop      :    0.421  
+alpha_pop   :   0.0437  
+tau_pop     :     74.9  
+
+omega_p0    :        0  
+omega_alpha :     0.52  
+omega_tau   :     7.58  
+
+a           :     0.01  
+
+
+Population parameters estimation...
+
+Elapsed time is 43.9 seconds. 
+CPU time is 79.2 seconds. 

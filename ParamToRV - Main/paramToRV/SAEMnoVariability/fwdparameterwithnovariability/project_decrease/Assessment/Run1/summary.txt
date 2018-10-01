@@ -1,0 +1,82 @@
+********************************************************************************
+*                        project_decrease.mlxtran                              *
+*                        November 27, 2017 at 17:51:13                         *
+*                        Monolix version : 5.0.0                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------   s.e.(sa)  r.s.e.(%)
+p0_pop                        :      0.317    0.00217      0.685
+alpha_pop                     :      0.039    0.00131       3.36
+tau_pop                       :         72      0.441      0.613
+
+Standard Deviation of the Random Effects -
+omega_alpha                   :      0.526      0.024       4.57
+omega_tau                     :       6.89      0.311       4.51
+
+Error Model Parameters -------------------
+a                             :       0.01   0.000201       2.01
+
+Elapsed time (seconds) :       11
+ _______________________________________________________________________________
+
+
+CORRELATION MATRIX OF THE ESTIMATES ____________________________________________
+
+Fisher by Stochastic Approximation ---------------------------------------------
+Correlation Matrix :
+     p0_pop   1.00000
+  alpha_pop   0.09664   1.00000
+    tau_pop   0.13680   0.00838   1.00000
+omega_alpha  -0.01626   0.01368  -0.00605   1.00000
+  omega_tau   0.02748  -0.01047   0.01084  -0.01017   1.00000
+          a  -0.04608  -0.00415  -0.00806  -0.00752  -0.00551   1.00000
+
+                               min       max   max/min
+Eigen values           :      0.83       1.2       1.4
+
+Elapsed time (seconds) :    0.38
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+              min        Q1    median        Q3       max
+p0    :     0.316     0.317     0.317     0.317     0.319
+alpha :   0.00892    0.0273    0.0407     0.056     0.151
+tau   :      56.4      66.9      71.9      76.6      89.8
+
+Elapsed time (seconds) :     3.1
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+              min        Q1    median        Q3       max
+p0    :     0.316     0.317     0.317     0.317     0.319
+alpha :   0.00892    0.0273    0.0407     0.056     0.151
+tau   :      56.4      66.9      71.9      76.6      89.8
+
+Elapsed time (seconds) :     3.1
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                (is)
+
+-2 x log-likelihood                 :       -7941.55
+Akaike Information Criteria   (AIC) :       -7929.55
+Bayesian Information Criteria (BIC) :       -7908.42
+
+Elapsed time              (seconds) :            7.3
+
+
+[Importance Sampling] Standard error        : 0.269
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+ _______________________________________________________________________________

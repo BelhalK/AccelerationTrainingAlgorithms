@@ -1,0 +1,24 @@
+DESCRIPTION:
+Paper version for B cel model
+
+INPUT:
+parameter = {iB, actB, uB, h}
+
+EQUATION:
+
+;t0 = 0
+;B_0 = iB
+
+T0 = h
+if t<=T0
+coef = 1
+else
+coef = 0
+end
+
+;ddt_B = coef*actB - uB*B
+
+B=coef*(-(-exp(-uB*t)*iB*uB+exp(-uB*t)*actB-actB)/uB)+(1-coef)*(-(-exp(-uB*h)*iB*uB+exp(-uB*h)*actB-actB)*exp(uB*(h-t))/uB)
+
+OUTPUT:
+output = {B}

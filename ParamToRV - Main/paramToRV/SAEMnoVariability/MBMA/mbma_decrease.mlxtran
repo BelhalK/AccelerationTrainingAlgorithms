@@ -1,0 +1,99 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'data_9studies.csv'
+delimiter = comma
+header = {STUDY, ARM, DRUG, DRUGinteger, TIME, Y, Publication, Narm, TRT, DiseaseDuration, CReactiveProtein, SwollenJointCount, transY}
+
+[CONTENT]
+STUDY = {use=identifier}
+ARM = {use=occasion}
+DRUG = {use=covariate, type=categorical}
+TIME = {use=time}
+Narm = {use=regressor}
+DiseaseDuration = {use=covariate, type=continuous}
+CReactiveProtein = {use=covariate, type=continuous}
+SwollenJointCount = {use=covariate, type=continuous}
+transY = {use=observation, name=y, ytype=1, type=continuous}
+
+<MODEL>
+
+[COVARIATE]
+input = {DRUG, sDRUG, DiseaseDuration, CReactiveProtein, SwollenJointCount, OCC, sOCC}
+DRUG = {type=categorical, categories={abata, adali, canaki, placebo}}
+sDRUG = {type=categorical, categories={abata, adali, placebo_abata, placebo_adali, placebo_canaki}}
+OCC = {type=categorical, categories={0, 1}}
+sOCC = {type=categorical, categories={0_1, 1}}
+
+DEFINITION:
+tDRUG =
+{
+  transform = DRUG,
+  categories = {
+    abata = abata,
+    adali = adali,
+    canaki = canaki,
+    placebo = placebo
+  },
+  reference = placebo
+}
+
+[INDIVIDUAL]
+input = {Emax_pop, beta_Emax_tDRUG_abata, beta_Emax_tDRUG_adali, beta_Emax_tDRUG_canaki, tDRUG, T50_pop, beta_T50_tDRUG_abata, beta_T50_tDRUG_adali, beta_T50_tDRUG_canaki, etaBSVEmax_pop, omega_etaBSVEmax, etaBTAVEmax_pop, gamma1_etaBTAVEmax}
+tDRUG = {type=categorical, categories={abata, adali, canaki, placebo}}
+
+DEFINITION:
+Emax = {distribution=logitnormal, typical=Emax_pop, covariate=tDRUG, coefficient={beta_Emax_tDRUG_abata, beta_Emax_tDRUG_adali, beta_Emax_tDRUG_canaki, 0}, no-variability}
+T50 = {distribution=lognormal, typical=T50_pop, covariate=tDRUG, coefficient={beta_T50_tDRUG_abata, beta_T50_tDRUG_adali, beta_T50_tDRUG_canaki, 0}, no-variability}
+etaBSVEmax = {distribution=normal, typical=etaBSVEmax_pop, sd=omega_etaBSVEmax}
+etaBTAVEmax = {distribution=normal, typical=etaBTAVEmax_pop, varlevel=id*occ, sd=gamma1_etaBTAVEmax}
+
+[LONGITUDINAL]
+input = a
+
+file = './model_ACR20_onlyEmaxVariability.txt'
+
+DEFINITION:
+y = {distribution=normal, prediction=pred, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+Emax_pop = {value=0.4, method=MLE}
+beta_Emax_tDRUG_abata = {value=1, method=MLE}
+beta_Emax_tDRUG_adali = {value=1, method=MLE}
+beta_Emax_tDRUG_canaki = {value=1, method=MLE}
+T50_pop = {value=4, method=MLE}
+beta_T50_tDRUG_abata = {value=-0.5, method=MLE}
+beta_T50_tDRUG_adali = {value=-0.5, method=MLE}
+beta_T50_tDRUG_canaki = {value=-0.5, method=MLE}
+etaBSVEmax_pop = {value=0, method=FIXED}
+omega_etaBSVEmax = {value=1, method=MLE}
+etaBTAVEmax_pop = {value=0, method=FIXED}
+gamma1_etaBTAVEmax = {value=1, method=MLE}
+a = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+fim(method = Linearization)
+logLikelihood(method = Linearization)
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'mbma_decrease'
+nbchains = 6
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+exploratoryiterations = 300
+variability = Decreasing
+mixturesinitbeta = 1
+

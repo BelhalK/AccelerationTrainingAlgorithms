@@ -1,0 +1,20 @@
+******************************************************************
+*      weibullModel_mixed.mlxtran
+*      June 01, 2017 at 11:05:32
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+           parameter 
+Te_pop   :     402   
+p_pop    :    1.47   
+
+omega_Te :   0.431   
+omega_p  :       0   
+
+
+Population parameters estimation...
+
+Elapsed time is 14.2 seconds. 
+CPU time is 63.8 seconds. 

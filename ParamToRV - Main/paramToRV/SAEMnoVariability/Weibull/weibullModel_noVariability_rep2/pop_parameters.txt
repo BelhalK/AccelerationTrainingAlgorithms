@@ -1,0 +1,40 @@
+******************************************************************
+*      weibullModel_noVariability.mlxtran
+*      June 01, 2017 at 11:27:26
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+           parameter     s.e. (s.a.)   r.s.e.(%) 
+Te_pop   :     408            24            6    
+p_pop    :    1.44          0.12            8    
+
+omega_Te :   0.375         0.087           23    
+omega_p  :       0           -            -      
+
+______________________________________________
+correlation matrix of the estimates(Stochastic Approximation)
+
+Te_pop      1    
+p_pop    0.02       1 
+
+Eigenvalues (min, max, max/min): 0.98  1  1
+
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 42.6 seconds. 
+CPU time is 189 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by Importance Sampling
+Sampling distribution for the random effects: t with 5 d.f
+
+-2 x log-likelihood:                   2309.56 (0.14)
+Akaike Information Criteria   (AIC):   2315.56 (0.14)
+Bayesian Information Criteria (BIC):   2325.85 (0.14)
+
+Elapsed time is 34 seconds. 
+CPU time is 123 seconds. 
+______________________________________________________________

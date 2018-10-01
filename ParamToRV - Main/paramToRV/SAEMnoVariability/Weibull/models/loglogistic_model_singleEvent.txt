@@ -1,0 +1,13 @@
+DESCRIPTION: log-logistic model for time-to-event data (single event per individual). Te is the scale parameter (characteristic time) and s is the shape parameter.
+
+[LONGITUDINAL]
+input = {Te, s}
+
+EQUATION:
+h = s/Te * (t/Te)^(s-1) / (1+(t/Te)^s)
+
+DEFINITION:
+Event = {type=event, maxEventNumber=1, hazard=h}
+
+OUTPUT:
+output = {Event}

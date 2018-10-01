@@ -1,0 +1,66 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'Data_logistic_1D_simule.txt'
+delimiter = tab
+header = {X, Y, group}
+
+[CONTENT]
+X = {use=time}
+Y = {use=observation, name=y, ytype=1, type=continuous}
+group = {use=identifier}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {p0_pop, alpha_pop, omega_alpha, tau_pop, omega_tau}
+
+DEFINITION:
+p0 = {distribution=logitnormal, typical=p0_pop, no-variability}
+alpha = {distribution=lognormal, typical=alpha_pop, sd=omega_alpha}
+tau = {distribution=normal, typical=tau_pop, sd=omega_tau}
+
+[LONGITUDINAL]
+input = a
+
+file = './model1dML.txt'
+
+DEFINITION:
+y = {distribution=normal, prediction=Yy, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+p0_pop = {value=0.6, method=MLE}
+alpha_pop = {value=0.05, method=MLE}
+omega_alpha = {value=1, method=MLE}
+tau_pop = {value=60, method=MLE}
+omega_tau = {value=10, method=MLE}
+a = {value=0.5, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+fim(method = Linearization)
+logLikelihood(method = ImportanceSampling)
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'project_2016novar'
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+smoothingiterations = 100
+mixturesinitbeta = 1
+kdisp = 20
+
+LL:
+fixedsimulations = 5000
+optimizedsimulations = 500
+

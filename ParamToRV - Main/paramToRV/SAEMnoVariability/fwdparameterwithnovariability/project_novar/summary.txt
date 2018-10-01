@@ -1,0 +1,37 @@
+********************************************************************************
+*                        project_novar.mlxtran                                 *
+*                        November 27, 2017 at 17:07:06                         *
+*                        Monolix version : 5.0.0                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+p0_pop                         :     0.222
+alpha_pop                      :    0.0309
+tau_pop                        :      68.9
+
+Standard Deviation of the Random Effects -
+omega_alpha                    :     0.526
+omega_tau                      :      6.73
+
+Error Model Parameters -------------------
+a                              :   0.00998
+
+Elapsed time (seconds) :       27
+ _______________________________________________________________________________
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                (is)
+
+-2 x log-likelihood                 :       -7959.47
+Akaike Information Criteria   (AIC) :       -7947.47
+Bayesian Information Criteria (BIC) :       -7926.35
+
+Elapsed time              (seconds) :            7.2
+
+
+[Importance Sampling] Standard error        : 0.355
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+ _______________________________________________________________________________

@@ -1,0 +1,10 @@
+DESCRIPTION: Univariate model
+
+[LONGITUDINAL]
+input =  {p0, alpha, tau}
+
+EQUATION:
+Yy = 1/( 1 + ((1/p0)-1)*exp( - alpha*(t  - tau)/(p0*(1-p0)) ) )
+
+OUTPUT:
+output = Yy

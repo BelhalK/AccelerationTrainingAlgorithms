@@ -1,0 +1,34 @@
+[LONGITUDINAL]
+
+input = {iMB,actB,pMT,uB, h}
+
+
+EQUATION:
+
+
+T1 = h
+
+if t<0 
+c0=0
+c1=0
+
+elseif (t>=0 & t <=T1)
+c0=1
+c1=0
+
+else
+c0=0
+c1=1
+
+
+end
+
+
+MB = iMB + c0*(pMT*t)+c1*(pMT*h)
+
+SB = c0*(-(exp(-uB*t)*actB-actB)/uB) + c1*(-(exp(-uB*h)*actB-actB)*exp(uB*(h-t))/uB) 
+
+B = SB + MB
+
+OUTPUT:
+output = {B}

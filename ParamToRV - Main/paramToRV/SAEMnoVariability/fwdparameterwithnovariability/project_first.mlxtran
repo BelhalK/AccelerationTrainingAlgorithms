@@ -1,0 +1,66 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'Data_logistic_1D_simule.txt'
+delimiter = space
+header = {X, Y, group}
+
+[CONTENT]
+X = {use=time}
+Y = {use=observation, name=y, type=continuous}
+group = {use=identifier}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {p0_pop, alpha_pop, omega_alpha, tau_pop, omega_tau}
+
+DEFINITION:
+p0 = {distribution=logitNormal, typical=p0_pop, no-variability}
+alpha = {distribution=logNormal, typical=alpha_pop, sd=omega_alpha}
+tau = {distribution=normal, typical=tau_pop, sd=omega_tau}
+
+[LONGITUDINAL]
+input = {a}
+file = 'model1dML.txt'
+
+DEFINITION:
+y = {distribution=normal, prediction=Yy, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+a = {value=1, method=MLE}
+alpha_pop = {value=0.05, method=MLE}
+omega_alpha = {value=1, method=MLE}
+omega_tau = {value=10, method=MLE}
+p0_pop = {value=0.6, method=MLE}
+tau_pop = {value=60, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(run = false,method = conditionalMode)
+fim(run = false,method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'project_first'
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+smoothingiterations = 100
+exploratoryiterations = 300
+variability = firstStage
+mixturesinitbeta = 1
+
+LL:
+fixedsimulations = 8000
+

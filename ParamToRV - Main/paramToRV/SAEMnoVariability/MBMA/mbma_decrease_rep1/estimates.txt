@@ -1,0 +1,22 @@
+                       ; parameter;  s.e._lin;r.s.e._lin;pvalues_lin
+               Emax_pop;   0.40839;   0.03387;      8.29;        NaN
+  beta_Emax_tDRUG_abata;   1.78003;   0.16048;      9.02;      1e-10
+  beta_Emax_tDRUG_adali;   1.35888;   0.16750;     12.33;      1e-10
+ beta_Emax_tDRUG_canaki;   1.29559;   0.84640;     65.33;    0.12584
+beta_Emax_tDRUG_placebo;   0.00000;       NaN;       NaN;        NaN
+                T50_pop;   3.81748;   0.47648;     12.48;        NaN
+   beta_T50_tDRUG_abata;   0.10130;   0.14021;    138.42;    0.47001
+   beta_T50_tDRUG_adali;  -0.64087;   0.16570;     25.86; 0.00010993
+  beta_T50_tDRUG_canaki;   0.04913;   0.60071;   1222.62;    0.93481
+ beta_T50_tDRUG_placebo;   0.00000;       NaN;       NaN;        NaN
+         etaBSVEmax_pop;   0.00000;   0.00000;      0.00;        NaN
+        etaBTAVEmax_pop;   0.00000;   0.00000;      0.00;        NaN
+             omega_Emax;   0.00000;   0.00000;      0.00;        NaN
+              omega_T50;   0.00000;   0.00000;      0.00;        NaN
+       omega_etaBSVEmax;   0.27822;   0.08545;     30.71;        NaN
+      omega_etaBTAVEmax;   0.00000;   0.00000;      0.00;        NaN
+             gamma_Emax;   0.00000;   0.00000;      0.00;        NaN
+              gamma_T50;   0.00000;   0.00000;      0.00;        NaN
+       gamma_etaBSVEmax;   0.00000;   0.00000;      0.00;        NaN
+      gamma_etaBTAVEmax;   2.02734;   1.14750;     56.60;        NaN
+                      a;   2.44807;   0.15474;      6.32;        NaN

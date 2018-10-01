@@ -1,0 +1,56 @@
+******************************************************************
+*      PK_TlagkaVc_nocens_noVariability.mlxtran
+*      June 09, 2017 at 18:59:33
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter     s.e. (lin)   r.s.e.(%) 
+Tlag_pop    :     0.121        0.082            68 
+ka_pop      :     0.967         0.35            36 
+V_pop       :       211           36            17 
+alpha_pop   :     0.683         0.27            40 
+beta_pop    :     0.753        0.078            10 
+
+omega_Tlag  :   0.00315     2.6e+002     8.16e+006 
+omega_ka    :     0.979         0.23            24 
+omega_V     :     0.519         0.12            22 
+omega_alpha :         0          -             -   
+omega_beta  :         0          -             -   
+
+a           : 2.58e-011        0.011     4.25e+010 
+b           :     0.327        0.043            13 
+
+______________________________________________
+correlation matrix of the estimates(linearization)
+
+Tlag_pop       1             
+ka_pop      0.45       1          
+V_pop        0.1    0.18       1       
+alpha_pop  -0.02    0.04    0.07       1    
+beta_pop   -0.01   -0.09   -0.13   -0.99       1 
+
+Eigenvalues (min, max, max/min): 0.0078  2  2.6e+002
+
+omega_Tlag      1             
+omega_ka    -0.13       1          
+omega_V      0.01      -0       1       
+a           -0.18    0.03      -0       1    
+b           -0.03   -0.03   -0.02   -0.77       1 
+
+Eigenvalues (min, max, max/min): 0.2  1.8  9.2
+
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 32.8 seconds. 
+CPU time is 45.9 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by linearization
+
+-2 x log-likelihood:                   -65.76 
+Akaike Information Criteria   (AIC):   -45.76 
+Bayesian Information Criteria (BIC):   -40.92 
+______________________________________________________________

@@ -1,0 +1,147 @@
+\documentclass[a4paper]{article}
+
+%% The graphicx package provides the includegraphics command.
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+
+%% The amsthm package provides extended theorem environments
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{fancyvrb}
+\usepackage{dsfont}
+\usepackage[utf8]{inputenc}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{algorithm} 
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs,amsfonts,dsfont}
+
+
+
+%% remove journal footer
+\makeatletter
+\def\ps@pprintTitle{%
+ \let\@oddhead\@empty
+ \let\@evenhead\@empty
+ \def\@oddfoot{}%
+ \let\@evenfoot\@oddfoot}
+\makeatother
+
+
+%% change 'Abstract' to 'Outline'
+\renewenvironment{abstract}{\global\setbox\absbox=\vbox\bgroup
+  \hsize=\textwidth\def\baselinestretch{1}%
+  \noindent\unskip\textbf{Outline}
+ \par\medskip\noindent\unskip\ignorespaces}
+ {\egroup}
+
+
+\begin{document}
+\pagenumbering{gobble}
+
+\Large
+ \begin{center}
+Converting a population partameter into a random variable with small variance
+
+\hspace{10pt}
+
+% Author names and affiliations
+\large
+Belhal Karimi
+
+\hspace{10pt}
+
+\end{center}
+
+\hspace{10pt}
+
+\normalsize
+
+%% main text
+
+
+\section{Convert the parameter into random variables with variance that tends to infinity}
+The initial model $p(y_i, \psi_i;\alpha,\theta)$ becomes $p(y_i, \psi_i,\alpha;\theta)$.\\
+
+The new model can now be written as:\\
+\begin{align}
+p(y_i| \psi_i,\alpha;\theta)p(\psi_i;\theta)\pi(\alpha)
+\end{align}
+where $\pi(\alpha)$ is a prior on our new random variable $\alpha$.\\
+The challenge is to see if we keep the same convergence properties in the SAEM algorithm when we operate that change.\\
+
+Let's take a simple example: a logistic regression:
+\begin{align}
+f(t) = \frac{1}{\beta+e^{-\psi_i t}} + a_i\epsilon_i
+\end{align}\\
+Hypothesis:\\
+
+\begin{align}
+ y_i \sim N(\frac{1}{\beta+e^{-\psi_i t}},a_i^{2})\\
+ log(\psi_i) \sim N(log(\psi_pop),\sigma^{2})
+\end{align}
+The parameter $\theta$ that we are looking for is: $\theta = (\begin{bmatrix}
+           \psi_{pop}\\
+           \beta
+         \end{bmatrix}, \omega, a_i)$\\
+
+\subsection{Fixed population parameter}
+The model is written as 
+\begin{align}
+ p(y,\psi;\theta) = p(y|\psi;\theta)p(\psi;\theta)
+\end{align}\\
+\begin{align}
+ (\psi_i)^{k+1} \sim p(\psi_i| y_i,\theta^{k};\beta^{k})\\
+ \theta^{k+1},\beta^{k+1} = max(p(y,\psi^{k+1},\theta,\beta))
+\end{align}
+
+\subsection{Random population parameter}
+In the second algorithm, $\beta$ is a random variable such as $\beta \sim N(\beta^{*},\sigma_\beta)$\\
+The model becomes:
+\begin{align}
+ p(y,\psi,\beta;\theta) = p(y|\psi,\beta;\theta)p(\psi;\theta)\pi(\beta)\\
+\end{align}
+with $\theta = (\psi_{pop}, \omega, a_i)$\\
+
+
+If we then look at what is happening in the SAEM algorithm, nothing changes in the simulation phase where the latent data are drawn from same the conditional $p(\psi_i|y_i)$.\\
+Yet, the new algorithm requires to draw a new $\beta$ at each iteration from the conditional $p(\beta|y_i,\beta_{k},(\beta^*)_{k})$.\\
+
+\begin{align}
+ (\psi_i)^{k+1} \sim p(\psi_i| y_i,\theta^{k};\beta^{k}) + \beta^{k+1}\\
+ \beta^{k+1} \sim p(\beta| y_i,\beta^{k};(\beta^{*})^{k})
+\end{align}\\
+
+As a matter of fact, if we consider that the complete data likelihood belongs to the exponential family. Thus can be written as:
+
+ \begin{align}
+ f(y,\psi,\beta;\theta) = exp^{-\phi(\theta) + <\Phi(\theta),E(S(y,\psi))|y,\theta^k,\beta^k> + B(\psi,\beta) }
+\end{align}\\
+
+
+
+
+
+\begin{algorithm}
+\caption{EM Algorithm}
+\label{pseudoEM}
+\begin{algorithmic}[1]
+\State Initial value $\theta_0$
+\State $\theta \gets \theta_0$
+\For{$k \gets 1 \textrm{ to } K$}
+    \State $Q_k(\theta|\theta_{k-1}) \gets \mathbb{E}(\log p(y,\psi;\theta)|y;\theta_{k-1})$
+    \State $\theta_k \gets \underset{\theta}{\argmax} Q_k(\theta|\theta_{k-1})$
+\EndFor  
+\State \Return $\theta_K$
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{document}

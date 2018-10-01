@@ -1,0 +1,8 @@
+           ; parameter;  s.e._lin;r.s.e._lin;pvalues_lin
+     p0_pop;   0.24407;   0.02140;      8.77;        NaN
+  alpha_pop;   0.03318;   0.00227;      6.85;        NaN
+    tau_pop;  69.70833;   0.85848;      1.23;        NaN
+   omega_p0;   0.00000;   0.00000;      0.00;        NaN
+omega_alpha;   0.52864;   0.02412;      4.56;        NaN
+  omega_tau;   6.68327;   0.30157;      4.51;        NaN
+          a;   0.00997;   0.00020;      2.00;        NaN

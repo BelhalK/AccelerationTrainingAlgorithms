@@ -1,0 +1,83 @@
+******************************************************************
+*      mbma_noVariability.mlxtran
+*      June 05, 2017 at 19:01:32
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+                         parameter     s.e. (lin)   r.s.e.(%)    p-value 
+Emax_pop               :    0.404        0.033           8               
+beta_Emax_tDRUG_abata  :     1.66         0.16           9      < 1e-010 
+beta_Emax_tDRUG_adali  :     1.27         0.16          13      < 1e-010 
+beta_Emax_tDRUG_canaki :    0.794         0.58          73          0.17 
+T50_pop                :     4.48         0.55          12               
+beta_T50_tDRUG_abata   :    -0.11         0.14         126          0.43 
+beta_T50_tDRUG_adali   :   -0.802         0.16          21      1.1e-006 
+beta_T50_tDRUG_canaki  :   -0.723         0.69          95          0.29 
+etaBSVEmax_pop         :        0          -           -                 
+etaBTAVEmax_pop        :        0          -           -                 
+
+omega_Emax             :        0          -           -                 
+omega_T50              :        0          -           -                 
+omega_etaBSVEmax       :    0.268        0.082          31               
+omega_etaBTAVEmax      :        0          -           -                 
+
+gamma_Emax             :        0          -           -                 
+gamma_T50              :        0          -           -                 
+gamma_etaBSVEmax       :        0          -           -                 
+gamma_etaBTAVEmax      :     1.93          1.1          57               
+
+a                      :     2.49         0.16           6               
+
+______________________________________________
+correlation matrix of the estimates(linearization)
+
+Emax_pop                    1                      
+beta_Emax_tDRUG_abata   -0.49       1                   
+beta_Emax_tDRUG_adali   -0.47    0.25       1                
+beta_Emax_tDRUG_canaki  -0.16    0.09    0.08       1             
+T50_pop                  0.41   -0.35   -0.32   -0.12       1          
+beta_T50_tDRUG_abata    -0.34    0.48    0.27    0.11   -0.88       1       
+beta_T50_tDRUG_adali     -0.3    0.25    0.42    0.09   -0.74    0.65       1    
+beta_T50_tDRUG_canaki   -0.07    0.06    0.06    0.76   -0.18    0.16    0.13       1 
+
+Eigenvalues (min, max, max/min): 0.088  3.4  38
+
+omega_etaBSVEmax       1       
+gamma_etaBTAVEmax  -0.76       1    
+a                   0.01   -0.04       1 
+
+Eigenvalues (min, max, max/min): 0.24  1.8  7.2
+
+_______________
+Estimation of the population parameters by groups
+
+                        parameter     s.e. (lin)   r.s.e.(%) 
+Emax_(tDRUG=placebo*) :   0.404         0.033           8    
+Emax_(tDRUG=abata   ) :   0.782         0.026           3    
+Emax_(tDRUG=adali   ) :   0.707         0.033           5    
+Emax_(tDRUG=canaki  ) :     0.6          0.14          23    
+T50_(tDRUG=placebo*)  :    4.48          0.55          12    
+T50_(tDRUG=abata   )  :    4.01          0.27           7    
+T50_(tDRUG=adali   )  :    2.01          0.22          11    
+T50_(tDRUG=canaki  )  :    2.17           1.5          67    
+
+Categorical covariates
+	tDRUG
+ 		Reference group: placebo 
+		Other groups:  abata, adali, canaki
+		
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 69 seconds. 
+CPU time is 101 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by linearization
+
+-2 x log-likelihood:                   686.71 
+Akaike Information Criteria   (AIC):   708.71 
+Bayesian Information Criteria (BIC):   716.50 
+______________________________________________________________

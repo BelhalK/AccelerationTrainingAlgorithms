@@ -1,0 +1,37 @@
+********************************************************************************
+*                        project_first.mlxtran                                 *
+*                        November 27, 2017 at 16:57:29                         *
+*                        Monolix version : 5.0.0                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+p0_pop                         :     0.404
+alpha_pop                      :    0.0431
+tau_pop                        :      74.5
+
+Standard Deviation of the Random Effects -
+omega_alpha                    :     0.519
+omega_tau                      :      7.45
+
+Error Model Parameters -------------------
+a                              :   0.00994
+
+Elapsed time (seconds) :      4.9
+ _______________________________________________________________________________
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                (is)
+
+-2 x log-likelihood                 :       -7908.07
+Akaike Information Criteria   (AIC) :       -7896.07
+Bayesian Information Criteria (BIC) :       -7874.94
+
+Elapsed time              (seconds) :            7.2
+
+
+[Importance Sampling] Standard error        : 0.42
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+ _______________________________________________________________________________

@@ -1,0 +1,5 @@
+        ; parameter;   s.e._sa;r.s.e._sa;pvalues_sa
+  Te_pop; 392.00329;  25.89161;     6.60;       NaN
+   p_pop;   1.63506;   0.15813;     9.67;       NaN
+omega_Te;   0.58872;   0.09372;    15.92;       NaN
+ omega_p;   0.00000;   0.00000;     0.00;       NaN

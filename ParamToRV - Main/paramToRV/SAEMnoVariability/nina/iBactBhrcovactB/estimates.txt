@@ -1,0 +1,11 @@
+         ;  parameter
+  Ad0_pop; 2610.08948
+  Ac0_pop; 1798.64133
+   ka_pop;12431.67987
+    k_pop;    0.00000
+omega_Ad0;    0.99777
+omega_Ac0;    1.01718
+ omega_ka;    5.90357
+  omega_k;  116.70421
+        a;    0.00000
+        b;    0.40075

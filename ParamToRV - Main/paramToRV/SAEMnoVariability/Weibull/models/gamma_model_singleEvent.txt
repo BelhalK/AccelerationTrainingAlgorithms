@@ -1,0 +1,22 @@
+DESCRIPTION: 2-parameter gamma model for time-to-event data (single event per individual). Te is the scale parameter (characteristic time) and alpha is the shape parameter.
+
+[LONGITUDINAL]
+input = {Te, alpha}
+
+EQUATION:
+; calculation of the incomplete gamma function via integration
+t_0 = 0
+incompleteGamma_0 = 0
+ddt_incompleteGamma = alpha/Te * (alpha*t/Te)^(alpha-1) * exp(-(alpha*t/Te))
+
+; hazard
+h = alpha/Te * (alpha*t/Te)^(alpha-1)*exp(-(alpha*t/Te)) / (exp(gammaln(alpha)) - incompleteGamma)
+
+; saturation to prevent h to go to negative values:
+hsat = max(h,0)
+
+DEFINITION:
+Event = {type=event, maxEventNumber=1, hazard=hsat}
+
+OUTPUT:
+output = {Event}

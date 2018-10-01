@@ -1,0 +1,55 @@
+******************************************************************
+*      mbma_mixed.mlxtran
+*      June 05, 2017 at 18:43:51
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+                         parameter 
+Emax_pop               :    0.376  
+beta_Emax_tDRUG_abata  :     1.68  
+beta_Emax_tDRUG_adali  :      1.4  
+beta_Emax_tDRUG_canaki :    0.769  
+T50_pop                :     3.54  
+beta_T50_tDRUG_abata   :    0.203  
+beta_T50_tDRUG_adali   :   -0.575  
+beta_T50_tDRUG_canaki  :     -0.7  
+etaBSVEmax_pop         :        0  
+etaBTAVEmax_pop        :        0  
+
+omega_Emax             :        0  
+omega_T50              :        0  
+omega_etaBSVEmax       :    0.359  
+omega_etaBTAVEmax      :        0  
+
+gamma_Emax             :        0  
+gamma_T50              :        0  
+gamma_etaBSVEmax       :        0  
+gamma_etaBTAVEmax      :     1.42  
+
+a                      :     2.45  
+
+_______________
+Estimation of the population parameters by groups
+
+                        parameter 
+Emax_(tDRUG=placebo*) :   0.376   
+Emax_(tDRUG=abata   ) :   0.764   
+Emax_(tDRUG=adali   ) :   0.711   
+Emax_(tDRUG=canaki  ) :   0.565   
+T50_(tDRUG=placebo*)  :    3.54   
+T50_(tDRUG=abata   )  :    4.33   
+T50_(tDRUG=adali   )  :    1.99   
+T50_(tDRUG=canaki  )  :    1.76   
+
+Categorical covariates
+	tDRUG
+ 		Reference group: placebo 
+		Other groups:  abata, adali, canaki
+		
+
+Population parameters estimation...
+
+Elapsed time is 38.6 seconds. 
+CPU time is 53.4 seconds. 

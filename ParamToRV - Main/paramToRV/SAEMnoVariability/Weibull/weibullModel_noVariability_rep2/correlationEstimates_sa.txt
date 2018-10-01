@@ -1,0 +1,4 @@
+  Te_pop;   1.00000;   0.01818;   0.26170;       NaN
+   p_pop;   0.01818;   1.00000;   0.39735;       NaN
+omega_Te;   0.26170;   0.39735;   1.00000;       NaN
+ omega_p;       NaN;       NaN;       NaN;       NaN

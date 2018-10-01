@@ -1,0 +1,10 @@
+          ; parameter
+  Tlag_pop;   0.29634
+    ka_pop;   1.50237
+     V_pop; 228.39480
+    Cl_pop;  39.39550
+omega_Tlag;   0.00000
+  omega_ka;   1.33152
+   omega_V;   0.42145
+  omega_Cl;   0.33123
+         a;   0.33942

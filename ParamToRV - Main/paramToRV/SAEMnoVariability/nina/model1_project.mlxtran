@@ -1,0 +1,98 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'BCEL_VAR.txt'
+delimiter = tab
+header = {GROUP, ID, TIME, Y, MDV, MDV0}
+
+[CONTENT]
+GROUP = {use=covariate, type=categorical}
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=y, ytype=1, type=continuous}
+MDV = {use=missingDependentVariable}
+
+<MODEL>
+
+[COVARIATE]
+input = GROUP
+GROUP = {type=categorical, categories={1, 2, 3, 4, 5}}
+
+DEFINITION:
+tGROUP =
+{
+  transform = GROUP,
+  categories = {
+    1 = 1,
+    2 = 2,
+    3 = 3,
+    4 = 4,
+    5 = 5
+  },
+  reference = 4
+}
+
+[INDIVIDUAL]
+input = {Ad0_pop, omega_Ad0, ka_pop, omega_ka, k_pop, omega_k, V_pop, omega_V}
+
+DEFINITION:
+Ad0 = {distribution=lognormal, typical=Ad0_pop, sd=omega_Ad0}
+ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+k = {distribution=lognormal, typical=k_pop, sd=omega_k}
+V = {distribution=lognormal, typical=V_pop, sd=omega_V}
+
+[LONGITUDINAL]
+input = {a, b}
+
+file = './model1.txt'
+
+DEFINITION:
+y = {distribution=normal, prediction=B, errorModel=combined1(a, b)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+Ad0_pop = {value=1, method=MLE}
+omega_Ad0 = {value=1, method=MLE}
+ka_pop = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+k_pop = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+V_pop = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+a = {value=100, method=MLE}
+b = {value=0.3, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = conditionalMode)
+fim(method = Linearization)
+logLikelihood(method = Linearization)
+plotResult()
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'iBactBhrcovactB'
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+exploratoryiterations = 800
+omegatau = 0.99
+errormodeltau = 1.01
+mixturesinitbeta = 1
+kdisp = 10
+
+LL:
+optimizedsimulations = 100000
+
+INDIVIDUAL:
+miniterations = 10000
+

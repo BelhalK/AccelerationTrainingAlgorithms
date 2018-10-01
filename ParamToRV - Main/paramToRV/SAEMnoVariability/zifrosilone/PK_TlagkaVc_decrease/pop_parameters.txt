@@ -1,0 +1,28 @@
+******************************************************************
+*      PK_TlagkaVc_2017decrease.mlxtran
+*      January 30, 2018 at 16:02:38
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter 
+Tlag_pop    :   0.158   
+ka_pop      :    0.18   
+V_pop       :      40   
+alpha_pop   :    1.03   
+beta_pop    :   0.993   
+
+omega_Tlag  :    1.34   
+omega_ka    :    0.23   
+omega_V     :   0.365   
+omega_alpha :       0   
+omega_beta  :       0   
+
+a           :   0.328   
+
+
+Population parameters estimation...
+
+Elapsed time is 28.3 seconds. 
+CPU time is 32.6 seconds. 

@@ -1,0 +1,12 @@
+           ; parameter;  s.e._lin;r.s.e._lin;pvalues_lin
+   Tlag_pop;   0.20255;   0.08150;     40.24;        NaN
+     ka_pop;   1.43135;   0.52104;     36.40;        NaN
+      V_pop; 234.39250;  34.95061;     14.91;        NaN
+  alpha_pop;   0.75150;   0.31026;     41.29;        NaN
+   beta_pop;   0.72570;   0.08025;     11.06;        NaN
+ omega_Tlag;   0.97287;   0.49049;     50.42;        NaN
+   omega_ka;   1.00842;   0.28070;     27.84;        NaN
+    omega_V;   0.46125;   0.10377;     22.50;        NaN
+omega_alpha;   0.00000;   0.00000;      0.00;        NaN
+ omega_beta;   0.00000;   0.00000;      0.00;        NaN
+          a;   0.30352;   0.02600;      8.57;        NaN

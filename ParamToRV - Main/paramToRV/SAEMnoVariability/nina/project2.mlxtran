@@ -1,0 +1,57 @@
+
+DATA: 
+    file  = "BCEL_VAR.txt",
+    headers = {CAT,ID,TIME,Y,MDV,IGNORE},
+    columnDelimiter = ";"
+
+VARIABLES: 
+    tGROUP = transform(
+        GROUP,
+        1 = {1},
+        2 = {2},
+        3 = {3},
+        4 = {4} reference,
+        5 = {5}
+        ) [use=cov,  type=cat]
+
+INDIVIDUAL: 
+    actB = {distribution=logNormal, covariate=tGROUP, iiv=yes},
+    h = {distribution=logNormal, iiv=yes},
+    iMB = {distribution=logNormal, iiv=yes},
+    pMT = {distribution=logNormal, iiv=no},
+    uB = {distribution=logNormal, iiv=no}
+
+STRUCTURAL_MODEL: 
+    file = "mlxt:Bcel model actB SBMB pMB ic",
+    output = {B}
+
+
+OBSERVATIONS: 
+    y1 = {type=continuous, prediction=B, error=constant}
+
+TASKS: 
+    ; settings
+    globalSettings={
+        withVariance=no,
+        settingsGraphics="%MLXPROJECT%/iBactBhrcovactBdecreasing_graphics.xmlx",
+        settingsAlgorithms="%MLXPROJECT%/iBactBhrcovactBdecreasing_algorithms.xmlx",
+        resultFolder="%MLXPROJECT%/iBactBhrcovactBdecreasing"},
+    ; workflow
+    estimatePopulationParameters(
+        initialValues={
+            pop_actB = 1,
+            beta_{actB,tGROUP} = 0 ,
+            pop_h = 1,
+            pop_iMB = 1,
+            pop_pMT = 1,
+            pop_uB = 1,
+            a_y1 = 1,
+            omega_actB = 1,
+            omega_h = 1,
+            omega_iMB = 1
+            } ),
+    estimateFisherInformationMatrix( method={stochasticApproximation} ),
+    estimateIndividualParameters( method={conditionalMode} ),
+    estimateLogLikelihood(method={importantSampling}  ),
+    displayGraphics(),
+

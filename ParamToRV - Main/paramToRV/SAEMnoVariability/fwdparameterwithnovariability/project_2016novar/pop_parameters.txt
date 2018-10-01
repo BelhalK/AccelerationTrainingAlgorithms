@@ -1,0 +1,51 @@
+******************************************************************
+*      project_2016novar.mlxtran
+*      November 27, 2017 at 17:17:40
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+              parameter     s.e. (lin)   r.s.e.(%) 
+p0_pop      :    0.244        0.021           9    
+alpha_pop   :   0.0332       0.0023           7    
+tau_pop     :     69.7         0.86           1    
+
+omega_p0    :        0          -           -      
+omega_alpha :    0.529        0.024           5    
+omega_tau   :     6.68          0.3           5    
+
+a           :  0.00997       0.0002           2    
+
+______________________________________________
+correlation matrix of the estimates(linearization)
+
+p0_pop         1       
+alpha_pop   0.87       1    
+tau_pop     0.87    0.75       1 
+
+Eigenvalues (min, max, max/min): 0.091  2.7  29
+
+omega_alpha      1       
+omega_tau       -0       1    
+a            -0.01      -0       1 
+
+Eigenvalues (min, max, max/min): 0.99  1  1
+
+
+Population parameters and Fisher Information Matrix estimation...
+
+Elapsed time is 45.2 seconds. 
+CPU time is 69.2 seconds. 
+______________________________________________________________
+
+Log-likelihood Estimation by Importance Sampling
+Sampling distribution for the random effects: t with 5 d.f
+
+-2 x log-likelihood:                   -7958.25 (1.2)
+Akaike Information Criteria   (AIC):   -7946.25 (1.2)
+Bayesian Information Criteria (BIC):   -7925.12 (1.2)
+
+Elapsed time is 22 seconds. 
+CPU time is 30.5 seconds. 
+______________________________________________________________

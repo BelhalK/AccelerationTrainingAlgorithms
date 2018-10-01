@@ -1,0 +1,74 @@
+; this script is generated automatically
+
+<DATAFILE>
+
+[FILEINFO]
+file = 'dataPK_zifrosilone.csv'
+delimiter = comma
+header = {ID, TIME, AMT, Y, CENS, LIMIT, logY, logLIMIT, log10Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+AMT = {use=amount}
+Y = {use=observation, name=y, ytype=1, type=continuous}
+CENS = {use=censored}
+LIMIT = {use=limit}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, omega_V, alpha_pop, beta_pop}
+
+DEFINITION:
+Tlag = {distribution=lognormal, typical=Tlag_pop, sd=omega_Tlag}
+ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=lognormal, typical=V_pop, sd=omega_V}
+alpha = {distribution=lognormal, typical=alpha_pop, no-variability}
+beta = {distribution=lognormal, typical=beta_pop, no-variability}
+
+[LONGITUDINAL]
+input = a
+
+file = './PK_TlagkaVc.txt'
+
+DEFINITION:
+y = {distribution=lognormal, prediction=Cc, errorModel=constant(a)}
+
+<FIT>
+data = y
+model = y
+
+<PARAMETER>
+Tlag_pop = {value=0.2, method=MLE}
+omega_Tlag = {value=2, method=MLE}
+ka_pop = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+V_pop = {value=250, method=MLE}
+omega_V = {value=1, method=MLE}
+alpha_pop = {value=1, method=MLE}
+beta_pop = {value=1, method=MLE}
+a = {value=0.5, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+fim(method = Linearization)
+logLikelihood(method = Linearization)
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'PK_TlagkaVc_firstStage'
+nbchains = 5
+autochains = no
+
+POPULATION:
+exploratoryautostop = no
+smoothingautostop = no
+smoothingiterations = 100
+exploratoryiterations = 300
+variability = FirstStage
+mixturesinitbeta = 1
+kdisp = 20
+

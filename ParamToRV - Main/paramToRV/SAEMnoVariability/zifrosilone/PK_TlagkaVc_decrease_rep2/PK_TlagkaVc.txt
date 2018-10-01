@@ -1,0 +1,9 @@
+[LONGITUDINAL]
+input = {Tlag, ka, V, alpha, beta}
+
+EQUATION:
+Cc = pkmodel(Tlag, ka, V, Cl=alpha*(V^beta))
+
+OUTPUT:
+output = Cc
+

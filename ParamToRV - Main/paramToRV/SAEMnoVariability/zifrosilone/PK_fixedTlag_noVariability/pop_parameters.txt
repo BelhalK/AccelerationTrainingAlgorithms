@@ -1,0 +1,26 @@
+******************************************************************
+*      PK_fixedTlag_noVariability.mlxtran
+*      June 01, 2017 at 11:39:46
+*      Monolix version: 4.4.0
+******************************************************************
+
+Estimation of the population parameters
+
+             parameter 
+Tlag_pop   :   0.296   
+ka_pop     :     1.5   
+V_pop      :     228   
+Cl_pop     :    39.4   
+
+omega_Tlag :       0   
+omega_ka   :    1.33   
+omega_V    :   0.421   
+omega_Cl   :   0.331   
+
+a          :   0.339   
+
+
+Population parameters estimation...
+
+Elapsed time is 19.7 seconds. 
+CPU time is 24 seconds. 

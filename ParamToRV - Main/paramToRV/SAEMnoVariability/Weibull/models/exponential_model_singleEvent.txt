@@ -1,0 +1,13 @@
+DESCRIPTION: exponential model for time-to-event data (single event per individual). Te is the scale parameter (characteristic time).
+
+[LONGITUDINAL]
+input = {Te}
+
+EQUATION:
+h = 1/Te
+
+DEFINITION:
+Event = {type=event, maxEventNumber=1, hazard=h}
+
+OUTPUT:
+output = {Event}

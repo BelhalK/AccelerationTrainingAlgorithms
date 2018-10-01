@@ -1,0 +1,27 @@
+********************************************************************************
+*                        PK_TlagkaVc_2017novar.mlxtran                         *
+*                        February 12, 2018 at 17:55:00                         *
+*                        Monolix version : 5.0.0                               *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+Tlag_pop                       :  0.000371
+ka_pop                         :     0.732
+V_pop                          :       195
+alpha_pop                      :      1.36
+beta_pop                       :     0.631
+
+Standard Deviation of the Random Effects -
+omega_Tlag                     :      3.91
+omega_ka                       :     0.851
+omega_V                        :     0.599
+
+Error Model Parameters -------------------
+a                              :      0.23
+
+Elapsed time (seconds) :       12
+CPU time     (seconds) :       39
+ _______________________________________________________________________________
+

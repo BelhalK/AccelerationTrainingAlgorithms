@@ -1,0 +1,65 @@
+<DATAFILE>
+
+[FILEINFO]
+file = '../../dataPK_zifrosilone.csv'
+delimiter = comma
+header = {ID, TIME, AMT, Y, CENS, LIMIT, logY, logLIMIT, log10Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+AMT = {use=amount}
+Y = {use=observation, name=Y, type=continuous}
+CENS = {use=censored}
+LIMIT = {use=limit}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Tlag_pop, omega_Tlag, ka_pop, omega_ka, V_pop, omega_V, alpha_pop, omega_alpha, beta_pop, omega_beta}
+
+DEFINITION:
+Tlag = {distribution=logNormal, typical=Tlag_pop, sd=omega_Tlag}
+ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+alpha = {distribution=logNormal, typical=alpha_pop, sd=omega_alpha}
+beta = {distribution=logNormal, typical=beta_pop, sd=omega_beta}
+
+[LONGITUDINAL]
+input = {a}
+
+file = 'PK_TlagkaVc.txt'
+
+DEFINITION:
+Y = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+
+<FIT>
+data = Y
+model = Y
+
+<PARAMETER>
+Tlag_pop = {value=0.2, method=MLE}
+V_pop = {value=250, method=MLE}
+a = {value=1, method=MLE}
+alpha_pop = {value=1, method=MLE}
+beta_pop = {value=1, method=MLE}
+ka_pop = {value=1, method=MLE}
+omega_Tlag = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_alpha = {value=1, method=MLE}
+omega_beta = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(run = false,method = conditionalMode)
+fim(run = false,method = Linearization)
+logLikelihood(run = false,method = Linearization)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = '../'
+
