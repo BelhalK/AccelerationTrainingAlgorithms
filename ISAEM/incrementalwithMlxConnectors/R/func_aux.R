@@ -395,7 +395,7 @@ conditional.distribution_c<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,m
   fi <- computePredictions(data.frame(tempsii), individualIds=idi)$Cc
   if(err=="exponential")
     fi<-log(cutoff(fi))
-  gi<-error(fi,pres)      #    cutoff((pres[1]+pres[2]*abs(fi)))
+  gi<-error(fi,pres)      
   Uy<-sum(0.5*((yi-fi)/gi)**2+log(gi))
   dphi<-phi1-mphi
   Uphi<-0.5*sum(dphi*(dphi%*%iomega))
