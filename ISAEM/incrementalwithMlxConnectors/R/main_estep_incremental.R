@@ -216,7 +216,17 @@ if(Dargs$type=="structural"){
 		if(Dargs$type=="structural"){
 			#MAP calculation
 		 	# for(i in 1:saemixObject["data"]["N"]) {
+			# phiM <- saemixObject["results"]["phi"]
+			# psiM <- transphi(phiM,saemixObject["model"]["transform.par"])
 			
+			# fpred1 <- structural.model(psiM,Dargs$IdM,Dargs$XM)
+			# tempsiM <- cbind(unique(Dargs$IdM), psiM)
+			# colnames(tempsiM) <- c("id",colnames(omega.eta))
+			# fpred2 <- computePredictions(data.frame(tempsiM))$Cc
+			
+			# structural.model(psiM[10,],rep(1,11),Dargs$XM[Dargs$IdM==10,])
+			# computePredictions(data.frame(tempsiM)[10,], individualIds=10)$Cc
+
 			for(i in chosen) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
@@ -225,10 +235,29 @@ if(Dargs$type=="structural"){
 			    mean.phi1<-mean.phiM[i,i1.omega2]
 			    phii<-saemixObject["results"]["phi"][i,]
 			    phi1<-phii[i1.omega2]
-			    browser()
-			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], model=saemixObject["model"]["model"], pres=varList$pres, err=saemixObject["model"]["error.model"])
+			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c, 
+			    	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
+			    	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
+			    	model=saemixObject["model"]["model"], pres=varList$pres, 
+			    	err=saemixObject["model"]["error.model"], index.indiv=i)
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 			}
+
+			# for(i in chosen) {
+			#     isuj<-id.list[i]
+			#     xi<-xind[id==isuj,,drop=FALSE]
+			#     yi<-yobs[id==isuj]
+			#     idi<-rep(1,length(yi))
+			#     mean.phi1<-mean.phiM[i,i1.omega2]
+			#     phii<-saemixObject["results"]["phi"][i,]
+			#     phi1<-phii[i1.omega2]
+			#     phi1.opti<-optim(par=phi1, fn=conditional.distribution_c_test, 
+			#     	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
+			#     	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
+			#     	model=saemixObject["model"]["model"], pres=varList$pres, 
+			#     	err=saemixObject["model"]["error.model"])
+			#     phi.map[i,i1.omega2]<-phi1.opti$par
+			# }
 
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
@@ -240,35 +269,40 @@ if(Dargs$type=="structural"){
 			eta_map <- phi_map - mean.phiM
 		
 			#gradient at the map estimation
-			fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
-			gradf <- matrix(0L, nrow = length(fpred1), ncol = nb.etas) 
+			tempsi_map <- cbind(unique(Dargs$IdM), psi_map)
+			colnames(tempsi_map) <- c("id",colnames(omega.eta))
+			fpred1<-computePredictions(data.frame(tempsi_map))$Cc
 
+			# fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
+			gradf <- matrix(0L, nrow = length(fpred1), ncol = nb.etas) 
+			r <- which(Dargs$IdM %in% chosen)
 			for (j in 1:nb.etas) {
 				phi_map2 <- phi_map
-				phi_map2[,j] <- phi_map[,j]+phi_map[,j]/100;
+				phi_map2[,j] <- phi_map[,j]+1/100;
 				psi_map2 <- transphi(phi_map2,saemixObject["model"]["transform.par"]) 
 				tempsi_map <- cbind(unique(Dargs$IdM), psi_map)
 				tempsi_map2 <- cbind(unique(Dargs$IdM), psi_map2)
 				colnames(tempsi_map) <- c("id",colnames(omega.eta))
 				colnames(tempsi_map2) <- c("id",colnames(omega.eta))
 				fpred1 <- fpred2 <- Dargs$yM
-				fpred1[chosen]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)$Cc
-				fpred2[chosen]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)$Cc
+				fpred1[r]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)$Cc
+				fpred2[r]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)$Cc
+
 				for (i in chosen){
-					r = 1:sum(Dargs$IdM == i)
-	                r = r+sum(as.matrix(gradf[,j]) != 0L)
-					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
+					gradf[which(Dargs$IdM == i),j] <- (fpred2[which(Dargs$IdM == i)] - fpred1[which(Dargs$IdM == i)])/(1/10)
 				}
 			}
+
 
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)
 			z <- matrix(0L, nrow = length(fpred1), ncol = 1) 
-			for (i in 1:(Dargs$NM)){
-				r = 1:sum(Dargs$IdM == i)
-				r <- r+sum(as.matrix(z) != 0L)
-	            z[r] <- gradf[r,1]
-				Gamma[[i]] <- solve(t(gradf[r,])%*%gradf[r,]/(varList$pres[1])^2+solve(omega.eta))
+			for (i in 1:Dargs$NM){
+				Gamma[[i]] <- omega.eta
+			}
+
+			for (i in chosen){
+				Gamma[[i]] <- solve(t(gradf[which(Dargs$IdM == i),])%*%gradf[which(Dargs$IdM == i),]/(varList$pres[1])^2+solve(omega.eta))
 				# Gamma[[i]] <- omega.eta
 			}
 
@@ -279,7 +313,6 @@ if(Dargs$type=="structural"){
 				propc <- U.eta
 				prop <- U.eta
 				#generate candidate eta
-					
 				for (i in chosen){
 					M <- matrix(rnorm(Dargs$NM*nb.etas), ncol=nb.etas)%*%chol(Gamma[[i]])
 					etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] +M[i,]

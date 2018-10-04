@@ -385,14 +385,33 @@ compute.LLy_d<-function(phiM,args,Dargs,DYF) {
 }
 
 
-conditional.distribution_c<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model,pres,err) {
+conditional.distribution_c<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model,pres,err, index.indiv) {
   phii[idx]<-phi1
   psii<-transphi(matrix(phii,nrow=1),trpar)
   if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)
   # fi<-model(psii,idi,xi)
-  tempsii <- cbind(unique(idi), psii)
+  tempsii <- cbind(index.indiv, psii)
   colnames(tempsii) <- c("id",colnames(iomega))
-  fi <- computePredictions(data.frame(tempsii), individualIds=idi)$Cc
+  # browser()
+  fi <- computePredictions(data.frame(tempsii), individualIds=index.indiv)$Cc
+  if(err=="exponential")
+    fi<-log(cutoff(fi))
+  gi<-error(fi,pres)      
+  Uy<-sum(0.5*((yi-fi)/gi)**2+log(gi))
+  dphi<-phi1-mphi
+  Uphi<-0.5*sum(dphi*(dphi%*%iomega))
+  return(Uy+Uphi)
+}
+
+
+conditional.distribution_c_test<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,model,pres,err) {
+  phii[idx]<-phi1
+  psii<-transphi(matrix(phii,nrow=1),trpar)
+  if(is.null(dim(psii))) psii<-matrix(psii,nrow=1)
+  fi<-model(psii,idi,xi)
+  # tempsii <- cbind(unique(idi), psii)
+  # colnames(tempsii) <- c("id",colnames(iomega))
+  # fi <- computePredictions(data.frame(tempsii), individualIds=unique(idi))$Cc
   if(err=="exponential")
     fi<-log(cutoff(fi))
   gi<-error(fi,pres)      
