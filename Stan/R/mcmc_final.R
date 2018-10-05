@@ -662,11 +662,11 @@ if(opt$nbiter.mcmc[6]>0) {
 
 
 		warmup <- 1000
-		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
+		fit <- sampling(stan.model, data = stan_data, iter = 6*saemix.options$L_mcmc+warmup,warmup = warmup,
 			chains = 1,algorithm = "NUTS", init = psiM[indiv,]) #can try "HMC", "Fixed_param"
 		# browser()
 		fit_samples = extract(fit)
-		psiMstan <- fit_samples$beta[seq(1,6*L_mcmc,6),]
+		psiMstan <- fit_samples$beta[seq(1,6*saemix.options$L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 		etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 		colMeans(etaMstan)
@@ -689,10 +689,10 @@ if(opt$nbiter.mcmc[6]>0) {
 						omega_beta=sqrt(omega.eta[2,2]),omega_lambda=sqrt(omega.eta[1,1]))
 		warmup <- 1000
 		# browser()
-		fit <- sampling(stan.model, data = stan_data, iter = 6*L_mcmc+warmup,warmup = warmup,
+		fit <- sampling(stan.model, data = stan_data, iter = 6*saemix.options$L_mcmc+warmup,warmup = warmup,
 			chains = 1,algorithm = "NUTS") 
 		fit_samples = extract(fit)
-		psiMstan <- fit_samples$param[seq(1,6*L_mcmc,6),]
+		psiMstan <- fit_samples$param[seq(1,6*saemix.options$L_mcmc,6),]
 		phiMstan<-transpsi(psiMstan,Dargs$transform.par)
 		etaMstan <- phiMstan - matrix(rep(mean.phiM[1,],each=nrow(phiMstan)),nrow=nrow(phiMstan))
 		eta_list[[indiv]] <- etaMstan
