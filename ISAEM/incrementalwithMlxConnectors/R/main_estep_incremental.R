@@ -226,6 +226,9 @@ if(Dargs$type=="structural"){
 			
 			# structural.model(psiM[10,],rep(1,11),Dargs$XM[Dargs$IdM==10,])
 			# computePredictions(data.frame(tempsiM)[10,], individualIds=10)$Cc
+			# computePredictions(data.frame(tempsiM)[26,], individualIds=26)$Cc
+			# computePredictions(data.frame(tempsiM)[28,], individualIds=28)$Cc
+			# structural.model(psiM,Dargs$IdM[Dargs$IdM==28],Dargs$XM[which(Dargs$IdM==28),])
 
 			for(i in chosen) {
 			    isuj<-id.list[i]
@@ -243,21 +246,26 @@ if(Dargs$type=="structural"){
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 			}
 
-			# for(i in chosen) {
-			#     isuj<-id.list[i]
-			#     xi<-xind[id==isuj,,drop=FALSE]
-			#     yi<-yobs[id==isuj]
-			#     idi<-rep(1,length(yi))
-			#     mean.phi1<-mean.phiM[i,i1.omega2]
-			#     phii<-saemixObject["results"]["phi"][i,]
-			#     phi1<-phii[i1.omega2]
-			#     phi1.opti<-optim(par=phi1, fn=conditional.distribution_c_test, 
-			#     	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
-			#     	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
-			#     	model=saemixObject["model"]["model"], pres=varList$pres, 
-			#     	err=saemixObject["model"]["error.model"])
-			#     phi.map[i,i1.omega2]<-phi1.opti$par
-			# }
+			phimap1<- phi.map
+			if (kiter ==3) browser()
+
+			for(i in chosen) {
+			    isuj<-id.list[i]
+			    xi<-xind[id==isuj,,drop=FALSE]
+			    yi<-yobs[id==isuj]
+			    idi<-rep(1,length(yi))
+			    mean.phi1<-mean.phiM[i,i1.omega2]
+			    phii<-saemixObject["results"]["phi"][i,]
+			    phi1<-phii[i1.omega2]
+			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c_test, 
+			    	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
+			    	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
+			    	model=saemixObject["model"]["model"], pres=varList$pres, 
+			    	err=saemixObject["model"]["error.model"])
+			    phi.map[i,i1.omega2]<-phi1.opti$par
+			}
+			phimap2<- phi.map
+			phimap2 - phimap1
 
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]

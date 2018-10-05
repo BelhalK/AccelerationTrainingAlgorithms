@@ -242,9 +242,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     }else{
       xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
     }
-
-
-    # xmcmc<-estep(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject)
+    
     varList<-xmcmc$varList
     DYF<-xmcmc$DYF
     phiM<-xmcmc$phiM
