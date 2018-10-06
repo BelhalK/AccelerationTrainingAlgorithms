@@ -263,7 +263,7 @@ boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],groun
 boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[1:niter,2],groundtruth[,2], names=algo) 
 boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],groundtruth[1:niter,3],groundtruth[,3], names=algo) 
 
-averagenuts <- groundtruth[1:niter,]
+averagenuts <- groundtruth[1:L_mcmc,]
 
 averageref$algo <- "RWM"
 averagenew$algo <- "IMH"
@@ -272,15 +272,16 @@ averagenuts$algo <- "NUTS"
 groundtruth$algo <- "Truth"
 
 
-niter <- 10
-df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagenuts[1:niter,],groundtruth)
+niter <- 6
+df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagenuts[1:niter,],tail(groundtruth,1000))
 colnames(df) <- c("ka", "V", "k","algo")
 df.m <- melt(df, id.var = "algo")
 
 algo <- factor(algo,levels = c("RWM", "MALA","NUTS","IMH", "Truth"))
-ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
-
-
+par(cex.axis=5)
+save <- ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+ggsave(save,file="boxplots_warfa.pdf", width = 900, height = 450, units = "mm")
+# ggsave(fig,file="boxplot_warfa.pdf", width = 900, height = 450, units = "mm")
 
 # abline(h=quantile(groundtruth[,3],0.9),col="red",lty=2)
 # abline(h=quantile(averagenew[1:niter,3],0.9),col="blue",lty=2)
@@ -337,6 +338,25 @@ model <- 'data {
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
+
+
+
+#MALA
+i <- 10
+listofnutschains <- 0
+for (m in 1:nchains){
+options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=100000,
+  nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
+  modelstan = modelstan, indiv.index = i)
+nuts<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+
+
+  listofnutschains <- listofnutschains + nuts
+}
+groundtruth <- listofnutschains/nchains
+
+
 i <- 10
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=100000,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
