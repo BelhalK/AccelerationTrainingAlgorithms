@@ -9,7 +9,7 @@ require(reshape2)
 library(dplyr)
 library(data.table)
 library(rstan)
-load("hmc_quantile_indiv.RData")
+load("RData/hmc_quantile_indiv.RData")
 # save.image("hmc_quantile_indiv.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
@@ -192,3 +192,35 @@ norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])
 abs(Gamma.vi - Gammamap[[i]])/abs(Gammamap[[i]])
 (Gamma.vi - Gammamap[[i]])/(Gammamap[[i]])
 
+
+
+#Autocorrelation
+rwm.obj <- as.mcmc(ref)
+refac <- autocorr.plot(rwm.obj[,1]) 
+
+new.obj <- as.mcmc(new)
+newac <- autocorr.plot(new.obj[,1]) 
+
+mala.obj <- as.mcmc(mala)
+malaac <- autocorr.plot(mala.obj[,1]) 
+
+vi.obj <- as.mcmc(vi)
+viac <- autocorr.plot(vi.obj[,1]) 
+
+
+advi.obj <- as.mcmc(advi)
+adviac <- autocorr.plot(advi.obj[,1]) 
+
+
+par(mfrow=c(1,4))
+acf(ref[,1], main="RWM")
+acf(new[,1], main="IMH")
+acf(mala[,1], main="MALA")
+acf(vi[,1], main="NUTS")
+
+#MSJD
+mssd(ref[,1])
+mssd(new[,1])
+mssd(mala[,1])
+mssd(advi[,1])
+mssd(vi[,1])

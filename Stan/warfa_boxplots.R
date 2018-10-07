@@ -279,10 +279,17 @@ df.m <- melt(df, id.var = "algo")
 
 algo <- factor(algo,levels = c("RWM", "MALA","NUTS","IMH", "Truth"))
 par(cex.axis=5)
-save <- ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+# save <- ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
 ggsave(save,file="boxplots_warfa.pdf", width = 900, height = 450, units = "mm")
 # ggsave(fig,file="boxplot_warfa.pdf", width = 900, height = 450, units = "mm")
 
+
+par(mfrow=c(1,3))
+par(cex.axis=2)
+boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],averagenuts[1:niter,1],groundtruth[,1], names=algo) 
+boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],averagenuts[1:niter,2],groundtruth[,2], names=algo) 
+boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],averagenuts[1:niter,3],groundtruth[,3], names=algo) 
 # abline(h=quantile(groundtruth[,3],0.9),col="red",lty=2)
 # abline(h=quantile(averagenew[1:niter,3],0.9),col="blue",lty=2)
 # abline(h=quantile(averageref[1:niter,3],0.9),col="green",lty=2)
