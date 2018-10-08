@@ -75,8 +75,8 @@ if (kiter <= 0){ #if rwm
 	# indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE)
 	block <- setdiff(1:Dargs$NM, indchosen)
 	
-	print(kiter)
-	print(indchosen)
+	# print(kiter)
+	# print(indchosen)
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	etaM[indchosen,] <- eta_map[indchosen,] #if rwm
@@ -99,7 +99,7 @@ if (kiter <= 0){ #if rwm
 }
 
 if(Dargs$type=="structural"){
-		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,chosen)
+		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N)
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 }
@@ -111,6 +111,7 @@ if(Dargs$type=="structural"){
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			if(Dargs$type=="structural"){
+				# browser()
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 			} else {
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
@@ -134,7 +135,7 @@ if(Dargs$type=="structural"){
 					#				cat('vk2=',vk2,' nrs2=',nrs2,"\n")
 					etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-					psiMc<-transphi(phiMc,Dargs$transform.par)
+					# psiMc<-transphi(phiMc,Dargs$transform.par)
 					if(Dargs$type=="structural"){
 						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 					} else {
@@ -173,7 +174,7 @@ if(Dargs$type=="structural"){
 					etaMc<-etaM
 					etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
 					phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
-					psiMc<-transphi(phiMc,Dargs$transform.par)
+					# psiMc<-transphi(phiMc,Dargs$transform.par)
 					if(Dargs$type=="structural"){
 						Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 					} else {
@@ -247,25 +248,25 @@ if(Dargs$type=="structural"){
 			}
 
 			phimap1<- phi.map
-			if (kiter ==3) browser()
+			# if (kiter ==3) browser()
 
-			for(i in chosen) {
-			    isuj<-id.list[i]
-			    xi<-xind[id==isuj,,drop=FALSE]
-			    yi<-yobs[id==isuj]
-			    idi<-rep(1,length(yi))
-			    mean.phi1<-mean.phiM[i,i1.omega2]
-			    phii<-saemixObject["results"]["phi"][i,]
-			    phi1<-phii[i1.omega2]
-			    phi1.opti<-optim(par=phi1, fn=conditional.distribution_c_test, 
-			    	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
-			    	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
-			    	model=saemixObject["model"]["model"], pres=varList$pres, 
-			    	err=saemixObject["model"]["error.model"])
-			    phi.map[i,i1.omega2]<-phi1.opti$par
-			}
-			phimap2<- phi.map
-			phimap2 - phimap1
+			# for(i in chosen) {
+			#     isuj<-id.list[i]
+			#     xi<-xind[id==isuj,,drop=FALSE]
+			#     yi<-yobs[id==isuj]
+			#     idi<-rep(1,length(yi))
+			#     mean.phi1<-mean.phiM[i,i1.omega2]
+			#     phii<-saemixObject["results"]["phi"][i,]
+			#     phi1<-phii[i1.omega2]
+			#     phi1.opti<-optim(par=phi1, fn=conditional.distribution_c_test, 
+			#     	phii=phii,idi=idi,xi=xi,yi=yi,mphi=mean.phi1,idx=i1.omega2,
+			#     	iomega=iomega.phi1, trpar=saemixObject["model"]["transform.par"], 
+			#     	model=saemixObject["model"]["model"], pres=varList$pres, 
+			#     	err=saemixObject["model"]["error.model"])
+			#     phi.map[i,i1.omega2]<-phi1.opti$par
+			# }
+			# phimap2<- phi.map
+			# phimap2 - phi.map
 
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]

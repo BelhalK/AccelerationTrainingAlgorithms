@@ -59,7 +59,7 @@ Pop.CondInit  1 1  1
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=150, K2=50 
+    Number of iterations:  K1=300, K2=50 
     Number of chains:  1 
     Seed:  3456 
     Simulations:
@@ -75,17 +75,17 @@ Pop.CondInit  1 1  1
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        1.37    
-[2,] V         5.96    
-[3,] Cl        0.38    
-[4,] a         4.81    
+[1,] ka        0.82    
+[2,] V         7.75    
+[3,] Cl        0.12    
+[4,] a         2.21    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 7.3e-05 
-V  omega2.V  7.3e-02 
-Cl omega2.Cl 3.5e-05 
+ka omega2.ka 0.00073 
+V  omega2.V  0.01035 
+Cl omega2.Cl 0.01483 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

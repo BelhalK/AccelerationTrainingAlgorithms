@@ -79,17 +79,18 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   byrow=TRUE))
 
 
-K1 = 150
+K1 = 300
 K2 = 50
 iterations = 1:(K1+K2)
 end = K1+K2
 batchsize25 = 25
 batchsize50 = 50
 
-seed0=3456
+seed0=39546
 
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,0),
+###RWM
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,0),
  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
  map.range=c(0), nb.replacement=100,sampling='seq')
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
@@ -102,7 +103,21 @@ theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,2),
+options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+theo_mix25 <- data.frame(theo_mix25$param)
+theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+row_sub  = apply(theo_mix25, 1, function(row) all(row !=0 ))
+theo_mix25 <- theo_mix25[row_sub,]
+theo_mix25$algo <- 'quarter'
+theo_mix25$iterations <- seq(0,10, length.out=length(theo_mix25$iterations))
+
+
+
+####NEWKERNEL
+options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,2),
  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
  map.range=c(1:4), nb.replacement=100,sampling='seq')
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
@@ -115,8 +130,8 @@ theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(2:4),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=50,sampling='randompass')
 theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25 <- data.frame(theo_mix25$param)
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
