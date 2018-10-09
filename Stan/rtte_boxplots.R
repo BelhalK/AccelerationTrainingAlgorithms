@@ -8,8 +8,8 @@ require(gridExtra)
 require(reshape2)
 library(dplyr)
 library(rstan)
-# load("boxplot_rtte.RData")
-# save.image("boxplot_rtte.RData")
+load("RData/boxplot_rtte.RData")
+# save.image("RData/boxplot_rtte.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
@@ -100,7 +100,7 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
   covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
 
-nchains = 3
+nchains = 1
 L_mcmc=100
 indiv.index <- 2
 
@@ -196,14 +196,8 @@ averagemala <- listofmalachains/nchains
 
 
 
-niter <- 60
-algo = c("RWM", "MALA","IMH","NUTS", "Truth")
-boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],averagenuts[1:niter,1],truth[,1], names=algo) 
-boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[1:niter,2],groundtruth[,2], names=algo) 
-boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],groundtruth[1:niter,3],groundtruth[,3], names=algo) 
 
-averagenuts <- data.frame(groundtruth[[indiv.index]])
-truth <- data.frame(groundtruth[[indiv.index]])
+algo = c("RWM", "MALA","IMH","NUTS", "Truth")
 
 averageref$algo <- "RWM"
 averagenew$algo <- "IMH"
@@ -211,25 +205,28 @@ averagemala$algo <- "MALA"
 averagenuts$algo <- "NUTS"
 truth$algo <- "Truth"
 
-colnames(truth) <-colnames(averageref) <- colnames(averagenew) <- colnames(averagemala) <- colnames(averagenuts) <- c("lambda", "beta","algo")
+colnames(truth) <-colnames(averagenuts) <-colnames(averageref) <- colnames(averagenew) <- colnames(averagemala)<- c("lambda", "beta","algo")
+
 niter <- 10
-# df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagemala[1:niter,],averagenuts[1:niter,])
-df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagenuts[1:niter,], truth)
-colnames(df) <- c("lambda", "beta","algo")
-df.m <- melt(df, id.var = "algo")
-
-ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+par(mfrow=c(1,2))
+par(cex.axis=2)
+boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],averagenuts[1:niter,1],truth[,1], names=algo) 
+boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],averagenuts[1:niter,2],truth[,2], names=algo) 
 
 
-# niter <- 1000
-# algo = c("IMH", "MALA", "Truth")
-# boxplot(averagemala[1:niter,1],averagenew[1:niter,1],groundtruth[[indiv.index]][1000:2000,1], names=algo) 
+#ACF plots
+par(mfrow=c(1,4))
+acf(averageref[,1], main="RWM")
+acf(averagenew[,1], main="IMH")
+acf(averagemala[,1], main="MALA")
+acf(vi[[indiv.index]][,1], main="NUTS")
 
-
-# algo = c("IMH", "MALA", "Truth")
-# boxplot(averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[[indiv.index]][1000:2000,2], names=algo) 
-
-
+#MSJD
+mssd(ref[[indiv.index]][,1])
+mssd(new[[indiv.index]][,1])
+mssd(mala[[indiv.index]][,1])
+mssd(advi[[indiv.index]][,1])
+mssd(vi[[indiv.index]][,1])
 
 
 model <- 'data {

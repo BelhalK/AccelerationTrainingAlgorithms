@@ -212,6 +212,24 @@ advi<-mcmc(saemix.model_rtte,saemix.data_rtte,options_warfavi)$eta
 
 
 
+
+
+
+
+par(mfrow=c(1,4))
+acf(ref[[i]][,1], main="RWM")
+acf(new[[i]][,1], main="IMH")
+acf(mala[[i]][,1], main="MALA")
+acf(vi[[i]][,1], main="NUTS")
+
+#MSJD
+mssd(ref[[i]][,1])
+mssd(new[[i]][,1])
+mssd(mala[[i]][,1])
+mssd(advi[[i]][,1])
+mssd(vi[[i]][,1])
+
+
 i <- 2
 start_interval <- 200
 zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 2))
