@@ -10,7 +10,7 @@ library(dplyr)
 library(data.table)
 library(rstan)
 # load("RData/boxplots_warfa.RData")
-# load("RData/newboxplots_warfa.RData")
+load("RData/newboxplots_warfa.RData")
 # save.image("RData/newboxplots_warfa.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
@@ -214,7 +214,7 @@ for (m in 1:nchains){
 
 ########################PLOT##############################################################
 
-variable <- 2
+variable <- 3
 niter1 <- 5
 niter2 <- 20
 niter3 <- 500
@@ -256,12 +256,19 @@ colnames(df.m) <- c("ID","group","var","value")
 
 index <- which(df.m$group=="Truth"&df.m$var%in%list(as.character(niter1), as.character(niter2)))
 test <- df.m[-index,]
-ggplot(data=df.m[-index,]) + 
+
+save <- ggplot(data=df.m[-index,]) + 
     geom_boxplot( aes(x=factor(group), y=value, fill=factor(var)), position=position_dodge(1)) +
     labs(fill="Iteration")+
-    theme(text = element_text(size=20))+xlab("Algorithm")+ylab("")
+     theme_bw() + theme(legend.title = element_text(size=40),legend.text = element_text(size=40),axis.text=element_text(size=32), 
+                 axis.title=element_text(size=40),
+                   panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
+     xlab("Algorithm")+ylab("")
 
 
+ggsave(save, file="newpics/boxplots_warfa_ka.pdf", width = 900, height = 450, units = "mm")
+ggsave(save, file="newpics/boxplots_warfa_V.pdf", width = 900, height = 450, units = "mm")
+ggsave(save, file="newpics/boxplots_warfa_k.pdf", width = 900, height = 450, units = "mm")
 
 ########################PLOT##############################################################
 
