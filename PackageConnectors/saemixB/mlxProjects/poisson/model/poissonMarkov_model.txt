@@ -1,0 +1,19 @@
+DESCRIPTION: Poisson model with Markovian dependence
+
+[LONGITUDINAL]
+input = {lambda1, lambda2, z}
+z = {use = regressor}
+
+DEFINITION:
+Y = {type = count,
+  if z <= 1
+    aux = -lambda1 + k*log(lambda1) - factln(k) 
+  else
+    aux = -lambda2 + k*log(lambda2) - factln(k)
+  end
+
+  log(P(Y=k)) = aux
+}
+
+OUTPUT:
+output = Y 

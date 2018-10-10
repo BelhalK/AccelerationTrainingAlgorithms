@@ -1,0 +1,12 @@
+DESCRIPTION: Basic Poisson model
+
+[LONGITUDINAL]
+input = lambda
+
+DEFINITION:
+Y = {type = count,  
+       log(P(Y=k)) = -lambda + k*log(lambda) - factln(k)
+}
+
+OUTPUT:
+output = Y

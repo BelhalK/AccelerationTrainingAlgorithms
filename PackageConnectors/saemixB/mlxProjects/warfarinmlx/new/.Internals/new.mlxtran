@@ -1,0 +1,62 @@
+<DATAFILE>
+
+[FILEINFO]
+file = '../../data/warfarin_data.txt'
+delimiter = tab
+header = {id, time, amt, dv, dvid, wt, sex, age}
+
+[CONTENT]
+id = {use=identifier}
+time = {use=time}
+amt = {use=amount}
+dv = {use=observation, name={y1, y2}, yname={'1', '2'}, type={continuous, continuous}}
+dvid = {use=observationtype}
+wt = {use=covariate, type=continuous}
+sex = {use=covariate, type=categorical}
+age = {use=covariate, type=continuous}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {ka_pop, omega_ka, V_pop, omega_V, Cl_pop, omega_Cl}
+
+DEFINITION:
+ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
+
+[LONGITUDINAL]
+input = {a1, b1}
+
+file = 'lib:oral1_1cpt_kaVCl.txt'
+
+DEFINITION:
+y1 = {distribution=normal, prediction=Cc, errorModel=combined1(a1, b1)}
+
+<FIT>
+data = y1
+model = y1
+
+<PARAMETER>
+Cl_pop = {value=1, method=MLE}
+V_pop = {value=1, method=MLE}
+a1 = {value=1, method=MLE}
+b1 = {value=0.3, method=MLE}
+ka_pop = {value=1, method=MLE}
+omega_Cl = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = '../'
+

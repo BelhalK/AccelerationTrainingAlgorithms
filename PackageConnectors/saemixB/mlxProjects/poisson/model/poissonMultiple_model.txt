@@ -1,0 +1,11 @@
+DESCRIPTION: Poisson Model - multiple outputs
+
+[LONGITUDINAL]
+input = {lambda1, lambda2}
+
+DEFINITION:
+Y1 = { type = count, log(P(Y1=k)) = -lambda1 + k*log(lambda1) - factln(k) }
+Y2 = { type = count, log(P(Y2=k)) = -lambda1 + k*log(lambda2) - factln(k) }
+
+OUTPUT:
+output = {Y1, Y2}

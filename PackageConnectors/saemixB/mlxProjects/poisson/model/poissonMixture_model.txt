@@ -1,0 +1,15 @@
+DESCRIPTION: Mixture of 2 Poisson models
+
+[LONGITUDINAL]
+input = {lambda, alpha, mp}
+
+EQUATION:
+lambda2 = (1+alpha)*lambda
+
+DEFINITION:
+Y = { type = count,
+        P(Y=k) = mp*exp(-lambda + k*log(lambda) - factln(k)) + (1-mp)*exp(-lambda2 + k*log(lambda2) - factln(k)) 
+}
+
+OUTPUT:
+output = Y

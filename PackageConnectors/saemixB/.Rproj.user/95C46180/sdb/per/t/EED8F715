@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(saemixB)\n###WARFA\nwarfa_data <- read.table(\"/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/data/warfarin_data.txt\", header=T)\nsaemix.data_warfa<-saemixData(name.data=warfa_data,header=TRUE,sep=\" \",na=NA, name.group=c(\"id\"),\n  name.predictors=c(\"amount\",\"time\"),name.response=c(\"y1\"), name.X=\"time\")\n\nmodel1cpt<-function(psi,id,xidep) { \n  dose<-xidep[,1]\n  tim<-xidep[,2]  \n  ka<-psi[id,1]\n  V<-psi[id,2]\n  k<-psi[id,3]\n  CL<-k*V\n  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))\n  return(ypred)\n}\n\nsaemix.model_warfa<-saemixModel(model=model1cpt,description=\"warfarin\",type=\"structural\"\n  ,psi0=matrix(c(1,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c(\"ka\",\"V\",\"k\"))),\n  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),\n  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, \n  byrow=TRUE))\n\n\n###RTTE\ntimetoevent.saemix <- read.table(\"/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/data/rttellis.csv\", header=T, sep=\",\")\ntimetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]\nsaemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=\" \",na=NA, name.group=c(\"id\"),name.response=c(\"y\"),name.predictors=c(\"time\",\"y\"), name.X=c(\"time\"))\ntimetoevent.model<-function(psi,id,xidep) {\nT<-xidep[,1]\ny<-xidep[,2]\nN <- nrow(psi)\nNj <- length(T)\ncensoringtime = 20\nlambda <- psi[id,1]\nbeta <- psi[id,2]\ninit <- which(T==0)\ncens <- which(T==censoringtime)\nind <- setdiff(1:Nj, append(init,cens))\nhazard <- (beta/lambda)*(T/lambda)^(beta-1)\nH <- (T/lambda)^beta\nlogpdf <- rep(0,Nj)\nlogpdf[cens] <- -H[cens] + H[cens-1]\nlogpdf[ind] <- -H[ind] + H[ind-1] + log(hazard[ind])\nreturn(logpdf)\n}\n\nsaemix.model_rtte<-saemixModel(model=timetoevent.model,description=\"time model\",type=\"likelihood\",   \n  psi0=matrix(c(2,1),ncol=2,byrow=TRUE,dimnames=list(NULL,   \n  c(\"lambda\",\"beta\"))), \n  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, \n  byrow=TRUE))\n\n\n##RUNS\n\nK1 = 200\nK2 = 50\niterations = 1:(K1+K2+1)\nend = K1+K2\n\n#Warfarin\noptions_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0)\nwarfa<-saemix(saemix.model_warfa,saemix.data_warfa,options_warfa)\n\n#Weibull\noptions_rtte<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0)\nrtte<-saemix(saemix.model_rtte,saemix.data_rtte,options_rtte)\n\n",
+    "created" : 1511874365796.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "22341227",
+    "id" : "EED8F715",
+    "lastKnownWriteTime" : 1512311579,
+    "last_content_update" : 1512311579,
+    "path" : "~/Desktop/package_contrib/saemixB/demo.R",
+    "project_path" : "demo.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
