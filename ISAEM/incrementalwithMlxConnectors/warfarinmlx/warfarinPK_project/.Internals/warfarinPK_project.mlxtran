@@ -51,7 +51,7 @@ omega_ka = {value=1, method=MLE}
 
 [TASKS]
 populationParameters()
-individualParameters(method = {conditionalMean, conditionalMode })
+individualParameters(method = conditionalMode)
 fim(run = false,method = StochasticApproximation)
 logLikelihood(run = false,method = ImportanceSampling)
 plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
@@ -59,4 +59,8 @@ plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covari
 [SETTINGS]
 GLOBAL:
 exportpath = '../'
+
+INDIVIDUAL:
+optimizationiterations = 500
+optimizationtolerance = 1e-05
 

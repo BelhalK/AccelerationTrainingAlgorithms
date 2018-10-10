@@ -18,7 +18,7 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	psiM<-transphi(phiM,Dargs$transform.par)
 	tempsiM <- cbind(unique(Dargs$IdM), psiM)
 	colnames(tempsiM) <- c("id",colnames(omega.eta))
-	fpred <- computePredictions(data.frame(tempsiM))$Cc
+	fpred <- computePredictions(data.frame(tempsiM))[[1]]
 	# fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	if(Dargs$error.model=="exponential")
 		fpred<-log(cutoff(fpred))

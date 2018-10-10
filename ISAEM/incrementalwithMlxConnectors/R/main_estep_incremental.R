@@ -224,12 +224,12 @@ if(Dargs$type=="structural"){
 			# fpred1 <- structural.model(psiM,Dargs$IdM,Dargs$XM)
 			# tempsiM <- cbind(unique(Dargs$IdM), psiM)
 			# colnames(tempsiM) <- c("id",colnames(omega.eta))
-			# fpred2 <- computePredictions(data.frame(tempsiM))$Cc
+			# fpred2 <- computePredictions(data.frame(tempsiM))[[1]]
 			
 			# structural.model(psiM[10,],rep(1,11),Dargs$XM[Dargs$IdM==10,])
-			# computePredictions(data.frame(tempsiM)[10,], individualIds=10)$Cc
-			# computePredictions(data.frame(tempsiM)[26,], individualIds=26)$Cc
-			# computePredictions(data.frame(tempsiM)[28,], individualIds=28)$Cc
+			# computePredictions(data.frame(tempsiM)[10,], individualIds=10)[[1]]
+			# computePredictions(data.frame(tempsiM)[26,], individualIds=26)[[1]]
+			# computePredictions(data.frame(tempsiM)[28,], individualIds=28)[[1]]
 			# structural.model(psiM,Dargs$IdM[Dargs$IdM==28],Dargs$XM[which(Dargs$IdM==28),])
 			for(i in chosen) {
 			    isuj<-id.list[i]
@@ -264,7 +264,6 @@ if(Dargs$type=="structural"){
 			# }
 			# phimap2<- phi.map
 			# phimap2 - phi.map
-
 			#rep the map nchains time
 			phi.map <- phi.map[rep(seq_len(nrow(phi.map)),Uargs$nchains ), ]
 		  	map.psi<-transphi(phi.map,saemixObject["model"]["transform.par"])
@@ -277,7 +276,7 @@ if(Dargs$type=="structural"){
 			#gradient at the map estimation
 			tempsi_map <- cbind(unique(Dargs$IdM), psi_map)
 			colnames(tempsi_map) <- c("id",colnames(omega.eta))
-			fpred1<-computePredictions(data.frame(tempsi_map))$Cc
+			fpred1<-computePredictions(data.frame(tempsi_map))[[1]]
 
 			# fpred1<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
 			gradf <- matrix(0L, nrow = length(fpred1), ncol = nb.etas) 
@@ -292,8 +291,8 @@ if(Dargs$type=="structural"){
 				colnames(tempsi_map2) <- c("id",colnames(omega.eta))
 				fpred1 <- fpred2 <- Dargs$yM
 				# if (kiter==2) browser()
-				fpred1[r]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)$Cc
-				fpred2[r]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)$Cc
+				fpred1[r]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)[[1]]
+				fpred2[r]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)[[1]]
 
 				for (i in chosen){
 					gradf[which(Dargs$IdM == i),j] <- (fpred2[which(Dargs$IdM == i)] - fpred1[which(Dargs$IdM == i)])/(1/10)

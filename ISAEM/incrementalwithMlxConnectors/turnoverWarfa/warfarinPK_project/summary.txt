@@ -1,0 +1,36 @@
+********************************************************************************
+*                         warfarinPK_project.mlxtran                           *
+*                         October 10, 2018 at 12:55:51                         *
+*                         Monolix version : 5.0.1                              *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+Tlag_pop                       :       3.1
+ka_pop                         :   0.00648
+V_pop                          :        87
+Cl_pop                         :  1.88e-07
+Imax_pop                       :      1.33
+IC50_pop                       :     0.356
+Rin_pop                        :     0.785
+kout_pop                       :    0.0719
+
+Standard Deviation of the Random Effects -
+omega_Tlag                     :     0.333
+omega_ka                       :     0.216
+omega_V                        :     0.218
+omega_Cl                       :      2.47
+omega_Imax                     :    0.0389
+omega_IC50                     :     0.179
+omega_Rin                      :    0.0834
+omega_kout                     :    0.0584
+
+Error Model Parameters -------------------
+a1                             :  2.22e-16
+b1                             :     0.251
+
+Elapsed time (seconds) :       29
+CPU time     (seconds) :  1.2e+02
+ _______________________________________________________________________________
+

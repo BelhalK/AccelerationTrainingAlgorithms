@@ -338,7 +338,7 @@ compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF) {
   
   tempsiM <- cbind(unique(Dargs$IdM), psiM)
   colnames(tempsiM) <- c("id",names(args$i1.omega))
-  fpred <- computePredictions(data.frame(tempsiM))$Cc
+  fpred <- computePredictions(data.frame(tempsiM))[[1]]
 
   # fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
   if(Dargs$error.model=="exponential")
@@ -366,7 +366,7 @@ compute.LLy_c<-function(phiM,pres,args,Dargs,DYF,chosen) {
   tempsiM <- cbind(unique(Dargs$IdM), psiM)
   colnames(tempsiM) <- c("id",names(args$i1.omega))
   fpred <- Dargs$yM
-  fpred[which(Dargs$IdM %in% chosen)] <- computePredictions(data.frame(tempsiM)[chosen,], individualIds=chosen)$Cc
+  fpred[which(Dargs$IdM %in% chosen)] <- computePredictions(data.frame(tempsiM)[chosen,], individualIds=chosen)[[1]]
   # fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
   if(Dargs$error.model=="exponential")
      fpred<-log(cutoff(fpred))
@@ -393,7 +393,7 @@ conditional.distribution_c<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,trpar,m
   tempsii <- cbind(index.indiv, psii)
   colnames(tempsii) <- c("id",colnames(iomega))
   # browser()
-  fi <- computePredictions(data.frame(tempsii), individualIds=index.indiv)$Cc
+  fi <- computePredictions(data.frame(tempsii), individualIds=index.indiv)[[1]]
   if(err=="exponential")
     fi<-log(cutoff(fi))
   gi<-error(fi,pres)      
@@ -411,7 +411,7 @@ conditional.distribution_c_test<-function(phi1,phii,idi,xi,yi,mphi,idx,iomega,tr
   fi<-model(psii,idi,xi)
   # tempsii <- cbind(unique(idi), psii)
   # colnames(tempsii) <- c("id",colnames(iomega))
-  # fi <- computePredictions(data.frame(tempsii), individualIds=unique(idi))$Cc
+  # fi <- computePredictions(data.frame(tempsii), individualIds=unique(idi))[[1]]
   if(err=="exponential")
     fi<-log(cutoff(fi))
   gi<-error(fi,pres)      

@@ -116,11 +116,11 @@ theo_mix25$algo <- 'quarter'
 theo_mix25$iterations <- seq(0,10, length.out=length(theo_mix25$iterations))
 
 
-
+runtime <- 40
 ####NEWKERNEL
 options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,2),
  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
- map.range=c(1:4), nb.replacement=100,sampling='seq')
+ map.range=c(1:4), nb.replacement=100,sampling='seq',duration=runtime)
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
 theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
