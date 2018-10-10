@@ -96,6 +96,8 @@ if (kiter <= 0){ #if rwm
 	}
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
+
+	chosen <- unique(chosen)
 }
 
 if(Dargs$type=="structural"){
@@ -111,7 +113,6 @@ if(Dargs$type=="structural"){
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			if(Dargs$type=="structural"){
-				# browser()
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 			} else {
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
@@ -230,7 +231,6 @@ if(Dargs$type=="structural"){
 			# computePredictions(data.frame(tempsiM)[26,], individualIds=26)$Cc
 			# computePredictions(data.frame(tempsiM)[28,], individualIds=28)$Cc
 			# structural.model(psiM,Dargs$IdM[Dargs$IdM==28],Dargs$XM[which(Dargs$IdM==28),])
-
 			for(i in chosen) {
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
@@ -246,10 +246,7 @@ if(Dargs$type=="structural"){
 			    	err=saemixObject["model"]["error.model"], index.indiv=i)
 			    phi.map[i,i1.omega2]<-phi1.opti$par
 			}
-
 			phimap1<- phi.map
-			# if (kiter ==3) browser()
-
 			# for(i in chosen) {
 			#     isuj<-id.list[i]
 			#     xi<-xind[id==isuj,,drop=FALSE]
@@ -294,6 +291,7 @@ if(Dargs$type=="structural"){
 				colnames(tempsi_map) <- c("id",colnames(omega.eta))
 				colnames(tempsi_map2) <- c("id",colnames(omega.eta))
 				fpred1 <- fpred2 <- Dargs$yM
+				# if (kiter==2) browser()
 				fpred1[r]<-computePredictions(data.frame(tempsi_map)[chosen,], individualIds=chosen)$Cc
 				fpred2[r]<-computePredictions(data.frame(tempsi_map2)[chosen,], individualIds=chosen)$Cc
 
@@ -301,8 +299,6 @@ if(Dargs$type=="structural"){
 					gradf[which(Dargs$IdM == i),j] <- (fpred2[which(Dargs$IdM == i)] - fpred1[which(Dargs$IdM == i)])/(1/10)
 				}
 			}
-
-
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)
 			z <- matrix(0L, nrow = length(fpred1), ncol = 1) 
@@ -315,8 +311,7 @@ if(Dargs$type=="structural"){
 				# Gamma[[i]] <- omega.eta
 			}
 
-			etaM <- eta_map
-			# etaM[chosen,] <- eta_map[chosen,]
+			etaM[chosen,] <- eta_map[chosen,]
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta
@@ -400,7 +395,7 @@ if(Dargs$type=="structural"){
 				inv.Gamma[[i]] <- solve(Gamma[[i]])
 			}
 			
-			etaM <- eta_map
+			etaM[chosen,] <- eta_map[chosen,]
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta

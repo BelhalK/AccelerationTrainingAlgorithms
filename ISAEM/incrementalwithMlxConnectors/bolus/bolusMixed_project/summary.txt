@@ -1,7 +1,7 @@
 ********************************************************************************
-*                        bolusMixed_project.mlxtran                            *
-*                        September 26, 2018 at 17:00:52                        *
-*                        Monolix version : 5.0.1                               *
+*                         bolusMixed_project.mlxtran                           *
+*                         October 09, 2018 at 16:46:58                         *
+*                         Monolix version : 5.0.1                              *
 ********************************************************************************
 
 POPULATION PARAMETERS ESTIMATION _______________________________________________
@@ -21,7 +21,7 @@ omega_Km                       :     0.399
 Error Model Parameters -------------------
 a                              :       0.1
 
-Elapsed time (seconds) :       13
+Elapsed time (seconds) :       15
 CPU time     (seconds) :       61
  _______________________________________________________________________________
 

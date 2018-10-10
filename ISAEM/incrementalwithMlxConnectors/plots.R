@@ -259,24 +259,36 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
 }
 
 
-seplot <- function(df,colname, title=NULL, ylim=NULL, legend=TRUE)
+seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
 {
   G <- (ncol(df)-2)/3
   df$algo <- as.factor(df$algo)
-  df$individual <- as.factor(df$individual)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
-  graf <- ggplot(df)+geom_line(aes(iterations,value,by=value,colour = df$algo,linetype=df$individual),show.legend = legend,size=1)+guides(linetype=FALSE,size=FALSE)+labs(colour='batch size (in %)') +
-  xlab("passes")+ ylab(colname)   + theme_bw() + theme(
-        
-        panel.background = element_rect(colour = "grey", size=1),legend.position = c(0.8, 0.6)) + guides(color = guide_legend(override.aes = list(size=5)))+
-   theme(legend.text=element_text(size=20),legend.title=element_text(size=20))+ theme(panel.border = element_blank() ,axis.text.x = element_text(color="black", 
-                           size=20, angle=0),
-          axis.text.y = element_text(color="black", 
-                           size=20, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", size=20))# + theme(aspect.ratio=1)
+  graf <- ggplot(df)+geom_line(aes(iterations,value,by=value,colour = df$algo),show.legend = legend) +
+  xlab("iterations") + ylab('value') + facet_wrap(~variable,scales = "free_y") + theme_bw() 
   grid.arrange(graf)
   # do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
+
+# seplot <- function(df,colname, title=NULL, ylim=NULL, legend=TRUE)
+# {
+#   G <- (ncol(df)-2)/3
+#   df$algo <- as.factor(df$algo)
+#   df$individual <- as.factor(df$individual)
+#   ylim <-rep(ylim,each=2)
+#   graf <- vector("list", ncol(df)-2)
+#   graf <- ggplot(df)+geom_line(aes(iterations,value,by=value,colour = df$algo,linetype=df$individual),show.legend = legend,size=1)+guides(linetype=FALSE,size=FALSE)+labs(colour='batch size (in %)') +
+#   xlab("passes")+ ylab(colname)   + theme_bw() + theme(
+        
+#         panel.background = element_rect(colour = "grey", size=1),legend.position = c(0.8, 0.6)) + guides(color = guide_legend(override.aes = list(size=5)))+
+#    theme(legend.text=element_text(size=20),legend.title=element_text(size=20))+ theme(panel.border = element_blank() ,axis.text.x = element_text(color="black", 
+#                            size=20, angle=0),
+#           axis.text.y = element_text(color="black", 
+#                            size=20, angle=0))+theme(axis.title = element_text(family = "Trebuchet MS", color="black", size=20))# + theme(aspect.ratio=1)
+#   grid.arrange(graf)
+#   # do.call("grid.arrange", c(graf, ncol=1, top=title))
+# }
 
 
 seplot2 <- function(df,colname, title=NULL, ylim=NULL, legend=TRUE)

@@ -9,8 +9,9 @@ require(reshape2)
 library(dplyr)
 library(data.table)
 library(rstan)
-load("boxplots_warfa.RData")
-# save.image("boxplots_warfa.RData")
+# load("RData/boxplots_warfa.RData")
+# load("RData/newboxplots_warfa.RData")
+# save.image("RData/newboxplots_warfa.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('aaa_generics.R') 
@@ -101,217 +102,53 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
-nchains = 50
-L_mcmc=100
+nchains = 100
+L_mcmc= 600
 indiv.index <- 10
 
+options_warfa<-list(seed=395,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
+  nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=indiv.index)
+  ref<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
 
 
-# options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=10000,
-#   nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
-#   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=indiv.index)
-# groundtruth<-mcmc(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
-
-
-# listofrefchains <- list(ref,ref)
-listofrefchains <- 0
+listofrefchains <- list(ref,ref)
+# listofrefchains <- 0
 for (m in 1:nchains){
   options_warfa<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=indiv.index)
   ref<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
-
-  listofrefchains <- listofrefchains + ref
+  # listofrefchains <- listofrefchains + ref
+  listofrefchains[[m]] <- ref
 }
-averageref <- listofrefchains/nchains
+# averageref <- listofrefchains/nchains
 
-
-listofnewchains <- 0
+listofnewchains <- list(ref,ref)
+# listofnewchains <- 0
 for (m in 1:nchains){
   options_warfanew<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=indiv.index)
   new<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
-  listofnewchains <- listofnewchains + new
+  # listofnewchains <- listofnewchains + new
+  listofnewchains[[m]] <- new
 }
-averagenew <- listofnewchains/nchains
-
-
-# boxplot(groundtruth)
-# boxplot(averagenew, add=TRUE,col=c('mistyrose'))
-# boxplot(averageref, add=TRUE,col=c('powderblue'))
-# # new <- boxplot(averagenew,col=c('green'))
-# # truth <- boxplot(groundtruth,col=c('mistyrose'))
-# # ref <- boxplot(averageref,col=c('blue'))
-
-
-# niter <- 10
-# algo = c("RWM", "IMH", "Truth")
-# boxplot(averageref[1:niter,1],averagenew[1:niter,1],groundtruth[,1], names=algo) 
-
-# abline(h=quantile(groundtruth[,1],0.1),col="red",lty=2)
-# abline(h=quantile(groundtruth[,1],0.5),col="red",lty=2)
-# abline(h=quantile(groundtruth[,1],0.9),col="red",lty=2)
-
-# abline(h=quantile(averagenew[1:niter,1],0.1),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,1],0.5),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,1],0.9),col="blue",lty=2)
-
-# abline(h=quantile(averageref[1:niter,1],0.1),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,1],0.5),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,1],0.9),col="green",lty=2)
-
-
-# algo = c("RWM", "IMH", "Truth")
-# boxplot(averageref[1:niter,2],averagenew[1:niter,2],groundtruth[,2], names=algo) 
-
-
-# abline(h=quantile(groundtruth[,2],0.1),col="red",lty=2)
-# abline(h=quantile(groundtruth[,2],0.5),col="red",lty=2)
-# abline(h=quantile(groundtruth[,2],0.9),col="red",lty=2)
-
-# abline(h=quantile(averagenew[1:niter,2],0.1),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,2],0.5),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,2],0.9),col="blue",lty=2)
-
-# abline(h=quantile(averageref[1:niter,2],0.1),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,2],0.5),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,2],0.9),col="green",lty=2)
-
-# algo = c("RWM", "IMH", "Truth")
-# boxplot(averageref[1:niter,3],averagenew[1:niter,3],groundtruth[,3], names=algo) 
-
-
+# averagenew <- listofnewchains/nchains
 #MALA
 i <- 10
-listofmalachains <- 0
+listofmalachains <- list(ref,ref)
+# listofmalachains <- 0
 for (m in 1:nchains){
  options.mala<-list(seed=39546*m,map=F,fim=F,ll.is=F, av=0, sigma.val=0.002
   ,gamma.val=0.1,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0,0),nb.chains=1
   , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
   , map.range=c(0), indiv.index = i)
 mala<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
-
-
-  listofmalachains <- listofmalachains + mala
+# listofmalachains <- listofmalachains + mala
+listofmalachains[[m]] <- mala
 }
-averagemala <- listofmalachains/nchains
-
-
-# niter <- 10
-# algo = c("RWM", "MALA","IMH", "Truth")
-# boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],groundtruth[,1], names=algo) 
-
-# abline(h=quantile(groundtruth[,1],0.1),col="red",lty=2)
-# abline(h=quantile(groundtruth[,1],0.5),col="red",lty=2)
-# abline(h=quantile(groundtruth[,1],0.9),col="red",lty=2)
-
-# abline(h=quantile(averagenew[1:niter,1],0.1),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,1],0.5),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,1],0.9),col="blue",lty=2)
-
-# abline(h=quantile(averageref[1:niter,1],0.1),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,1],0.5),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,1],0.9),col="green",lty=2)
-
-# abline(h=quantile(averagemala[1:niter,1],0.1),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,1],0.5),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,1],0.9),col="yellow",lty=2)
-
-# boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[,2], names=algo) 
-
-# abline(h=quantile(groundtruth[,2],0.1),col="red",lty=2)
-# abline(h=quantile(groundtruth[,2],0.5),col="red",lty=2)
-# abline(h=quantile(groundtruth[,2],0.9),col="red",lty=2)
-
-# abline(h=quantile(averagenew[1:niter,2],0.1),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,2],0.5),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,2],0.9),col="blue",lty=2)
-
-# abline(h=quantile(averageref[1:niter,2],0.1),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,2],0.5),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,2],0.9),col="green",lty=2)
-
-# abline(h=quantile(averagemala[1:niter,2],0.1),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,2],0.5),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,2],0.9),col="yellow",lty=2)
-
-
-# boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],groundtruth[,3], names=algo) 
-
-# abline(h=quantile(groundtruth[,3],0.1),col="red",lty=2)
-# abline(h=quantile(groundtruth[,3],0.5),col="red",lty=2)
-# abline(h=quantile(groundtruth[,3],0.9),col="red",lty=2)
-
-# abline(h=quantile(averagenew[1:niter,3],0.1),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,3],0.5),col="blue",lty=2)
-# abline(h=quantile(averagenew[1:niter,3],0.9),col="blue",lty=2)
-
-# abline(h=quantile(averageref[1:niter,3],0.1),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,3],0.5),col="green",lty=2)
-# abline(h=quantile(averageref[1:niter,3],0.9),col="green",lty=2)
-
-# abline(h=quantile(averagemala[1:niter,3],0.1),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,3],0.5),col="yellow",lty=2)
-# abline(h=quantile(averagemala[1:niter,3],0.9),col="yellow",lty=2)
-
-
-
-niter <- 6
-algo = c("RWM", "MALA","IMH","NUTS", "Truth")
-boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],groundtruth[1:niter,1],groundtruth[,1], names=algo) 
-boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[1:niter,2],groundtruth[,2], names=algo) 
-boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],groundtruth[1:niter,3],groundtruth[,3], names=algo) 
-
-averagenuts <- groundtruth[1:L_mcmc,]
-
-averageref$algo <- "RWM"
-averagenew$algo <- "IMH"
-averagemala$algo <- "MALA"
-averagenuts$algo <- "NUTS"
-groundtruth$algo <- "Truth"
-
-
-niter <- 6
-df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagenuts[1:niter,],tail(groundtruth,1000))
-colnames(df) <- c("ka", "V", "k","algo")
-df.m <- melt(df, id.var = "algo")
-
-algo <- factor(algo,levels = c("RWM", "MALA","NUTS","IMH", "Truth"))
-par(cex.axis=5)
-ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
-# save <- ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
-ggsave(save,file="boxplots_warfa.pdf", width = 900, height = 450, units = "mm")
-# ggsave(fig,file="boxplot_warfa.pdf", width = 900, height = 450, units = "mm")
-
-
-par(mfrow=c(1,3))
-par(cex.axis=2)
-boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],averagenuts[1:niter,1],groundtruth[,1], names=algo) 
-boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],averagenuts[1:niter,2],groundtruth[,2], names=algo) 
-boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],averagenuts[1:niter,3],groundtruth[,3], names=algo) 
-# abline(h=quantile(groundtruth[,3],0.9),col="red",lty=2)
-# abline(h=quantile(averagenew[1:niter,3],0.9),col="blue",lty=2)
-# abline(h=quantile(averageref[1:niter,3],0.9),col="green",lty=2)
-# abline(h=quantile(averagemala[1:niter,3],0.9),col="yellow",lty=2)
-# abline(h=quantile(groundtruth[1:niter,3],0.9),col="brown",lty=2)
-
-# abline(h=quantile(groundtruth[,3],0.1),col="red",lty=2)
-# abline(h=quantile(averagenew[1:niter,3],0.1),col="blue",lty=2)
-# abline(h=quantile(averageref[1:niter,3],0.1),col="green",lty=2)
-# abline(h=quantile(averagemala[1:niter,3],0.1),col="yellow",lty=2)
-# abline(h=quantile(groundtruth[1:niter,3],0.1),col="brown",lty=2)
-
-# abline(h=quantile(groundtruth[,2],0.5),col="red",lty=2)
-# abline(h=quantile(averagenew[1:niter,2],0.5),col="blue",lty=2)
-# abline(h=quantile(groundtruth[1:niter,2],0.5),col="brown",lty=2)
-# abline(h=quantile(averageref[1:niter,3],0.5),col="green",lty=2)
-# abline(h=quantile(averagemala[1:niter,3],0.5),col="yellow",lty=2)
-
-# boxplot(groundtruth)
-# boxplot(groundtruth[1:niter,])
-# boxplot(averagenew, add=TRUE,col=c('mistyrose'))
-# boxplot(averageref, add=TRUE,col=c('powderblue'))
+# averagemala <- listofmalachains/nchains
 
 
 #RSTAN VB
@@ -348,29 +185,147 @@ modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 
 
-#MALA
-i <- 10
-listofnutschains <- 0
+#NUTS
+listofnutschains <- list(ref,ref)
+# listofnutschains <- 0
 for (m in 1:nchains){
-options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=100000,
+options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
 nuts<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
-
-
-  listofnutschains <- listofnutschains + nuts
+  # listofnutschains <- listofnutschains + nuts
+listofnutschains[[m]] <- nuts
 }
-groundtruth <- listofnutschains/nchains
+# groundtruth <- listofnutschains/nchains
 
-
-i <- 10
-options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=100000,
+groundtruthchains <- list(ref,ref)
+for (m in 1:nchains){
+  options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=50000,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
-groundtruth<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
-# vi<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+  groundtruth<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+  groundtruthchains[[m]] <- groundtruth
+}
+
+
+
+
+########################PLOT##############################################################
+
+variable <- 2
+niter1 <- 5
+niter2 <- 20
+niter3 <- 500
+refbox <- ref[nchains,]
+malabox <- mala[nchains,]
+newbox <- new[nchains,]
+nutsbox <- nuts[nchains,]
+truthbox <- groundtruth[nchains,]
+
+
+for (iter in list(niter1,niter2,niter3)){
+  dim <- which(list(niter1,niter2,niter3)==iter)
+   for (j in 1:nchains){
+    refbox[j,dim] <- listofrefchains[[j]][iter,variable]
+    newbox[j,dim] <- listofnewchains[[j]][iter,variable]
+    malabox[j,dim] <- listofmalachains[[j]][iter,variable]
+    nutsbox[j,dim] <- listofnutschains[[j]][iter,variable]
+    truthbox[j,dim] <- groundtruthchains[[j]][dim(groundtruthchains[[j]])[1],variable]
+  }
+}
+
+
+refbox$iterations <- 1:nchains
+newbox$iterations <- 1:nchains
+malabox$iterations <- 1:nchains
+nutsbox$iterations <- 1:nchains
+truthbox$iterations <- 1:nchains
+
+refbox$algo <- "RWM"
+newbox$algo <- "IMH"
+malabox$algo <- "MALA"
+nutsbox$algo <- "NUTS"
+truthbox$algo <- "Truth"
+
+df <- rbind(refbox,newbox,malabox,nutsbox,truthbox)
+colnames(df) <- c(as.character(niter1), as.character(niter2), as.character(niter3),"iterations","algo")
+df.m <- melt(df, id.var = c("iterations","algo"))
+colnames(df.m) <- c("ID","group","var","value")
+
+index <- which(df.m$group=="Truth"&df.m$var%in%list(as.character(niter1), as.character(niter2)))
+test <- df.m[-index,]
+ggplot(data=df.m[-index,]) + 
+    geom_boxplot( aes(x=factor(group), y=value, fill=factor(var)), position=position_dodge(1)) +
+    labs(fill="Iteration")+
+    theme(text = element_text(size=20))+xlab("Algorithm")+ylab("")
+
+
+
+########################PLOT##############################################################
+
+
+
+
+# for (j in 1:nchains){
+#   refbox[j,] <- listofrefchains[[j]][niter,]
+#   newbox[j,] <- listofnewchains[[j]][niter,]
+#   malabox[j,] <- listofmalachains[[j]][niter,]
+#   nutsbox[j,] <- listofnutschains[[j]][niter,]
+#   truthbox[j,] <- groundtruthchains[[j]][niter,]
+# }
+
+refbox$algo <- "RWM"
+newbox$algo <- "IMH"
+malabox$algo <- "MALA"
+nutsbox$algo <- "NUTS"
+truthbox$algo <- "Truth"
+
+df <- rbind(refbox,newbox,malabox,nutsbox,truthbox)
+colnames(df) <- c("ka", "V", "k","algo")
+df.m <- melt(df, id.var = "algo")
+algo = c("RWM", "MALA","IMH","NUTS","Truth")
+algo <- factor(algo,levels = c("RWM", "MALA","NUTS","IMH","Truth"))
+par(cex.axis=5)
+ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+
+
+
+# niter <- 6
+# algo = c("RWM", "MALA","IMH","NUTS", "Truth")
+# boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],groundtruth[1:niter,1],groundtruth[,1], names=algo) 
+# boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],groundtruth[1:niter,2],groundtruth[,2], names=algo) 
+# boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],groundtruth[1:niter,3],groundtruth[,3], names=algo) 
+
+# averagenuts <- groundtruth[1:L_mcmc,]
+
+# averageref$algo <- "RWM"
+# averagenew$algo <- "IMH"
+# averagemala$algo <- "MALA"
+# averagenuts$algo <- "NUTS"
+# groundtruth$algo <- "Truth"
+
+
+# niter <- 6
+# df <- rbind(averageref[1:niter,],averagenew[1:niter,],averagemala[1:niter,],averagenuts[1:niter,],tail(groundtruth,1000))
+# colnames(df) <- c("ka", "V", "k","algo")
+# df.m <- melt(df, id.var = "algo")
+
+# algo <- factor(algo,levels = c("RWM", "MALA","NUTS","IMH", "Truth"))
+# par(cex.axis=5)
+# ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+# # save <- ggplot(data = df.m, aes(x=algo, y=value)) + geom_boxplot() + facet_wrap(~variable,ncol = 3)+ theme_bw() 
+# ggsave(save,file="boxplots_warfa.pdf", width = 900, height = 450, units = "mm")
+# ggsave(fig,file="boxplot_warfa.pdf", width = 900, height = 450, units = "mm")
+
+
+par(mfrow=c(1,3))
+par(cex.axis=2)
+boxplot(averageref[1:niter,1],averagemala[1:niter,1],averagenew[1:niter,1],averagenuts[1:niter,1],groundtruth[,1], names=algo) 
+boxplot(averageref[1:niter,2],averagemala[1:niter,2],averagenew[1:niter,2],averagenuts[1:niter,2],groundtruth[,2], names=algo) 
+boxplot(averageref[1:niter,3],averagemala[1:niter,3],averagenew[1:niter,3],averagenuts[1:niter,3],groundtruth[,3], names=algo) 
+
 
 
 #ADVI for VI post outputs

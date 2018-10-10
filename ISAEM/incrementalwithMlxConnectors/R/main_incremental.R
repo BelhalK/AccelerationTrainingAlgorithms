@@ -200,11 +200,18 @@ duration <- end_time - start_time
 kiter = 0
 
 duration <- end_time - start_time
-# while (duration <20){
+j = 0
+# browser()
+# while (duration <saemix.options$duration){
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
-  # print(kiter)
-  duration <- end_time - start_time
-  # kiter = kiter + 1
+  duration <- as.numeric(end_time - start_time,units="secs")
+  # print(duration)
+  # if (duration > saemix.options$duration - 10){
+  #   j = j +1
+  #   kiter = saemix.options$nbiter.saemix[1] + j
+  # } else {
+  #   kiter = kiter + 1
+  # }
   # SAEM convergence plots
   	if(kiter%%saemix.options$nbdisplay==0) {
       cat(".")
@@ -246,7 +253,6 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     varList<-xmcmc$varList
     DYF<-xmcmc$DYF
     phiM<-xmcmc$phiM
-    
     # M-step
     if(opt$stepsize[kiter]>0) {
   ############# Stochastic Approximation
@@ -282,7 +288,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   # End of loop on kiter
   end_time <- Sys.time()
 }
-
+print(duration)
 etaM<-xmcmc$etaM # only need etaM here (re-created in estep otherwise)
 cat("\n    Minimisation finished\n")
 print(date())
