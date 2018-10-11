@@ -177,6 +177,7 @@ saemix<-function(model,data,control=list()) {
 if(saemix.options$displayProgress) par(ask=FALSE)
 cat("Running main SAEM algorithm\n")
 print(date())
+start_time <- Sys.time()
 for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
 
 # SAEM convergence plots
@@ -241,7 +242,9 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   parpop[(kiter+1),]<-theta
 # End of loop on kiter
 }
-
+  end_time <- Sys.time()
+  duration <- as.numeric(end_time - start_time,units="secs")
+  print(duration)
 
 etaM<-xmcmc$etaM # only need etaM here (re-created in estep otherwise)
 cat("\n    Minimisation finished\n")

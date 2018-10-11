@@ -368,7 +368,8 @@ compute.LLy_c<-function(phiM,pres,args,Dargs,DYF) {
   if (Dargs$monolix == TRUE){
     tempsiM <- cbind(unique(Dargs$IdM), psiM)
     colnames(tempsiM) <- c("id",names(args$i1.omega))
-    fpred <- computePredictions(data.frame(tempsiM))[[1]]
+    fpred <- as.numeric(computePredictions(data.frame(tempsiM))[[1]])
+    fpred[which(is.nan(fpred))] <- 0
   } else {
     fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
   }

@@ -32,7 +32,6 @@ loadProject(project.file)
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  time<-xidep[,2]  
   s<-psi[id,1]
   d<-psi[id,2]
   beta<-psi[id,3]
@@ -44,7 +43,6 @@ model1cpt<-function(psi,id,xidep) {
   ypred<-1
   return(ypred)
 }
-
 
 hcv_data <- readDatamlx(project = project.file)
 treat <- hcv_data$treatment[,c(3)]
@@ -59,7 +57,7 @@ saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
   transform.par=c(1,1,1,1,1,1,1,1),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
 
 K1 = 200
-K2 = 50
+K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 

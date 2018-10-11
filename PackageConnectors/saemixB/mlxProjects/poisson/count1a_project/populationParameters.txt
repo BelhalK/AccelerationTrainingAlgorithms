@@ -1,0 +1,3 @@
+parameter,value
+lambda_pop,0.475762813363077
+omega_lambda,1.05934726541607
