@@ -113,6 +113,7 @@ if(Dargs$type=="structural"){
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			if(Dargs$type=="structural"){
+				browser()
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 			} else {
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
@@ -126,7 +127,6 @@ if(Dargs$type=="structural"){
 		}
 		U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
 		# Second stage
-		
 		if(opt$nbiter.mcmc[2]>0) {
 			nt2<-nbc2<-matrix(data=0,nrow=nb.etas,ncol=1)
 			nrs2<-1

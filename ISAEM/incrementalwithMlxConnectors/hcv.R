@@ -78,8 +78,8 @@ saemix.data<-saemixData(name.data=hcv.saemix,header=TRUE,sep=" ",na=NA, name.gro
 # Default model, no covariate
 
 saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
-  ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,1,1,0,1,1,1),
-  transform.par=c(1,1,1,1,0,1,1,1),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
+  ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,1,1,1,1,1,1),
+  transform.par=c(1,1,1,1,1,1,1,1),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
 
 # K1 = 2000
 # K2 = 500

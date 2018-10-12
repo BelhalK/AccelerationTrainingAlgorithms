@@ -99,7 +99,7 @@ theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
 row_sub_ref  = apply(theo_ref, 1, function(row) all(row !=0 ))
 theo_ref <- theo_ref[row_sub_ref,]
-theo_ref$algo <- 'full'""
+theo_ref$algo <- 'full'
 theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 

@@ -15,14 +15,14 @@ CENS = {use=censored}
 <MODEL>
 
 [INDIVIDUAL]
-input = {s_pop, omega_s, d_pop, omega_d, beta_pop, omega_beta, delta_pop, omega_delta, p_pop, c_pop, omega_c, eta_pop, epsilon_pop, omega_epsilon, omega_eta}
+input = {s_pop, omega_s, d_pop, omega_d, beta_pop, omega_beta, delta_pop, omega_delta, p_pop, c_pop, omega_c, eta_pop, epsilon_pop, omega_epsilon, omega_eta, omega_p}
 
 DEFINITION:
 s = {distribution=logNormal, typical=s_pop, sd=omega_s}
 d = {distribution=logNormal, typical=d_pop, sd=omega_d}
 beta = {distribution=logNormal, typical=beta_pop, sd=omega_beta}
 delta = {distribution=logNormal, typical=delta_pop, sd=omega_delta}
-p = {distribution=logNormal, typical=p_pop, no-variability}
+p = {distribution=logNormal, typical=p_pop, sd=omega_p}
 c = {distribution=logNormal, typical=c_pop, sd=omega_c}
 eta = {distribution=logitNormal, typical=eta_pop, sd=omega_eta}
 epsilon = {distribution=logitNormal, typical=epsilon_pop, sd=omega_epsilon}
@@ -53,6 +53,7 @@ omega_d = {value=1, method=MLE}
 omega_delta = {value=1, method=MLE}
 omega_epsilon = {value=1, method=MLE}
 omega_eta = {value=1, method=MLE}
+omega_p = {value=1, method=MLE}
 omega_s = {value=1, method=MLE}
 p_pop = {value=20, method=MLE}
 s_pop = {value=1000, method=MLE}
