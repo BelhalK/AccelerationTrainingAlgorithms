@@ -21,7 +21,7 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 
 
 	if(Dargs$type=="structural"){
-		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)
+		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF)$U
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
@@ -32,18 +32,17 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		if(Dargs$type=="structural"){
-			psiMc<-transphi(phiMc,Dargs$transform.par)
-		    tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
-		    colnames(tempsiMc) <- c("id",colnames(omega.eta))
-		    fpred <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
-		    indices <- which(is.nan(fpred))
-		    block <- Dargs$IdM[indices]
-			Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+			lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+			Uc.y<-lly_c$U
+			indices<-lly_c$indices
+			block <- Dargs$IdM[indices]
 		} else {
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 		}
 		deltau<-Uc.y-U.y
-		deltau[block] <- 10000000
+		if (Dargs$monolix == TRUE){
+		    deltau[block] <- 100000
+		}
 		ind<-which(deltau<(-1)*log(runif(Dargs$NM)))
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
@@ -62,18 +61,18 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				if(Dargs$type=="structural"){
-					psiMc<-transphi(phiMc,Dargs$transform.par)
-				    tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
-				    colnames(tempsiMc) <- c("id",colnames(omega.eta))
-				    fpred <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
-				    indices <- which(is.nan(fpred))
-				    block <- Dargs$IdM[indices]
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+					Uc.y<-lly_c$U
+					indices<-lly_c$indices
+					block <- Dargs$IdM[indices]
 				} else {
 					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				if (Dargs$monolix == TRUE){
+				    deltu[block] <- 100000
+				}
 				ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 				etaM[ind,]<-etaMc[ind,]
 				U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
@@ -104,18 +103,18 @@ estep<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, D
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				if(Dargs$type=="structural"){
-					Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+					Uc.y<-lly_c$U
+					indices<-lly_c$indices
+					block <- Dargs$IdM[indices]
 				} else {
-					psiMc<-transphi(phiMc,Dargs$transform.par)
-				    tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
-				    colnames(tempsiMc) <- c("id",colnames(omega.eta))
-				    fpred <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
-				    indices <- which(is.nan(fpred))
-				    block <- Dargs$IdM[indices]
 					Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 				}
 				Uc.eta<-0.5*rowSums(etaMc*(etaMc%*%somega))
 				deltu<-Uc.y-U.y+Uc.eta-U.eta
+				if (Dargs$monolix == TRUE){
+					deltu[block] <- 100000
+				}
 				ind<-which(deltu<(-log(runif(Dargs$NM))))
 				etaM[ind,]<-etaMc[ind,]
 				#        if(kiter<20 | (kiter>150 & kiter<170)) {
