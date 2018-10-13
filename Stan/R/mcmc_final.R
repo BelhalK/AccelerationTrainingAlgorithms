@@ -295,7 +295,8 @@ if(opt$nbiter.mcmc[4]>0) {
 				gradp[i,j] <- (l2[i] - l1[i])/(phi_map[i,j]/100)
 			}
 		}
-
+		browser()
+		
 		#calculation of the covariance matrix of the proposal
 		fpred<-structural.model(psi_map, Dargs$IdM, Dargs$XM)
 		DYF[Uargs$ind.ioM]<- fpred
@@ -544,6 +545,7 @@ if(opt$nbiter.mcmc[5]>0) {
 		}
 	}
 }
+
 #NUTS with rstan
 if(opt$nbiter.mcmc[6]>0) {
 	# etaMc<-etaM
