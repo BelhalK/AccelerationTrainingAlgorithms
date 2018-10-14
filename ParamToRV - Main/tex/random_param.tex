@@ -1,0 +1,195 @@
+\documentclass[a4paper]{article}
+
+%% The graphicx package provides the includegraphics command.
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multirow}
+%% The amsthm package provides extended theorem environments
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{fancyvrb}
+\usepackage{dsfont}
+\usepackage[utf8]{inputenc}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{algorithm} 
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs,amsfonts,dsfont}
+%% remove journal footer
+\makeatletter
+\def\ps@pprintTitle{%
+ \let\@oddhead\@empty
+ \let\@evenhead\@empty
+ \def\@oddfoot{}%
+ \let\@evenfoot\@oddfoot}
+\makeatother
+
+
+%% change 'Abstract' to 'Outline'
+\renewenvironment{abstract}{\global\setbox\absbox=\vbox\bgroup
+  \hsize=\textwidth\def\baselinestretch{1}%
+  \noindent\unskip\textbf{Outline}
+ \par\medskip\noindent\unskip\ignorespaces}
+ {\egroup}
+
+
+
+\begin{document}
+\pagenumbering{gobble}
+
+\Large
+ \begin{center}
+Converting a population partameter into a random variable with small variance
+
+\hspace{10pt}
+
+% Author names and affiliations
+\large
+Belhal Karimi
+
+\hspace{10pt}
+
+\end{center}
+
+\hspace{10pt}
+
+\normalsize
+
+%% main text
+
+
+\section{Convert the parameter into random variables with variance that tends to infinity}
+The initial model $p(y_i, \psi_i;\beta,\theta)$ becomes $p(y_i, \psi_i,\beta;\theta)$.\\
+
+The new model can now be written as:\\
+\begin{align}
+p(y_i| \psi_i,\beta;\theta)p(\psi_i;\theta)\pi(\beta)
+\end{align}
+where $\pi(\beta)$ is a prior on our new random variable $\beta$.\\
+The challenge is to see if we keep the same convergence properties in the SAEM algorithm when we operate that change.\\
+
+Let's take a simple example: a logistic regression:
+\begin{align}
+y_{ij} = f(t_{ij},\psi_i) + \epsilon_{ij}= \frac{1}{\alpha_i+e^{-\beta_i t_{ij}}} + \epsilon_{ij}
+\end{align}\\
+For all individuals $\beta_i = \beta$ and we have j observations per individual i. For the moment we will forget about the number of observations j.
+With $\psi_i = (\alpha_i, \beta)$
+Hypothesis:\\
+
+\begin{equation}
+ y_i \sim N(\frac{1}{\alpha_i+e^{-\beta t}},a_i^{2})
+\end{equation}
+
+\subsection{Fixed population parameter}
+The model is written as 
+\begin{align}
+ p(y,\psi;\theta) = p(y|\psi;\theta)p(\psi;\theta)
+\end{align}
+With $\theta = (\theta_{\alpha}, \beta)$
+In that case, we can not consider that the model belongs to the exponential family. Indeed we can not write $(y_i - \frac{1}{\eta_i+e^{-\psi_i t}})$ as a scalar product between the sufficient statistic and a vector of parameter.\\
+The solution consists in putting variability on the parameter $\beta$ so that the sufficient statistics becomes a function of $y_i$ and $\psi_i$. In that case we belong to the exponential family.\\
+\textit{Remark}: Instead of putting variability, we can also put a prior on this parameter. We'll see in the sequel what differences it makes in practice.\\
+In that part, we consider that the parameters are fixed $\theta =(\theta_{\alpha}, \beta)$. Running the SAEM gives us the maximum likelihood estimate $\theta^{ML} =(\theta_{\alpha}^{ML}, \beta^{ML})$\\
+
+The issue now is to see if the estimates obtained while putting variability, or a prior, leads to the same maximum likelihood estimate when we tends the variability to zero.
+
+
+\subsection{Parameter with variability}
+In the second algorithm, $\beta$ is a random variable such as $\beta \sim N(\beta^{*},\sigma_{\beta}^2)$\\
+The model becomes:
+\begin{align}
+ p(y,\psi,\beta;\theta) = p(y|\psi,\beta;\theta)p(\psi;\theta)\pi(\beta)\\
+\end{align}
+with $\theta = (\theta_{\alpha}, \beta^*, \sigma_{\beta}^2)$\\
+
+
+If we then look at what is happening in the SAEM algorithm, nothing changes in the simulation phase where the latent data are drawn from same the conditional $p(\psi_i|y_i, \theta_{\alpha}, \beta, \theta_y)$.\\
+Yet, the new algorithm requires to draw a new $\beta$ at each iteration from the conditional $p(\beta| y_i,\eta,\theta_{\beta},\theta_y)$.\\
+
+\begin{align}
+ (\eta_i)^{k+1} \sim p(\eta_i| y_i,\beta^k, \theta_{\alpha}, \theta_y) \\
+ \beta^{k+1} \sim p(\beta| y_i,\eta^{k+1},\theta_{\beta},\theta_y) = C p(y_i|\beta,\eta^{k+1}, \theta_y) p(\beta,\theta_{\beta})
+\end{align}\\
+
+This consists in a Gibbs sampling where we alternatively simulate from two posteriors using MCMC transistion kernels.\\
+Question: Convergence of $\hat{\theta}(\sigma_{\beta}) = (\hat{\theta_{\alpha}}(\sigma_{\beta}) , \hat{\beta}(\sigma_{\beta}) )$   when $\sigma_{\beta} \mapsto 0$\\
+\\
+We know that when the complete model belongs to the exponential family, the saem converges to a subset of the EM solution set. In this case we are linking our non-exponential model to an exponential one by putting variability on the fixed parameter.\\
+Yet, here the algorithm implies a gibbs sampling (to sample $\eta$ and $\beta$ alternatively) and of course two MCMC. Let's first consider the case when we can directly sample from those two conditional distributions (no mcmc). The challenge is to see if the parameters estimates at convergence of this algo are the MLE.\\
+
+So here we use only one MCMC method, known as Gibbs sampling, to sample from the conditionals of interest. Keep in mind that each conditional can be sampled via an MCMC method as well (MH for instance). We'll consider only one iteration of the Gibbs sampling to begin with.\\
+
+In the current implementation of the SAEM, the sampling is done on $\eta$ instead of $\psi$ but we can shift from one to another by adding the fixed effect to the random effects $\eta_i$:
+\begin{equation}
+\psi_i = \eta_i + \beta
+\end{equation}
+After the gibbs sampling the update of the individual parameter component $\psi_i$ looks like:
+\begin{equation}
+\psi_i^k = \eta_i^k + \beta^k
+\end{equation}
+The stochastic approximation is:
+\begin{equation}
+s_k = s_{k-1} + \gamma_k(\sum_{i=1}^{N}{\~S(y_i,\eta_i^k, \beta^k)} - s_{k-1})
+\end{equation}
+And finally the M-step:
+\begin{equation}
+\theta_k = \hat{\theta}(s_k)
+\end{equation}
+We have to keep in mind that this $\theta_k$ depends on $\sigma_{\beta}$.\\
+\textbf{The problem is not around the Gibbs sampling.} Indeed when the random effects are already multidimensional, gibbs sampling is already used.\\
+Let's name all the models:
+\begin{enumerate}
+	\item M1 is the model where $\beta$ is not random
+	\item M2 is the model where $\beta$ is a random variable following a gaussian $\mathcal{N}(\beta^*,\sigma_{\beta})$
+	\item M3 is the model where we put a prior on $\beta$
+\end{enumerate}
+
+In M2, we choose a variance for $\beta$ that does not change throughout the iterations. The SAEM converges to the maximum likelihood of model M2: $\theta^{ML M2}(\sigma_{\beta}) = (\theta_{\alpha}^{ML M2}(\sigma_{\beta}),\beta_*^{ML M2}(\sigma_{\beta}) )$. Two interesting questions arise:
+\begin{enumerate}
+	\item What are the properties of this estimator and where does it converge when $\sigma_{\beta}$ tends to $0$? Does it converge to $\theta^{ML M1}$?
+	\item If the variance on $\beta$, $\sigma_{\beta}$ is converging to zero throughout the iterations, will the estimator converge to $\theta^{ML M1}$?
+\end{enumerate}
+
+
+In the latter case, the whole point is to see if we could converge to the right MLE while defining the population parameter as a random variable (wheres we want to solve the problem when the paraemeter is fixed) by making its variance tend to zero throughout the iterations.
+
+\subsubsection{Properties of the estimator when the population parameter is a random variable}
+
+First, let's focus on the properties of our estimator 
+\begin{equation}
+\theta^{ML M2}(\sigma_{\beta}) = (\theta_{\alpha}^{ML M2}(\sigma_{\beta}),\beta_*^{ML M2}(\sigma_{\beta}) )
+\end{equation}
+
+In this case the most important thing is to evaluate the expectation (bias), the variance, the efficiency and in the case of large samples, the consistency. Indeed the variability put on the population parameter induces some variability since at each iteration N simulations of the random variable $\beta$ are sampled from their conditional distributions. The goal is to evaluate this variance and the expectation of the estimator when the SAEM algorithm has converged. Those two quantities depends on the value of the variance of $\beta$. Checking that the parameter estimate of the random effects converges to the solution of the model 1 when the variance tends to zero will be crucial.\\
+
+For exploratory purposes, we are going to study the case of the linear gaussian mixed effects model. In this case, we can compute all the posterior distributions and as a result explicitly write all of our estimators. First of all, the maximum likelihood estimators are computed with one of the individual parameters component being fixed. Then, variability is being introduced: this same component is considered as a random variable, gaussian with a non zero mean and a variance.\\
+
+In that sense, we are going to be in the same spot as before
+
+\subsection{Putting a prior on the parameter}
+In that case we are only putting a prior on $\beta \sim \mathcal{N}(\beta^{*}, \sigma_{\beta}^2)$ where now the parameters of that prior does not change from an iteration to another.\\
+So the vector of parameter is now $\theta = (\theta_{\alpha}, \beta)$. The SAEM gives us a estimate of the maximum likelihood that depends obviously on the value of the variance of the prior $\hat{\theta}(\sigma_{\beta}) = (\hat{\theta_{\alpha}}, \hat{\beta})$ with $\hat{\beta}^{MAP}(\sigma_{\beta})  = arg max (p(\beta | y, \hat{\theta_{\alpha}}))$. \\
+Question: convergence of $\hat{\beta}^{MAP}$ when $\sigma_{\beta} \mapsto 0$\\
+
+
+In this case the implementation is kind of the same and implies a Gibbs sampling where we alternatively sample from two mcmc (on the individual parameters and the fixed param we put a prior on). The difference is that the parameters of that prior are not re-evaluated.
+
+
+
+
+
+
+
+\newpage
+\end{document}
+
+
+
+
+
+
