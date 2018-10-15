@@ -9,7 +9,7 @@ require(reshape2)
 library(dplyr)
 library(rstan)
 # load("rtte_mala_indiv.RData")
-load("rtte_mala.RData")
+# load("rtte_mala.RData")
 # save.image("rtte_mala.RData")
 # save.image("rtte_mala_indiv.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
@@ -74,12 +74,12 @@ return(logpdf)
 #   byrow=TRUE))
 
 
-##RUNS
+#RUNS
 
-# K1 = 200
-# K2 = 100
-# iterations = 1:(K1+K2+1)
-# end = K1+K2
+K1 = 200
+K2 = 100
+iterations = 1:(K1+K2+1)
+end = K1+K2
 
 # #Weibull
 # options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0))
