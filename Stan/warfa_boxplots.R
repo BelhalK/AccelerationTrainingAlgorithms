@@ -102,9 +102,19 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
-nchains = 100
-L_mcmc= 600
-indiv.index <- 10
+
+# saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+#   ,psi0=matrix(c(1,5,1),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+#   byrow=TRUE))
+
+# nchains = 100
+# L_mcmc= 600
+nchains = 10
+L_mcmc= 500
+indiv.index <- 1
+
 
 options_warfa<-list(seed=395,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
@@ -201,7 +211,7 @@ listofnutschains[[m]] <- nuts
 
 groundtruthchains <- list(ref,ref)
 for (m in 1:nchains){
-  options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=50000,
+  options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=10000,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
   modelstan = modelstan, indiv.index = i)
@@ -210,14 +220,13 @@ for (m in 1:nchains){
 }
 
 
-
-
 ########################PLOT##############################################################
 
 variable <- 3
 niter1 <- 5
 niter2 <- 20
-niter3 <- 500
+niter3 <- L_mcmc
+
 refbox <- ref[nchains,]
 malabox <- mala[nchains,]
 newbox <- new[nchains,]
@@ -254,24 +263,83 @@ colnames(df) <- c(as.character(niter1), as.character(niter2), as.character(niter
 df.m <- melt(df, id.var = c("iterations","algo"))
 colnames(df.m) <- c("ID","group","var","value")
 
-index <- which(df.m$group=="Truth"&df.m$var%in%list(as.character(niter1), as.character(niter2)))
+# index <- which(df.m$group=="Truth"&df.m$var%in%list(as.character(niter1), as.character(niter2)))
+index <- which(df.m$group=="Truth"&df.m$var%in%list(as.character(niter1), as.character(niter2),as.character(niter3)))
 test <- df.m[-index,]
 
-save <- ggplot(data=df.m[-index,]) + 
-    geom_boxplot( aes(x=factor(group), y=value, fill=factor(var)), position=position_dodge(1)) +
-    labs(fill="Iteration")+
-     theme_bw() + theme(legend.title = element_text(size=40),legend.text = element_text(size=40),axis.text=element_text(size=32), 
-                 axis.title=element_text(size=40),
-                   panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
-     xlab("Algorithm")+ylab("")
+# save <- ggplot(data=test, aes(x=factor(group), y=value, fill=factor(var)))+
+# geom_boxplot()+
+# labs(fill="Iteration")+
+# geom_boxplot(data=test[test$group=="Truth",],
+#             aes(x=factor(group), y=value,),fill="yellow")+
+# labs(fill="Iteration")+
+# theme_bw()+
+# theme(legend.title = element_text(size=40),
+#   legend.key.size = unit(5,"line"),
+#       legend.text = element_text(size=40),
+#       axis.text=element_text(size=32), 
+#       axis.title=element_text(size=40),
+#       panel.border = element_rect(colour = "black", fill=NA, size=2),
+#       plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
+# xlab("")+ylab("") + geom_hline(yintercept = quantile(truthbox[,variable],0.25))+
+# geom_hline(yintercept = quantile(truthbox[,variable],0.5))+
+# geom_hline(yintercept = quantile(truthbox[,variable],0.75))
+
+ggplot(data=test, aes(x=factor(group), y=value, fill=factor(var)))+
+geom_boxplot()+
+labs(fill="Iteration")+
+geom_boxplot(data=test[test$group=="Truth",],
+            aes(x=factor(group), y=value,),fill="yellow")+
+labs(fill="Iteration")+
+theme_bw()+ylab("ka")+
+theme(legend.title = element_text(size=40),
+  legend.key.size = unit(5,"line"),
+      legend.text = element_text(size=40),
+      axis.text=element_text(size=32), 
+      axis.title=element_text(size=40),
+      panel.border = element_rect(colour = "black", fill=NA, size=2),
+      plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
+xlab("")+ylab("ka") + geom_hline(yintercept = quantile(truthbox[,variable],0.25), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0.5), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0.75), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0), col="grey", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],1), col="grey", linetype="dashed",size=1.5)
 
 
-ggsave(save, file="newpics/boxplots_warfa_ka.pdf", width = 900, height = 450, units = "mm")
-ggsave(save, file="newpics/boxplots_warfa_V.pdf", width = 900, height = 450, units = "mm")
-ggsave(save, file="newpics/boxplots_warfa_k.pdf", width = 900, height = 450, units = "mm")
+save <- ggplot(data=test, aes(x=factor(group), y=value, fill=factor(var)))+
+geom_boxplot()+
+labs(fill="Iteration")+
+geom_boxplot(data=test[test$group=="Truth",],
+            aes(x=factor(group), y=value,),fill="yellow")+
+labs(fill="Iteration")+
+theme_bw()+ylab("ka")+
+theme(legend.title = element_text(size=40),
+  legend.key.size = unit(5,"line"),
+      legend.text = element_text(size=40),
+      axis.text=element_text(size=32), 
+      axis.title=element_text(size=40),
+      panel.border = element_rect(colour = "black", fill=NA, size=2),
+      plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
+xlab("")+ylab("ka") + geom_hline(yintercept = quantile(truthbox[,variable],0.25), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0.5), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0.75), col="purple", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],0), col="grey", linetype="dashed",size=1.5)+
+geom_hline(yintercept = quantile(truthbox[,variable],1), col="grey", linetype="dashed",size=1.5)
+
+# save <- ggplot(data=df.m[-index,]) + 
+#     geom_boxplot( aes(x=factor(group), y=value, fill=factor(var)), position=position_dodge(1)) +
+#     labs(fill="Iteration")+
+#      theme_bw() + theme(legend.title = element_text(size=40),legend.text = element_text(size=40),axis.text=element_text(size=32), 
+#                  axis.title=element_text(size=40),
+#                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
+#      xlab("Algorithm")+ylab("")
+
+
+ggsave(save, file="newpics/boxplots_warfa_ka2.pdf", width = 900, height = 450, units = "mm")
+ggsave(save, file="newpics/boxplots_warfa_V2.pdf", width = 900, height = 450, units = "mm")
+ggsave(save, file="newpics/boxplots_warfa_k2.pdf", width = 900, height = 450, units = "mm")
 
 ########################PLOT##############################################################
-
 
 
 
