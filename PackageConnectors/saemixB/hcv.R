@@ -26,9 +26,9 @@ initializeMlxConnectors(software = "monolix")
 project.file <- "mlxProjects/hcv/hcv_project.mlxtran"
 loadProject(project.file)
 
-# getEstimatedPopulationParameters()
-# computePredictions(getEstimatedIndividualParameters()$saem)
-# computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
+getEstimatedPopulationParameters()
+computePredictions(getEstimatedIndividualParameters()$saem)
+computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
