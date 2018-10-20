@@ -1,0 +1,43 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/count1_data.txt'
+delimiter = tab
+header = {ID, TIME, Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=Y, type=discrete}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {lambda_pop, omega_lambda}
+
+DEFINITION:
+lambda = {distribution=logNormal, typical=lambda_pop, sd=omega_lambda}
+
+[LONGITUDINAL]
+file = 'model/poisson_model.txt'
+<FIT>
+data = Y
+model = Y
+
+<PARAMETER>
+lambda_pop = {value=1, method=MLE}
+omega_lambda = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, vpc, npc, residualsscatter, residualsdistribution, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, blq, predictiondistribution, likelihoodcontribution, categorizedoutput, saemresults, condmeanresults, fisher, likelihoodresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'count1a_project'
+

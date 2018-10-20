@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "Package: saemixB\nTitle: Stochastic Approximation Expectation Maximization (SAEM) Algorithm\nDescription: Implements the Stochastic Approximation EM algorithm \nVersion: 0.1\nAuthor: Belhal Karimi\nMaintainer: Belhal Karimi <belhal.karimi@inria.fr>\nDepends: R (>= 3.0.1)\nLicense: GPL\nLazyData: true\nCollate: \n    'aaa_generics.R'\n    'SaemixData.R'\n    'SaemixModel.R'\n    'SaemixRes.R'\n    'SaemixObject.R'\n    'SaemixRes_c.R'\n    'SaemixRes_d.R'\n    'compute_LL.R'\n    'func_FIM.R'\n    'func_aux.R'\n    'func_distcond.R'\n    'func_plots.R'\n    'func_simulations.R'\n    'main.R'\n    'main_estep.R'\n    'main_initialiseMainAlgo.R'\n    'main_mstep.R'\n    'zzz.R'\nRoxygenNote: 6.0.1\n",
+    "created" : 1511819980238.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1654873885",
+    "id" : "661B0C31",
+    "lastKnownWriteTime" : 1512311368,
+    "last_content_update" : 1512311368,
+    "path" : "~/Desktop/package_contrib/saemixB/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "dcf"
+}
