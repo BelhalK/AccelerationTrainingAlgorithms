@@ -222,10 +222,10 @@ for (m in 1:nchains){
 
 ########################PLOT##############################################################
 
-variable <- 3
+variable <- 1
 niter1 <- 5
 niter2 <- 20
-niter3 <- L_mcmc
+niter3 <- 500
 
 refbox <- ref[nchains,]
 malabox <- mala[nchains,]
@@ -253,7 +253,7 @@ nutsbox$iterations <- 1:nchains
 truthbox$iterations <- 1:nchains
 
 refbox$algo <- "RWM"
-newbox$algo <- "IMH"
+newbox$algo <- "nlme-IMH"
 malabox$algo <- "MALA"
 nutsbox$algo <- "NUTS"
 truthbox$algo <- "Truth"
