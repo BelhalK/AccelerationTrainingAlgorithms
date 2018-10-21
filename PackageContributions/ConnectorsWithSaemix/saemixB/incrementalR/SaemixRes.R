@@ -1,11 +1,11 @@
 ####################################################################################
-####			SaemixRes class - definition				####
+####            SaemixRes class - definition                ####
 ####################################################################################
 
 ###############################
 # Definition with initialise
 
-#' Class "SaemixRes_c"
+#' Class "SaemixRes"
 #' 
 #' An object of the SaemixRes class, representing the results of a fit through the SAEM algorithm.
 #' 
@@ -21,15 +21,15 @@
 #'     }
 #' @section Methods:
 #'   \describe{
-#'     \item{[<-}{\code{signature(x = "SaemixRes_c")}: replace elements of object}
-#'     \item{[}{\code{signature(x = "SaemixRes_c")}: access elements of object}
-#'     \item{initialize}{\code{signature(.Object = "SaemixRes_c")}: internal function to initialise object, not to be used}
-#'     \item{print}{\code{signature(x = "SaemixRes_c")}: prints details about the object (more extensive than show)}
-#'     \item{read}{\code{signature(object = "SaemixRes_c")}: internal function, not to be used }
-#'     \item{showall}{\code{signature(object = "SaemixRes_c")}: shows all the elements in the object}
-#'     \item{show}{\code{signature(object = "SaemixRes_c")}: prints details about the object}
-#'     \item{summary}{\code{signature(object = "SaemixRes_c")}: summary of the results. Returns a list with a number of elements extracted from the results ().}
-#' 	 }
+#'     \item{[<-}{\code{signature(x = "SaemixRes")}: replace elements of object}
+#'     \item{[}{\code{signature(x = "SaemixRes")}: access elements of object}
+#'     \item{initialize}{\code{signature(.Object = "SaemixRes")}: internal function to initialise object, not to be used}
+#'     \item{print}{\code{signature(x = "SaemixRes")}: prints details about the object (more extensive than show)}
+#'     \item{read}{\code{signature(object = "SaemixRes")}: internal function, not to be used }
+#'     \item{showall}{\code{signature(object = "SaemixRes")}: shows all the elements in the object}
+#'     \item{show}{\code{signature(object = "SaemixRes")}: prints details about the object}
+#'     \item{summary}{\code{signature(object = "SaemixRes")}: summary of the results. Returns a list with a number of elements extracted from the results ().}
+#'   }
 #' @references Kuhn E, Lavielle M. Maximum likelihood estimation in nonlinear mixed effects models. Computational Statistics and Data Analysis 49, 4 (2005), 1020-1038.
 #' 
 #' Comets E, Lavenu A, Lavielle M. SAEMIX, an R version of the SAEM algorithm. 20th meeting of the Population Approach Group in Europe, Athens, Greece (2011), Abstr 2173.
@@ -38,75 +38,76 @@
 #' @author Marc Lavielle.
 #' @seealso \code{\link{saemixData}} \code{\link{SaemixModel}} \code{\link{saemixControl}} \code{\link{saemix}}
 #' @examples
-#' methods(class="SaemixRes_c")
+#' methods(class="SaemixRes")
 #' 
-#' showClass("SaemixRes_c")
+#' showClass("SaemixRes")
 #' 
 #' @keywords classes
 #' @exportClass SaemixRes
 
 setClass(
-  Class="SaemixRes_c",
+  Class="SaemixRes",
   representation=representation(
-    name.fixed="character",	# names of fixed parameters in the model
-    name.random="character",	# names of random effects
-    name.res="character",	# names of parameters of residual error model
-    npar.est="numeric",		# nb of parameters estimated (fixed, random & resid)
-    fixed.effects="numeric",	# vector with h(mu) and betas in estimation order
-    fixed.psi="numeric",	# h(mu)
-    betas="matrix",		# estimated mu
-    betaC="numeric",		# estimated fixed effects for covariates
-    omega="matrix",		# estimated omega
-    respar="numeric",		# estimated residual variability
-    fim="matrix",		# Fisher information matrix
-    se.fixed="numeric",		# estimated SE for fixed effects
-    se.omega="numeric",	# estimated SE for Omega
-    se.respar="numeric",	# estimated SE for residual variability
-    parpop="matrix",	# population parameters at each iteration
-    allpar="matrix",	# all parameters (including covariate effects) at each iteration
-    indx.fix="numeric",	# index of mean param estimated (was indx.betaI)
-    indx.cov="numeric",	# index of cov param estimated (was indx.betaC)
-    indx.omega="numeric",	# index of random param estimated (was i1.omega2)
-    indx.res="numeric",	# index of param of residual errors estimated (was indx.res)
-    MCOV="matrix",		# 
+    modeltype="character", # names of fixed parameters in the model
+    name.fixed="character", # names of fixed parameters in the model
+    name.random="character",    # names of random effects
+    name.res="character",   # names of parameters of residual error model
+    npar.est="numeric",     # nb of parameters estimated (fixed, random & resid)
+    fixed.effects="numeric",    # vector with h(mu) and betas in estimation order
+    fixed.psi="numeric",    # h(mu)
+    betas="matrix",     # estimated mu
+    betaC="numeric",        # estimated fixed effects for covariates
+    omega="matrix",     # estimated omega
+    respar="numeric",       # estimated residual variability
+    fim="matrix",       # Fisher information matrix
+    se.fixed="numeric",     # estimated SE for fixed effects
+    se.omega="numeric", # estimated SE for Omega
+    se.respar="numeric",    # estimated SE for residual variability
+    parpop="matrix",    # population parameters at each iteration
+    allpar="matrix",    # all parameters (including covariate effects) at each iteration
+    indx.fix="numeric", # index of mean param estimated (was indx.betaI)
+    indx.cov="numeric", # index of cov param estimated (was indx.betaC)
+    indx.omega="numeric",   # index of random param estimated (was i1.omega2)
+    indx.res="numeric", # index of param of residual errors estimated (was indx.res)
+    MCOV="matrix",      # 
 # Individual parameters
-    cond.mean.phi="matrix",	# Cond mean estimates of Phi (mean of conditional distribution)
-    cond.mean.psi="matrix",	# Cond mean estimates of Psi (h(cond.mean.phi))
+    cond.mean.phi="matrix", # Cond mean estimates of Phi (mean of conditional distribution)
+    cond.mean.psi="matrix", # Cond mean estimates of Psi (h(cond.mean.phi))
     cond.var.phi="matrix",  # Variability on cond.mean.phi (var of conditional distribution)
-    cond.mean.eta="matrix",	# Cond mean estimates of eta (CHECK FORMULA)
-    cond.shrinkage="numeric",	# Shrinkage for cond mean estimates of Eta
+    cond.mean.eta="matrix", # Cond mean estimates of eta (CHECK FORMULA)
+    cond.shrinkage="numeric",   # Shrinkage for cond mean estimates of Eta
     mean.phi="matrix",  # population estimate (Ci*mu) including covariate effects
-    map.psi="data.frame",	# MAP estimates of individual parameters 
-    map.phi="data.frame",	# MAP estimates of phi
-    map.eta="matrix",		# ETAs corresponding to the MAP estimates (computed as map.phi-COV%*%MCOV in compute.eta.map)
-    map.shrinkage="numeric", 	# shrinkage on MAP estimates
+    map.psi="data.frame",   # MAP estimates of individual parameters 
+    map.phi="data.frame",   # MAP estimates of phi
+    map.eta="matrix",       # ETAs corresponding to the MAP estimates (computed as map.phi-COV%*%MCOV in compute.eta.map)
+    map.shrinkage="numeric",    # shrinkage on MAP estimates
     phi="matrix",
-    psi.samp="array",		# nb.chains samples in the individual conditional distributions (psi)
-    phi.samp="array",		# nb.chains samples in the individual conditional distributions (phi)
-    phi.samp.var="array",	# variance of samples
+    psi.samp="array",       # nb.chains samples in the individual conditional distributions (psi)
+    phi.samp="array",       # nb.chains samples in the individual conditional distributions (phi)
+    phi.samp.var="array",   # variance of samples
 # Statistical criteria
-    ll.lin="numeric",		# for each method (linearisation, IS, GQ)
-    aic.lin="numeric",		# ll=log-likelihood
-    bic.lin="numeric",		# aic= Akaike Information Criterion
-    ll.is="numeric",		# bic= Bayesian Information Criterion
+    ll.lin="numeric",       # for each method (linearisation, IS, GQ)
+    aic.lin="numeric",      # ll=log-likelihood
+    bic.lin="numeric",      # aic= Akaike Information Criterion
+    ll.is="numeric",        # bic= Bayesian Information Criterion
     aic.is="numeric",
     bic.is="numeric",
-    LL="numeric",		# LL for each iteration in the IS algorithm
+    LL="numeric",       # LL for each iteration in the IS algorithm
     ll.gq="numeric",
     aic.gq="numeric",
     bic.gq="numeric",
 # Model predictions and residuals
-		predictions="data.frame", # data frame containing all the predictions and residuals below
-    ypred="numeric",		# vector of mean population predictions
-    ppred="numeric",		# vector of population predictions with MAP
-    ipred="numeric",		# vector of individual predictions with MAP
-    icpred="numeric",		# vector of individual predictions with conditional estimates
-    ires="numeric",		  # vector of individual residuals with MAP (ipred-x)
-    iwres="numeric",		# vector of individual weighted residuals with MAP
-    icwres="numeric",		# vector of individual weighted residuals with conditional estimates
-    wres="numeric",		# vector of WRES (population weighted residuals)
-    npde="numeric",		# vector of npde
-    pd="numeric"		# vector of prediction discrepancies
+        predictions="data.frame", # data frame containing all the predictions and residuals below
+    ypred="numeric",        # vector of mean population predictions
+    ppred="numeric",        # vector of population predictions with MAP
+    ipred="numeric",        # vector of individual predictions with MAP
+    icpred="numeric",       # vector of individual predictions with conditional estimates
+    ires="numeric",       # vector of individual residuals with MAP (ipred-x)
+    iwres="numeric",        # vector of individual weighted residuals with MAP
+    icwres="numeric",       # vector of individual weighted residuals with conditional estimates
+    wres="numeric",     # vector of WRES (population weighted residuals)
+    npde="numeric",     # vector of npde
+    pd="numeric"        # vector of prediction discrepancies
   ),
   validity=function(object){
 #    cat ("--- Checking SaemixRes object ---\n")
@@ -122,9 +123,11 @@ setClass(
 
 setMethod(
   f="initialize",
-  signature="SaemixRes_c",
-  definition= function(.Object,name.fixed,name.random,name.res,fixed.effects, fixed.psi,betaC,betas,omega,respar,cond.mean.phi,cond.var.phi,mean.phi,phi, phi.samp,parpop, allpar,MCOV){
+  signature="SaemixRes",
+  definition= function(.Object,modeltype,name.fixed,name.random,name.res,fixed.effects, fixed.psi,betaC,betas,omega,respar,cond.mean.phi,cond.var.phi,mean.phi,phi, phi.samp,parpop, allpar,MCOV){
 #    cat ("--- initialising SaemixRes Object --- \n")
+    if(missing(modeltype)) modeltype<-character(0)
+    .Object@modeltype<-modeltype
     if(missing(name.fixed)) name.fixed<-character(0)
     .Object@name.fixed<-name.fixed
     if(missing(name.random)) name.random<-character(0)
@@ -169,7 +172,7 @@ setMethod(
 )
 
 ####################################################################################
-####			SaemixRes class - accesseur				####
+####            SaemixRes class - accesseur             ####
 ####################################################################################
 
 ##' Get/set methods for SaemixRes object
@@ -188,9 +191,10 @@ setMethod(
 # Getteur
 setMethod(
   f ="[",
-  signature = "SaemixRes_c" ,
+  signature = "SaemixRes" ,
   definition = function (x,i,j,drop ){
   switch (EXPR=i,
+    "modeltype"={return(x@modeltype)},
     "name.fixed"={return(x@name.fixed)},
     "name.res"={return(x@name.res)},
     "name.random"={return(x@name.random)},
@@ -256,9 +260,10 @@ setMethod(
 # Setteur
 setReplaceMethod(
   f ="[",
-  signature = "SaemixRes_c" ,
+  signature = "SaemixRes" ,
   definition = function (x,i,j,value){
   switch (EXPR=i,
+    "modeltype"={x@modeltype<-value},
     "name.fixed"={x@name.fixed<-value},
     "name.random"={x@name.random<-value},
     "name.res"={x@name.res<-value},
@@ -323,12 +328,12 @@ setReplaceMethod(
 )
 
 ####################################################################################
-####			SaemixRes class - method to print/show data		####
+####            SaemixRes class - method to print/show data     ####
 ####################################################################################
 
 #' @exportMethod print
 
-setMethod("print","SaemixRes_c",
+setMethod("print","SaemixRes",
   function(x,digits=2,map=FALSE,...) {
 #    cat("Nonlinear mixed-effects model fit by the SAEM algorithm\n")
 #    cat("Dataset",x@name.data,"\n")
@@ -340,10 +345,18 @@ setMethod("print","SaemixRes_c",
     cat("-----------------  Fixed effects  ------------------\n")
     cat("----------------------------------------------------\n")
     if(length(x@se.fixed)==0) {
-      tab<-cbind(c(x@name.fixed,x@name.res[x@indx.res]), c(x@fixed.effects,x@respar[x@indx.res]))
+        if(x@modeltype=="structural") {
+            tab<-cbind(c(x@name.fixed,x@name.res[x@indx.res]), c(x@fixed.effects,x@respar[x@indx.res]))
+        }else{
+            tab<-cbind(c(x@name.fixed), c(x@fixed.effects))
+        }
       colnames(tab)<-c("Parameter","Estimate")
     } else {
-      tab<-cbind(c(x@name.fixed,x@name.res[x@indx.res]), c(x@fixed.effects,x@respar[x@indx.res]),c(x@se.fixed,x@se.respar[x@indx.res]))
+        if(x@modeltype=="structural") {
+            tab<-cbind(c(x@name.fixed,x@name.res[x@indx.res]), c(x@fixed.effects,x@respar[x@indx.res]),c(x@se.fixed,x@se.respar[x@indx.res]))
+        }else{
+            tab<-cbind(c(x@name.fixed), c(x@fixed.effects))
+        }
       tab<-cbind(tab,100*abs(as.double(tab[,3])/as.double(tab[,2])))
       colnames(tab)<-c("Parameter","Estimate","SE","CV(%)")
       if(length(x@indx.cov)>0) {
@@ -430,7 +443,7 @@ setMethod("print","SaemixRes_c",
 
 #' @exportMethod show
 
-setMethod("show","SaemixRes_c",
+setMethod("show","SaemixRes",
   function(object) {
 #    cat("Nonlinear mixed-effects model fit by the SAEM algorithm\n")
     cat("Fixed effects\n")
@@ -513,7 +526,7 @@ setMethod("show","SaemixRes_c",
 #' @exportMethod showall
 
 # Could be print, with only head of data
-setMethod("showall","SaemixRes_c",
+setMethod("showall","SaemixRes",
   function(object) {
     cat("\n----------------------------------------------------\n")
     cat("-----------------  Fixed effects  ------------------\n")
@@ -583,7 +596,7 @@ setMethod("showall","SaemixRes_c",
 )
 
 ####################################################################################
-####			SaemixRes class - extracting residuals	and fitted values		####
+####            SaemixRes class - extracting residuals  and fitted values       ####
 ####################################################################################
 # resid.lm
 #           function (object, type = c("working", "response", "deviance", 
@@ -649,7 +662,7 @@ fitted.SaemixRes<-function (object, type = c("ipred", "ypred", "ppred", "icpred"
 }
 
 ####################################################################################
-####			SaemixRes class - variance-covariance matrix		####
+####            SaemixRes class - variance-covariance matrix        ####
 ####################################################################################
 
 #' Extracts the Variance-Covariance Matrix for a Fitted Model Object
@@ -660,7 +673,7 @@ fitted.SaemixRes<-function (object, type = c("ipred", "ypred", "ppred", "icpred"
 #' @aliases vcov vcov.SaemixRes vcov.SaemixObject ##vcov,SaemixRes vcov,SaemixObject
 #' 
 #' @param object a fitted object from a call to saemix
-#' @param ...	further arguments to be passed to or from other methods
+#' @param ...   further arguments to be passed to or from other methods
 #' 
 #' @return A matrix of the estimated covariances between the parameter estimates in model. In saemix, this matrix is obtained as the inverse of the Fisher Information Matrix computed by linearisation
 #' 
@@ -675,7 +688,7 @@ vcov.SaemixObject<-function(object, ...) {
   vcov(object@results)
 }
 
-# setMethod("vcov","SaemixRes_c",
+# setMethod("vcov","SaemixRes",
 #           function (object, ...) 
 #           {
 #             object@fim
@@ -691,7 +704,7 @@ vcov.SaemixObject<-function(object, ...) {
 
 
 ####################################################################################
-####			SaemixRes class - method to plot			####
+####            SaemixRes class - method to plot            ####
 ####################################################################################
 
 ####################################################################################

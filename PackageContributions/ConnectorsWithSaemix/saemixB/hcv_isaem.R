@@ -1,4 +1,5 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/R")
+# setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/incrementalR")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -8,6 +9,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/Co
   source('func_simulations.R') 
   source('main.R')
   source('main_estep.R')
+  source('main_estep_incremental.R')
   source('main_initialiseMainAlgo.R') 
   source('main_mstep.R') 
   source('SaemixData.R')
@@ -16,7 +18,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/Co
   source('SaemixObject.R') 
   source('zzz.R') 
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB")
-
+library("rlist")
 library("mlxR")
 library(MlxConnectors)
 initializeMlxConnectors(software = "monolix")
@@ -26,9 +28,9 @@ initializeMlxConnectors(software = "monolix")
 project.file <- "mlxProjects/hcv/hcv_project.mlxtran"
 loadProject(project.file)
 
-getEstimatedPopulationParameters()
-computePredictions(getEstimatedIndividualParameters()$saem)
-computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
+# getEstimatedPopulationParameters()
+# computePredictions(getEstimatedIndividualParameters()$saem)
+# computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
@@ -61,8 +63,11 @@ K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE)
+runtime = 50
+
+options<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+ nb.replacement=100,sampling='randompass', duration = runtime)
 hcv<-saemix(saemix.model,saemix.data,options)
-
-
 
