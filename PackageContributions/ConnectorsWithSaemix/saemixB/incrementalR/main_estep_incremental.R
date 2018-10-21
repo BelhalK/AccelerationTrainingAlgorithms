@@ -19,8 +19,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 
-	# ll <- sort(l[ind_rand],decreasing=FALSE)
-	ll <- l[ind_rand]
+	ll <- sort(l[ind_rand],decreasing=FALSE)
 	blockincremental <- NULL
 	for (m in 1:Uargs$nchains){	
 		blockincremental <- list.append(blockincremental,setdiff(1:Dargs$N, ll)+(m-1)*Dargs$N)
@@ -49,22 +48,22 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 			Uc.y<-lly_c$U
 			indices<-lly_c$indices
 			block <- unique(Dargs$IdM[indices])
-
-
-
-			psiMc<-transphi(phiMc,Dargs$transform.par)
-			tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
-		    colnames(tempsiMc) <- c("id",colnames(varList$omega))
-		    fpred <- Dargs$yM
-		    browser()
-		    test1 <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
-		    test2 <- as.numeric(computePredictions(data.frame(tempsiMc)[1:Dargs$N,], individualIds=1:Dargs$N)[[1]])
-		    test3 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosen,], individualIds=chosen)[[1]])
-		    chosensorted <- sort(chosen,decreasing=FALSE)
-		    test4 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosensorted,], individualIds=chosensorted)[[1]])
-		    as.numeric(computePredictions(data.frame(tempsiMc)[c(1,2,3,4),], individualIds=c(1,2,3,4))[[1]])
-
-			as.numeric(computePredictions(data.frame(tempsiMc)[c(3,4,1,2),], individualIds=c(2,4,1,2))[[1]])
+			# psiMc<-transphi(phiMc,Dargs$transform.par)
+			# tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
+		 #    colnames(tempsiMc) <- c("id",colnames(varList$omega))
+		 #    fpred <- Dargs$yM
+		 #    browser()
+		 #    test1 <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
+		 #    test2 <- as.numeric(computePredictions(data.frame(tempsiMc)[1:Dargs$N,], individualIds=1:Dargs$N)[[1]])
+		 #    test3 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosen,], individualIds=chosen)[[1]])
+		 #    chosensorted <- sort(chosen,decreasing=FALSE)
+		 #    test4 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosensorted,], individualIds=chosensorted)[[1]])
+		 #    as.numeric(computePredictions(data.frame(tempsiMc)[c(1,2,3,4),], individualIds=c(1,2,3,4))[[1]])
+			# as.numeric(computePredictions(data.frame(tempsiMc)[c(1),], individualIds=c(1))[[1]])
+			# as.numeric(computePredictions(data.frame(tempsiMc)[c(2),], individualIds=c(2))[[1]])
+			# as.numeric(computePredictions(data.frame(tempsiMc)[c(3),], individualIds=c(3))[[1]])
+			# as.numeric(computePredictions(data.frame(tempsiMc)[c(4),], individualIds=c(4))[[1]])
+			# as.numeric(computePredictions(data.frame(tempsiMc)[c(3,4,1,2),], individualIds=c(3,4,1,2))[[1]])
 
 		} else {
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)

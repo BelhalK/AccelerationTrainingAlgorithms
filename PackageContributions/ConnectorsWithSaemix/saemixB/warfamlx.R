@@ -1,4 +1,4 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageConnectors/saemixB/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -16,7 +16,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageConnectors/saemi
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageConnectors/saemixB")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB")
 
 library("mlxR")
 library(MlxConnectors)
