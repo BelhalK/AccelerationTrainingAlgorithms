@@ -23,12 +23,22 @@ library("mlxR")
 library(MlxConnectors)
 initializeMlxConnectors(software = "monolix")
 
+library("psych")
+library("coda")
+library("Matrix")
+library(abind)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
+require(madness)
 ################################################################ MonolixProject ####################################################################################################################################
 
 project.file <- "mlxProjects/hcv/hcv_project.mlxtran"
 loadProject(project.file)
 
 # getEstimatedPopulationParameters()
+# getEstimatedLogLikelihood()
+# runLogLikelihoodEstimation(linearization = FALSE, wait = TRUE)
 # computePredictions(getEstimatedIndividualParameters()$saem)
 # computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
 
@@ -54,20 +64,74 @@ hcv.saemix <- hcv_data$Y
 saemix.data<-saemixData(name.data=hcv.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("time"),name.response=c("Y"), name.X="time")
 
-saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
-  ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,1,1,1,1,1,1),
-  transform.par=c(1,1,1,1,1,1,1,1),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
+# saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
+#   ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,1,1,1,1,1,1),
+#   transform.par=c(1,1,1,1,1,1,3,3),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
 
-K1 = 200
-K2 = 100
+saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
+  ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,0,0,0,0,1,1),
+  transform.par=c(1,1,1,1,1,1,2,2),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),covariance.model=matrix(diag(8),ncol=8,byrow=TRUE))
+
+K1 = 1000
+K2 = 500
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-runtime = 50
+runtime = 100
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
  nb.replacement=100,sampling='randompass', duration = runtime)
-hcv<-saemix(saemix.model,saemix.data,options)
+hcv<-data.frame(saemix(saemix.model,saemix.data,options))
+hcv <- cbind(iterations, hcv)
+row_sub_ref  = apply(hcv, 1, function(row) all(row !=0 ))
+hcv <- hcv[row_sub_ref,]
+hcv$algo <- 'full'
+hcv$iterations <- seq(0,runtime, length.out=length(hcv$iterations))
+
+
+
+options50<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+ nb.replacement=50,sampling='randompass', duration = runtime)
+hcv50<-data.frame(saemix(saemix.model,saemix.data,options50))
+hcv50 <- cbind(iterations, hcv50)
+row_sub_50  = apply(hcv50, 1, function(row) all(row !=0 ))
+hcv50 <- hcv50[row_sub_50,]
+hcv50$algo <- 'half'
+hcv50$iterations <- seq(0,runtime, length.out=length(hcv50$iterations))
+
+
+options25<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+ nb.replacement=25,sampling='randompass', duration = runtime)
+hcv25<-data.frame(saemix(saemix.model,saemix.data,options25))
+hcv25 <- cbind(iterations, hcv25)
+row_sub_25  = apply(hcv25, 1, function(row) all(row !=0 ))
+hcv25 <- hcv25[row_sub_25,]
+hcv25$algo <- 'quarter'
+hcv25$iterations <- seq(0,runtime, length.out=length(hcv25$iterations))
+
+
+seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
+{
+  G <- (ncol(df)-2)/3
+  df$algo <- as.factor(df$algo)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  graf <- ggplot(df)+geom_line(aes(iterations,value,by=value,colour = df$algo),show.legend = legend) +
+  xlab("iterations") + ylab('value') + facet_wrap(~variable,scales = "free_y") + theme_bw() 
+  grid.arrange(graf)
+  # do.call("grid.arrange", c(graf, ncol=1, top=title))
+}
+
+
+comparison <- 0
+comparison <- rbind(hcv,hcv50)
+var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
+prec <- seplot(var, title="comparison",legend=TRUE)
+
 

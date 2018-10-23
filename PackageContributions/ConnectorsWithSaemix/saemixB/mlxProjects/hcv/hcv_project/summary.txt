@@ -1,6 +1,6 @@
 ********************************************************************************
 *                         hcv_project.mlxtran                                  *
-*                         October 10, 2018 at 21:14:54                         *
+*                         October 23, 2018 at 09:46:27                         *
 *                         Monolix version : 5.0.1                              *
 ********************************************************************************
 
@@ -31,5 +31,21 @@ a                              :     0.593
 
 Elapsed time (seconds) :    1e+02
 CPU time     (seconds) :  5.1e+02
+ _______________________________________________________________________________
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                (is)
+
+-2 x log-likelihood                 :        1209.62
+Akaike Information Criteria   (AIC) :        1243.62
+Bayesian Information Criteria (BIC) :        1278.05
+
+Elapsed time              (seconds) :             69
+CPU time                  (seconds) :        3.3e+02
+
+
+[Importance Sampling] Standard error        : 0.436
+                      Sampling distribution : T-distribution with 5 degrees of freedom
  _______________________________________________________________________________
 

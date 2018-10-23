@@ -1,0 +1,54 @@
+DESCRIPTION: Latently dynamic model for HIV.  Multiple outputs, VL and CD4+ 
+Publication from Funk et al. 
+Quantification of in vivo replicative capacity of HIV-1 in different compartments of infected cells. 
+Journal of Acquired Immune Deficiency Syndromes. 2001;26:397 - 404.
+
+Variables: 
+- T_NI Number of noninfected CD4 cells
+- T_L  Number of latently infected CD4 cells
+- T_A  Number of activated CD4 cells
+- V_NI Number of noninfected virus cells
+- V_I  Number of infected virus cells
+
+Parameters:
+- lambda [cells/mm3/day] Rate of production of infected CD4 cells
+- gamma0 [cells/mm3/day] Infection rate of CD4 cell per virion
+- muNI	 [1/day]	     Death rate of uninfected CD4 cells
+- muL	 [1/day]	     Death rate for latently infected CD4 cells
+- muA	 [1/day]         Death rate for actively infected CD4 cells
+- muV	 [1/day]	     Death rate of virions
+- p0		             Number of virions production by CD4 cell
+- alphaL		         Activation rate of latently infected CD4 cells
+- f		                 Proportion of infected CD4 cells that become activated
+- etaRTI	             Efficacy of NRTI
+- etaPI		             Efficacy of PI
+
+[LONGITUDINAL]
+input = {lambda, gamma0, muNI, muL, muA, muV, p0, alphaL, f, etaRTI, etaPI}
+
+EQUATION:
+gamma = (1-etaRTI)*gamma0
+
+; Initial conditions
+; Variables are assumed to be at steady state
+t0    = 0
+TNI_0 = (muA*muV*(alphaL+muL))/(gamma0*p0*(alphaL+muL*f))
+VI_0  = (lambda-TNI_0*muNI)/(gamma0*TNI_0)
+TA_0  = muV*VI_0/p0
+TL_0  = (1-f)*gamma0*TNI_0*VI_0/(alphaL+muL)
+VNI_0 = 0
+
+; Dynamical model
+ddt_TNI = lambda-gamma*TNI*VI-muNI*TNI
+ddt_TL  = (1-f)*gamma*TNI*VI-alphaL*TL-muL*TL
+ddt_TA  = f*gamma*TNI*VI+alphaL*TL-muA*TA
+ddt_VI  = (1-etaPI)*p0*TA-muV*VI
+ddt_VNI = etaPI*p0*TA-muV*VNI
+
+; The measured viral load is the total viral load V = VNI +VI
+; The measured CD4 cell count is the total T = TNI + TL + TA.
+LVL = log10(max((VNI+VI)*1000,1))
+TTOT = TNI+TL+TA
+
+OUTPUT:
+output = {LVL, TTOT}

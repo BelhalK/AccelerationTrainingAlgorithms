@@ -47,12 +47,12 @@ function(psi,id,xidep) {
      Parameter Distribution Estimated
 [1,] s         log-normal   Estimated
 [2,] d         log-normal   Estimated
-[3,] beta      log-normal   Estimated
-[4,] delta     log-normal   Estimated
-[5,] p         log-normal   Estimated
-[6,] c         log-normal   Estimated
-[7,] eta       log-normal   Estimated
-[8,] epsilon   log-normal   Estimated
+[3,] beta      log-normal   Fixed    
+[4,] delta     log-normal   Fixed    
+[5,] p         log-normal   Fixed    
+[6,] c         log-normal   Fixed    
+[7,] eta       probit       Estimated
+[8,] epsilon   probit       Estimated
   Variance-covariance matrix:
         s d beta delta p c eta epsilon
 s       1 0    0     0 0 0   0       0
@@ -72,7 +72,7 @@ Pop.CondInit 1000 1 5e-05  0.05 20 5 0.9     0.7
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=200, K2=100 
+    Number of iterations:  K1=1000, K2=500 
     Number of chains:  1 
     Seed:  39546 
     Simulations:
@@ -88,27 +88,27 @@ Pop.CondInit 1000 1 5e-05  0.05 20 5 0.9     0.7
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
       Parameter Estimate
- [1,] s         1.3e+03 
- [2,] d         1.5e+00 
- [3,] beta      3.8e-05 
- [4,] delta     8.8e-03 
+ [1,] s         1.8e+03 
+ [2,] d         1.0e+00 
+ [3,] beta      5.0e-05 
+ [4,] delta     5.0e-02 
  [5,] p         2.0e+01 
- [6,] c         6.8e+00 
- [7,] eta       8.9e-01 
- [8,] epsilon   7.1e-01 
- [9,] a         5.6e-01 
+ [6,] c         5.0e+00 
+ [7,] eta       1.8e-01 
+ [8,] epsilon   5.3e-01 
+ [9,] a         5.3e-01 
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
         Parameter      Estimate
-s       omega2.s       3.2e-01 
-d       omega2.d       2.3e-03 
-beta    omega2.beta    1.4e-03 
-delta   omega2.delta   6.7e-05 
-p       omega2.p       1.6e+00 
-c       omega2.c       5.3e-01 
-eta     omega2.eta     1.0e-01 
-epsilon omega2.epsilon 4.6e-02 
+s       omega2.s        0.120  
+d       omega2.d        0.663  
+beta    omega2.beta     0.037  
+delta   omega2.delta    1.370  
+p       omega2.p        0.054  
+c       omega2.c        3.597  
+eta     omega2.eta     16.792  
+epsilon omega2.epsilon  1.656  
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------

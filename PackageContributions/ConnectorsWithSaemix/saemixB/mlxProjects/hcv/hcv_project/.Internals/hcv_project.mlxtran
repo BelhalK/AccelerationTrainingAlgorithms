@@ -64,7 +64,7 @@ s_pop = {value=1000, method=MLE}
 populationParameters()
 individualParameters(method = {conditionalMean, conditionalMode })
 fim(method = StochasticApproximation)
-logLikelihood(run = false,method = ImportanceSampling)
+logLikelihood(method = ImportanceSampling)
 plotResult(method = {outputplot, indfits, obspred, vpc, npc, residualsscatter, residualsdistribution, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, blq, predictiondistribution, likelihoodcontribution, categorizedoutput, saemresults, condmeanresults, fisher, likelihoodresults })
 
 [SETTINGS]

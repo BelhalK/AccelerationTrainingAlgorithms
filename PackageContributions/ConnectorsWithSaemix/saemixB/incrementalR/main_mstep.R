@@ -19,7 +19,8 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	if (Dargs$monolix == TRUE){
 	    tempsiM <- cbind(unique(Dargs$IdM), psiM)
 		colnames(tempsiM) <- c("id",colnames(omega.eta))
-		fpred <- computePredictions(data.frame(tempsiM))[[1]]
+		fpred <- as.numeric(computePredictions(data.frame(tempsiM))[[1]])
+    	fpred[which(is.nan(fpred))] <- 0
 	} else {
 		fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	}

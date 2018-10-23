@@ -4,7 +4,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	# E-step - simulate unknown parameters
 	# Input: kiter, Uargs, structural.model, mean.phi (unchanged)
 	# Output: varList, DYF, phiM (changed)
-	
+
 	# Function to perform MCMC simulation
 	nb.etas<-length(varList$ind.eta)
 	domega<-cutoff(mydiag(varList$omega[varList$ind.eta,varList$ind.eta]),.Machine$double.eps)
@@ -30,13 +30,22 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	}
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
+	phiM <- etaM + mean.phiM
 
 	if(Dargs$type=="structural"){
-		U.y<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N)$U
+		ll.y <- compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N)
+		U.y<-ll.y$U
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 	}
 	
+	# if (kiter==56) browser()
+	# phiM <- etaM + mean.phiM
+	# psiM<-transphi(phiM,Dargs$transform.par)
+ #    tempsiM <- cbind(unique(Dargs$IdM), psiM)
+ #    colnames(tempsiM) <- c("id",colnames(varList$omega))
+ #    computePredictions(data.frame(tempsiM))[[1]]
+
 
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
@@ -48,23 +57,6 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 			Uc.y<-lly_c$U
 			indices<-lly_c$indices
 			block <- unique(Dargs$IdM[indices])
-			# psiMc<-transphi(phiMc,Dargs$transform.par)
-			# tempsiMc <- cbind(unique(Dargs$IdM), psiMc)
-		 #    colnames(tempsiMc) <- c("id",colnames(varList$omega))
-		 #    fpred <- Dargs$yM
-		 #    browser()
-		 #    test1 <- as.numeric(computePredictions(data.frame(tempsiMc))[[1]])
-		 #    test2 <- as.numeric(computePredictions(data.frame(tempsiMc)[1:Dargs$N,], individualIds=1:Dargs$N)[[1]])
-		 #    test3 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosen,], individualIds=chosen)[[1]])
-		 #    chosensorted <- sort(chosen,decreasing=FALSE)
-		 #    test4 <- as.numeric(computePredictions(data.frame(tempsiMc)[chosensorted,], individualIds=chosensorted)[[1]])
-		 #    as.numeric(computePredictions(data.frame(tempsiMc)[c(1,2,3,4),], individualIds=c(1,2,3,4))[[1]])
-			# as.numeric(computePredictions(data.frame(tempsiMc)[c(1),], individualIds=c(1))[[1]])
-			# as.numeric(computePredictions(data.frame(tempsiMc)[c(2),], individualIds=c(2))[[1]])
-			# as.numeric(computePredictions(data.frame(tempsiMc)[c(3),], individualIds=c(3))[[1]])
-			# as.numeric(computePredictions(data.frame(tempsiMc)[c(4),], individualIds=c(4))[[1]])
-			# as.numeric(computePredictions(data.frame(tempsiMc)[c(3,4,1,2),], individualIds=c(3,4,1,2))[[1]])
-
 		} else {
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
 		}
@@ -77,9 +69,8 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		etaM[ind,]<-etaMc[ind,]
 		U.y[ind]<-Uc.y[ind]
 	}
-
 	U.eta<-0.5*rowSums(etaM*(etaM%*%somega))
-	
+
 	# Second stage
 	
 	if(opt$nbiter.mcmc[2]>0) {

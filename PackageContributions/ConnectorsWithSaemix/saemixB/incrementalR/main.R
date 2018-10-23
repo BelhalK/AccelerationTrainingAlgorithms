@@ -200,17 +200,17 @@ kiter = 0
 duration <- end_time - start_time
 j = 0
 
-# while (duration <saemix.options$duration){
-for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
+while (duration <saemix.options$duration){
+# for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   duration <- as.numeric(end_time - start_time,units="secs")
+  # print(kiter)
   print(kiter)
-  # print(duration)
-  # if (duration > saemix.options$duration - 10){
-  #   j = j +1
-  #   kiter = saemix.options$nbiter.saemix[1] + j
-  # } else {
-  #   kiter = kiter + 1
-  # }
+  if (duration > saemix.options$duration - 10){
+    j = j +1
+    kiter = saemix.options$nbiter.saemix[1] + j
+  } else {
+    kiter = kiter + 1
+  }
 # SAEM convergence plots
 	if(kiter%%saemix.options$nbdisplay==0) {
     cat(".")
@@ -243,13 +243,12 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   varList<-xmcmc$varList
   DYF<-xmcmc$DYF
   phiM<-xmcmc$phiM
+
   #  psiM<-transphi(phiM,saemix.model["transform.par"])
   
   # M-step
   if(opt$stepsize[kiter]>0) {
 ############# Stochastic Approximation
-    lly_c<-compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N)
-    lly_c$U
   	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat)
     varList<-xstoch$varList
   	mean.phi<-xstoch$mean.phi
@@ -437,5 +436,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(saemixObject)
+  return(parpop)
 }
