@@ -1,0 +1,3 @@
+residuals,statistic,p-value,test
+NPDE_y_2,163.017,0,VDW
+PWRES_y_2,157.657,0,VDW

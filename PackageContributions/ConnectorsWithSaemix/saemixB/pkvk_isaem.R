@@ -44,8 +44,19 @@ loadProject(project.file)
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  tauD<-psi[id,1]
-  tauS<-psi[id,2]
+  Tlag<-psi[id,1]
+  Tk0<-psi[id,2]
+  Vol<-psi[id,3]
+  Cl<-psi[id,4]
+  ke0<-psi[id,5]
+  IC50<-psi[id,6]
+  gamma<-psi[id,7]
+  s<-psi[id,13]
+  d<-psi[id,9]
+  beta<-psi[id,10]
+  delta<-psi[id,11]
+  p<-psi[id,12]
+  c<-psi[id,13]
   ypred<-1
   return(ypred)
 }
@@ -53,22 +64,31 @@ model1cpt<-function(psi,id,xidep) {
 pkvk_data <- readDatamlx(project = project.file)
 treat <- pkvk_data$treatment[,c(3)]
 # pkvk.saemix <- cbind(pkvk_data$Y,treat)
-pkvk.saemix <- pkvk_data$y
+pkvk.saemix <- pkvk_data$y_2
 
 saemix.data<-saemixData(name.data=pkvk.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("time"),name.response=c("y"), name.X="time")
+  name.predictors=c("time"),name.response=c("y_2"), name.X="time")
+
+# saemix.model<-saemixModel(model=model1cpt,description="pkvk",type="structural"
+#   ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=13,byrow=TRUE, dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),fixed.estim=c(1,1,1,1,1,1,1,1),
+#   transform.par=c(1,1,1,1,1,1,3,3),omega.init=matrix(diag(13),ncol=13,byrow=TRUE),covariance.model=matrix(diag(13),ncol=13,byrow=TRUE))
+
+cov.model = matrix(0,nrow=13,ncol=13,byrow=TRUE)
+cov.model[1,1] <- 1
 
 saemix.model<-saemixModel(model=model1cpt,description="pkvk",type="structural"
-  ,psi0=matrix(c(10,10),ncol=2,byrow=TRUE, dimnames=list(NULL, c("tauD","tauS"))),
-  fixed.estim=c(1,1),transform.par=c(1,1),omega.init=matrix(diag(2),ncol=2,byrow=TRUE),
-  covariance.model=matrix(diag(2),ncol=2,byrow=TRUE), error.model = "proportional")
+  ,psi0=matrix(c(0.01,0.2,1,15,1,1.5,2,10000,0.5,0.00005,1,20,2),ncol=13,byrow=TRUE,
+   dimnames=list(NULL, c("Tlag","Tk0","Vol","Cl","ke0","IC50","gamma","s","d","beta","delta","p","c"))),fixed.estim=c(1,0,0,0,0,0,0,0,0,0,0,0,0),
+  transform.par=c(1,1,1,1,1,1,1,1,1,1,1,1,1),omega.init=matrix(diag(13),ncol=13,byrow=TRUE),
+  covariance.model=cov.model)
 
-K1 = 1000
-K2 = 500
+
+K1 = 2000
+K2 = 1000
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-runtime = 20
+runtime = 100
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
@@ -81,6 +101,18 @@ pkvk <- pkvk[row_sub_ref,]
 pkvk$algo <- 'full'
 pkvk$iterations <- seq(0,runtime, length.out=length(pkvk$iterations))
 
+
+
+options75<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+ nb.replacement=75,sampling='randompass', duration = runtime)
+pkvk75<-data.frame(saemix(saemix.model,saemix.data,options75))
+pkvk75 <- cbind(iterations, pkvk75)
+row_sub_ref  = apply(pkvk75, 1, function(row) all(row !=0 ))
+pkvk75 <- pkvk75[row_sub_ref,]
+pkvk75$algo <- '75'
+pkvk75$iterations <- seq(0,runtime, length.out=length(pkvk75$iterations))
 
 
 options50<-list(seed=39546,map=F,fim=F,ll.is=F,
@@ -121,9 +153,9 @@ seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
 
 
 comparison <- 0
-comparison <- rbind(pkvk,pkvk)
+# comparison <- rbind(pkvk,pkvk)
 # comparison <- rbind(pkvk,pkvk50)
-comparison <- rbind(pkvk,pkvk25,pkvk50)
+comparison <- rbind(pkvk,pkvk25,pkvk50,pkvk75)
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 prec <- seplot(var, title="comparison",legend=TRUE)
 

@@ -218,9 +218,12 @@ initialiseMainAlgo<-function(saemix.data,saemix.model,saemix.options) {
 		phiM[itest.phi,]<-phiMc[itest.phi,]
 		psiM<-transphi(phiM,saemix.model["transform.par"])
 		if (saemix.options$monolix == TRUE){
-		    tempsiM <- cbind(itest.phi, psiM)
+		    tempsiM <- cbind(rep(1:N,saemix.options$nb.chains), psiM)
 			colnames(tempsiM) <- c("id",colnames(omega))
-			fpred <- computePredictions(data.frame(tempsiM))[[1]]
+			fpred <- NULL
+			for (m in 0:(saemix.options$nb.chains-1)){	
+				fpred <- list.append(fpred,computePredictions(data.frame(tempsiM)[(1+m*N):((m+1)*N),])[[1]])
+			}
 		} else {
 			fpred<-structural.model(psiM, IdM, XM)
 		}

@@ -19,21 +19,22 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	mean.phiM<-do.call(rbind,rep(list(mean.phi),Uargs$nchains))
 	phiM[,varList$ind0.eta]<-mean.phiM[,varList$ind0.eta]
 
-	ll <- sort(l[ind_rand],decreasing=FALSE)
+	ll <- sort(unique(l[ind_rand]),decreasing=FALSE)
 	blockincremental <- NULL
 	for (m in 1:Uargs$nchains){	
 		blockincremental <- list.append(blockincremental,setdiff(1:Dargs$N, ll)+(m-1)*Dargs$N)
 	}
-	chosen <- NULL
-	for (m in 1:Uargs$nchains){	
-		chosen <- list.append(chosen, ll+(m-1)*Dargs$N)
-	}
+	# chosen <- NULL
+	# for (m in 1:Uargs$nchains){	
+	# 	chosen <- list.append(chosen, ll+(m-1)*Dargs$N)
+	# }
+	chosen <- ll
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
-	phiM <- etaM + mean.phiM
+	phiM[,varList$ind.eta] <- etaM[,varList$ind.eta] + mean.phiM[,varList$ind.eta]
 
 	if(Dargs$type=="structural"){
-		ll.y <- compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N)
+		ll.y <- compute.LLy_c(phiM,varList$pres,Uargs,Dargs,DYF,1:Dargs$N,varList$omega)
 		U.y<-ll.y$U
 	} else{
 		U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
@@ -53,7 +54,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 		phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 		if(Dargs$type=="structural"){
-			lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
+			lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen,varList$omega)
 			Uc.y<-lly_c$U
 			indices<-lly_c$indices
 			block <- unique(Dargs$IdM[indices])
@@ -83,7 +84,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2],nrow=1) # 2e noyau ? ou 1er noyau+permutation?
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				if(Dargs$type=="structural"){
-					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
+					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen,varList$omega)
 					Uc.y<-lly_c$U
 					indices<-lly_c$indices
 					block <- unique(Dargs$IdM[indices])
@@ -126,7 +127,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 				etaMc[,vk2]<-etaM[,vk2]+matrix(rnorm(Dargs$NM*nrs2), ncol=nrs2)%*%mydiag(varList$domega2[vk2,nrs2])
 				phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 				if(Dargs$type=="structural"){
-					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
+					lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen,varList$omega)
 					Uc.y<-lly_c$U
 					indices<-lly_c$indices
 					block <- unique(Dargs$IdM[indices])

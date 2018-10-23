@@ -17,10 +17,19 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	
 	psiM<-transphi(phiM,Dargs$transform.par)
 	if (Dargs$monolix == TRUE){
-	    tempsiM <- cbind(unique(Dargs$IdM), psiM)
-		colnames(tempsiM) <- c("id",colnames(omega.eta))
-		fpred <- as.numeric(computePredictions(data.frame(tempsiM))[[1]])
-    	fpred[which(is.nan(fpred))] <- 0
+		tempsiM <- cbind(rep(unique(Dargs$IdM),Uargs$nchains), psiM)
+	    colnames(tempsiM) <- c("id",colnames(varList$omega))
+	    fpred <- NULL
+	    nan.indices <- NULL
+		for (m in 0:(Uargs$nchains-1)){  
+	      tempfpred <- Dargs$yobs
+	      tempsiM2 <- tempsiM[(1+m*Dargs$N):((m+1)*Dargs$N),]
+	      tempfpred <- as.numeric(computePredictions(data.frame(tempsiM2))[[1]])
+	      fpred <- list.append(fpred,tempfpred)
+	      tempnan <- which(is.nan(tempfpred))+m*Dargs$N
+	      nan.indices <- list.append(nan.indices,tempnan)
+	    }
+	    fpred[nan.indices] <- 0
 	} else {
 		fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	}
@@ -58,6 +67,7 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 		betas[Uargs$ind.fix11]<-solve(comega[Uargs$ind.fix11,Uargs$ind.fix11],rowSums(temp)) 
 		# ECO TODO: utiliser optimise dans le cas de la dimension 1
 		if(Dargs$type=="structural"){
+			browser()
 			beta0<-optim(par=betas[Uargs$ind.fix10],fn=compute.Uy_c,phiM=phiM,pres=varList$pres,args=Uargs,Dargs=Dargs,DYF=DYF,control=list(maxit=opt$maxim.maxiter))$par # else
 		} else {
 			beta0<-optim(par=betas[Uargs$ind.fix10],fn=compute.Uy_d,phiM=phiM,args=Uargs,Dargs=Dargs,DYF=DYF,control=list(maxit=opt$maxim.maxiter))$par

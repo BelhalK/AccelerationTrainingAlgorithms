@@ -1,0 +1,29 @@
+********************************************************************************
+*                         hcv_project.mlxtran                                  *
+*                         October 23, 2018 at 17:16:26                         *
+*                         Monolix version : 5.0.1                              *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+s_pop                          :  5.11e+03
+d_pop                          :      1.53
+beta_pop                       :     5e-05
+delta_pop                      :      0.05
+p_pop                          :        20
+c_pop                          :         5
+eta_pop                        :       0.9
+epsilon_pop                    :       0.7
+
+Standard Deviation of the Random Effects -
+omega_s                        :      1.58
+omega_d                        :      1.31
+
+Error Model Parameters -------------------
+a                              :         1
+
+Elapsed time (seconds) :       20
+CPU time     (seconds) :    1e+02
+ _______________________________________________________________________________
+

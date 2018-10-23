@@ -329,7 +329,7 @@ dtransphi<-function(phi,tr) {
   return(dpsi)
 }
 
-compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF) {
+compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF,omega) {
 # Attention, DYF variable locale non modifiee en dehors
   args$MCOV0[args$j0.covariate]<-b0
   phi0<-args$COV0 %*% args$MCOV0
@@ -337,7 +337,7 @@ compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF) {
   psiM<-transphi(phiM,Dargs$transform.par)
   if (Dargs$monolix == TRUE){
     tempsiM <- cbind(unique(Dargs$IdM), psiM)
-    colnames(tempsiM) <- c("id",names(args$i1.omega))
+    colnames(tempsiM) <- c("id",colnames(omega))
     fpred <- computePredictions(data.frame(tempsiM))[[1]]
   } else {
     fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
@@ -363,15 +363,23 @@ compute.Uy_d<-function(b0,phiM,args,Dargs,DYF) {
 }
 
 
-compute.LLy_c<-function(phiM,pres,args,Dargs,DYF,chosen) {
+compute.LLy_c<-function(phiM,pres,args,Dargs,DYF,chosen,omega) {
   psiM<-transphi(phiM,Dargs$transform.par)
   if (Dargs$monolix == TRUE){
-    tempsiM <- cbind(unique(Dargs$IdM), psiM)
-    colnames(tempsiM) <- c("id",names(args$i1.omega))
-    fpred <- Dargs$yM
-    fpred[which(Dargs$IdM %in% chosen)] <- as.numeric(computePredictions(data.frame(tempsiM)[chosen,], individualIds=chosen)[[1]])
+    tempsiM <- cbind(rep(unique(Dargs$IdM),args$nchains), psiM)
+    colnames(tempsiM) <- c("id",colnames(omega))
+    fpred <- NULL
+    nan.indices <- NULL
+    for (m in 0:(args$nchains-1)){  
+      tempfpred <- Dargs$yobs
+      tempsiM2 <- tempsiM[(1+m*Dargs$N):((m+1)*Dargs$N),]
+      tempfpred[which(Dargs$IdM %in% chosen)] <- as.numeric(computePredictions(data.frame(tempsiM2)[chosen,], individualIds=chosen)[[1]])
+      fpred <- list.append(fpred,tempfpred)
+      tempnan <- which(is.nan(tempfpred))+m*Dargs$N
+      nan.indices <- list.append(nan.indices,tempnan)
+    }
     # fpred <- as.numeric(computePredictions(data.frame(tempsiM))[[1]])
-    nan.indices <- which(is.nan(fpred))
+    # nan.indices <- which(is.nan(fpred))
     fpred[nan.indices] <- 0
   } else {
     fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
