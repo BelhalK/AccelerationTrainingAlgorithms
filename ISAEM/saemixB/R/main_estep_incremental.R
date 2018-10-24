@@ -44,7 +44,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	eta_map <- phi.map
   	indchosen <- l[ind_rand]
 # Sampling strategy (MAP calculation)
-if (kiter <= 33){ #if rwm
+if (kiter <= 33 && length(ind_rand)!=Dargs$NM){ #if rwm
   	# if (kiter <= length(map_range) && length(ind_rand)!=Dargs$NM){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
@@ -68,7 +68,8 @@ if (kiter <= 33){ #if rwm
 	eta_map <- phi_map - mean.phiM
 
 	weight <- eta_map[,1]
-	gamma = 0
+	gamma = saemix.options$gamma
+	
 	for (m in 1:Dargs$NM){
 		weight[m] <- exp(gamma*eta_map[m,2]^2)
 		# weight[m] <- exp(gamma*eta_map[m,2])

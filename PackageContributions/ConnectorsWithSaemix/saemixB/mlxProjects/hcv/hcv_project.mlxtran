@@ -24,8 +24,8 @@ beta = {distribution=logNormal, typical=beta_pop, sd=omega_beta}
 delta = {distribution=logNormal, typical=delta_pop, no-variability}
 p = {distribution=logNormal, typical=p_pop, no-variability}
 c = {distribution=logNormal, typical=c_pop, no-variability}
-eta = {distribution=logitNormal, typical=eta_pop, no-variability}
-epsilon = {distribution=logitNormal, typical=epsilon_pop, no-variability}
+eta = {distribution=logNormal, typical=eta_pop, no-variability}
+epsilon = {distribution=logNormal, typical=epsilon_pop, no-variability}
 
 [LONGITUDINAL]
 input = {a}

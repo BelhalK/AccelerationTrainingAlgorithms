@@ -79,12 +79,13 @@ saemix.data<-saemixData(name.data=hcv.saemix,header=TRUE,sep=" ",na=NA, name.gro
 cov.model = matrix(0,nrow=8,ncol=8,byrow=TRUE)
 cov.model[1,1] <- 1
 cov.model[2,2] <- 1
+cov.model[3,3] <- 1
 
 saemix.model<-saemixModel(model=model1cpt,description="hcv",type="structural"
   ,psi0=matrix(c(1000,1,0.00005,0.05,20,5,0.9,0.7),ncol=8,byrow=TRUE,
    dimnames=list(NULL, c("s","d","beta","delta","p","c","eta","epsilon"))),
-  fixed.estim=c(1,1,0,0,0,0,0,0),
-  transform.par=c(1,1,1,1,1,1,2,2),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),
+  fixed.estim=c(1,1,1,0,0,0,0,0),
+  transform.par=c(1,1,1,1,1,1,1,1),omega.init=matrix(diag(8),ncol=8,byrow=TRUE),
   covariance.model=cov.model)
 
 
@@ -95,11 +96,12 @@ iterations = 1:(K1+K2)
 end = K1+K2
 
 runtime = 200
-nchains = 50
+nchains = 1
+nsa = 100
 
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=nsa,
   displayProgress=TRUE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=100,sampling='randompass', duration = runtime)
 hcv<-data.frame(saemix(saemix.model,saemix.data,options))
@@ -110,9 +112,13 @@ hcv$algo <- 'full'
 hcv$iterations <- seq(0,runtime, length.out=length(hcv$iterations))
 
 
+var <- melt(hcv, id.var = c('iterations','algo'), na.rm = TRUE)
+prec <- seplot(var, title="comparison",legend=TRUE)
+
+
 
 options25<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=nsa,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=25,sampling='randompass', duration = runtime)
 hcv25<-data.frame(saemix(saemix.model,saemix.data,options25))
@@ -126,7 +132,7 @@ hcv25$iterations <- seq(0,runtime, length.out=length(hcv25$iterations))
 
 
 options50<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=nsa,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=50,sampling='randompass', duration = runtime)
 hcv50<-data.frame(saemix(saemix.model,saemix.data,options50))
@@ -139,7 +145,7 @@ hcv50$iterations <- seq(0,runtime, length.out=length(hcv50$iterations))
 
 
 options75<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=nsa,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=75,sampling='randompass', duration = runtime)
 hcv75<-data.frame(saemix(saemix.model,saemix.data,options75))
@@ -151,7 +157,7 @@ hcv75$iterations <- seq(0,runtime, length.out=length(hcv75$iterations))
 
 
 options95<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=nsa,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=85,sampling='randompass', duration = runtime)
 hcv95<-data.frame(saemix(saemix.model,saemix.data,options95))

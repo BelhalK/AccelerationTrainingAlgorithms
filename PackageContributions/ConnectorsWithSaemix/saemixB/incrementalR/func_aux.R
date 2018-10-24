@@ -353,9 +353,6 @@ compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF,omega) {
       fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
       nan.indices <- 0
     }
-  } else {
-    fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
-  }
   if(Dargs$error.model=="exponential")
      fpred<-log(cutoff(fpred))
   gpred<-error(fpred,pres)
