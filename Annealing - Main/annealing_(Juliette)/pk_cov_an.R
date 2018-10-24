@@ -183,13 +183,15 @@ for (m in 1:replicate){
   final.ref <- rbind(final.ref,pk)
 
 
-  options.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1, alpha.sa=0.95)
+  options.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1, nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, 
+    map.range=c(0),an=FALSE,coeff=1, alpha.sa=0.95)
   pk.sa<-data.frame(saemix(saemix.model,saemix.data,options.sa))
   pk.sa <- cbind(iterations, pk.sa[-1,])
   pk.sa['individual'] <- m
   final.sa <- rbind(final.sa,pk.sa)
 
-  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=0.0303)
+  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,
+    nbiter.burn =0, an=TRUE,coeff=0.0303)
   pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
   pknew <- cbind(iterations, pknew[-1,])
   pknew['individual'] <- m
