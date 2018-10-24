@@ -93,7 +93,7 @@ K2 = 1000
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-runtime = 100
+runtime = 50
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
@@ -105,6 +105,31 @@ row_sub_ref  = apply(hcv, 1, function(row) all(row !=0 ))
 hcv <- hcv[row_sub_ref,]
 hcv$algo <- 'full'
 hcv$iterations <- seq(0,runtime, length.out=length(hcv$iterations))
+
+
+options75<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=5,monolix=TRUE,
+ nb.replacement=75,sampling='randompass', duration = runtime)
+hcv75<-data.frame(saemix(saemix.model,saemix.data,options75))
+hcv75 <- cbind(iterations, hcv75)
+row_sub_75  = apply(hcv75, 1, function(row) all(row !=0 ))
+hcv75 <- hcv75[row_sub_75,]
+hcv75$algo <- '75'
+hcv75$iterations <- seq(0,runtime, length.out=length(hcv75$iterations))
+
+
+options95<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=5,monolix=TRUE,
+ nb.replacement=85,sampling='randompass', duration = runtime)
+hcv95<-data.frame(saemix(saemix.model,saemix.data,options95))
+hcv95 <- cbind(iterations, hcv95)
+row_sub_95  = apply(hcv95, 1, function(row) all(row !=0 ))
+hcv95 <- hcv95[row_sub_95,]
+hcv95$algo <- '85'
+hcv95$iterations <- seq(0,runtime, length.out=length(hcv95$iterations))
+
 
 
 
@@ -135,9 +160,10 @@ hcv25$iterations <- seq(0,runtime, length.out=length(hcv25$iterations))
 
 
 comparison <- 0
-comparison <- rbind(hcv,hcv)
-comparison <- rbind(hcv,hcv50)
-comparison <- rbind(hcv,hcv25,hcv50)
+# comparison <- rbind(hcv,hcv)
+# comparison <- rbind(hcv,hcv50)
+# comparison <- rbind(hcv,hcv25,hcv50)
+comparison <- rbind(hcv,hcv25,hcv50,hcv75,hcv95)
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 prec <- seplot(var, title="comparison",legend=TRUE)
 

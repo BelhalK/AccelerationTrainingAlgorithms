@@ -201,12 +201,13 @@ while (duration <saemix.options$duration){
   duration <- as.numeric(end_time - start_time,units="secs")
   # print(kiter)
   print(kiter)
-  if (duration > saemix.options$duration - 10){
-    j = j +1
-    kiter = saemix.options$nbiter.saemix[1] + j
-  } else {
-    kiter = kiter + 1
-  }
+  # if (duration > saemix.options$duration - 2){
+  #   j = j +1
+  #   kiter = saemix.options$nbiter.saemix[1] + j
+  # } else {
+  #   kiter = kiter + 1
+  # }
+  kiter = kiter + 1
 # SAEM convergence plots
 	if(kiter%%saemix.options$nbdisplay==0) {
     cat(".")
@@ -271,7 +272,7 @@ while (duration <saemix.options$duration){
     } else{
       theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
     }
-
+    print(theta)
   parpop[(kiter+1),]<-theta
 # End of loop on kiter
   end_time <- Sys.time()
