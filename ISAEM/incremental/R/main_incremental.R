@@ -200,9 +200,10 @@ duration <- end_time - start_time
 kiter = 0
 
 duration <- end_time - start_time
-while (duration <10){
-  duration <- end_time - start_time
-  kiter = kiter + 1
+# while (duration <10){
+for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
+  # duration <- end_time - start_time
+  # kiter = kiter + 1
   # SAEM convergence plots
   	if(kiter%%saemix.options$nbdisplay==0) {
       cat(".")

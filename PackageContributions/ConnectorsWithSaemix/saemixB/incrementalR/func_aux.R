@@ -336,9 +336,23 @@ compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF,omega) {
   phiM[,args$i0.omega2]<-do.call(rbind,rep(list(phi0),args$nchains))
   psiM<-transphi(phiM,Dargs$transform.par)
   if (Dargs$monolix == TRUE){
-    tempsiM <- cbind(unique(Dargs$IdM), psiM)
+    tempsiM <- cbind(rep(unique(Dargs$IdM),args$nchains), psiM)
     colnames(tempsiM) <- c("id",colnames(omega))
-    fpred <- computePredictions(data.frame(tempsiM))[[1]]
+    fpred <- NULL
+    nan.indices <- NULL
+    for (m in 0:(args$nchains-1)){  
+      tempfpred <- Dargs$yobs
+      tempsiM2 <- tempsiM[(1+m*Dargs$N):((m+1)*Dargs$N),]
+      tempfpred[which(Dargs$IdM %in% chosen)] <- as.numeric(computePredictions(data.frame(tempsiM2)[chosen,], individualIds=chosen)[[1]])
+      fpred <- list.append(fpred,tempfpred)
+      tempnan <- which(is.nan(tempfpred))+m*Dargs$N
+      nan.indices <- list.append(nan.indices,tempnan)
+    }
+    fpred[nan.indices] <- 0
+    } else {
+      fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
+      nan.indices <- 0
+    }
   } else {
     fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
   }
@@ -370,7 +384,7 @@ compute.LLy_c<-function(phiM,pres,args,Dargs,DYF,chosen,omega) {
     colnames(tempsiM) <- c("id",colnames(omega))
     fpred <- NULL
     nan.indices <- NULL
-    for (m in 0:(args$nchains-1)){  
+    for (m in 0:(args$nchains-1)){ 
       tempfpred <- Dargs$yobs
       tempsiM2 <- tempsiM[(1+m*Dargs$N):((m+1)*Dargs$N),]
       tempfpred[which(Dargs$IdM %in% chosen)] <- as.numeric(computePredictions(data.frame(tempsiM2)[chosen,], individualIds=chosen)[[1]])

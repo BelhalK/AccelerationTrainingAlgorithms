@@ -29,6 +29,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 	# 	chosen <- list.append(chosen, ll+(m-1)*Dargs$N)
 	# }
 	chosen <- ll
+	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
 	phiMc<-phiM
 	phiM[,varList$ind.eta] <- etaM[,varList$ind.eta] + mean.phiM[,varList$ind.eta]
@@ -56,7 +57,7 @@ estep.incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
 		if(Dargs$type=="structural"){
 			lly_c<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen,varList$omega)
 			Uc.y<-lly_c$U
-			indices<-lly_c$indices
+			indices <- lly_c$indices
 			block <- unique(Dargs$IdM[indices])
 		} else {
 			Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)

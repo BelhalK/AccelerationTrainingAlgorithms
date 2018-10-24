@@ -20,16 +20,13 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 		tempsiM <- cbind(rep(unique(Dargs$IdM),Uargs$nchains), psiM)
 	    colnames(tempsiM) <- c("id",colnames(varList$omega))
 	    fpred <- NULL
-	    nan.indices <- NULL
 		for (m in 0:(Uargs$nchains-1)){  
 	      tempfpred <- Dargs$yobs
 	      tempsiM2 <- tempsiM[(1+m*Dargs$N):((m+1)*Dargs$N),]
 	      tempfpred <- as.numeric(computePredictions(data.frame(tempsiM2))[[1]])
 	      fpred <- list.append(fpred,tempfpred)
-	      tempnan <- which(is.nan(tempfpred))+m*Dargs$N
-	      nan.indices <- list.append(nan.indices,tempnan)
 	    }
-	    fpred[nan.indices] <- 0
+	    fpred[which(is.nan(fpred))] <- 0
 	} else {
 		fpred<-structural.model(psiM, Dargs$IdM, Dargs$XM)
 	}

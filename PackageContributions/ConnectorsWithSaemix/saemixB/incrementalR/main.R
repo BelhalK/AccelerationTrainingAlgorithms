@@ -199,7 +199,6 @@ j = 0
 while (duration <saemix.options$duration){
 # for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
   duration <- as.numeric(end_time - start_time,units="secs")
-  # print(kiter)
   print(kiter)
   # if (duration > saemix.options$duration - 2){
   #   j = j +1
@@ -272,7 +271,6 @@ while (duration <saemix.options$duration){
     } else{
       theta<-c(fixed.psi,var.eta[Uargs$i1.omega2])
     }
-    print(theta)
   parpop[(kiter+1),]<-theta
 # End of loop on kiter
   end_time <- Sys.time()

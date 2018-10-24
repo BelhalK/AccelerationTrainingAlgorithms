@@ -216,7 +216,8 @@ if (kiter <= 0){ #if rwm
 			#MAP calculation
 		 	# for(i in 1:saemixObject["data"]["N"]) {
 			
-			for(i in l[ind_rand]) {
+			# for(i in l[ind_rand]) {
+			for (i in 1:(Dargs$NM)){
 			    isuj<-id.list[i]
 			    xi<-xind[id==isuj,,drop=FALSE]
 			    yi<-yobs[id==isuj]
@@ -252,7 +253,6 @@ if (kiter <= 0){ #if rwm
 					gradf[r,j] <- (fpred2[r] - fpred1[r])/(phi_map[i,j]/100)
 				}
 			}
-			browser()
 
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)
