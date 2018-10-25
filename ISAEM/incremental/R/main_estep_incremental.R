@@ -44,7 +44,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	eta_map <- phi.map
   	indchosen <- l[ind_rand]
 # Sampling strategy (MAP calculation)
-if (kiter <= 10){ #if rwm
+if (kiter <= 0){ #if rwm
   	# if (kiter <= length(map_range) && length(ind_rand)!=Dargs$NM){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
@@ -67,17 +67,22 @@ if (kiter <= 10){ #if rwm
 	phi_map <- as.matrix(map.phi[,-c(1)])
 	eta_map <- phi_map - mean.phiM
 
-	weight <- eta_map[,1]
+	weight <- eta_map[1:Dargs$N,1]
 	gamma = saemix.options$gamma
 	
-	for (m in 1:Dargs$NM){
+	for (m in 1:Dargs$N){
 		weight[m] <- exp(gamma*eta_map[m,2]^2)
 		# weight[m] <- exp(gamma*eta_map[m,2])
 	}
+
 	weight <- weight/sum(weight)
 	nb.replacement <- length(ind_rand)
-	indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE, prob = weight)
-	# indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE)
+	chosen <- sample(1:Dargs$N, size = nb.replacement, replace = FALSE, prob = weight)
+	
+	indchosen <- NULL
+	for (m in 1:Uargs$nchains){	
+		indchosen <- list.append(indchosen, chosen+(m-1)*Dargs$N)
+	}
 	block <- setdiff(1:Dargs$NM, indchosen)
 	
 	print(kiter)
@@ -87,7 +92,6 @@ if (kiter <= 10){ #if rwm
 	etaM[indchosen,] <- eta_map[indchosen,] #if rwm
 	phiM <- etaM + mean.phiM
 	phiMc<-phiM
-	chosen <- indchosen
 
 } else {
 	
@@ -258,7 +262,7 @@ if (kiter <= 10){ #if rwm
 			#calculation of the covariance matrix of the proposal
 			Gamma <- list(omega.eta,omega.eta)
 			z <- matrix(0L, nrow = length(fpred1), ncol = 1) 
-			for (i in 1:(Dargs$NM)){
+			for (i in 1:(Dargs$N)){
 				r = 1:sum(Dargs$IdM == i)
 				r <- r+sum(as.matrix(z) != 0L)
 	            z[r] <- gradf[r,1]
@@ -267,7 +271,7 @@ if (kiter <= 10){ #if rwm
 			}
 
 			# etaM <- eta_map
-			etaM[chosen,] <- eta_map[chosen,]
+			etaM[indchosen,] <- eta_map[indchosen,]
 			for (u in 1:opt$nbiter.mcmc[4]) {
 				etaMc<-etaM
 				propc <- U.eta
@@ -285,8 +289,8 @@ if (kiter <= 10){ #if rwm
 
 				# for (i in 1:(Dargs$NM)){
 				for (i in chosen){
-					propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
-					prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%solve(Gamma[[i]]))
+					propc[which(Dargs$IdM==i)] <- 0.5*rowSums((etaMc[which(Dargs$IdM==i),varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaMc[which(Dargs$IdM==i),varList$ind.eta]-eta_map[which(Dargs$IdM==i),varList$ind.eta])%*%solve(Gamma[[i]]))
+					prop[which(Dargs$IdM==i)] <- 0.5*rowSums((etaM[which(Dargs$IdM==i),varList$ind.eta]-eta_map[which(Dargs$IdM==i),varList$ind.eta])*(etaM[which(Dargs$IdM==i),varList$ind.eta]-eta_map[which(Dargs$IdM==i),varList$ind.eta])%*%solve(Gamma[[i]]))
 				}
 				deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 				deltu[block] = 1000000
