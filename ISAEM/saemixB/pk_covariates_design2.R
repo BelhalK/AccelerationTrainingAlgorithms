@@ -1,5 +1,6 @@
 # savedwarfarin.saemix <- warfarin.saemix
-# save.image("pkcov.RData")
+# load("pkcov_samplingstrat.RData")
+# save.image("pkcov_samplingstrat.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('aaa_generics.R') 
@@ -96,7 +97,7 @@ theo_ref <- cbind(iterations, theo_ref[-1,])
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma=3)
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma=1)
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
 theo_mix50 <- data.frame(theo50$param)
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
@@ -142,6 +143,7 @@ chosen_random$iterations <- 1:kiter
 df.chosen_random <- melt(chosen_random ,  id.vars = 'iterations')
 df$chosen_random <- df.chosen_random$value
 
+
 ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen_random))+ 
   geom_point(data = theo_mix50_random[1:kiter,], aes(x = iterations, y = theo_mix50_random[end,2]), color = "red")+ 
   geom_point(data = theo_mix50_random[1:kiter,], aes(x = iterations, y = theo_mix50_random[1:kiter,2]), color = "yellow")+ theme_bw()
@@ -157,7 +159,7 @@ theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
 theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 theo_mix50_random_scaled$iterations = theo_mix50_random_scaled$iterations*0.5
 
-graphConvMC_5(theo_ref_scaled,theo_mix50_scaled,theo_mix50_random_scaled,theo_mix50_random_scaled,theo_mix50_random_scaled)
+graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_random_scaled)
 
 
 
