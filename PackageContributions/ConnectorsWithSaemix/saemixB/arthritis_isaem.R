@@ -65,30 +65,30 @@ saemix.model<-saemixModel(model=model1cpt,description="arthritis",type="structur
 
 K1 = 1000
 K2 = 500
-iterations = 1:(K1+K2+1)
+iterations = 1:(K1+K2)
 end = K1+K2
 
-runtime = 20
-
+runtime = 120
+nchains = 20
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=100,sampling='randompass', duration = runtime)
 arthritis<-data.frame(saemix(saemix.model,saemix.data,options))
-arthritis <- cbind(iterations, arthritis)
+arthritis <- cbind(iterations, arthritis[-1,])
 row_sub_ref  = apply(arthritis, 1, function(row) all(row !=0 ))
 arthritis <- arthritis[row_sub_ref,]
 arthritis$algo <- 'full'
 arthritis$iterations <- seq(0,runtime, length.out=length(arthritis$iterations))
 
 
-
+nchains = 20
 options50<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=50,sampling='randompass', duration = runtime)
 arthritis50<-data.frame(saemix(saemix.model,saemix.data,options50))
-arthritis50 <- cbind(iterations, arthritis50)
+arthritis50 <- cbind(iterations, arthritis50[-1,])
 row_sub_50  = apply(arthritis50, 1, function(row) all(row !=0 ))
 arthritis50 <- arthritis50[row_sub_50,]
 arthritis50$algo <- 'half'
@@ -97,10 +97,10 @@ arthritis50$iterations <- seq(0,runtime, length.out=length(arthritis50$iteration
 
 options25<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=25,sampling='randompass', duration = runtime)
 arthritis25<-data.frame(saemix(saemix.model,saemix.data,options25))
-arthritis25 <- cbind(iterations, arthritis25)
+arthritis25 <- cbind(iterations, arthritis25[-1,])
 row_sub_25  = apply(arthritis25, 1, function(row) all(row !=0 ))
 arthritis25 <- arthritis25[row_sub_25,]
 arthritis25$algo <- 'quarter'
@@ -114,14 +114,17 @@ seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
   ylim <-rep(ylim,each=2)
   graf <- vector("list", ncol(df)-2)
   graf <- ggplot(df)+geom_line(aes(iterations,value,by=value,colour = df$algo),show.legend = legend) +
-  xlab("iterations") + ylab('value') + facet_wrap(~variable,scales = "free_y") + theme_bw() 
+  xlab("iterations") + ylab('value') + facet_wrap(~variable,scales = "free_y") + theme_bw() +scale_x_log10()
   grid.arrange(graf)
   # do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
+dim(arthritis)
+dim(arthritis50)
+dim(arthritis25)
 
 comparison <- 0
-comparison <- rbind(arthritis,arthritis)
+# comparison <- rbind(arthritis,arthritis)
 # comparison <- rbind(arthritis,arthritis50)
 comparison <- rbind(arthritis,arthritis25,arthritis50)
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)

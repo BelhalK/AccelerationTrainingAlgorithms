@@ -1,6 +1,6 @@
 parameter,value
-Tlag_pop,0.158685775864151
-Tk0_pop,0.2
+Tlag_pop,0.000326748643694121
+Tk0_pop,0.752364722264872
 Vol_pop,1
 Cl_pop,15
 ke0_pop,1
@@ -12,5 +12,6 @@ beta_pop,5e-05
 delta_pop,1
 p_pop,20
 c_pop,2
-omega_Tlag,0.321817752461067
-a2,0.6455091095187
+omega_Tlag,2.73893611318118
+omega_Tk0,0.503524739110927
+a2,0.603262837293014

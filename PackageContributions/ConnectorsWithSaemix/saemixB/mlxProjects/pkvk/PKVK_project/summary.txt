@@ -1,14 +1,14 @@
 ********************************************************************************
 *                         PKVK_project.mlxtran                                 *
-*                         October 23, 2018 at 15:51:20                         *
+*                         October 26, 2018 at 18:10:55                         *
 *                         Monolix version : 5.0.1                              *
 ********************************************************************************
 
 POPULATION PARAMETERS ESTIMATION _______________________________________________
 
 Fixed Effects ----------------------------
-Tlag_pop                       :     0.159
-Tk0_pop                        :       0.2
+Tlag_pop                       :  0.000327
+Tk0_pop                        :     0.752
 Vol_pop                        :         1
 Cl_pop                         :        15
 ke0_pop                        :         1
@@ -22,12 +22,13 @@ p_pop                          :        20
 c_pop                          :         2
 
 Standard Deviation of the Random Effects -
-omega_Tlag                     :     0.322
+omega_Tlag                     :      2.74
+omega_Tk0                      :     0.504
 
 Error Model Parameters -------------------
-a2                             :     0.646
+a2                             :     0.603
 
-Elapsed time (seconds) :       41
-CPU time     (seconds) :  2.2e+02
+Elapsed time (seconds) :       34
+CPU time     (seconds) :  1.9e+02
  _______________________________________________________________________________
 

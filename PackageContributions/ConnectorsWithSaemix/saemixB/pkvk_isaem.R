@@ -75,10 +75,12 @@ saemix.data<-saemixData(name.data=pkvk.saemix,header=TRUE,sep=" ",na=NA, name.gr
 
 cov.model = matrix(0,nrow=13,ncol=13,byrow=TRUE)
 cov.model[1,1] <- 1
+cov.model[2,2] <- 1
 
 saemix.model<-saemixModel(model=model1cpt,description="pkvk",type="structural"
   ,psi0=matrix(c(0.01,0.2,1,15,1,1.5,2,10000,0.5,0.00005,1,20,2),ncol=13,byrow=TRUE,
-   dimnames=list(NULL, c("Tlag","Tk0","Vol","Cl","ke0","IC50","gamma","s","d","beta","delta","p","c"))),fixed.estim=c(1,0,0,0,0,0,0,0,0,0,0,0,0),
+   dimnames=list(NULL, c("Tlag","Tk0","Vol","Cl","ke0","IC50","gamma","s","d","beta","delta","p","c"))),
+  fixed.estim=c(1,1,0,0,0,0,0,0,0,0,0,0,0),
   transform.par=c(1,1,1,1,1,1,1,1,1,1,1,1,1),omega.init=matrix(diag(13),ncol=13,byrow=TRUE),
   covariance.model=cov.model)
 
@@ -88,11 +90,12 @@ K2 = 1000
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-runtime = 100
+runtime = 180
+nchains=3
 
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=100,sampling='randompass', duration = runtime)
 pkvk<-data.frame(saemix(saemix.model,saemix.data,options))
 pkvk <- cbind(iterations, pkvk)
@@ -103,21 +106,21 @@ pkvk$iterations <- seq(0,runtime, length.out=length(pkvk$iterations))
 
 
 
-options75<-list(seed=39546,map=F,fim=F,ll.is=F,
-  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
- nb.replacement=75,sampling='randompass', duration = runtime)
-pkvk75<-data.frame(saemix(saemix.model,saemix.data,options75))
-pkvk75 <- cbind(iterations, pkvk75)
-row_sub_ref  = apply(pkvk75, 1, function(row) all(row !=0 ))
-pkvk75 <- pkvk75[row_sub_ref,]
-pkvk75$algo <- '75'
-pkvk75$iterations <- seq(0,runtime, length.out=length(pkvk75$iterations))
+# options75<-list(seed=39546,map=F,fim=F,ll.is=F,
+#   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
+#   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
+#  nb.replacement=75,sampling='randompass', duration = runtime)
+# pkvk75<-data.frame(saemix(saemix.model,saemix.data,options75))
+# pkvk75 <- cbind(iterations, pkvk75)
+# row_sub_ref  = apply(pkvk75, 1, function(row) all(row !=0 ))
+# pkvk75 <- pkvk75[row_sub_ref,]
+# pkvk75$algo <- '75'
+# pkvk75$iterations <- seq(0,runtime, length.out=length(pkvk75$iterations))
 
 
 options50<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=50,sampling='randompass', duration = runtime)
 pkvk50<-data.frame(saemix(saemix.model,saemix.data,options50))
 pkvk50 <- cbind(iterations, pkvk50)
@@ -129,7 +132,7 @@ pkvk50$iterations <- seq(0,runtime, length.out=length(pkvk50$iterations))
 
 options25<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
-  displayProgress=FALSE,nbiter.burn =0,nb.chains=1,monolix=TRUE,
+  displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
  nb.replacement=25,sampling='randompass', duration = runtime)
 pkvk25<-data.frame(saemix(saemix.model,saemix.data,options25))
 pkvk25 <- cbind(iterations, pkvk25)
@@ -153,9 +156,9 @@ seplot <- function(df, title=NULL, ylim=NULL, legend=TRUE)
 
 
 comparison <- 0
-# comparison <- rbind(pkvk,pkvk)
-# comparison <- rbind(pkvk,pkvk50)
-comparison <- rbind(pkvk,pkvk25,pkvk50,pkvk75)
+comparison <- rbind(pkvk,pkvk)
+# comparison <- rbind(pkvk,pkvk25,pkvk50)
+# comparison <- rbind(pkvk,pkvk25,pkvk50,pkvk75)
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 prec <- seplot(var, title="comparison",legend=TRUE)
 
