@@ -149,7 +149,6 @@ ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen_random))+
   geom_point(data = theo_mix50_random[1:kiter,], aes(x = iterations, y = theo_mix50_random[1:kiter,2]), color = "yellow")+ theme_bw()
 
 
-
 theo_ref_scaled <- theo_ref
 theo_mix50_scaled <- theo_mix50
 theo_mix50_random_scaled <- theo_mix50_random

@@ -1,5 +1,7 @@
-load("warfa_isaem_newkernel.RData")
+# load("warfa_isaem_newkernel.RData")
 # save.image("warfa_isaem_newkernel.RData")
+# save.image("warfa_isaem_LARGEN.RData")
+save.image("warfa_isaem.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R")
   source('aaa_generics.R') 
@@ -86,7 +88,7 @@ res <- simulx(model     = model,
               parameter = param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(1,10,by=1)))
+              output    = list(name='y', time=seq(1,5,by=1)))
 
  warfarin.saemix <- res$y
  warfarin.saemix$amount <- 100
@@ -101,8 +103,8 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
 
 
 
-K1 = 300
-K2 = 100
+K1 = 200
+K2 = 30
 iterations = 0:(K1+K2-1)
 end = K1+K2
 batchsize25 = 25
@@ -110,7 +112,7 @@ batchsize50 = 50
 
 seed0=3456
 
-nchains = 50
+nchains = 20
 gamma = 1
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains,nbiter.mcmc = c(2,2,2,0), 
   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
@@ -147,12 +149,12 @@ theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 theo_ref_scaled <- theo_ref
 theo_mix25_scaled <- theo_mix25
 theo_mix50_scaled <- theo_mix50
-theo_mix75_scaled <- theo_mix75
+# theo_mix75_scaled <- theo_mix75
 theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
-theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
-
+# theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_scaled)
 graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
 
 # graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
