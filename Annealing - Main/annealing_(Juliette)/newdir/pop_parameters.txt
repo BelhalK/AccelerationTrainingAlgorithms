@@ -49,20 +49,19 @@ function(psi,id,xidep) {
    ka V k
 ka  1 0 0
 V   0 1 0
-k   0 0 1
+k   0 0 0
   Error model: combined , initial values: a=1 b=1 
     No covariate in the model.
     Initial values
-                   ka        V       k
-Pop.CondInit 1.102741 6.875536 1.89034
+                    ka        V        k
+Pop.CondInit 0.2867952 7.647777 1.808601
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
-    Estimation of log-likelihood by importance sampling
-    Number of iterations:  K1=1000, K2=100 
+    Algorithms: estimation only
+    Number of iterations:  K1=600, K2=0 
     Number of chains:  1 
     Seed:  39546 
-    Number of MCMC iterations for IS:  5000 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -76,31 +75,20 @@ Pop.CondInit 1.102741 6.875536 1.89034
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka         3.6e-08
-[2,] V          1.7e+07
-[3,] k          4.5e+06
-[4,] a         -1.8e-01
-[5,] b          1.0e+20
+[1,] ka        NaN     
+[2,] V         NaN     
+[3,] k           Inf   
+[4,] a          0.24   
+[5,] b         59.40   
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka 5.9e-12 
-V  omega2.V  1.5e-10 
-k  omega2.k  1.6e-07 
+ka omega2.ka NaN     
+V  omega2.V  NaN     
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V omega2.k
-omega2.ka 1         0        0       
-omega2.V  0         1        0       
-omega2.k  0         0        1       
-----------------------------------------------------
----------------  Statistical criteria  -------------
-----------------------------------------------------
-
-Likelihood computed by importance sampling
-      -2LL= 3246.584 
-      AIC = 3262.584 
-      BIC = 3281.64 
-----------------------------------------------------
+          omega2.ka omega2.V
+omega2.ka   1       NaN     
+omega2.V  NaN         1     
