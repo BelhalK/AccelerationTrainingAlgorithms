@@ -217,7 +217,7 @@ acf(ref[,1], main="RWM")
 acf(new[,1], main="IMH")
 acf(mala[,1], main="MALA")
 acf(vi[,1], main="NUTS")
-
+acf(advi[,1], main="VI")
 #MSJD
 mssd(ref[,1])
 mssd(new[,1])
