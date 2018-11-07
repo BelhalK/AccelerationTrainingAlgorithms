@@ -10,10 +10,40 @@ library(dplyr)
 library(data.table)
 library(rstan)
 load("RData/hmc_quantile_indiv.RData")
+library(mvtnorm)
+
+#### PLOT OF THE TRUTH (CURVE) #####
+
+yobs = warfa_data[warfa_data$id==11,4]
+x = warfa_data[warfa_data$id==11,2:3]
+model1cpt<-function(psi,xidep) { 
+  time<-xidep[,1]
+  dose<-xidep[,2]
+  ka<-psi[1]
+  V<-psi[2]
+  k<-psi[3]
+
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*time)-exp(-ka*time))
+  return(ypred)
+}
+
+fpred <- model1cpt(etamap[10,],x)
+
+sigma.prior <- matrix(c(sqrt(0.2),0,0,0,sqrt(0.18),0,0,0,sqrt(0.03)),ncol=3,byrow=TRUE)
+sigma.error <- daig(11)
+posterior <- function(psi) { 
+  dens <- dmvnorm(yobs-model1cpt(psi,x), rep(0,11),sigma = sigma.error)*dmvnorm(psi, mean =  rep(0,3), sigma = sigma.prior)
+  
+  return(dens)
+}
+
+
+posterior(etamap[1,])
+
+
 
 
 #### PLOTS OF THE PROPOSALS AGAINST THE TRUTH #####
-library(mvtnorm)
 
 dmvnorm(x=c(0,0))
 dmvnorm(x=c(0,0), mean=c(1,1))
