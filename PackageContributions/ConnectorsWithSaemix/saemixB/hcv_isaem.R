@@ -1,7 +1,7 @@
 # save.image("Rdata/hcv.RData")
 # load("Rdata/hcv.RData")
 # save.image("Rdata/hcv_morechains.RData")
-# load("Rdata/hcv_morechains.RData")
+load("Rdata/hcv_morechains.RData")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/incrementalR")
   source('aaa_generics.R') 
   source('compute_LL.R') 

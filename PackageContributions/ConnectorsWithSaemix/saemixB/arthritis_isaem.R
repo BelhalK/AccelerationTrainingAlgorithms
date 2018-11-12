@@ -1,6 +1,7 @@
 # save.image("arthritis_10chains.RData")
 # save.image("arthritis_40chains.RData")
 # load("arthritis_40chains.RData")
+load("arthritis_10chains.RData")
 # setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/ConnectorsWithSaemix/saemixB/incrementalR")
   source('aaa_generics.R') 
@@ -71,8 +72,8 @@ K2 = 500
 iterations = 1:(K1+K2)
 end = K1+K2
 
-runtime = 120
-nchains = 60
+runtime = 20
+nchains = 1
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
@@ -85,7 +86,7 @@ arthritis$algo <- 'full'
 arthritis$iterations <- seq(0,runtime, length.out=length(arthritis$iterations))
 
 
-nchains = 40
+nchains = 1
 options50<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=FALSE,nbiter.burn =0,nb.chains=nchains,monolix=TRUE,
