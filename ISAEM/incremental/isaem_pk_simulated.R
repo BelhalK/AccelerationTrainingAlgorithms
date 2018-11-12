@@ -1,7 +1,11 @@
 # load("warfa_isaem_newkernel.RData")
 # save.image("warfa_isaem_newkernel.RData")
 # save.image("warfa_isaem_LARGEN.RData")
-save.image("warfa_isaem.RData")
+
+####20 CHAINS
+load("warfa_isaem.RData")
+# save.image("warfa_isaem.RData")
+
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R")
   source('aaa_generics.R') 
@@ -122,12 +126,12 @@ theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
 
 
-# options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
-#   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
-#   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randomiter',gamma=gamma)
-# theo_mix75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
-# theo_mix75 <- data.frame(theo_mix75$param)
-# theo_mix75 <- cbind(iterations, theo_mix75[-1,])
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randomiter',gamma=gamma)
+theo_mix75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
+theo_mix75 <- data.frame(theo_mix75$param)
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
@@ -149,14 +153,32 @@ theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 theo_ref_scaled <- theo_ref
 theo_mix25_scaled <- theo_mix25
 theo_mix50_scaled <- theo_mix50
-# theo_mix75_scaled <- theo_mix75
 theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
 theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
-# theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
-# graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_scaled)
-graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
 
+
+theo_mix75_scaled <- theo_mix75
+theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
+theo_mix75_scaled_20chains <- theo_mix75_scaled
+
+# theo_ref_scaled_20chains <- theo_ref_scaled
+# theo_mix25_scaled_20chains <- theo_mix25_scaled
+# theo_mix50_scaled_20chains <- theo_mix50_scaled
+
+# theo_ref_scaled_10chains <- theo_ref_scaled
+# theo_mix25_scaled_10chains <- theo_mix25_scaled
+# theo_mix50_scaled_10chains <- theo_mix50_scaled
+
+
+graphConvMC_threekernels(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains)
+graphConvMC_threekernels(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains)
+graphConvMC_threekernels(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain)
+
+
+graphConvMC_5(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains,theo_mix75_scaled_20chains,theo_mix75_scaled_20chains)
+graphConvMC_5(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains,theo_mix75_scaled_10chains,theo_mix75_scaled_10chains)
+graphConvMC_5(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain,theo_mix75_scaled_1chain,theo_mix75_scaled_1chain)
 # graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
 # graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
 
