@@ -13,7 +13,9 @@ library(rstan)
 library(mvtnorm)
 library(MASS)
 # save.image("biplotviz.RData")
-load("biplotviz.RData")
+# save.image("biplotviz2.RData")
+load("biplotviz2.RData")
+# load("biplotviz.RData")
 source("marginal_plot.R")
 #### PLOT OF THE TRUTH (CURVE) #####
 
@@ -47,16 +49,15 @@ source("marginal_plot.R")
 
 
 
-samples.imh.proposal <- data.frame(mvrnorm(n = 10000000, map, G.map, tol = 1e-6, empirical = FALSE, EISPACK = FALSE))
-samples.advi.proposal <- data.frame(mvrnorm(n = 10000000, mu.vi, Gamma.vi, tol = 1e-6, empirical = FALSE, EISPACK = FALSE))
+samples.imh.proposal <- data.frame(mvrnorm(n = 100000, map, G.map, tol = 1e-6, empirical = FALSE, EISPACK = FALSE))
+samples.advi.proposal <- data.frame(mvrnorm(n = 100000, mu.vi, Gamma.vi, tol = 1e-6, empirical = FALSE, EISPACK = FALSE))
 head(vi)
 
-samples.imh.proposal$algo <- "IMH"
-samples.advi.proposal$algo <- "VI"
-vi$algo <- "Truth"
+samples.imh.proposal$algo <- "nlme-IMH"
+samples.advi.proposal$algo <- "Variational MCMC"
+vi$algo <- "NUTS"
 
 colnames(samples.imh.proposal) <- colnames(samples.advi.proposal) <- colnames(vi) <- c("ka","V","k","algo")
-
 
 
 d.newka <- density(samples.imh.proposal$ka) # returns the density data 
@@ -108,30 +109,86 @@ ggscatterstats(
 )
 
 
-data <- rbind(samples.imh.proposal[1:1000000,],samples.advi.proposal[1:1000000,],vi[1:20000,])
-# data <- rbind(samples.imh.proposal[1:100000,],samples.advi.proposal[1:100000,],vi[1:20000,])
+# data <- rbind(samples.imh.proposal[1:20000,],samples.advi.proposal[1:20000,],vi[1:20000,])
+# data <- rbind(vi[1:20000,],samples.imh.proposal[1:20000,],samples.advi.proposal[1:20000,])
+data <- rbind(samples.imh.proposal,samples.advi.proposal,vi)
 
-colnames(data) <- c("ka","V","k","Proposal")
-
-
-marginal_plot(x = ka, y = V, 
-  group = Proposal, data = data, bw = "nrd", 
-  lm_formula = NULL, xlab = "ka", ylab = "V", pch = 15, cex = 0.5)
-dev.copy(jpeg,'biplotkaV.jpg', width=900, height=550)
-dev.off()
+colnames(data) <- c("ka","V","k","Algorithm")
 
 
-marginal_plot(x = ka, y = k, 
-  group = Proposal, data = data, bw = "nrd", 
-  lm_formula = NULL, xlab = "ka", ylab = "k", pch = 15, cex = 0.5)
-dev.copy(jpeg,'biplotkak.jpg', width=900, height=550)
-dev.off()
+# Courbe de densité marginale de x (panel du haut)
+xdensity <- ggplot(data[indices,], aes(V, fill=Algorithm)) + 
+  geom_density(alpha=.5) + 
+  theme_bw()+
+  theme(legend.position = "none",axis.text=element_text(size=20), 
+                 axis.title=element_text(size=20))
+
+# Courbe de densité marginale de y (panel de droite)
+ydensity <- ggplot(data[indices,], aes(k, fill=Algorithm)) + 
+  geom_density(alpha=.5) + 
+  theme_bw()+
+  theme(legend.position = "none",axis.text=element_text(size=20), 
+                 axis.title=element_text(size=20)) + coord_flip()
+
+
+
+
+npoints <- 1000
+indices1 <- sort(sample(1:100000, npoints))
+indices2 <- sort(sample(100000:200000, npoints))
+indices3 <- sort(sample(200000:300000, npoints))
+indices <- abind(indices1,indices2,indices3)
+
+scatterPlot <- ggplot(data = data) +
+  stat_ellipse(aes(x = V, y = k, color = Algorithm),cex=2) +
+  geom_point(data = data[indices,], aes(x = V, y = k, color = Algorithm), cex=0.9)+ 
+   ylab(expression(paste(k[i])))  +
+   xlab(expression(paste(V[i])))  +
+  theme_bw()+
+  theme(legend.position=c(0.01,0.99), legend.justification=c(0,1),axis.text=element_text(size=20), 
+                 axis.title=element_text(size=20), 
+                 legend.text = element_text(size=15),
+                  legend.title = element_text(size=15))
+
+scatterPlot
+
+blankPlot <- ggplot()+geom_blank(aes(1,1))+
+  theme(plot.background = element_blank(), 
+   panel.grid.major = element_blank(),
+   panel.grid.minor = element_blank(), 
+   panel.border = element_blank(),
+   panel.background = element_blank(),
+   axis.title.x = element_blank(),
+   axis.title.y = element_blank(),
+   axis.text.x = element_blank(), 
+   axis.text.y = element_blank(),
+   axis.ticks = element_blank()
+     )
+
+library("gridExtra")
+grid.arrange(xdensity, blankPlot, scatterPlot, ydensity, 
+        ncol=2, nrow=2, widths=c(4, 1.4), heights=c(1.4, 4))
+# marginal_plot(x = ka, y = V, 
+#   group = Proposal, data = data, bw = "nrd", 
+#   lm_formula = NULL, xlab = "ka", ylab = "V", pch = 15, cex = 0.5)
+# dev.copy(jpeg,'biplotkaV.jpg', width=900, height=550)
+# dev.off()
+
+
+# marginal_plot(x = ka, y = k, 
+#   group = Proposal, data = data, bw = "nrd", 
+#   lm_formula = NULL, xlab = "ka", ylab = "k", pch = 15, cex = 0.5)
+# dev.copy(jpeg,'biplotkak.jpg', width=900, height=550)
+# dev.off()
+library(ellipse)
 
 marginal_plot(x = V, y = k, 
-  group = Proposal, data = data, bw = "nrd", 
+  group = Algorithm, data = data, bw = "nrd", 
   lm_formula = NULL, xlab = "V", ylab = "k", pch = 15, cex = 0.5)
-dev.copy(jpeg,'biplotkV.jpg', width=900, height=550)
-dev.off()
+
+
+# dev.copy(jpeg,'biplotkV.jpg', width=900, height=550)
+# dev.off()
 
 
 
@@ -279,3 +336,24 @@ title(main="MPG Distribution by Car Cylinders")
 # add legend via mouse click
 colfill<-c(2:(2+length(levels(cyl.f)))) 
 legend(locator(1), levels(cyl.f), fill=colfill)
+
+
+
+mu.vi + c(1,8,0.01)
+etamap[i,]+ c(1,8,0.01)
+mean(vi$ka)+1
+mean(vi$V)+8
+mean(vi$k)+0.01
+
+#Covariances
+sqrt(diag(Gamma.vi))
+sqrt(diag(Gammamap[[10]]))
+sqrt(diag(Gamma.vi))
+
+sqrt(diag(cov(vi[,1:3])))
+
+#Correlations
+cor(new[,1:3])
+cor(advi[,1:3])
+cor(vi[,1:3])
+

@@ -41,6 +41,7 @@ marginal_plot = function(x, y, group = NULL, data = NULL, lm_show = FALSE, lm_fo
     data = subset(data, group %in% names(which(table(data$group) > 5)))
     data$group = droplevels(data$group)
     group_colors = rainbow(length(unique(data$group)))
+    group_colors = c("#00FF00FF","#0000FFFF","#FF0000FF")
   } 
   
   # log-transform data (this is need for correct plotting of density functions)
@@ -93,6 +94,12 @@ marginal_plot = function(x, y, group = NULL, data = NULL, lm_show = FALSE, lm_fo
     if(missing(group)){
       do.call(plot, c(list(x = quote(data$x), y = quote(data$y), col = quote(scales::alpha("black", alpha))), moreargs))
     } else {
+      # npoints <- 10000
+      # indices1 <- sort(sample(1:100000, npoints))
+      # indices2 <- sort(sample(100000:200000, npoints))
+      # indices3 <- sort(sample(200000:300000, npoints))
+      # indices <- abind(indices1,indices2,indices3)
+      # do.call(plot, c(list(x = quote(data$x[indices]), y = quote(data$y[indices]), col = quote(scales::alpha(group_colors[data$group[indices]], alpha))), moreargs))
       do.call(plot, c(list(x = quote(data$x), y = quote(data$y), col = quote(scales::alpha(group_colors[data$group], alpha))), moreargs))
     }
     axis(3, labels = F, tck = 0.01)
@@ -111,7 +118,7 @@ marginal_plot = function(x, y, group = NULL, data = NULL, lm_show = FALSE, lm_fo
     # right density plot
     par(mar = c(4,0.25,0,1))
     par(cex.axis=1.3,cex.main=1.6, cex.lab=1.6,cex.axis=1.6)
-    plot(NULL, type = "n", ylim = moreargs$ylim, xlim = c(0, max(sapply(data_split, function(group_set) max(density(group_set$y, bw = bw)$y)))), main = NA, axes = F, xlab = "density",cex.main=2, cex.lab=2,cex.axis=2)
+    plot(NULL, type = "n", ylim = moreargs$ylim, xlim = c(0, max(sapply(data_split, function(group_set) max(density(group_set$y, bw = bw)$y)))), main = NA, axes = F, xlab = "density")
     mapply(function(group_set, group_color){lines(x = density(group_set$y, bw = bw, adjust = adjust)$y, y = density(group_set$y, bw = bw)$x, col = group_color, lwd = 2)}, data_split, group_colors)
     axis(1)
   }, finally = {
