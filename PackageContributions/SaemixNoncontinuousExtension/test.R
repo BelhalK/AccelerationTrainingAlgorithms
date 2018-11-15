@@ -42,8 +42,8 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 
 
 
-K1 = 20
-K2 = 10
+K1 = 200
+K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
@@ -89,6 +89,6 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
 #Weibull
 options_rtte<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0
-  ,displayProgress=FALSE,save.graphs=FALSE,nbiter.burn =0)
+  ,displayProgress=TRUE,save.graphs=FALSE,nbiter.burn =0)
 rtte<-saemix(saemix.model_rtte,saemix.data_rtte,options_rtte)
 

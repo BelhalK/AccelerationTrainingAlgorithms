@@ -301,11 +301,6 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 # a la fin: mais verifier, pe pb de distribution ??? ie allpar sur l'echelle des betas et pas parpop ? a verifier
 # saemix.res["allpar"]<-allpar
 # saemix.res["parpop"]<-allpar[,-c(indx.betaC)]
-  browser()
-  map.saemix(saemixObject)
-  fim.saemix(saemixObject)
-  llis.saemix(saemixObject)
-  llgq.saemix(saemixObject)
 #### Final computations
 # Compute the MAP estimates of the PSI_i's 
   if(saemix.options$map) saemixObject<-map.saemix(saemixObject)
