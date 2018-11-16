@@ -44,7 +44,7 @@ estep_incremental<-function(kiter, Uargs, Dargs, opt, structural.model, mean.phi
   	eta_map <- phi.map
   	indchosen <- l[ind_rand]
 # Sampling strategy (MAP calculation)
-if (kiter <= 0){ #if rwm
+if (kiter <= 33 && length(ind_rand)!=Dargs$NM){ #if rwm
   	# if (kiter <= length(map_range) && length(ind_rand)!=Dargs$NM){
 	 for(i in 1:saemixObject["data"]["N"]) {
 	    isuj<-id.list[i]
@@ -80,16 +80,16 @@ if (kiter <= 0){ #if rwm
 	# indchosen <- sample(1:Dargs$NM, size = nb.replacement, replace = FALSE)
 	block <- setdiff(1:Dargs$NM, indchosen)
 	
-	print(kiter)
-	print(indchosen)
+	# print(kiter)
+	# print(indchosen)
 	
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]
-	etaM[indchosen,] <- eta_map[indchosen,] #if rwm
+	# etaM[indchosen,] <- eta_map[indchosen,] #if rwm
 	phiM <- etaM + mean.phiM
 	phiMc<-phiM
 
 } else {
-	indchosen <- 1:Dargs$NM
+	indchosen <- l[ind_rand]
 	block <- setdiff(1:Dargs$NM, l[ind_rand])
 
 	etaM<-phiM[,varList$ind.eta]-mean.phiM[,varList$ind.eta,drop=FALSE]

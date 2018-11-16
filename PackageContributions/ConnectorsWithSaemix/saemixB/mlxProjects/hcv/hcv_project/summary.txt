@@ -1,35 +1,30 @@
 ********************************************************************************
 *                         hcv_project.mlxtran                                  *
-*                         October 10, 2018 at 21:14:54                         *
+*                         October 24, 2018 at 14:43:39                         *
 *                         Monolix version : 5.0.1                              *
 ********************************************************************************
 
 POPULATION PARAMETERS ESTIMATION _______________________________________________
 
 Fixed Effects ----------------------------
-s_pop                          :  1.43e+03
-d_pop                          :      2.33
-beta_pop                       :  4.38e-05
-delta_pop                      :     0.043
-p_pop                          :        78
-c_pop                          :      4.99
-eta_pop                        :     0.948
-epsilon_pop                    :     0.661
+s_pop                          :  5.65e+03
+d_pop                          :     0.396
+beta_pop                       :   1.2e-05
+delta_pop                      :      0.05
+p_pop                          :        20
+c_pop                          :         5
+eta_pop                        :       0.9
+epsilon_pop                    :       0.7
 
 Standard Deviation of the Random Effects -
-omega_s                        :     0.336
-omega_d                        :     0.472
-omega_beta                     :     0.531
-omega_delta                    :     0.516
-omega_p                        :     0.901
-omega_c                        :     0.688
-omega_eta                      :      4.68
-omega_epsilon                  :      2.47
+omega_s                        :      1.64
+omega_d                        :      1.32
+omega_beta                     :     0.478
 
 Error Model Parameters -------------------
-a                              :     0.593
+a                              :     0.694
 
-Elapsed time (seconds) :    1e+02
-CPU time     (seconds) :  5.1e+02
+Elapsed time (seconds) :       53
+CPU time     (seconds) :    2e+02
  _______________________________________________________________________________
 

@@ -1,7 +1,13 @@
-load("minibatch_pk_simu.RData")
-# save.image("minibatch_pk_simu.RData")
+# load("warfa_isaem_newkernel.RData")
+# save.image("warfa_isaem_newkernel.RData")
+# save.image("warfa_isaem_LARGEN.RData")
+
+####20 CHAINS
+load("warfa_isaem.RData")
+# save.image("warfa_isaem.RData")
+
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -25,12 +31,13 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('main_estep_incremental.R')
 
 
-  source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R/mixtureFunctions.R')
-  source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB")
+  source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R/mixtureFunctions.R')
+  source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/plots.R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental")
 
 
 library("mlxR")
+library("rlist")
 library("psych")
 library("coda")
 library("Matrix")
@@ -74,7 +81,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=2000
+N=100
 
 param   <- c(
   ka_pop  = 1,    omega_ka  = 0.3,
@@ -85,7 +92,7 @@ res <- simulx(model     = model,
               parameter = param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(1,10,by=1)))
+              output    = list(name='y', time=seq(1,5,by=1)))
 
  warfarin.saemix <- res$y
  warfarin.saemix$amount <- 100
@@ -100,8 +107,8 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
 
 
 
-K1 = 300
-K2 = 100
+K1 = 200
+K2 = 30
 iterations = 0:(K1+K2-1)
 end = K1+K2
 batchsize25 = 25
@@ -109,98 +116,133 @@ batchsize50 = 50
 
 seed0=3456
 
-
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), nb.replacement=100,sampling='seq')
+nchains = 20
+gamma = 1
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains,nbiter.mcmc = c(2,2,2,0), 
+  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
+  map.range=c(0), nb.replacement=100,sampling='randomiter',gamma=gamma)
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
 theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
 
 
-# options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-#   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-#   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
-# theo_mix75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
-# theo_mix75 <- data.frame(theo_mix75$param)
-# theo_mix75 <- cbind(iterations, theo_mix75[-1,])
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randomiter',gamma=gamma)
+theo_mix75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
+theo_mix75 <- data.frame(theo_mix75$param)
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
-# options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
-#                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
-#                           nbiter.burn =0, nb.replacement=50,sampling='randompass')
-# theo_mix50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-# theo_mix50 <- data.frame(theo_mix50$param)
-# theo_mix50 <- cbind(iterations, theo_mix50[-1,])
-
-
-# options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-#   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
-#   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
-# theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
-# theo_mix25 <- data.frame(theo_mix25$param)
-# theo_mix25 <- cbind(iterations, theo_mix25[-1,])
-
-# theo_ref_scaled <- theo_ref
-# theo_mix25_scaled <- theo_mix25
-# theo_mix50_scaled <- theo_mix50
-# theo_mix75_scaled <- theo_mix75
-# theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
-# theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
-# theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
-# theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
-
-# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
-
-# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
-# graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
-
-###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
-
-options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,2),
- nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
- map.range=c(1:4), nb.replacement=100,sampling='seq')
-theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
-theo_ref <- data.frame(theo_ref$param)
-theo_ref <- cbind(iterations, theo_ref[-1,])
-
-
-
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
-theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-theo_mix50 <- data.frame(theo50$param)
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
+                          nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='seq',gamma=gamma)
+theo_mix50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+theo_mix50 <- data.frame(theo_mix50$param)
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
 
 
-options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='seq',gamma=gamma)
 theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25 <- data.frame(theo_mix25$param)
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
 
 theo_ref_scaled <- theo_ref
+theo_mix25_scaled <- theo_mix25
 theo_mix50_scaled <- theo_mix50
+theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
+theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
+
+
+theo_mix75_scaled <- theo_mix75
+theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
+theo_mix75_scaled_20chains <- theo_mix75_scaled
+
+# theo_ref_scaled_20chains <- theo_ref_scaled
+# theo_mix25_scaled_20chains <- theo_mix25_scaled
+# theo_mix50_scaled_20chains <- theo_mix50_scaled
+
+# theo_ref_scaled_10chains <- theo_ref_scaled
+# theo_mix25_scaled_10chains <- theo_mix25_scaled
+# theo_mix50_scaled_10chains <- theo_mix50_scaled
+
+
+graphConvMC_threekernels(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains)
+graphConvMC_threekernels(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains)
+graphConvMC_threekernels(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain)
+
+
+graphConvMC_5(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains,theo_mix75_scaled_20chains,theo_mix75_scaled_20chains)
+graphConvMC_5(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains,theo_mix75_scaled_10chains,theo_mix75_scaled_10chains)
+graphConvMC_5(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain,theo_mix75_scaled_1chain,theo_mix75_scaled_1chain)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
+# graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
+
+###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
+nchains = 1
+gamma = 1
+options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains,
+  nbiter.mcmc = c(2,2,2,2),nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,
+  nbiter.burn = 0, 
+ map.range=c(1:4), nb.replacement=100,sampling='seq', gamma = gamma)
+theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
+theo_ref <- data.frame(theo_ref$param)
+theo_ref <- cbind(iterations, theo_ref[-1,])
+
+
+
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,2), 
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:10),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass',gamma=gamma)
+theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+theo_mix50 <- data.frame(theo50$param)
+theo_mix50 <- cbind(iterations, theo_mix50[-1,])
+
+
+options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
+  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma)
+theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+theo_mix25 <- data.frame(theo_mix25$param)
+theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+
+
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,2), 
+                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:10),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=75,sampling='randompass',gamma=gamma)
+theo75<-saemix_incremental(saemix.model,saemix.data,options.incremental75)
+theo_mix75 <- data.frame(theo75$param)
+theo_mix75 <- cbind(iterations, theo_mix75[-1,])
+
+
+
+theo_ref_scaled <- theo_ref
+theo_mix50_scaled <- theo_mix50
+theo_mix75_scaled <- theo_mix75
 theo_mix25_scaled <- theo_mix25
 theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
 theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
-graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix25_scaled)
 
-graphConvMC_threekernels(theo_ref,theo_mix50,theo_mix25)
-graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix25_scaled)
+# graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix75_scaled)
+graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix75_scaled,theo_mix75_scaled)
+# graphConvMC_threekernels(theo_ref,theo_mix50,theo_mix75)
 ###NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL#######NEWKERNEL####
 
 
-options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+options.incremental75<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=75,sampling='randompass')
 theo_mix75<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental75))
 theo_mix75 <- cbind(iterations, theo_mix75[-1,])
 
 
-options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+options.incremental85<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=85,sampling='randompass')
 theo_mix85<-data.frame(saemix_incremental(saemix.model,saemix.data,options.incremental85))
@@ -315,7 +357,7 @@ theo_ref['individual'] <- m
 final_ref <- rbind(final_ref,theo_ref)
 
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,2), 
                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
                           nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 0.2)
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
@@ -329,7 +371,7 @@ theo_mix50['individual'] <- m
 final_mix <- rbind(final_mix,theo_mix50)
 
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,2), 
                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
                           nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 2)
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
@@ -342,7 +384,7 @@ error_mix2 <- error_mix2 + (theo_mix50[,2:8]-ML)^2
 theo_mix50['individual'] <- m
 final_mix <- rbind(final_mix,theo_mix50)
 
-options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,2), 
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,2), 
                           nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),nbiter.sa=0,
                           nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma = 20)
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)

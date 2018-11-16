@@ -154,6 +154,7 @@ model <- 'data {
 modelstan <- stan_model(model_name = "warfarin",model_code = model)
 
 #NUTS using rstan
+L_mcmc <- 100000
 i <- 10
 options.vi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
@@ -217,7 +218,7 @@ acf(ref[,1], main="RWM")
 acf(new[,1], main="IMH")
 acf(mala[,1], main="MALA")
 acf(vi[,1], main="NUTS")
-
+acf(advi[,1], main="VI")
 #MSJD
 mssd(ref[,1])
 mssd(new[,1])

@@ -399,5 +399,5 @@ cond.mean.eta<-t(apply(cond.mean.eta,c(1,2),mean))
 
   options(warn=opt.warn)
 
-  return(saemixObject)
+  return(parpop)
 }

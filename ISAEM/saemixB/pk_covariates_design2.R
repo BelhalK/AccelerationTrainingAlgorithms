@@ -1,5 +1,6 @@
 # savedwarfarin.saemix <- warfarin.saemix
-# save.image("pkcov.RData")
+# load("pkcov_samplingstrat.RData")
+# save.image("pkcov_samplingstrat.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('aaa_generics.R') 
@@ -27,7 +28,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R/mixtureFunctions.R')
   source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB")
-load("isaem_design2.RData")
+# load("isaem_design2.RData")
 # save.image("isaem_design2.RData")
 
 library("mlxR")
@@ -95,34 +96,72 @@ theo_ref <- cbind(iterations, theo_ref[-1,])
 
 
 options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
-                          nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=50,sampling='randompass')
+                          nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma=1)
 theo50<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
-
 theo_mix50 <- data.frame(theo50$param)
 theo_mix50 <- cbind(iterations, theo_mix50[-1,])
 
-# summary <- theo50$summary
-# chosen <- data.frame(theo50$chosen)
+summary <- theo50$summary
+chosen <- data.frame(theo50$chosen)
+kiter <- 30
+test <- t(summary)
+test <- data.frame(test)
+test$iterations <- 1:kiter
+df <- melt(test ,  id.vars = 'iterations')
+current <- theo_mix50[1:kiter,2]
+chosen <- t(chosen)
+chosen <- data.frame(chosen)
+chosen$iterations <- 1:kiter
+df.chosen <- melt(chosen ,  id.vars = 'iterations')
+df$chosen <- df.chosen$value
 
-# kiter <- 30
-
-# test <- t(summary)
-# test <- data.frame(test)
-# test$iterations <- 1:kiter
-# df <- melt(test ,  id.vars = 'iterations')
+ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen))+ 
+  geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[end,2]), color = "red")+ 
+  geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[1:kiter,2]), color = "yellow")+ theme_bw()
 
 
-# current <- theo_mix50[1:kiter,2]
-# chosen <- t(chosen)
-# chosen <- data.frame(chosen)
-# chosen$iterations <- 1:kiter
-# df.chosen <- melt(chosen ,  id.vars = 'iterations')
-# df$chosen <- df.chosen$value
 
-# ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen))+ 
-#   geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[end,2]), color = "red")+ 
-#   geom_point(data = theo_mix50[1:kiter,], aes(x = iterations, y = theo_mix50[1:kiter,2]), color = "yellow")+ theme_bw()
+options.incremental50<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, nbiter.mcmc = c(2,2,2,0), 
+                          nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
+                          nbiter.burn =0, nb.replacement=50,sampling='randompass', gamma=0)
+theo50_random<-saemix_incremental(saemix.model,saemix.data,options.incremental50)
+theo_mix50_random <- data.frame(theo50_random$param)
+theo_mix50_random <- cbind(iterations, theo_mix50_random[-1,])
+
+summary_random <- theo50_random$summary
+chosen_random <- data.frame(theo50_random$chosen)
+kiter <- 30
+test <- t(summary_random)
+test <- data.frame(test)
+test$iterations <- 1:kiter
+df <- melt(test ,  id.vars = 'iterations')
+current <- theo_mix50_random[1:kiter,2]
+chosen_random <- t(chosen_random)
+chosen_random <- data.frame(chosen_random)
+chosen_random$iterations <- 1:kiter
+df.chosen_random <- melt(chosen_random ,  id.vars = 'iterations')
+df$chosen_random <- df.chosen_random$value
+
+
+ggplot(df, aes(iterations,value)) + geom_point(aes(colour = chosen_random))+ 
+  geom_point(data = theo_mix50_random[1:kiter,], aes(x = iterations, y = theo_mix50_random[end,2]), color = "red")+ 
+  geom_point(data = theo_mix50_random[1:kiter,], aes(x = iterations, y = theo_mix50_random[1:kiter,2]), color = "yellow")+ theme_bw()
+
+
+theo_ref_scaled <- theo_ref
+theo_mix50_scaled <- theo_mix50
+theo_mix50_random_scaled <- theo_mix50_random
+
+
+theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
+theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
+theo_mix50_random_scaled$iterations = theo_mix50_random_scaled$iterations*0.5
+
+graphConvMC_threekernels(theo_ref_scaled,theo_mix50_scaled,theo_mix50_random_scaled)
+
+
+
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 

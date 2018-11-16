@@ -1,35 +1,31 @@
 ********************************************************************************
 *                         hcv_project.mlxtran                                  *
-*                         October 11, 2018 at 18:49:13                         *
+*                         October 23, 2018 at 14:35:45                         *
 *                         Monolix version : 5.0.1                              *
 ********************************************************************************
 
 POPULATION PARAMETERS ESTIMATION _______________________________________________
 
 Fixed Effects ----------------------------
-s_pop                          :   1.4e+03
-d_pop                          :      1.13
-beta_pop                       :  2.86e-05
-delta_pop                      :    0.0464
-p_pop                          :      88.7
-c_pop                          :      5.48
-eta_pop                        :     0.946
-epsilon_pop                    :     0.644
+s_pop                          :       935
+d_pop                          :      1.33
+beta_pop                       :  2.27e-05
+delta_pop                      :    0.0417
+p_pop                          :      73.4
+c_pop                          :      3.19
+eta_pop                        :     0.768
+epsilon_pop                    :     0.732
 
 Standard Deviation of the Random Effects -
-omega_s                        :     0.387
-omega_d                        :     0.746
-omega_beta                     :     0.468
-omega_delta                    :     0.529
-omega_p                        :     0.694
-omega_c                        :       1.2
-omega_eta                      :      2.53
-omega_epsilon                  :      2.45
+omega_s                        :      1.38
+omega_d                        :     0.706
+omega_eta                      :       4.7
+omega_epsilon                  :      2.62
 
 Error Model Parameters -------------------
-a                              :     0.596
+a                              :     0.608
 
-Elapsed time (seconds) :       78
-CPU time     (seconds) :  3.9e+02
+Elapsed time (seconds) :  2.5e+02
+CPU time     (seconds) :  1.3e+03
  _______________________________________________________________________________
 

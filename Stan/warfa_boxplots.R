@@ -222,10 +222,10 @@ for (m in 1:nchains){
 
 ########################PLOT##############################################################
 
-variable <- 3
+variable <- 1
 niter1 <- 5
 niter2 <- 20
-niter3 <- L_mcmc
+niter3 <- 500
 
 refbox <- ref[nchains,]
 malabox <- mala[nchains,]
@@ -253,7 +253,7 @@ nutsbox$iterations <- 1:nchains
 truthbox$iterations <- 1:nchains
 
 refbox$algo <- "RWM"
-newbox$algo <- "IMH"
+newbox$algo <- "nlme-IMH"
 malabox$algo <- "MALA"
 nutsbox$algo <- "NUTS"
 truthbox$algo <- "Truth"
@@ -316,8 +316,8 @@ theme_bw()+ylab("ka")+
 theme(legend.title = element_text(size=40),
   legend.key.size = unit(5,"line"),
       legend.text = element_text(size=40),
-      axis.text=element_text(size=32), 
-      axis.title=element_text(size=40),
+      axis.text=element_text(size=48), 
+      axis.title=element_text(size=56),
       panel.border = element_rect(colour = "black", fill=NA, size=2),
       plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
 xlab("")+ylab("ka") + geom_hline(yintercept = quantile(truthbox[,variable],0.25), col="purple", linetype="dashed",size=1.5)+
@@ -325,6 +325,7 @@ geom_hline(yintercept = quantile(truthbox[,variable],0.5), col="purple", linetyp
 geom_hline(yintercept = quantile(truthbox[,variable],0.75), col="purple", linetype="dashed",size=1.5)+
 geom_hline(yintercept = quantile(truthbox[,variable],0), col="grey", linetype="dashed",size=1.5)+
 geom_hline(yintercept = quantile(truthbox[,variable],1), col="grey", linetype="dashed",size=1.5)
+
 
 # save <- ggplot(data=df.m[-index,]) + 
 #     geom_boxplot( aes(x=factor(group), y=value, fill=factor(var)), position=position_dodge(1)) +
@@ -334,8 +335,7 @@ geom_hline(yintercept = quantile(truthbox[,variable],1), col="grey", linetype="d
 #                    panel.border = element_rect(colour = "black", fill=NA, size=2),plot.margin=unit(c(0.1,0.5,0.1,0.1),"cm"))+
 #      xlab("Algorithm")+ylab("")
 
-
-ggsave(save, file="newpics/boxplots_warfa_ka2.pdf", width = 900, height = 450, units = "mm")
+ggsave(save, file="newpics/test1.pdf", width = 900, height = 450, units = "mm")
 ggsave(save, file="newpics/boxplots_warfa_V2.pdf", width = 900, height = 450, units = "mm")
 ggsave(save, file="newpics/boxplots_warfa_k2.pdf", width = 900, height = 450, units = "mm")
 
