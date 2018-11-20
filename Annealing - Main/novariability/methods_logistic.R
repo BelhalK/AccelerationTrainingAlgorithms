@@ -1,4 +1,7 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
+# save.image("logistic_novar_an.RData")
+load("logistic_novar_an.RData")
+
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -16,7 +19,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/")
 source('mixtureFunctions.R') 
 source('plots.R')
 
@@ -24,7 +27,7 @@ library('rCMA')
 ###logit
 
 
-logit_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/Data_logistic_1D_simule.txt", header=T)
+logit_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/data/Data_logistic_1D_simule.txt", header=T)
 saemix.data_logit<-saemixData(name.data=logit_data,header=TRUE,sep=" ",na=NA, name.group=c("group"),
   name.predictors=c("X"),name.response=c("Y"), name.X="X")
 
@@ -95,7 +98,7 @@ logit_withnosa <- cbind(iterations, logit_withnosa)
 
 
 
-replicate = 6
+replicate = 3
 seed0 = 395246
 
 #RWM
@@ -103,6 +106,8 @@ final_optim <- 0
 final_av <- 0
 final_avnew <- 0
 final_bayes <- 0
+final_annealing <- 0
+
 for (m in 1:replicate){
   print(m)
   l = list(c(0.5,0.05,60),c(0.55,0.07,50),c(0.6,0.1,40),c(0.15,0.05,60),c(0.20,0.05,60),c(0.25,0.05,60))
@@ -121,27 +126,41 @@ saemix.model_logisticnovar<-saemixModel(model=model1cpt,description="logitrin",t
 
   #No var
   ##### Optim (fmin search)
-  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,an=FALSE,coeff=1, av=0)
   logistic_optim<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_logistic_with))
   logistic_optim <- cbind(iterations, logistic_optim)
   logistic_optim['individual'] <- m
   final_optim <- rbind(final_optim,logistic_optim)
   ##### AV
-  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, map.range=c(0),av=1)
+  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1,av=1)
   logistic_withav<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_logistic_with))
   logistic_withav <- cbind(iterations, logistic_withav)
   logistic_withav['individual'] <- m
   final_av <- rbind(final_av,logistic_withav)
 
-  ##### AV and new kernel
-  options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1), av=1)
-  logistic_newkernelav<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_newkernel))
-  logistic_newkernelav <- cbind(iterations, logistic_newkernelav)
-  logistic_newkernelav['individual'] <- m
-  final_avnew <- rbind(final_avnew,logistic_newkernelav)
+  # ##### AV and new kernel
+  # options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.sa=K1/2,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(1), av=1)
+  # logistic_newkernelav<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_newkernel))
+  # logistic_newkernelav <- cbind(iterations, logistic_newkernelav)
+  # logistic_newkernelav['individual'] <- m
+  # final_avnew <- rbind(final_avnew,logistic_newkernelav)
+
+
+  ##### Annealing
+  options_an<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=0.05,
+  map.range=c(0), av=1)
+  logistic_an<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_an))
+  logistic_an <- cbind(iterations, logistic_an)
+  logistic_an['individual'] <- m
+  final_annealing <- rbind(final_annealing,logistic_an)
 
   ##### pseudo bayesian
-  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
+  options_logistic_with<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0,2),
+    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, av=0,an=FALSE,
+    coeff=1,map.range=c(0))
   logistic_bayes<-data.frame(saemix(saemix.model_logisticnovar,saemix.data_logit,options_logistic_with))
   logistic_bayes <- cbind(iterations, logistic_bayes)
   logistic_bayes['individual'] <- m
@@ -149,11 +168,11 @@ saemix.model_logisticnovar<-saemixModel(model=model1cpt,description="logitrin",t
 }
 
 
-graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
+graphConvMC_diff4(final_optim,final_av,final_annealing,final_bayes, title="")
 
 #black: optim
 #blue: av
-#red: av newkernel
+#red: annealing
 #green: bayes
 
 graphConvMC_diff(final_optim,final_bayes, title="")

@@ -1,4 +1,4 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -16,7 +16,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/")
 source('mixtureFunctions.R') 
 source('plots.R') 
 
@@ -24,7 +24,7 @@ library('rCMA')
 
 ###rtte
 ###RTTE
-timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/data/rtte_data.csv", header=T, sep=",")
+timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/data/rtte_data.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 saemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
 timetoevent.model<-function(psi,id,xidep) {
@@ -78,6 +78,8 @@ replicate <- 3
 final_optim <- 0
 final_av <- 0
 final_avnew <- 0
+
+final_annealing <- 0
 final_bayes <- 0
 for (m in 1:replicate){
   print(m)
@@ -91,38 +93,51 @@ for (m in 1:replicate){
 
   #No var
   ##### Optim (fmin search)
-  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0)
+  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,an=FALSE,coeff=1, av=0)
   rtte_optim<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_rtte_with))
   rtte_optim <- cbind(iterations, rtte_optim)
   rtte_optim['individual'] <- m
   final_optim <- rbind(final_optim,rtte_optim)
+
   ##### AV
-  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, map.range=c(0),av=1)
+  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, map.range=c(0),an=FALSE,coeff=1,av=1)
   rtte_withav<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_rtte_with))
   rtte_withav <- cbind(iterations, rtte_withav)
   rtte_withav['individual'] <- m
   final_av <- rbind(final_av,rtte_withav)
 
-  ##### AV and new kernel
-  options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0,map.range=c(1:3), av=1)
-  rtte_newkernelav<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_newkernel))
-  rtte_newkernelav <- cbind(iterations, rtte_newkernelav)
-  rtte_newkernelav['individual'] <- m
-  final_avnew <- rbind(final_avnew,rtte_newkernelav)
+  # ##### AV and new kernel
+  # options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(1:3), av=1)
+  # rtte_newkernelav<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_newkernel))
+  # rtte_newkernelav <- cbind(iterations, rtte_newkernelav)
+  # rtte_newkernelav['individual'] <- m
+  # final_avnew <- rbind(final_avnew,rtte_newkernelav)
+
+   ##### AV and new kernel
+  options_an<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+    nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,map.range=c(0),an=TRUE,coeff=0.05, av=1)
+  rtte_an<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_an))
+  rtte_an <- cbind(iterations, rtte_an)
+  rtte_an['individual'] <- m
+  final_annealing <- rbind(final_annealing,rtte_an)
 
   ##### pseudo bayesian
-  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=TRUE,nbiter.burn =0, av=0,map.range=c(0))
+  options_rtte_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,2),
+    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0,an=FALSE,coeff=1,
+     av=0,map.range=c(0))
   rtte_bayes<-data.frame(saemix(saemix.model_rttenovar,saemix.data_rtte,options_rtte_with))
   rtte_bayes <- cbind(iterations, rtte_bayes)
   rtte_bayes['individual'] <- m
   final_bayes <- rbind(final_bayes,rtte_bayes)
 }
 
-graphConvMC_diff4(final_optim,final_av,final_avnew,final_bayes, title="")
+graphConvMC_diff4(final_optim,final_av,final_annealing,final_bayes, title="")
 
 #black: optim
 #blue: av
-#red: av newkernel
+#red: annealing
 #green: bayes
 
 graphConvMC_diff(final_optim,final_bayes, title="")

@@ -251,21 +251,21 @@
       if (saemix.options$an){
         if(Dargs$type=="structural") {
           # varList$omega <- varList$omega*T[kiter]
-          varList$omega[Uargs$i1.omega2] <- varList$omega[Uargs$i1.omega2]*T[kiter]
-          varList$omega[Uargs$i0.omega2] <- varList$omega[Uargs$i0.omega2]*Tnovar[kiter]
+          # varList$omega[Uargs$i1.omega2] <- varList$omega[Uargs$i1.omega2]*T[kiter]
+          # varList$omega[Uargs$i0.omega2] <- varList$omega[Uargs$i0.omega2]*Tnovar[kiter]
           # varList$omega <- pmin(varList$omega*T[kiter],2)
 
           # varList$omega <-T[kiter]/((1+T[kiter])/2)*varList$omega
 
 
-          # T1[kiter] <- min(max(theta[4]/varList$omega[1,1],1),T1[kiter])
-          # T2[kiter] <- min(max(theta[5]/varList$omega[2,2],1),T2[kiter])
-          # T3[kiter] <- min(max(theta[6]/varList$omega[3,3],1),T3[kiter])
-          # varList$omega[1,1] <- varList$omega[1,1]*T1[kiter]
-          # varList$omega[2,2] <- varList$omega[2,2]*T2[kiter]
-          # varList$omega[3,3] <- varList$omega[3,3]*T3[kiter]
+          T1[kiter] <- min(max(theta[4]/varList$omega[1,1],1),T1[kiter])
+          T2[kiter] <- min(max(theta[5]/varList$omega[2,2],1),T2[kiter])
+          T3[kiter] <- min(max(theta[6]/varList$omega[3,3],1),T3[kiter])
+          varList$omega[1,1] <- varList$omega[1,1]*T1[kiter]
+          varList$omega[2,2] <- varList$omega[2,2]*T2[kiter]
+          varList$omega[3,3] <- varList$omega[3,3]*T3[kiter]
           
-          # varList$pres <- varList$pres*sqrt(T[kiter])
+          varList$pres <- varList$pres*sqrt(T[kiter])
           
         } else{
           var.eta[Uargs$i1.omega2] <- var.eta[Uargs$i1.omega2]*T[kiter]
