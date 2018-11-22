@@ -88,7 +88,7 @@ for (m in 1:replicate){
  saemix.model_rttenovar<-saemixModel(model=timetoevent.model,description="time model",type="likelihood",   
   psi0=matrix(l[[m]],ncol=2,byrow=TRUE,dimnames=list(NULL,   
   c("lambda","beta"))), 
-  transform.par=c(1,1),covariance.model=matrix(c(0,0,0,1),ncol=2, 
+  transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
 
   #No var

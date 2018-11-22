@@ -1,4 +1,4 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -16,24 +16,24 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/R")
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/novariability/")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/")
 source('mixtureFunctions.R') 
 source('plots.R') 
 
-library('rCMA')
-source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
+# library('rCMA')
+# source("/Users/karimimohammedbelhal/Desktop/papers/iem_code/imcem_saemix/plots_se.R")
 
 
-library("rJava")
-library("rCMA")
-library("mlxR")
-library("psych")
-library("coda")
-library("Matrix")
-library(abind)
-require(ggplot2)
-require(gridExtra)
-require(reshape2)
+# library("rJava")
+# library("rCMA")
+# library("mlxR")
+# library("psych")
+# library("coda")
+# library("Matrix")
+# library(abind)
+# require(ggplot2)
+# require(gridExtra)
+# require(reshape2)
 
 #####################################################################################
 # Theophylline
