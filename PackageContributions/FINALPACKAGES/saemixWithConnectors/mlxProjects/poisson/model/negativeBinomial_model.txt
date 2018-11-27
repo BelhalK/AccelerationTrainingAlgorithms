@@ -1,0 +1,26 @@
+DESCRIPTION: Count data model, negative binomial distribution
+
+[LONGITUDINAL]
+input = {delta, lambda}
+
+EQUATION:
+  h1 = 1/(1+lambda*delta)
+  llam = log(h1)/delta
+
+DEFINITION:
+Y = { type = count,
+
+  if k > 0
+    lg1 = gammaln(k+1/delta)
+    lg2 = gammaln(1/delta)
+    lh2 = log(1-h1)
+    aux = llam + lg1 - lg2 + k*lh2 - factln(k)
+  else
+    aux = llam
+  end
+
+  log(P(Y=k)) = aux
+}
+
+OUTPUT:
+output = Y 

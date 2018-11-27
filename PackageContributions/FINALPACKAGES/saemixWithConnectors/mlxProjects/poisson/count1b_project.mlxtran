@@ -1,0 +1,49 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/count1_data.txt'
+delimiter = tab
+header = {ID, TIME, Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=Y, type=discrete}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {alpha_pop, omega_alpha, mp_pop, omega_mp, lambda_pop, omega_lambda}
+
+DEFINITION:
+alpha = {distribution=logNormal, typical=alpha_pop, sd=omega_alpha}
+mp = {distribution=logitNormal, typical=mp_pop, sd=omega_mp}
+lambda = {distribution=logNormal, typical=lambda_pop, sd=omega_lambda}
+
+[LONGITUDINAL]
+file = 'model/poissonMixture_model.txt'
+<FIT>
+data = Y
+model = Y
+
+<PARAMETER>
+alpha_pop = {value=1, method=MLE}
+lambda_pop = {value=0.5, method=MLE}
+mp_pop = {value=0.5, method=MLE}
+omega_alpha = {value=1, method=MLE}
+omega_lambda = {value=1, method=MLE}
+omega_mp = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, vpc, npc, residualsscatter, residualsdistribution, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, blq, predictiondistribution, likelihoodcontribution, categorizedoutput, saemresults, condmeanresults, fisher, likelihoodresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'count1b_project'
+

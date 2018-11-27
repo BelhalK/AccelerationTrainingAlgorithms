@@ -1,0 +1,49 @@
+********************************************************************************
+*                         warfarinPK_project.mlxtran                           *
+*                         October 10, 2018 at 22:38:14                         *
+*                         Monolix version : 5.0.1                              *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+ka_pop                         :     0.613
+V_pop                          :      7.64
+Cl_pop                         :     0.135
+
+Standard Deviation of the Random Effects -
+omega_ka                       :     0.749
+omega_V                        :     0.221
+omega_Cl                       :     0.288
+
+Error Model Parameters -------------------
+a                              :      1.07
+
+Elapsed time (seconds) :      2.6
+CPU time     (seconds) :        7
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+           min        Q1    median        Q3       max
+ka :     0.176     0.692      0.79      0.87      2.06
+V  :      5.03      6.92      7.81      8.59      11.5
+Cl :    0.0779     0.111     0.129     0.167     0.258
+
+Elapsed time (seconds) :    0.72
+CPU time     (seconds) :       2
+ -------------------------------------------------------------------------------
+
+Individual Parameters Estimation by Conditional Mode ---------------------------
+           min        Q1    median        Q3       max
+ka :     0.172     0.559     0.607     0.669      1.75
+V  :      4.98      6.81      7.65       8.4      11.2
+Cl :    0.0776     0.109     0.127     0.165     0.259
+
+Elapsed time (seconds) :   0.037
+CPU time     (seconds) :       0
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+

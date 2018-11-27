@@ -1,0 +1,10 @@
+[LONGITUDINAL]
+input = {Emax, EC50}
+
+EQUATION:
+; The time is used as the equivalent of the concentration
+Cc_sat = max(t, 0)
+E = Emax*Cc_sat / (Cc_sat+EC50)
+
+OUTPUT:
+output = E
