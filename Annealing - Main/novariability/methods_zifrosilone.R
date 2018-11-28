@@ -237,8 +237,6 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 }
 
 
-
-
 graphConvMC_diff4(final_optim,final_av,final_annealing,final_bayes, title="")
 #black: optim
 #blue: av

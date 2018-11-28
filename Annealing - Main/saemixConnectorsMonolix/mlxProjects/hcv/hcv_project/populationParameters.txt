@@ -1,0 +1,13 @@
+parameter,value
+s_pop,5649.63445608156
+d_pop,0.39566171901224
+beta_pop,1.20452538015096e-05
+delta_pop,0.05
+p_pop,20
+c_pop,5
+eta_pop,0.9
+epsilon_pop,0.7
+omega_s,1.63956313173215
+omega_d,1.31977225799068
+omega_beta,0.478379134143675
+a,0.693874136579958

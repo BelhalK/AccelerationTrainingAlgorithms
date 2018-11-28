@@ -1,0 +1,87 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset arthritis.saemix 
+    Structured data: y ~ time | id 
+    Predictor: time () 
+Dataset characteristics:
+    number of subjects:     10 
+    number of observations: 210 
+    average/min/max nb obs: 21.00  /  21  /  21 
+First 10 lines of data:
+   id time         y mdv cens occ ytype
+1   1    0  575962.6   0    0   1     1
+2   1    5 1131762.7   0    0   1     1
+3   1   10 1707655.3   0    0   1     1
+4   1   15 2629966.3   0    0   1     1
+5   1   20 2880551.7   0    0   1     1
+6   1   25 3901008.9   0    0   1     1
+7   1   30 3943093.6   0    0   1     1
+8   1   35 4214112.2   0    0   1     1
+9   1   40 4885006.4   0    0   1     1
+10  1   45 3856453.7   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  arthritis  Model type:  structural
+function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  tauD<-psi[id,1]
+  tauS<-psi[id,2]
+  ypred<-1
+  return(ypred)
+}
+  Nb of parameters: 2 
+      parameter names:  tauD tauS 
+      distribution:
+     Parameter Distribution Estimated
+[1,] tauD      log-normal   Estimated
+[2,] tauS      log-normal   Estimated
+  Variance-covariance matrix:
+     tauD tauS
+tauD    1    0
+tauS    0    1
+  Error model: proportional , initial values: b=1 
+    No covariate in the model.
+    Initial values
+             tauD tauS
+Pop.CondInit    8    8
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=100, K2=50 
+    Number of chains:  1 
+    Seed:  39546 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter Estimate
+[1,] tauD      8.69    
+[2,] tauS      9.92    
+[3,] b         0.11    
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+     Parameter   Estimate
+tauD omega2.tauD 6.8e-02 
+tauS omega2.tauS 2.2e-09 
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+            omega2.tauD omega2.tauS
+omega2.tauD 1           0          
+omega2.tauS 0           1          

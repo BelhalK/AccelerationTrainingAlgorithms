@@ -1,0 +1,45 @@
+********************************************************************************
+*                           arthritis_projet.mlxtran                           *
+*                            at                                                *
+*                           Monolix version : 5.0.1                            *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+tauD_pop                       :      8.65
+tauS_pop                       :      9.68
+
+Standard Deviation of the Random Effects -
+omega_tauD                     :     0.273
+omega_tauS                     :     0.245
+
+Error Model Parameters -------------------
+b                              :     0.113
+
+Elapsed time (seconds) :  1.2e+02
+CPU time     (seconds) :  7.3e+02
+ _______________________________________________________________________________
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+             min        Q1    median        Q3       max
+tauD :      5.29      7.54      8.71      10.5      12.3
+tauS :      7.66      9.03      10.4      10.9      11.6
+
+Elapsed time (seconds) :      32
+CPU time     (seconds) : 1.6e+02
+ -------------------------------------------------------------------------------
+
+Individual Parameters Estimation by Conditional Mode ---------------------------
+             min        Q1    median        Q3       max
+tauD :      5.35      7.61      8.76      10.5      12.3
+tauS :       7.5      8.86      10.3      10.9      11.5
+
+Elapsed time (seconds) :       1
+CPU time     (seconds) :       5
+ -------------------------------------------------------------------------------
+ _______________________________________________________________________________
+

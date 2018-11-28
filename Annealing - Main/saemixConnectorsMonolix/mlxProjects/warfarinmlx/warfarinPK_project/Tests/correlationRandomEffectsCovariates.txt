@@ -1,0 +1,10 @@
+eta,covariate,statistic,p-value,test
+eta_ka,age,0.160253,0.874696,Pearson
+eta_ka,wt,0.0837514,0.971515,Pearson
+eta_ka,sex,1.0112,0.592834,Fisher
+eta_V,age,-0.155407,0.965457,Pearson
+eta_V,wt,4.49143,2.21859e-06,Pearson
+eta_V,sex,15.2635,0.000251449,Fisher
+eta_Cl,age,1.9073,0.0956039,Pearson
+eta_Cl,wt,2.58367,0.0184761,Pearson
+eta_Cl,sex,0.889532,0.634827,Fisher

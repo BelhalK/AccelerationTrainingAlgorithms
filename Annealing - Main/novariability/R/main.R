@@ -267,7 +267,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
           varList$pres <- varList$pres*sqrt(T[kiter])
           
         } else{
-          var.eta[Uargs$i1.omega2] <- var.eta[Uargs$i1.omega2]*T[kiter]
+          varList$omega[Uargs$i1.omega2] <- varList$omega[Uargs$i1.omega2]*T[kiter]
           varList$omega[Uargs$i0.omega2] <- varList$omega[Uargs$i0.omega2]*Tnovar[kiter]
         }
       }
