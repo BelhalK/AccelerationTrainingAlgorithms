@@ -339,8 +339,11 @@ compute.Uy_c<-function(b0,phiM,pres,args,Dargs,DYF) {
     tempsiM <- cbind(unique(Dargs$IdM), psiM)
     colnames(tempsiM) <- c("id",names(args$i1.omega),names(args$i0.omega))
     fpred <- computePredictions(data.frame(tempsiM))[[1]]
+    nan.indices <- which(is.nan(fpred))
+    fpred[nan.indices] <- 0
   } else {
     fpred<-Dargs$structural.model(psiM,Dargs$IdM,Dargs$XM)
+    nan.indices <- 0
   }
   if(Dargs$error.model=="exponential")
      fpred<-log(cutoff(fpred))

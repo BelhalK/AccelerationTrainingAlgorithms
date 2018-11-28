@@ -66,7 +66,6 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 		temp<-d1.omega[Uargs$ind.fix1,]*(t(Uargs$COV1)%*%(suffStat$statphi1-Uargs$dstatCOV[,varList$ind.eta]))
 		betas[Uargs$ind.fix1]<-solve(comega[Uargs$ind.fix1,Uargs$ind.fix1],rowSums(temp)) 
 	}
-	
 	varList$MCOV[Uargs$j.covariate]<-betas
 	mean.phi<-Uargs$COV %*% varList$MCOV
 	e1.phi<-mean.phi[,varList$ind.eta,drop=FALSE]

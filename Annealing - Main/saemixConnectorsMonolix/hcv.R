@@ -71,7 +71,7 @@ K2 = 50
 iterations = 1:(K1+K2+1)
 end = K1+K2
 nchains = 1
-
+runtime = 20
 replicate = 3
 seed0 = 395246
 
@@ -86,7 +86,6 @@ final_annealing <- 0
 cov.model = matrix(0,nrow=8,ncol=8,byrow=TRUE)
 cov.model[1,1] <- 1
 cov.model[2,2] <- 1
-cov.model[3,3] <- 1
 
 for (m in 1:replicate){
   print(m)
