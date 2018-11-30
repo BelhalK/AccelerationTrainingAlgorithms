@@ -35,6 +35,7 @@ require(ggplot2)
 require(gridExtra)
 require(reshape2)
 
+
 timetoevent.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/rtte3se.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 saemix.data<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
@@ -63,7 +64,6 @@ saemix.model<-saemixModel(model=timetoevent.model,description="time model",type=
   c("lambda","beta"))), 
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2, 
   byrow=TRUE))
-
 
 ##RUNS
 
