@@ -37,11 +37,11 @@ require(madness)
 project.file <- "mlxProjects/arthritis/arthritis_projet.mlxtran"
 loadProject(project.file)
 
-# getEstimatedPopulationParameters()
-# getEstimatedLogLikelihood()
-# runLogLikelihoodEstimation(linearization = FALSE, wait = TRUE)
-# computePredictions(getEstimatedIndividualParameters()$saem)
-# computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
+getEstimatedPopulationParameters()
+getEstimatedLogLikelihood()
+runLogLikelihoodEstimation(linearization = FALSE, wait = TRUE)
+computePredictions(getEstimatedIndividualParameters()$saem)
+computePredictions(getEstimatedIndividualParameters()$saem, individualIds = c(10,20))
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
