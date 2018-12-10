@@ -15,7 +15,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/saemix
   source('SaemixData.R')
   source('SaemixModel.R') 
   source('SaemixRes.R') 
-  source('SaemixObject.R') 
+  source('SaemixObject.R')
   source('zzz.R') 
   source("plots.R")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/saemixConnectorsMonolix")
