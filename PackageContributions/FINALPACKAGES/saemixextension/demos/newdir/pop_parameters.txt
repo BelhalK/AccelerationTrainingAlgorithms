@@ -42,17 +42,13 @@ function(psi,id,xidep) {
    pge2<-exp(logit2)/(1+exp(logit2))
    pge3<-exp(logit3)/(1+exp(logit3))
    logpdf<-rep(0,length(T))
-   
-   # logpdf[y==0]<-log(1-pge1)
-   # logpdf[y==1]<-log(pge1-pge2)
-   # logpdf[y==2]<-log(pge2-pge3)
-   # logpdf[y==3]<-log(pge3)
+    P.obs = (y==0)*pge1+(y==1)*(pge2 - pge1)+(y==2)*(pge3 - pge2)+(y==3)*(1 - pge3)
+    logpdf <- log(P.obs)
 
-   logpdf[y==0]<-1-pge1
-   logpdf[y==1]<-pge1-pge2
-   logpdf[y==2]<-pge2-pge3
-   logpdf[y==3]<-pge3
-
+   # logpdf[y==0]<-log(pge1)
+   # logpdf[y==1]<-log(pge2 - pge1)
+   # logpdf[y==2]<-log(pge3 - pge2)
+   # logpdf[y==3]<-log(1 - pge3)
 
    return(logpdf)
 }
@@ -66,8 +62,8 @@ function(psi,id,xidep) {
   Variance-covariance matrix:
      alp1 alp2 alp3
 alp1    1    0    0
-alp2    0    1    0
-alp3    0    0    1
+alp2    0    0    0
+alp3    0    0    0
     No covariate in the model.
     Initial values
              alp1 alp2 alp3
@@ -92,20 +88,16 @@ Pop.CondInit    3    1  0.5
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] alp1      2.89    
-[2,] alp2      1.04    
-[3,] alp3      0.51    
+[1,] alp1      2.27    
+[2,] alp2      0.81    
+[3,] alp3      0.75    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
      Parameter   Estimate
-alp1 omega2.alp1 2.30    
-alp2 omega2.alp2 0.23    
-alp3 omega2.alp3 0.27    
+alp1 omega2.alp1 0.33    
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-            omega2.alp1 omega2.alp2 omega2.alp3
-omega2.alp1 1           0           0          
-omega2.alp2 0           1           0          
-omega2.alp3 0           0           1          
+            omega2.alp1
+omega2.alp1 1          

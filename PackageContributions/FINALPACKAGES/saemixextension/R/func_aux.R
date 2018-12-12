@@ -347,7 +347,7 @@ compute.LLy<-function(phiM,args,Dargs,DYF,pres) {
     gpred<-error(fpred,pres,Dargs$XM$ytype)
     DYF[args$ind.ioM]<-0.5*((Dargs$yM-fpred)/gpred)**2+log(gpred)
   } else {
-    DYF[args$ind.ioM]<- -log(fpred)
+    DYF[args$ind.ioM]<- -fpred
   }
   U<-colSums(DYF)
   return(U)

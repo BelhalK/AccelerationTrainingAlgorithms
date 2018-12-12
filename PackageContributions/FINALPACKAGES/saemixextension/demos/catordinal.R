@@ -37,17 +37,13 @@ ordinal.model<-function(psi,id,xidep) {
    pge2<-exp(logit2)/(1+exp(logit2))
    pge3<-exp(logit3)/(1+exp(logit3))
    logpdf<-rep(0,length(T))
-   
-   # logpdf[y==0]<-log(1-pge1)
-   # logpdf[y==1]<-log(pge1-pge2)
-   # logpdf[y==2]<-log(pge2-pge3)
-   # logpdf[y==3]<-log(pge3)
+    P.obs = (y==0)*pge1+(y==1)*(pge2 - pge1)+(y==2)*(pge3 - pge2)+(y==3)*(1 - pge3)
+    logpdf <- log(P.obs)
 
-   logpdf[y==0]<-1-pge1
-   logpdf[y==1]<-pge1-pge2
-   logpdf[y==2]<-pge2-pge3
-   logpdf[y==3]<-pge3
-
+   # logpdf[y==0]<-log(pge1)
+   # logpdf[y==1]<-log(pge2 - pge1)
+   # logpdf[y==2]<-log(pge3 - pge2)
+   # logpdf[y==3]<-log(1 - pge3)
 
    return(logpdf)
 }
@@ -58,7 +54,7 @@ model",type="likelihood",
  
 psi0=matrix(c(3,1,0.5),ncol=3,byrow=TRUE,dimnames=list(NULL,c("alp1","alp2","alp3"))),
  
-transform.par=c(0,1,1),covariance.model=matrix(diag(3),ncol=3))
+transform.par=c(0,1,1),covariance.model=matrix(c(1,rep(0,8)),ncol=3))
 
 options.ord<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), 
 nbiter.saemix = c(200,100), nbiter.sa=0, 
