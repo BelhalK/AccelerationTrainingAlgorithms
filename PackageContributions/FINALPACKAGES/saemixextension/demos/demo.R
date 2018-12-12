@@ -27,9 +27,9 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
 timetoevent.saemix <- read.table("data/rttellis.csv", header=T, sep=",")
 timetoevent.saemix <- timetoevent.saemix[timetoevent.saemix$ytype==2,]
 saemix.data_rtte<-saemixData(name.data=timetoevent.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),name.response=c("y"),name.predictors=c("time","y"), name.X=c("time"))
+
 timetoevent.model<-function(psi,id,xidep) {
 T<-xidep[,1]
-y<-xidep[,2]
 N <- nrow(psi)
 Nj <- length(T)
 censoringtime = 20
@@ -51,7 +51,6 @@ saemix.model_rtte<-saemixModel(model=timetoevent.model,description="time model",
   c("lambda","beta"))),
   transform.par=c(1,1),covariance.model=matrix(c(1,0,0,1),ncol=2,
   byrow=TRUE))
-
 
 
 ##RUNS

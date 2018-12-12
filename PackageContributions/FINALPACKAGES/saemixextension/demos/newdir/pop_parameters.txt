@@ -1,0 +1,111 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset smx.ord 
+    Structured data: Y ~ TIME + Y | ID 
+    X variable for graphs: TIME () 
+Dataset characteristics:
+    number of subjects:     1000 
+    number of observations: 4000 
+    average/min/max nb obs: 4.00  /  4  /  4 
+First 10 lines of data:
+   ID TIME Y Y.1 mdv cens occ ytype
+1   1    1 3   3   0    0   1     1
+2   1    2 0   0   0    0   1     1
+3   1    3 0   0   0    0   1     1
+4   1    4 0   0   0    0   1     1
+5   2    1 3   3   0    0   1     1
+6   2    2 0   0   0    0   1     1
+7   2    3 0   0   0    0   1     1
+8   2    4 0   0   0    0   1     1
+9   3    1 0   0   0    0   1     1
+10  3    2 0   0   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  Ordinal categorical 
+model  Model type:  likelihood
+function(psi,id,xidep) {
+   T<-xidep[,1]
+   y<-xidep[,2]
+   alp1<-psi[id,1]
+   alp2<-psi[id,2]
+   alp3<-psi[id,3]
+   logit1<-alp1
+   logit2<-alp1+alp2
+   logit3<-alp1+alp2+alp3
+   pge1<-exp(logit1)/(1+exp(logit1))
+   pge2<-exp(logit2)/(1+exp(logit2))
+   pge3<-exp(logit3)/(1+exp(logit3))
+   logpdf<-rep(0,length(T))
+   
+   # logpdf[y==0]<-log(1-pge1)
+   # logpdf[y==1]<-log(pge1-pge2)
+   # logpdf[y==2]<-log(pge2-pge3)
+   # logpdf[y==3]<-log(pge3)
+
+   logpdf[y==0]<-1-pge1
+   logpdf[y==1]<-pge1-pge2
+   logpdf[y==2]<-pge2-pge3
+   logpdf[y==3]<-pge3
+
+
+   return(logpdf)
+}
+  Nb of parameters: 3 
+      parameter names:  alp1 alp2 alp3 
+      distribution:
+     Parameter Distribution Estimated
+[1,] alp1      normal       Estimated
+[2,] alp2      log-normal   Estimated
+[3,] alp3      log-normal   Estimated
+  Variance-covariance matrix:
+     alp1 alp2 alp3
+alp1    1    0    0
+alp2    0    1    0
+alp3    0    0    1
+    No covariate in the model.
+    Initial values
+             alp1 alp2 alp3
+Pop.CondInit    3    1  0.5
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=200, K2=100 
+    Number of chains:  1 
+    Seed:  39546 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  FALSE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter Estimate
+[1,] alp1      2.89    
+[2,] alp2      1.04    
+[3,] alp3      0.51    
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+     Parameter   Estimate
+alp1 omega2.alp1 2.30    
+alp2 omega2.alp2 0.23    
+alp3 omega2.alp3 0.27    
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+            omega2.alp1 omega2.alp2 omega2.alp3
+omega2.alp1 1           0           0          
+omega2.alp2 0           1           0          
+omega2.alp3 0           0           1          
