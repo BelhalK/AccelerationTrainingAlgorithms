@@ -387,5 +387,5 @@ if (kiter <= 0){ #if rwm
 	}
 	
 	phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, map = eta_map, indchosen = indchosen))
+	return(list(varList=varList,DYF=DYF,phiM=phiM, etaM=etaM, map = eta_map, indchosen = l[ind_rand]))
 }
