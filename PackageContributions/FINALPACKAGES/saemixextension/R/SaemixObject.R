@@ -380,7 +380,6 @@ setMethod("summary","SaemixObject",
     cat("-----------------  Fixed effects  ------------------\n")
     cat("----------------------------------------------------\n")
     }
-    browser()
     if(length(object@results@se.fixed)==0) {
        if(object@modeltype=="structural") {
           tab<-data.frame(c(object@results@name.fixed, object@results@name.sigma[object@results@indx.res]), c(object@results@fixed.effects,object@results@respar[object@results@indx.res]))
@@ -722,7 +721,6 @@ setMethod(f="predict",
       temp<-tab[!duplicated(id),,drop=FALSE]
       if(dim(temp)[1]!=dim(temp2)[1]) cat("Some covariates have time-varying values; only the first is taken into account in the current version of the algorithm.\n")
       #temp<-temp[order(temp[,1]),]
-      
       if(length(newdata["name.covariates"])>0) {
         Mcovariates<-data.frame(id=rep(1,newdata["N"]),temp[,2:dim(temp)[2]])} else {
           Mcovariates<-data.frame(id=rep(1,newdata["N"]))

@@ -70,5 +70,8 @@ end = K1+K2
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=TRUE,save.graphs=FALSE,nbiter.burn =0)
-warfa<-saemix(model.ord,data.ord,options.ord)
+catordinal<-saemix(model.ord,data.ord,options.ord)
 
+
+test <- predict(catordinal)
+test <- saemix.predict(catordinal)
