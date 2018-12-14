@@ -239,7 +239,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
       xmcmc<-estep_incremental(kiter, Uargs, Dargs, opt, structural.model, mean.phi, varList, DYF, phiM,saemixObject,l,ind_rand)
       # eta_map <- xmcmc$map
       # summary[,kiter] <- eta_map[,1]
-      # indchosen <- xmcmc$indchosen
+      indchosen <- xmcmc$indchosen
       # block <- setdiff(1:Dargs$NM, indchosen)
 
       # chosen[block,kiter] <- 0
@@ -256,7 +256,7 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     # M-step
     if(opt$stepsize[kiter]>0) {
   ############# Stochastic Approximation
-    	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement)
+    	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen)
     	varList<-xstoch$varList
     	mean.phi<-xstoch$mean.phi
     	phi<-xstoch$phi

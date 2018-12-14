@@ -113,7 +113,6 @@ if(Dargs$type=="structural"){
 			etaMc<-matrix(rnorm(Dargs$NM*nb.etas),ncol=nb.etas)%*%chol.omega
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc
 			if(Dargs$type=="structural"){
-				browser()
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF,chosen)
 			} else {
 				Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)

@@ -167,7 +167,7 @@ saemix_incremental<-function(model,data,control=list()) {
 # List of sufficient statistics - change during call to stochasticApprox
   suffStat<-list(statphi1=0,statphi2=0,statphi3=0,statrese=0)
   phi<-array(data=0,dim=c(Dargs$N, Uargs$nb.parameters, saemix.options$nb.chains))
-
+  tempphi <- phi
 # structural model, check nb of parameters
   structural.model<-saemix.model["model"]
   #  nb.parameters<-saemix.model["nb.parameters"]
@@ -248,12 +248,14 @@ for (kiter in 1:saemix.options$nbiter.tot) { # Iterative portion of algorithm
     varList<-xmcmc$varList
     DYF<-xmcmc$DYF
     phiM<-xmcmc$phiM
-    
+
     # M-step
     if(opt$stepsize[kiter]>0) {
   ############# Stochastic Approximation
-    	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen)
-    	varList<-xstoch$varList
+    	xstoch<-mstep(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen,tempphi)
+      tempphi <- xstoch$tempphi
+    	
+      varList<-xstoch$varList
     	mean.phi<-xstoch$mean.phi
     	phi<-xstoch$phi
     	betas<-xstoch$betas
@@ -300,6 +302,7 @@ varList$omega[,Uargs$i0.omega2]<-0
 phi[,Uargs$i0.omega2,1:saemix.options$nb.chains]<-mean.phi[,Uargs$i0.omega2]
 phi.samp<-phi
 phi<-apply(phi,c(1,2),mean)
+
 
 ##### Conditional means and variances used for the estimation of the log-likelihood via Importance Sampling
 cond.mean.phi<-phi

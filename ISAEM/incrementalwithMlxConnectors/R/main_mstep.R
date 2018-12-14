@@ -1,5 +1,5 @@
 ################## Stochastic approximation - compute sufficient statistics (M-step) #####################
-mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement) {
+mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen) {
 	# M-step - stochastic approximation
 	# Input: kiter, Uargs, structural.model, DYF, phiM (unchanged)
 	# Output: varList, phi, betas, suffStat (changed)
@@ -25,6 +25,12 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=Uargs$nchains)
 	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	
+
+
+	# block <- setdiff(1:Dargs$N,indchosen)
+	# for(k in 1:Uargs$nchains) phi[block,,k]<-0
+
+
 	# if (kiter <= 3){ #if rwm
 
 	# 	# weight <- eta_map[,1]

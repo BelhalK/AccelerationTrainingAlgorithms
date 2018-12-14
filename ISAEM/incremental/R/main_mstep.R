@@ -1,5 +1,5 @@
 ################## Stochastic approximation - compute sufficient statistics (M-step) #####################
-mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen) {
+mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, phi, betas, suffStat,nb_replacement,indchosen,tempphi) {
 	# M-step - stochastic approximation
 	# Input: kiter, Uargs, structural.model, DYF, phiM (unchanged)
 	# Output: varList, phi, betas, suffStat (changed)
@@ -23,29 +23,29 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	
 
-	# ### ONLINE SAEM#####
+	### ONLINE SAEM#####
+	# if (kiter < 50){
+	# 	block <- setdiff(1:Dargs$N,indchosen)
+	# 	for(k in 1:Uargs$nchains) phi[block,,k]<-0
+	# }
+
 	# block <- setdiff(1:Dargs$N,indchosen)
 	# for(k in 1:Uargs$nchains) phi[block,,k]<-0
 
-
-	# ### SAEM-vr#####
-	# block <- setdiff(1:Dargs$N,indchosen)
-	# if(kiter%%round(Dargs$N/length(indchosen))==0){
-	# 	initialphi <- phi
-	# 	for(k in 1:Uargs$nchains) initialphi[block,,k]<-0
-	# }
-
-	# for(k in 1:Uargs$nchains){
-	# 	phi[block,,k]<- 0 
-	# 	phi[indchosen,,k]<- phiM[indchosen,] - initialphi[indchosen,,k]+initialsum
-	# }
-
-	# if(kiter%%round(Dargs$N/length(indchosen))==0){
-	# 	stat1<-apply(phi[,varList$ind.eta,,drop=FALSE],c(1,2),sum) # sum on columns ind.eta of phi, across 3rd dimension
-	# 	stat2<-matrix(data=0,nrow=nb.etas,ncol=nb.etas)
-	# 	stat3<-apply(phi**2,c(1,2),sum) #  sum on phi**2, across 3rd dimension
-	# }
 	
+	### SAEM-vr#####
+	block <- setdiff(1:Dargs$N,indchosen)
+
+	if(kiter%%round(Dargs$N/length(indchosen))==0) tempphi <- phi #update the temp phi at each epoch
+	
+	tempsum <- apply(tempphi[,varList$ind.eta,,drop=FALSE],c(1,2),sum)
+	tempsum <- colSums(tempsum)
+
+	for(k in 1:Uargs$nchains){
+		phi[block,,k]<- 0 
+		phi[indchosen,,k]<- phiM[indchosen,] - tempphi[indchosen,,k]+1/length(indchosen)*tempsum
+	}
+
 
 	# if (kiter <= 3){ #if rwm
 
@@ -144,5 +144,5 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 			varList$pres[2]<-varList$pres[2]+opt$stepsize[kiter]*(ABres[2]-varList$pres[2])
 		}
 	}
-	return(list(varList=varList,mean.phi=mean.phi,phi=phi,betas=betas,suffStat=suffStat))
+	return(list(varList=varList,mean.phi=mean.phi,phi=phi,betas=betas,suffStat=suffStat,tempphi=tempphi))
 }

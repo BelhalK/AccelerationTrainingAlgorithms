@@ -79,8 +79,8 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   byrow=TRUE))
 
 
-K1 = 3000
-K2 = 500
+K1 = 200
+K2 = 50
 iterations = 1:(K1+K2)
 end = K1+K2
 batchsize25 = 25
@@ -116,34 +116,47 @@ theo_mix25$algo <- 'quarter'
 theo_mix25$iterations <- seq(0,10, length.out=length(theo_mix25$iterations))
 
 
-runtime <- 40
-####NEWKERNEL
-options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,2),
- nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
- map.range=c(1:4), nb.replacement=100,sampling='seq',duration=runtime)
-theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
-theo_ref <- data.frame(theo_ref$param)
-theo_ref <- cbind(iterations, theo_ref[-1,])
-row_sub_ref  = apply(theo_ref, 1, function(row) all(row !=0 ))
-theo_ref <- theo_ref[row_sub_ref,]
-theo_ref$algo <- 'full'
-theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
 
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
-  nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
+  nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
-theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
-theo_mix25 <- data.frame(theo_mix25$param)
-theo_mix25 <- cbind(iterations, theo_mix25[-1,])
-row_sub  = apply(theo_mix25, 1, function(row) all(row !=0 ))
-theo_mix25 <- theo_mix25[row_sub,]
-theo_mix25$algo <- 'quarter'
-theo_mix25$iterations <- seq(0,10, length.out=length(theo_mix25$iterations))
+theo_mix25online<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+theo_mix25online <- data.frame(theo_mix25online$param)
+theo_mix25online <- cbind(iterations, theo_mix25online[-1,])
+row_sub  = apply(theo_mix25online, 1, function(row) all(row !=0 ))
+theo_mix25online <- theo_mix25online[row_sub,]
+theo_mix25online$algo <- 'online'
+theo_mix25online$iterations <- seq(0,10, length.out=length(theo_mix25online$iterations))
+
+runtime <- 40
+# ####NEWKERNEL
+# options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1,nbiter.mcmc = c(2,2,2,2),
+#  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, 
+#  map.range=c(1:4), nb.replacement=100,sampling='seq',duration=runtime)
+# theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
+# theo_ref <- data.frame(theo_ref$param)
+# theo_ref <- cbind(iterations, theo_ref[-1,])
+# row_sub_ref  = apply(theo_ref, 1, function(row) all(row !=0 ))
+# theo_ref <- theo_ref[row_sub_ref,]
+# theo_ref$algo <- 'full'
+# theo_ref$iterations <- seq(0,10, length.out=length(theo_ref$iterations))
+
+
+# options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = 1, 
+#   nbiter.mcmc = c(2,2,2,2), nbiter.saemix = c(K1,K2),displayProgress=TRUE, map.range=c(1:4),
+#   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='randompass')
+# theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
+# theo_mix25 <- data.frame(theo_mix25$param)
+# theo_mix25 <- cbind(iterations, theo_mix25[-1,])
+# row_sub  = apply(theo_mix25, 1, function(row) all(row !=0 ))
+# theo_mix25 <- theo_mix25[row_sub,]
+# theo_mix25$algo <- 'quarter'
+# theo_mix25$iterations <- seq(0,10, length.out=length(theo_mix25$iterations))
 
 
 comparison <- 0
-comparison <- rbind(theo_ref[,],theo_mix25[,])
+comparison <- rbind(theo_ref[,],theo_mix25[,],theo_mix25online)
 var <- melt(comparison, id.var = c('iterations','algo'), na.rm = TRUE)
 
 

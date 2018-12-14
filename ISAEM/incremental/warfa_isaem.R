@@ -84,7 +84,7 @@ batchsize50 = 50
 
 seed0=3456
 
-nchains = 20
+nchains = 1
 gamma = 1
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains,nbiter.mcmc = c(2,2,2,0), 
   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
@@ -112,7 +112,7 @@ theo_ref <- cbind(iterations, theo_ref[-1,])
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=25,sampling='seq',gamma=gamma)
+                          nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma)
 theo_mix25online<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25online <- data.frame(theo_mix25online$param)
 theo_mix25online <- cbind(iterations, theo_mix25online[-1,])
@@ -131,34 +131,10 @@ theo_mix25 <- cbind(iterations, theo_mix25[-1,])
 
 theo_ref_scaled <- theo_ref
 theo_mix25_scaled <- theo_mix25
-theo_mix50_scaled <- theo_mix50
 theo_ref_scaled$iterations = theo_ref_scaled$iterations*1
 theo_mix25_scaled$iterations = theo_mix25_scaled$iterations*0.25
-theo_mix50_scaled$iterations = theo_mix50_scaled$iterations*0.5
 
 
-theo_mix75_scaled <- theo_mix75
-theo_mix75_scaled$iterations = theo_mix75_scaled$iterations*0.75
-theo_mix75_scaled_20chains <- theo_mix75_scaled
-
-# theo_ref_scaled_20chains <- theo_ref_scaled
-# theo_mix25_scaled_20chains <- theo_mix25_scaled
-# theo_mix50_scaled_20chains <- theo_mix50_scaled
-
-# theo_ref_scaled_10chains <- theo_ref_scaled
-# theo_mix25_scaled_10chains <- theo_mix25_scaled
-# theo_mix50_scaled_10chains <- theo_mix50_scaled
 
 graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix25_scaled)
 graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix25online_scaled)
-
-graphConvMC_threekernels(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains)
-graphConvMC_threekernels(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains)
-graphConvMC_threekernels(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain)
-
-
-graphConvMC_5(theo_ref_scaled_20chains,theo_mix25_scaled_20chains,theo_mix50_scaled_20chains,theo_mix75_scaled_20chains,theo_mix75_scaled_20chains)
-graphConvMC_5(theo_ref_scaled_10chains,theo_mix25_scaled_10chains,theo_mix50_scaled_10chains,theo_mix75_scaled_10chains,theo_mix75_scaled_10chains)
-graphConvMC_5(theo_ref_scaled_1chain,theo_mix25_scaled_1chain,theo_mix50_scaled_1chain,theo_mix75_scaled_1chain,theo_mix75_scaled_1chain)
-# graphConvMC_threekernels(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled)
-# graphConvMC_5(theo_ref_scaled,theo_mix25_scaled,theo_mix50_scaled,theo_mix50_scaled,theo_mix75_scaled)
