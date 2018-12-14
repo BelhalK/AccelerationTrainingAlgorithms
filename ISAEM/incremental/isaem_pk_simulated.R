@@ -135,7 +135,7 @@ nchains = 1
 gamma = 1
 options<-list(seed=39546,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains,nbiter.mcmc = c(2,2,2,0), 
   nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
-  map.range=c(0), nb.replacement=100,sampling='randomiter',gamma=gamma)
+  map.range=c(0), nb.replacement=100,sampling='randomiter',gamma=gamma, algo="full")
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
 theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
@@ -159,7 +159,7 @@ theo_ref <- cbind(iterations, theo_ref[-1,])
 ##############ONLINE SAEM################
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma)
+                          nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma,algo="online")
 theo_mix25online<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25online <- data.frame(theo_mix25online$param)
 theo_mix25online <- cbind(iterations, theo_mix25online[-1,])
@@ -172,7 +172,7 @@ theo_mix25online_scaled$iterations = theo_mix25online_scaled$iterations*0.25
 ##############VR SAEM################
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
-                          nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma)
+                          nbiter.burn =0, nb.replacement=25,sampling='randompass',gamma=gamma,algo="vr")
 theo_mix25vr<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25vr <- data.frame(theo_mix25vr$param)
 theo_mix25vr <- cbind(iterations, theo_mix25vr[-1,])
@@ -182,7 +182,7 @@ theo_mix25vr_scaled$iterations = theo_mix25vr_scaled$iterations*0.25
 
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
-  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='seq',gamma=gamma)
+  nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='seq',gamma=gamma,algo="minibatch")
 theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25 <- data.frame(theo_mix25$param)
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
