@@ -81,7 +81,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=100
+N=10000
 
 param   <- c(
   ka_pop  = 1,    omega_ka  = 0.3,
@@ -92,33 +92,34 @@ res <- simulx(model     = model,
               parameter = param,
               treatment = list(time=0, amount=100),
               group     = list(size=N, level='individual'),
-              output    = list(name='y', time=seq(1,5,by=1)))
+              output    = list(name='y', time=seq(1,12,by=1)))
 
  warfarin.saemix <- res$y
  warfarin.saemix$amount <- 100
-#  saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-#   name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
+ saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+  name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
 
-# # Default model, no covariate
-# saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-#   ,psi0=matrix(c(3,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
-#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-#   byrow=TRUE))
-
-warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/data/warfarin_data.txt", header=T)
-saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
-
-
+# Default model, no covariate
 saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
-  ,psi0=matrix(c(3,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
-  covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  ,psi0=matrix(c(3,3,0.1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","Cl"))),fixed.estim=c(1,1,1),
+  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE))
 
 
+# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/data/warfarin_data.txt", header=T)
+# saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+#   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
-K1 = 300
+
+# saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structural"
+#   ,psi0=matrix(c(3,7,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
+#   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE),
+#   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+#   byrow=TRUE))
+
+
+
+K1 = 200
 K2 = 30
 iterations = 0:(K1+K2-1)
 end = K1+K2

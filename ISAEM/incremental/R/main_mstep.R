@@ -22,9 +22,30 @@ mstep<-function(kiter, Uargs, Dargs, opt, structural.model, DYF, phiM, varList, 
 	ff<-matrix(fpred,nrow=Dargs$nobs,ncol=Uargs$nchains)
 	for(k in 1:Uargs$nchains) phi[,,k]<-phiM[((k-1)*Dargs$N+1):(k*Dargs$N),]
 	
+
 	# ### ONLINE SAEM#####
 	# block <- setdiff(1:Dargs$N,indchosen)
 	# for(k in 1:Uargs$nchains) phi[block,,k]<-0
+
+
+	# ### SAEM-vr#####
+	# block <- setdiff(1:Dargs$N,indchosen)
+	# if(kiter%%round(Dargs$N/length(indchosen))==0){
+	# 	initialphi <- phi
+	# 	for(k in 1:Uargs$nchains) initialphi[block,,k]<-0
+	# }
+
+	# for(k in 1:Uargs$nchains){
+	# 	phi[block,,k]<- 0 
+	# 	phi[indchosen,,k]<- phiM[indchosen,] - initialphi[indchosen,,k]+initialsum
+	# }
+
+	# if(kiter%%round(Dargs$N/length(indchosen))==0){
+	# 	stat1<-apply(phi[,varList$ind.eta,,drop=FALSE],c(1,2),sum) # sum on columns ind.eta of phi, across 3rd dimension
+	# 	stat2<-matrix(data=0,nrow=nb.etas,ncol=nb.etas)
+	# 	stat3<-apply(phi**2,c(1,2),sum) #  sum on phi**2, across 3rd dimension
+	# }
+	
 
 	# if (kiter <= 3){ #if rwm
 
