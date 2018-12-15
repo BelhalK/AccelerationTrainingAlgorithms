@@ -6,7 +6,7 @@
 # load("warfa_isaem.RData")
 # save.image("warfa_isaem.RData")
 
-load("warfa_onlinesaem.RData")
+# load("warfa_onlinesaem.RData")
 # save.image("warfa_onlinesaem.RData")
 
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
