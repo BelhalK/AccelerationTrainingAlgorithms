@@ -63,7 +63,7 @@ T<-xidep[,1]
 y<-xidep[,2]
 N <- nrow(psi)
 Nj <- length(T)
-censoringtime = 20
+censoringtime = 6
 lambda <- psi[id,1]
 beta <- psi[id,2]
 init <- which(T==0)
