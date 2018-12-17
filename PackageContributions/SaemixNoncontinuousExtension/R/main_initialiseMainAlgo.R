@@ -219,7 +219,7 @@ initialiseMainAlgo<-function(saemix.data,saemix.model,saemix.options) {
 		etaM[itest.phi,]<-etaMc[itest.phi,]
 		phiM[itest.phi,]<-phiMc[itest.phi,]
 		psiM<-transphi(phiM,saemix.model["transform.par"])
-		browser()
+		# browser()
 		fpred<-structural.model(psiM, IdM, XM)
 		inan<-(is.na(fpred)+is.infinite(fpred)+(Im(fpred)!=0))
 		itest.phi<-unique(IdM[inan])
