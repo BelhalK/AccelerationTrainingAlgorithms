@@ -60,7 +60,9 @@ iterations = 1:(K1+K2+1)
 end = K1+K2
 
 #Warfarin
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,monolix=FALSE)
+options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,monolix=FALSE)
 warfa<-saemix(saemix.model,saemix.data,options_warfa)
 
 ################################################################ SAEMIX ####################################################################################################################################
@@ -88,7 +90,9 @@ model1cpt<-function(psi,id,xidep) {
   return(ypred)
 }
 
-options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE)
+options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,
+  nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE)
 warfa<-saemix(model=saemix.model,data=saemix.data,options_warfa)
 
 
