@@ -1,11 +1,6 @@
-
-
 # library("rJava")
 # library("rCMA")
 library("mlxR")
-# library("psych")
-# library("coda")
-# library("Matrix")
 library(abind)
 require(ggplot2)
 require(gridExtra)

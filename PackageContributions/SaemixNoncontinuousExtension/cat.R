@@ -19,9 +19,6 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/Sa
   source('zzz.R') 
   
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/SaemixNoncontinuousExtension")
-# cat_data.saemix <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/SaemixNoncontinuousExtension/data/categorical1_data.txt", header=T, sep="")
-# saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, 
-#   name.group=c("ID"),name.response=c("Y"),name.predictors=c("Y"), name.X=c("TIME"))
 library("mlxR")
 
 cat_data.saemix<-read.table("data/logistic2cat_test.csv", header=T, sep=",")
@@ -66,8 +63,8 @@ K2 = 100
 iterations = 1:(K1+K2+1)
 end = K1+K2
 
-#Warfarin
+
 options<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=TRUE,save.graphs=FALSE,nbiter.burn =0)
-warfa<-saemix(saemix.model,saemix.data,options)
+cat.fit<-saemix(saemix.model,saemix.data,options)
