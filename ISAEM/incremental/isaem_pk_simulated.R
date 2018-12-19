@@ -84,10 +84,10 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=10000
+N=1000
 
 param   <- c(
-  ka_pop  = 1,    omega_ka  = 0.3,
+  ka_pop  = 2,    omega_ka  = 0.3,
   V_pop   = 10,   omega_V   = 0.2,
   Cl_pop  = 1,    omega_Cl  = 0.3, a =1)
   
@@ -180,13 +180,15 @@ theo_mix25vr <- cbind(iterations, theo_mix25vr[-1,])
 theo_mix25vr_scaled <- theo_mix25vr
 theo_mix25vr_scaled$iterations = theo_mix25vr_scaled$iterations*0.25
 
+
+
+
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, 
   nbiter.mcmc = c(2,2,2,0), nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),
   nbiter.sa=0,nbiter.burn =0, nb.replacement=25,sampling='seq',gamma=gamma,algo="minibatch")
 theo_mix25<-saemix_incremental(saemix.model,saemix.data,options.incremental25)
 theo_mix25 <- data.frame(theo_mix25$param)
 theo_mix25 <- cbind(iterations, theo_mix25[-1,])
-
 
 
 
