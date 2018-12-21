@@ -174,7 +174,6 @@ for (m in 1:replicate){
   print(m)
   l = list(c(0.1,0.18,100,1,1),c(0.15,0.2,150,1.5,1.5),c(0.11,0.15,130,1.2,1.2),c(0.2,0.18,210,1,1),c(0.25,0.18,50,1,1))
   
-
 # saemix.model_zifro<-saemixModel(model=model1cpt,description="zifrorin",type="structural"
 #   ,psi0=matrix(l[[m]],ncol=5,byrow=TRUE, dimnames=list(NULL, c("T","ka","V","alpha","beta"))),
 #   transform.par=c(1,1,1,1,1),omega.init=matrix(c(0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1,0,0,0,0,0,0.1),ncol=5,byrow=TRUE),
