@@ -1,6 +1,6 @@
 # save.image("zifro_novar_an.RData")
 load("zifro_novar_an.RData")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/novariability/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -17,7 +17,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novari
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/novariability/")
 source('plots.R') 
 source('mixtureFunctions.R') 
 
@@ -26,11 +26,11 @@ library(mlxR)
 ###zifro
 
 
-# zifro_data <- read.csv("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/data/zifro.csv", header=T,sep=",")
+# zifro_data <- read.csv("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/novariability/data/zifro.csv", header=T,sep=",")
 # saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
 #   name.predictors=c("amount","time"),name.response=c("y"), name.X="x")
 
-zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/novariability/data/dataPK_zifrosilone.txt", header=T)
+zifro_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/novariability/data/dataPK_zifrosilone.txt", header=T)
 saemix.data_zifro<-saemixData(name.data=zifro_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
   name.predictors=c("AMT","TIME"),name.response=c("Y"), name.X="X")
 
@@ -189,22 +189,22 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
   byrow=TRUE),error.model="constant")
 
 
-  #No var
-  ##### Optim (fmin search)
-  options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
-    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1,nbiter.burn =0, av=0)
-  zifro_optim<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
-  zifro_optim <- cbind(iterations, zifro_optim)
-  zifro_optim['individual'] <- m
-  final_optim <- rbind(final_optim,zifro_optim)
+  # #No var
+  # ##### Optim (fmin search)
+  # options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+  #   nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1,nbiter.burn =0, av=0)
+  # zifro_optim<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
+  # zifro_optim <- cbind(iterations, zifro_optim)
+  # zifro_optim['individual'] <- m
+  # final_optim <- rbind(final_optim,zifro_optim)
   
-  #### AV
-  options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
-    nbiter.sa=K1,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1,nbiter.burn =0, map.range=c(0),av=1)
-  zifro_withav<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
-  zifro_withav <- cbind(iterations, zifro_withav)
-  zifro_withav['individual'] <- m
-  final_av <- rbind(final_av,zifro_withav)
+  # #### AV
+  # options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,0),
+  #   nbiter.sa=K1,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1,nbiter.burn =0, map.range=c(0),av=1)
+  # zifro_withav<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
+  # zifro_withav <- cbind(iterations, zifro_withav)
+  # zifro_withav['individual'] <- m
+  # final_av <- rbind(final_av,zifro_withav)
 
   # ##### AV and new kernel
   # options_newkernel<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,6,0),
@@ -226,13 +226,13 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 
   ##### pseudo bayesian
 
-  options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,2),
-    nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1, 
-    nbiter.burn =0, av=0,map.range=c(0))
-  zifro_bayes<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
-  zifro_bayes <- cbind(iterations, zifro_bayes)
-  zifro_bayes['individual'] <- m
-  final_bayes <- rbind(final_bayes,zifro_bayes)
+  # options_zifro_with<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0,2),
+  #   nbiter.sa=0,nbiter.saemix = c(K1,K2),displayProgress=FALSE,an=FALSE,coeff=1, 
+  #   nbiter.burn =0, av=0,map.range=c(0))
+  # zifro_bayes<-data.frame(saemix(saemix.model_zifronovar,saemix.data_zifro,options_zifro_with))
+  # zifro_bayes <- cbind(iterations, zifro_bayes)
+  # zifro_bayes['individual'] <- m
+  # final_bayes <- rbind(final_bayes,zifro_bayes)
 
 }
 
@@ -240,7 +240,6 @@ saemix.model_zifronovar<-saemixModel(model=model1cpt,description="zifrorin",type
 graphConvMC_diff4(final_optim,final_av,final_annealing,final_bayes, title="")
 #black: optim
 #blue: av
-#red: av newkernel
 #red: annealing
 #green: bayes
 

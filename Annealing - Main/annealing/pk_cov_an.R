@@ -9,7 +9,7 @@ require(reshape2)
 # save.image("pk_cov_an.RData")
 load("pk_cov_an.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/annealing/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -28,7 +28,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/annealing/R")
   source('SaemixObject.R') 
   source('zzz.R') 
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/annealing")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing")
 source('plots.R') 
 
 
