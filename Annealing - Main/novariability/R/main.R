@@ -184,9 +184,24 @@ print(date())
   #        seq(1,T0,length=100),
   #        seq(T0,1,length=50),
   #        seq(1,1,length=1000))
-  T <- (T0*exp(-coeff*iter)+1)
+  # T <- (T0*exp(-coeff*iter)+1)
   Tnovar <- (T0*exp(-coeff*iter))
   
+
+  ##### ANN #####
+  a <- 0.01
+  b <- 0.3
+  delay <- 10
+
+# a <- 0.5
+# b <- 0.5
+# delay <- 2
+  kappa <- iter/delay + 3*pi/4
+  T0 <- 1
+  T <- tanh(iter/delay) + (T0 - 2*sqrt(2)/(3*pi)*b)*a^(kappa/delay)+b*sin(kappa)/kappa
+  # T <- (T0*exp(-coeff*iter))
+  ##### ANN #####
+
 
   # T <- (T0*exp(-coeff*iter))
   T1 <- (T0*exp(-coeff*iter)+1)

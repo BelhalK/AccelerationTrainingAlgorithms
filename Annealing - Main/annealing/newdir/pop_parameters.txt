@@ -49,19 +49,21 @@ function(psi,id,xidep) {
    ka V k
 ka  1 0 0
 V   0 1 0
-k   0 0 0
+k   0 0 1
   Error model: combined , initial values: a=1 b=1 
     No covariate in the model.
     Initial values
                     ka        V        k
-Pop.CondInit 0.2867952 7.647777 1.808601
+Pop.CondInit 0.8220849 2.016814 1.076471
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
+    Estimation of log-likelihood by importance sampling
     Algorithms: estimation only
-    Number of iterations:  K1=600, K2=0 
+    Number of iterations:  K1=1000, K2=100 
     Number of chains:  1 
     Seed:  39546 
+    Number of MCMC iterations for IS:  5000 
     Simulations:
         nb of simulated datasets used for npde:  1000 
         nb of simulated datasets used for VPC:  100 
@@ -75,20 +77,31 @@ Pop.CondInit 0.2867952 7.647777 1.808601
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
      Parameter Estimate
-[1,] ka        NaN     
-[2,] V         NaN     
-[3,] k           Inf   
-[4,] a          0.24   
-[5,] b         59.40   
+[1,] ka         6.6e-02
+[2,] V          1.5e+04
+[3,] k          3.8e+04
+[4,] a         -7.3e-01
+[5,] b          6.5e+08
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
    Parameter Estimate
-ka omega2.ka NaN     
-V  omega2.V  NaN     
+ka omega2.ka 2.0e-09 
+V  omega2.V  1.8e-09 
+k  omega2.k  5.4e-13 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-          omega2.ka omega2.V
-omega2.ka   1       NaN     
-omega2.V  NaN         1     
+          omega2.ka omega2.V omega2.k
+omega2.ka 1         0        0       
+omega2.V  0         1        0       
+omega2.k  0         0        1       
+----------------------------------------------------
+---------------  Statistical criteria  -------------
+----------------------------------------------------
+
+Likelihood computed by importance sampling
+      -2LL= 30265.58 
+      AIC = 30281.58 
+      BIC = 30300.64 
+----------------------------------------------------

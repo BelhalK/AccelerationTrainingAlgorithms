@@ -1,10 +1,11 @@
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
+# save.image("pkmarc_temptanh1.RData")
 # save.image("pkmarc.RData")
-load("pkmarc.RData")
+# load("pkmarc.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/annealing/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -23,12 +24,12 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/anneal
   source('SaemixObject.R') 
   source('zzz.R') 
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/annealing")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing")
 source('plots.R') 
-# data <- read.csv("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/annealing/data/joint_datanew.csv", header=T,sep=",")
+# data <- read.csv("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing/data/joint_datanew.csv", header=T,sep=",")
 # data <- data[data$ytype==1,]
 
-data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/Annealing - Main/annealing/data/joint.txt", header=T)
+data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/Annealing - Main/annealing/data/joint.txt", header=T)
 saemix.data<-saemixData(name.data=data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("dose","time"),name.response=c("y"), name.X="time")
 
@@ -55,6 +56,25 @@ K1 = 500
 K2 = 100
 iterations = 1:(K1+K2)
 end = K1+K2
+
+
+
+a <- 0.01
+b <- 0.3
+delay <- 10
+kappa <- iterations/delay + 3*pi/4
+T0 <- 1
+Temp1 <- tanh(iterations/delay) + (T0 - 2*sqrt(2)/(3*pi)*b)*a^(kappa/delay)+b*sin(kappa)/kappa
+plot(Temp1)
+
+
+a <- 0.5
+b <- 0.5
+delay <- 2
+kappa <- iterations/delay + 3*pi/4
+T0 <- 1
+Temp2 <- tanh(iterations/delay) + (T0 - 2*sqrt(2)/(3*pi)*b)*a^(kappa/delay)+b*sin(kappa)/kappa
+plot(Temp2)
 
 
 #pkrin
@@ -111,7 +131,7 @@ for (m in 1:replicate){
   covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE), error.model="combined")
 
-  options<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1,
+  options<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1,
    nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, 
    map.range=c(0),an=FALSE,coeff=1)
   pk<-data.frame(saemix(saemix.model,saemix.data,options))
@@ -120,7 +140,7 @@ for (m in 1:replicate){
   final.ref <- rbind(final.ref,pk)
 
 
-  options.sa<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0),nb.chains=1,
+  options.sa<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0),nb.chains=1,
    nbiter.saemix = c(K1,K2),displayProgress=FALSE,nbiter.burn =0, 
    map.range=c(0),an=FALSE,coeff=1, alpha.sa=0.95)
   pk.sa<-data.frame(saemix(saemix.model,saemix.data,options.sa))
@@ -128,7 +148,7 @@ for (m in 1:replicate){
   pk.sa['individual'] <- m
   final.sa <- rbind(final.sa,pk.sa)
 
-  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=T,nbiter.mcmc = c(2,2,2,0), nb.chains=1,
+  optionsnew<-list(seed=39546,map=F,fim=F,ll.is=F,nbiter.mcmc = c(2,2,2,0), nb.chains=1,
    nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, an=TRUE,coeff=0.06)
   pknew<-data.frame(saemix(saemix.model,saemix.data,optionsnew))
   pknew <- cbind(iterations, pknew[-1,])
