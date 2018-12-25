@@ -1,6 +1,6 @@
 
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/SaemixNoncontinuousExtension/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/PackageContributions/SaemixNoncontinuousExtension/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -18,7 +18,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/Sa
   source('SaemixObject.R') 
   source('zzz.R') 
   
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/SaemixNoncontinuousExtension")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/PackageContributions/SaemixNoncontinuousExtension")
 library("mlxR")
 
 cat_data.saemix<-read.table("data/logistic2cat_test.csv", header=T, sep=",")
@@ -53,8 +53,8 @@ return(P.obs)
 saemix.model<-saemixModel(model=cat_data.model,description="cat model",type="likelihood",   
   psi0=matrix(c(2,1,2),ncol=3,byrow=TRUE,dimnames=list(NULL,   
   c("th1","th2","th3"))), 
-  transform.par=c(0,1,1),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
-  byrow=TRUE),omega.init=matrix(c(2,0,0,0,1,0,0,0,1),ncol=3, 
+  transform.par=c(0,0,0),covariance.model=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
+  byrow=TRUE),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3, 
   byrow=TRUE),error.model="constant")
 
 
