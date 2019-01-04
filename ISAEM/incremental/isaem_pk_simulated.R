@@ -168,7 +168,6 @@ theo_mix25online_scaled <- theo_mix25online
 theo_mix25online_scaled$iterations = theo_mix25online_scaled$iterations*0.25
 
 
-
 ##############VR SAEM################
 options.incremental25<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nb.chains = nchains, nbiter.mcmc = c(2,2,2,0), 
                           nbiter.saemix = c(K1,K2),displayProgress=FALSE, map.range=c(0),nbiter.sa=0,
