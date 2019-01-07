@@ -59,13 +59,13 @@ end = K1+K2
 
 
 
-a <- 0.01
-b <- 0.9
-delay <- 10
-kappa <- iterations/delay + 3*pi/4
-T0 <- 1
-Temp1 <- tanh(iterations/delay) + (T0 - 2*sqrt(2)/(3*pi)*b)*a^(kappa/delay)+b*sin(kappa)/kappa
-plot(Temp1)
+# a <- 0.01
+# b <- 0.9
+# delay <- 10
+# kappa <- iterations/delay + 3*pi/4
+# T0 <- 1
+# Temp1 <- tanh(iterations/delay) + (T0 - 2*sqrt(2)/(3*pi)*b)*a^(kappa/delay)+b*sin(kappa)/kappa
+# plot(Temp1)
 
 
 
