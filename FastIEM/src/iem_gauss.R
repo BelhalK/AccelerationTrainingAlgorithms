@@ -1,5 +1,5 @@
-source("algos_scalar.R")
-source("func_scalar.R")
+source("algos.R")
+source("func.R")
 theme_set(theme_bw())
 
 # n <- 100
@@ -16,7 +16,7 @@ sigma<-c(3,10)*1
 alph <- sigma[2]/(sigma[1]+sigma[2])
 gamm <- 1/(1/sigma[1]+1/sigma[2])
 
-KNR <- 100
+KNR <- 50
 K1<-30
 # Several Chains for the same iteration
 M <- 1
@@ -59,8 +59,6 @@ for (j in (1:nsim))
 }
 graphConvMC_new(dem, title="EM")
 
-
-
 # dem[,2] <- dem[,2]^2
 em <- NULL
 em <- dem[dem$rep==1,]
@@ -99,7 +97,7 @@ df.iem <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
-  df <- mixt.iem_seq(x[,j], theta0, KR, alph,nbr)
+  df <- mixt.iem(x[,j], theta0, KR, alph,nbr)
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
@@ -107,139 +105,84 @@ for (j in (1:nsim))
 }
 graphConvMC_new(diem, title="IEM 1R")
 # diem[,2] <- diem[,2]^2
-iem1 <- NULL
-iem1 <- diem[diem$rep==1,]
+iem <- NULL
+iem <- diem[diem$rep==1,]
 
 if (nsim>2) {
 		for (j in (2:nsim))
 	{
-	  iem1[,2] <- iem1[,2]+diem[diem$rep==j,2]
+	  iem[,2] <- iem[,2]+diem[diem$rep==j,2]
 	}
 }
 
-iem1$iteration <- 0:KR
-iem1[,2] <- 1/nsim*iem1[,2]
+iem$iteration <- 0:KR
+iem[,2] <- 1/nsim*iem[,2]
 Lr <- NULL
 for (i in (2:(KR+1)))
 {
-  Lr <- rbind(Lr,iem1[i,2])
+  Lr <- rbind(Lr,iem[i,2])
 }
 
 
 for (l in (0:(KR-1)))
 {
-  iem1[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
+  iem[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
 }
-iem1$iteration <- 1:(KR*nbr+1)
-iem1[,3]<-NULL
+iem$iteration <- 1:(KR*nbr+1)
+iem[,3]<-NULL
 
-
-
-## IEM
-print('IEM')
-nbr<-50
+# oEM
+print('oEM')
+nbr<-1
 KR <- KNR*n/nbr
 diem <- NULL
 df.iem <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
-  df <- mixt.iem_seq(x[,j], theta0, KR, alph,nbr)
+  df <- mixt.oem(x[,j], theta0, KR, alph,nbr)
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
 }
 graphConvMC_new(diem, title="IEM 1R")
-# diem[,2] <- diem[,2]^2
-iem5 <- NULL
-iem5 <- diem[diem$rep==1,]
+
+oem <- NULL
+oem <- diem[diem$rep==1,]
 
 if (nsim>2) {
     for (j in (2:nsim))
   {
-    iem5[,2] <- iem5[,2]+diem[diem$rep==j,2]
+    oem[,2] <- oem[,2]+diem[diem$rep==j,2]
   }
 }
 
-iem5$iteration <- 0:KR
-iem5[,2] <- 1/nsim*iem5[,2]
+oem$iteration <- 0:KR
+oem[,2] <- 1/nsim*oem[,2]
 Lr <- NULL
 for (i in (2:(KR+1)))
 {
-  Lr <- rbind(Lr,iem5[i,2])
+  Lr <- rbind(Lr,oem[i,2])
 }
 
 
 for (l in (0:(KR-1)))
 {
-  iem5[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
+  oem[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
 }
-iem5$iteration <- 1:(KR*nbr+1)
-iem5[,3]<-NULL
+oem$iteration <- 1:(KR*nbr+1)
+oem[,3]<-NULL
 
 
 
 
-
-
-
-# ## IEM
-# print('IEM')
-# nbr<-1
-# KR <- KNR*n/nbr
-# diem <- NULL
-# df.iem <- vector("list", length=nsim)
-# for (j in (1:nsim))
-# {
-#   print(j)
-#   df <- mixt.iem_perpass(x[,j], theta0, KR, alph,nbr)
-#   df$rep <- j
-#   diem <- rbind(diem,df)
-#   df$rep <- NULL
-#   df.iem[[j]] <- df
-# }
-# graphConvMC_new(diem, title="IEM 1R")
-# # diem[,2] <- diem[,2]^2
-# iem3 <- NULL
-# iem3 <- diem[diem$rep==1,]
-
-# if (nsim>2) {
-#     for (j in (2:nsim))
-#   {
-#     iem3[,2] <- iem3[,2]+diem[diem$rep==j,2]
-#   }
-# }
-
-# iem3$iteration <- 0:KR
-# iem3[,2] <- 1/nsim*iem3[,2]
-# Lr <- NULL
-# for (i in (2:(KR+1)))
-# {
-#   Lr <- rbind(Lr,iem3[i,2])
-# }
-
-
-# for (l in (0:(KR-1)))
-# {
-#   iem3[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
-# }
-# iem3$iteration <- 1:(KR*nbr+1)
-# iem3[,3]<-NULL
-
-
-
-
-
-
-iem1$algo <- '1/N'
-iem2$algo <- 'rand per iter'
-iem3$algo <- 'rand per pass'
-iem5$algo <- '50%'
+iem$algo <- 'iem'
+oem$algo <- 'oem'
 em$algo <- 'EM'
+
 variance <- NULL
-variance <- rbind(em,iem1, iem5)
-variance <- rbind(em,iem1,iem2, iem3)
+variance <- rbind(em,iem,oem)
 graphConvMC2_new(variance, title="IEMs alpha=0.33",legend=TRUE)
 
 
