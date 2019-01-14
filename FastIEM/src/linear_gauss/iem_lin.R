@@ -2,66 +2,62 @@ source("algos.R")
 source("func.R")
 theme_set(theme_bw())
 
+# n <- 100
+# mu<-c(1,0)
+# mu0<-c(0.1,0)
+# sigma<-c(0.5,0.1)*1
+
 n <- 100
-weight<-c(0.2, 0.8) 
-mu<-c(10,-10)
-sigma<-c(1,1)*1
+mu<-c(10,0)
+mu0<-c(5,0)
+# sigma<-c(10,5)*1
+sigma<-c(3,10)*1
 
+alph <- sigma[2]/(sigma[1]+sigma[2])
+gamm <- 1/(1/sigma[1]+1/sigma[2])
 
-weight0<-c(.5,.5)
-mu0<-c(1,2)
-sigma0<-c(1,1)
-nb_r <- 10
 KNR <- 50
-K1 <-10
-K <- 300
+K1<-30
+# Several Chains for the same iteration
+M <- 1
 
 alpha1 <- 0.7
 alpha2 <- 0.4
 seed0=44444
+ylim <- c(0.3)
 
-
-# ylim <- c(0.15, 0.5, 0.4)
-ylim <- c(0.1, 0.3, 0.3)
-
-M <- 1
-nsim <- 3
-#
-G<-length(mu)
-col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
-theta<-list(p=weight,mu=mu,sigma=sigma)
-theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
-# theta0<-theta
-
-
+nsim <- 2
+G<-1
+col.names <- c("iteration", paste0("mu",1:G))
+theta<-list(mu=mu[1])
+theta0<-list(mu=mu0[1])
 ##  Simulation
 x <- matrix(0,nrow=n,ncol=nsim)
 for (j in (1:nsim))
 {
   seed <- j*seed0
   set.seed(seed)
-  xj<-mixt.simulate(n,weight,mu,sigma)
+  xj<-mixt.simulate(n,mu,sigma)
   x[,j] <- xj
 }
-
-
 
 ## EM
 print('EM')
 dem <- NULL
+nbr<-n
+KR <- KNR*n/nbr
+K<-KR
 df.em <- vector("list", length=nsim)
 for (j in (1:nsim))
-{ print(j)
-  df <- mixt.em(x[,j], theta0, K)
-  df <- mixt.ident(df)
+{
+  print(j)
+  df <- mixt.em(x[,j], theta0, KR, alph)
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
 }
-graphConvMC(dem, title="EM")
-
-
+graphConvMC_new(dem, title="EM")
 
 # dem[,2] <- dem[,2]^2
 em <- NULL
@@ -101,13 +97,13 @@ df.iem <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
-  df <- mixt.iem(x[,j], theta0, K,nbr)
+  df <- mixt.iem(x[,j], theta0, KR, alph,nbr)
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC(diem, title="IEM 1R")
+graphConvMC_new(diem, title="IEM 1R")
 # diem[,2] <- diem[,2]^2
 iem <- NULL
 iem <- diem[diem$rep==1,]
@@ -170,12 +166,14 @@ for (i in (2:(KR+1)))
   Lr <- rbind(Lr,oem[i,2])
 }
 
+
 for (l in (0:(KR-1)))
 {
   oem[(l*nbr+2):((l+1)*nbr+1),2] <- Lr[l+1,]
 }
 oem$iteration <- 1:(KR*nbr+1)
 oem[,3]<-NULL
+
 
 
 # oemvr
