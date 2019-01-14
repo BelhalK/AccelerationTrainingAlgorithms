@@ -178,6 +178,6 @@ graphConvMC2_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=1, top=title))
+  do.call("grid.arrange", c(graf, ncol=3, top=title))
 }
 

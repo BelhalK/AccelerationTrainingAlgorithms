@@ -127,8 +127,8 @@ step.M<-function(s,n)
   return(theta)
 }
 
-#simulation
 
+#simulation
 step.S<-function(x,theta,M,alph,gamm)
 {
   n<-length(x)
@@ -140,43 +140,3 @@ step.S<-function(x,theta,M,alph,gamm)
   return(Z)
 }
 
-
-#stepStochasticApproximation
-
-step.SA <-function(x,Z,s.old,gamma)
-{
-  S<-compute.stat(x,Z)
-  s11<-s.old$s1+gamma*(S$s1-s.old$s1)
-  s.new<-list(s1=s11)
-  return(s.new)
-}
-
-step.SAll <-function(x,Z,s.old,gamma)
-{
-  # S<-compute.stat(x,Z)
-  s11<-s.old+gamma*(Z-s.old)
-  # s.new<-list(s1=s11)
-  return(s11)
-}
-
-step.SAmeanfield <-function(x,tau,s.old,gamma)
-{
-  n<-length(x)
-  s11 <- matrix(NA,n,1)
-  for (i in 1:n)
-  {
-    s11[i,]<-1/n*tau[i,]-s.old[i,]
-  }
-  # s.new<-list(s1=s11)
-  return(s11)
-}
-
-
-step.Mh<-function(h,n)
-{
-  s1 <- 0
-  s1 <- sum(h)
-  mu<-s1/n
-  theta<-list(mu=mu)
-  return(theta)
-}

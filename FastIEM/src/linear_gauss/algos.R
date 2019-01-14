@@ -122,8 +122,7 @@ mixt.oem <- function(x, theta0, K, alph,nbr)
 mixt.oemvr <- function(x, theta0, K, alph,nbr)
 {
   G<-1
-  kiter = 1:K
-  rho =0.01
+  rho =0.1
   col.names <- c("iteration", paste0("mu",1:G))
   theta.est <- matrix(NA,K+1,2)
   theta.est[1,] <- c(0, theta0$mu)
@@ -140,15 +139,17 @@ mixt.oemvr <- function(x, theta0, K, alph,nbr)
   
   for (k in 1:K)
   {
-    s.old <- s
     if (k%%(n/nbr) == 1)
     { 
-      i<-1:nbr
       tau.old <- compute.tau(x[l[i]],theta,alph)
-      s.old.init <- s.old
+      s.old.init <- s
+      i<-1:nbr
     }
 
+    # i<-sample(1:n,nbr)
+    s.old <- compute.stat(x,tau)
     tau[l[i],] <- compute.tau(x[l[i]],theta,alph)
+    # s <- compute.stat(x,tau)
     s$s1 <- s.old$s1 + rho*(tau[l[i],] - tau.old + s.old.init$s1 - s.old$s1)
     i <- i+nbr
     theta<-step.M(s,n)

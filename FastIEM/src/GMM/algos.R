@@ -53,13 +53,13 @@ mixt.iem <- function(x, theta0, K,nbr)
   tau <- compute.tau(x,theta0)
   theta<-theta0
   tau.old <- compute.tau(x[1],theta0)
-  s <- compute.stat_iem(x,tau, tau.old, tau.old,1)
+  s <- compute.stat_iem(x,tau, tau.old,1)
 
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
   for (k in 1:K)
   {
-    print(k)
+
     if (k%%(n/nbr) == 1)
     { 
       # l<-sample(1:n,n)
@@ -67,11 +67,10 @@ mixt.iem <- function(x, theta0, K,nbr)
       i<-1:nbr
     }
     tau.new <- compute.tau(x[i],theta)
-    s <- compute.stat_iem(x,tau, tau.new,tau.old, i)
+    s <- compute.stat_iem(x,tau, tau.new, i)
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
     i = i+nbr
-    tau.old <- tau.new
   }
   
   df <- as.data.frame(theta.est)
@@ -80,17 +79,18 @@ mixt.iem <- function(x, theta0, K,nbr)
 }
 
 
-mixt.oem <- function(x, theta0, K, alph,nbr)
+mixt.oem <- function(x, theta0, K,nbr)
 {
-  G<-1
+  G<-length(mu)
   kiter = 1:K
   rho = 10/(kiter+10)
-  col.names <- c("iteration", paste0("mu",1:G))
-  theta.est <- matrix(NA,K+1,2)
-  theta.est[1,] <- c(0, theta0$mu)
+  col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
+  
+  theta.est <- matrix(NA,K+1,3*G+1)
+  theta.est[1,] <- c(0, theta0$p, theta0$mu, theta0$sigma)
   theta<-theta0
-  tau<-compute.tau(x,theta,alph)
-  s<-step.E(x,theta,alph)
+  tau<-compute.tau(x,theta)
+  s<-step.E(x,theta)
   theta<-step.M(s,n)
   n<-length(x)
   l <- NULL
@@ -102,11 +102,11 @@ mixt.oem <- function(x, theta0, K, alph,nbr)
     { 
       i<-1:nbr
     }
-    tau.i <- compute.tau(x[l[i]],theta,alph)
-    s$s1 <- s$s1 + rho[k]*(tau.i - s$s1)
+    tau.new <- compute.tau(x[l[i]],theta)
+    s <- compute.stat_oem(x,tau, tau.new, i,rho[k])
     i <- i+nbr
     theta<-step.M(s,n)
-    theta.est[k+1,] <- c(k,theta$mu)
+    theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
   }
   
   df <- as.data.frame(theta.est)
@@ -114,44 +114,39 @@ mixt.oem <- function(x, theta0, K, alph,nbr)
   return(df)
 }
 
-mixt.oemvr <- function(x, theta0, K, alph,nbr)
+mixt.oemvr <- function(x, theta0, K,nbr)
 {
-  G<-1
-  kiter = 1:K
-  rho =0.01
-  col.names <- c("iteration", paste0("mu",1:G))
-  theta.est <- matrix(NA,K+1,2)
-  theta.est[1,] <- c(0, theta0$mu)
+   G<-length(mu)
+  col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
+  rho = 0.001
+  theta.est <- matrix(NA,K+1,3*G+1)
+  theta.est[1,] <- c(0, theta0$p, theta0$mu, theta0$sigma)
+  tau <- compute.tau(x,theta0)
+  tau.old.init <- tau[1,]
   theta<-theta0
-  tau<-compute.tau(x,theta,alph)
-  tau.old <- tau[1,]
-  s <- compute.stat(x,tau)
+  s<-step.E(x,theta)
   s.old.init <- s
-  n<-length(x)
-  
-  l <- NULL
+  # s <- compute.stat_oemvr(x,tau, tau.old.init,s.old.init,tau.old.init, i,rho)
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
-  
   for (k in 1:K)
   {
-    s.old <- s
     if (k%%(n/nbr) == 1)
     { 
+      tau.old.init <- compute.tau(x[i],theta)
+      s.old.init <- s
       i<-1:nbr
-      tau.old <- compute.tau(x[l[i]],theta,alph)
-      s.old.init <- s.old
     }
-
-    tau[l[i],] <- compute.tau(x[l[i]],theta,alph)
-    s$s1 <- s.old$s1 + rho*(tau[l[i],] - tau.old + s.old.init$s1 - s.old$s1)
+    tau.new <- compute.tau(x[i],theta)
+    s <- compute.stat_oemvr(x,tau, tau.new,s.old.init,tau.old.init, i,rho)
     i <- i+nbr
     theta<-step.M(s,n)
-    theta.est[k+1,] <- c(k,theta$mu)
+    theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
   }
   
   df <- as.data.frame(theta.est)
   names(df) <- col.names
   return(df)
 }
+
 

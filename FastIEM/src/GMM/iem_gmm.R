@@ -25,7 +25,7 @@ seed0=44444
 ylim <- c(0.1, 0.3, 0.3)
 
 M <- 1
-nsim <- 3
+nsim <- 2
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -50,6 +50,7 @@ for (j in (1:nsim))
 print('EM')
 dem <- NULL
 df.em <- vector("list", length=nsim)
+
 for (j in (1:nsim))
 { print(j)
   df <- mixt.em(x[,j], theta0, K)
@@ -107,7 +108,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC(diem, title="IEM 1R")
+graphConvMC(diem, title="IEM")
 # diem[,2] <- diem[,2]^2
 iem <- NULL
 iem <- diem[diem$rep==1,]
@@ -144,13 +145,13 @@ df.iem <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
-  df <- mixt.oem(x[,j], theta0, KR, alph,nbr)
+  df <- mixt.oem(x[,j], theta0, K,nbr)
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC_new(diem, title="IEM 1R")
+graphConvMC(diem, title="IEM 1R")
 
 oem <- NULL
 oem <- diem[diem$rep==1,]
@@ -187,7 +188,7 @@ df.iem <- vector("list", length=nsim)
 for (j in (1:nsim))
 {
   print(j)
-  df <- mixt.oemvr(x[,j], theta0, KR, alph,nbr)
+  df <- mixt.oemvr(x[,j], theta0, KR,nbr)
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL

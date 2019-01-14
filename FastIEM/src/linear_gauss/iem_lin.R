@@ -7,11 +7,11 @@ theme_set(theme_bw())
 # mu0<-c(0.1,0)
 # sigma<-c(0.5,0.1)*1
 
-n <- 100
+n <- 1000
 mu<-c(10,0)
 mu0<-c(5,0)
 # sigma<-c(10,5)*1
-sigma<-c(3,10)*1
+sigma<-c(1,1)*1
 
 alph <- sigma[2]/(sigma[1]+sigma[2])
 gamm <- 1/(1/sigma[1]+1/sigma[2])
@@ -103,7 +103,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC_new(diem, title="IEM 1R")
+graphConvMC_new(diem, title="IEM")
 # diem[,2] <- diem[,2]^2
 iem <- NULL
 iem <- diem[diem$rep==1,]
@@ -146,7 +146,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC_new(diem, title="IEM 1R")
+graphConvMC_new(diem, title="OEM")
 
 oem <- NULL
 oem <- diem[diem$rep==1,]
@@ -191,7 +191,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 }
-graphConvMC_new(diem, title="IEM 1R")
+graphConvMC_new(diem, title="OEMVR")
 
 oemvr <- NULL
 oemvr <- diem[diem$rep==1,]
@@ -227,4 +227,5 @@ em$algo <- 'EM'
 
 variance <- NULL
 variance <- rbind(em,iem,oem,oemvr)
+variance <- rbind(em[7000:13000,],iem[7000:13000,],oem[7000:13000,])
 graphConvMC2_new(variance, title="IEMs alpha=0.33",legend=TRUE)
