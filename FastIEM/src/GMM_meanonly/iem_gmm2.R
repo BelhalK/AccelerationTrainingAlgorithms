@@ -3,7 +3,8 @@ source("func.R")
 source("plots.R")
 theme_set(theme_bw())
 options(digits = 22)
-
+# save.image("gmm_mu.RData")
+load("gmm_mu.RData")
 n <- 1000
 weight<-c(0.2, 0.8) 
 mu<-c(1,-1)
@@ -213,13 +214,11 @@ em_scaled$rep <- NULL
 iem$rep <- NULL
 oem$rep <- NULL
 oemvr$rep <- NULL
-# m <- graphConvMC(em_scaled[0:K,c(1,2,8)],iem[0:K,c(1,2,8)],oem[0:K,c(1,2,8)])
-# m <- graphConvMC(em_scaled[0:K,c(1,2,9)],iem[0:K,c(1,2,9)],oem[0:K,c(1,2,9)],oemvr[0:K,c(1,2,9)])
+
+
 variance <- NULL
-variance <- rbind(em_scaled[0:K,c(1,4,5,8)],iem[0:K,c(1,4,5,8)],oem[0:K,c(1,4,5,8)],oemvr[0:K,c(1,4,5,8)])
-variance <- rbind(em_scaled[3:12,c(1,4,5,8)],iem[3:12,c(1,4,5,8)],oemvr[3:12,c(1,4,5,8)])
-variance <- rbind(oemvr[2:200,c(1,5,8)],iem[2:200,c(1,5,8)],oem[2:200,c(1,5,8)],em_scaled[2:200,c(1,5,8)])
-variance <- rbind(oemvr[2:2000,c(1,5,8)],iem[2:2000,c(1,5,8)],oem[2:2000,c(1,5,8)],em_scaled[2:2000,c(1,5,8)])
+variance <- rbind(oemvr[1001:2001,c(1,5,8)],iem[1001:2001,c(1,5,8)],oem[1001:2001,c(1,5,8)],em_scaled[1001:2001,c(1,5,8)])
+variance <- rbind(oemvr[2:(K+1),c(1,5,8)],iem[2:(K+1),c(1,5,8)],oem[2:(K+1),c(1,5,8)],em_scaled[2:(K+1),c(1,5,8)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 

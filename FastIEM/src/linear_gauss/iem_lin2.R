@@ -1,7 +1,7 @@
 source("algos.R")
 source("func.R")
 theme_set(theme_bw())
-
+# save.image("lin_gauss.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
@@ -32,6 +32,14 @@ theta<-list(mu=mu[1])
 theta0<-list(mu=mu0[1])
 
 
+set.seed(seed0)
+xj<-mixt.simulate(n,mu,sigma)
+df <- mixt.em(xj, theta0, K, alph)
+
+ML <- df
+for (i in (1:(K+1))){
+  ML[i,2]<- c(theta$mu)
+}
 
 ## EM
 print('EM')
@@ -63,25 +71,28 @@ for (j in (1:nsim))
   df <- mixt.em(x[,j], theta0, K, alph)
   # ML <- df
   # ML[1:(K+1),2]<- df[(K+1),2]
-  # df[,2] <- df[,2] - ML[,2]
+  df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
 
   df <- mixt.iem(x[,j], theta0, K, alph,nbr)
+  df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
 
   df <- mixt.oem(x[,j], theta0, K, alph,nbr)
+  df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   doem <- rbind(doem,df)
   df$rep <- NULL
   df.oem[[j]] <- df
 
   df <- mixt.oemvr(x[,j], theta0, K, alph,nbr)
+  df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   doemvr <- rbind(doemvr,df)
   df$rep <- NULL
@@ -162,35 +173,41 @@ em_scaled$algo <- 'EM'
 # variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
 # colnames(variance) <- c("iteration","mu1","algo")
 
-graphConvMC <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
-{
-  G <- (ncol(df)-2)/3
-  df$algo <- as.factor(df$algo)
-  df2$algo <- as.factor(df2$algo)
-  df3$algo <- as.factor(df3$algo)
-  df4$algo <- as.factor(df4$algo)
-  ylim <-rep(ylim,each=2)
-  graf <- vector("list", ncol(df)-2)
-  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-  for (j in (2:(ncol(df)-1)))
-  {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",linetype= "solid",size=2)+
-    geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",linetype="longdash",size=2)+
-    geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="red",linetype="dotted",size=2)+
-    geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="blue",linetype="dotted",size=2)+
-      xlab("") +ylab(expression(paste(beta,"1")))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
-                           size=30, angle=0),
-          axis.text.y = element_text(face="bold", color="black", 
-                           size=30, angle=0))+theme(axis.title = element_text(color="black", face="bold", size=30)) 
-    if (!is.null(ylim))
-      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
-    graf[[o[j]]] <- grafj
+variance <- NULL
+variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
-  }
-  do.call("grid.arrange", c(graf, ncol=1, top=title))
-}
 
-m <- graphConvMC(em_scaled[0:K,c(1,2,4)],iem[0:K,c(1,2,4)],oem[0:K,c(1,2,4)],oemvr[0:K,c(1,2,4)])
+
+# graphConvMC <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
+# {
+#   G <- (ncol(df)-2)/3
+#   df$algo <- as.factor(df$algo)
+#   df2$algo <- as.factor(df2$algo)
+#   df3$algo <- as.factor(df3$algo)
+#   df4$algo <- as.factor(df4$algo)
+#   ylim <-rep(ylim,each=2)
+#   graf <- vector("list", ncol(df)-2)
+#   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+#   for (j in (2:(ncol(df)-1)))
+#   {
+#     grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="black",linetype= "solid",size=2)+
+#     geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="black",linetype="longdash",size=2)+
+#     geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="red",linetype="dotted",size=2)+
+#     geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="blue",linetype="dotted",size=2)+
+#       xlab("") +ylab(expression(paste(beta,"1")))  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+# panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
+#                            size=30, angle=0),
+#           axis.text.y = element_text(face="bold", color="black", 
+#                            size=30, angle=0))+theme(axis.title = element_text(color="black", face="bold", size=30)) 
+#     if (!is.null(ylim))
+#       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+#     graf[[o[j]]] <- grafj
+
+#   }
+#   do.call("grid.arrange", c(graf, ncol=1, top=title))
+# }
+
+# m <- graphConvMC(em_scaled[0:K,c(1,2,4)],iem[0:K,c(1,2,4)],oem[0:K,c(1,2,4)],oemvr[0:K,c(1,2,4)])
 
 
