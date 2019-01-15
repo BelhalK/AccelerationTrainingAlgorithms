@@ -9,7 +9,7 @@ sigma<-c(1,1)*1
 
 
 weight0<-c(.5,.5)
-mu0<-c(1,2)
+mu0<-c(3,-2)
 sigma0<-c(1,1)
 nb_r <- 10
 KNR <- 50
@@ -60,7 +60,7 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.em[[j]] <- df
 }
-graphConvMC(dem, title="EM")
+graphConvMC_new(dem, title="EM")
 
 
 

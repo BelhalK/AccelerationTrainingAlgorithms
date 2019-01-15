@@ -2,14 +2,14 @@ source("algos.R")
 source("func.R")
 theme_set(theme_bw())
 
-n <- 100
-weight<-c(0.2, 0.8) 
+n <- 200
+weight<-c(0.4, 0.6) 
 mu<-c(10,-10)
 sigma<-c(1,1)*1
 
 
 weight0<-c(.5,.5)
-mu0<-c(1,2)
+mu0<-c(2,-2)
 sigma0<-c(1,1)
 nb_r <- 10
 KNR <- 50
@@ -34,6 +34,51 @@ theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
 # theta0<-theta
 
 
+##  Simulation
+x <- matrix(0,nrow=n,ncol=nsim)
+for (j in (1:nsim))
+{
+  seed <- j*seed0
+  set.seed(seed)
+  xj<-mixt.simulate(n,weight,mu,sigma)
+  x[,j] <- xj
+}
+
+
+## EM
+print('EM')
+dem <- NULL
+df.em <- vector("list", length=nsim)
+
+for (j in (1:nsim))
+{ print(j)
+  df <- mixt.em(x[,j], theta0, K)
+  df <- mixt.ident(df)
+  df$rep <- j
+  dem <- rbind(dem,df)
+  df$rep <- NULL
+  df.em[[j]] <- df
+}
+graphConvMC_new(dem, title="EM")
+
+
+## EM
+print('EM')
+doemvr <- NULL
+df.oemvr <- vector("list", length=nsim)
+
+for (j in (1:nsim))
+{ print(j)
+  df <- mixt.oemvr(x[,j], theta0, K,nbr)
+  df <- mixt.ident(df)
+  df$rep <- j
+  doemvr <- rbind(doemvr,df)
+  df$rep <- NULL
+  df.oemvr[[j]] <- df
+}
+graphConvMC_new(doemvr, title="EM")
+
+################################################
 print('EM')
 dem <- NULL
 
@@ -54,11 +99,9 @@ for (j in (1:nsim))
   print(j)
   seed <- j*seed0
   set.seed(seed)
-  x <- NULL
-  for (i in 1:n){
-   xj<-mixt.simulate(n,weight,mu,sigma)
-   x <- rbind(x,xj)
-  }
+  x <- matrix(0,nrow=n,ncol=nsim)
+  xj<-mixt.simulate(n,weight,mu,sigma)
+  x[,j] <- xj
 
   df <- mixt.em(x[,j], theta0, K)
   # ML <- df
@@ -157,15 +200,16 @@ em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
 
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
-oemvr$algo <- 'OEMvr'
+# oemvr$algo <- 'OEMvr'
 em_scaled$algo <- 'EM'
-# variance <- NULL
-# variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
-# colnames(variance) <- c("iteration","mu1","algo")
 
-m <- graphConvMC(em_scaled[0:K,c(1,2,8)],iem[0:K,c(1,2,8)],oem[0:K,c(1,2,8)])
+em_scaled$rep <- NULL
+iem$rep <- NULL
+oem$rep <- NULL
+oemvr$rep <- NULL
+# m <- graphConvMC(em_scaled[0:K,c(1,2,8)],iem[0:K,c(1,2,8)],oem[0:K,c(1,2,8)])
 # m <- graphConvMC(em_scaled[0:K,c(1,2,9)],iem[0:K,c(1,2,9)],oem[0:K,c(1,2,9)],oemvr[0:K,c(1,2,9)])
 
 variance <- NULL
 variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,])
-graphConvMC2_new(variance, title="IEMs alpha=0.33",legend=TRUE)
+graphConvMC2_new(variance, title="IEMs",legend=TRUE)
