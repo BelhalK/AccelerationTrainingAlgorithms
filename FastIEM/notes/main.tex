@@ -244,8 +244,8 @@ L(s;\theta) \triangleq \psi(\theta) - \langle \sum_{i=1}^N{s_i}, \phi(\theta)\ra
 Denote $s = \sum_{i=1}^N{s_i}$ and $\bar{s}_i(\theta) \triangleq \E_{p(z_i, \theta)}[\tilde{S}(z_i)]$. At iteration $k$ of epoch $e$, the E-step of those three algorithms consists in picking a single data $i_k$ and:
 \begin{itemize}
 \item \textbf{oEM algorithm:}  $s^{k} = s^{k-1} + \rho_k ( \bar{s}_{i_k}(\theta^{k-1})  - s^{k-1} )$
-\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{k-1}) - s_{i_k}^{e,0}+ s^{e,0} - s^{k-1} )$
-\item \textbf{MBEM algorithm: }  $s^{e,k} = s^{e,k-1} +  ( \bar{s}_{i_k}(\theta^{k-1})  - s_{i_k}^{k-1} )$
+\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{k-1}) - s_{i_k}^{e,0}+ s^{e,0} - s^{e,k-1} )$
+\item \textbf{MBEM algorithm: }  $s^{e,k} = s^{e,k-1} +  ( \bar{s}_{i_k}(\theta^{k-1})  - s_{i_k}^{e,k-1} )$
 \end{itemize}
 where $ s^{e,0}  = s^{e-1,M}$.
 
