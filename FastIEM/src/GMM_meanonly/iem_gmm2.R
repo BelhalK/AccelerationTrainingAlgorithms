@@ -186,6 +186,22 @@ oem[,9]<-NULL
 
 
 
+
+doemvr <- NULL
+df.oemvr <- vector("list", length=nsim)
+
+for (j in (1:nsim))
+{
+  print(j)
+  df <- mixt.oemvr(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  doemvr <- rbind(doemvr,df)
+  df$rep <- NULL
+  df.oemvr[[j]] <- df
+}
+
+
 oemvr <- NULL
 oemvr <- doemvr[doemvr$rep==1,]
 
@@ -218,7 +234,7 @@ oemvr$rep <- NULL
 
 variance <- NULL
 variance <- rbind(oemvr[1001:2001,c(1,5,8)],iem[1001:2001,c(1,5,8)],oem[1001:2001,c(1,5,8)],em_scaled[1001:2001,c(1,5,8)])
-variance <- rbind(oemvr[2:(K+1),c(1,5,8)],iem[2:(K+1),c(1,5,8)],oem[2:(K+1),c(1,5,8)],em_scaled[2:(K+1),c(1,5,8)])
+variance <- rbind(oemvr[1:(K+1),c(1,5,8)],iem[1:(K+1),c(1,5,8)],oem[1:(K+1),c(1,5,8)],em_scaled[1:(K+1),c(1,5,8)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 

@@ -44,7 +44,7 @@ graphConvMC_new <- function(df, title=NULL, ylim=NULL)
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=3, top=title))
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
 
@@ -58,12 +58,12 @@ graphConvMC2_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df,aes(colour=df$algo ))+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),show.legend = legend) +
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") +scale_x_log10()+ scale_y_log10()+  ylab(names(df[j])) 
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=3, top=title))
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
 
@@ -94,6 +94,6 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
     graf[[o[j]]] <- grafj
 
   }
-  do.call("grid.arrange", c(graf, ncol=3, top=title))
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
