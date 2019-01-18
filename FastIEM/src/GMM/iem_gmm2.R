@@ -1,19 +1,20 @@
 source("algos.R")
 source("func.R")
+source("plots.R")
 theme_set(theme_bw())
-
-n <- 300
+options(digits = 22)
+n <- 100
 weight<-c(0.4, 0.6) 
-mu<-c(10,-10)
+mu<-c(-2,2)
 sigma<-c(1,1)*1
 
 
 weight0<-c(.5,.5)
-mu0<-c(9,-9)
+mu0<-c(-5,5)
 sigma0<-c(0.8,0.8)
 
 
-K <- 1200
+K <- 1000
 
 seed0=44444
 
@@ -46,7 +47,7 @@ for (j in (1:nsim))
 print('EM')
 dem <- NULL
 df.em <- vector("list", length=nsim)
-
+Kem <- K/n
 for (j in (1:nsim))
 { print(j)
   df <- mixt.em(x[,j], theta0, K)
@@ -59,14 +60,31 @@ for (j in (1:nsim))
 graphConvMC_new(dem, title="EM")
 
 
+
+## EM
+print('EM')
+diem <- NULL
+df.iem <- vector("list", length=nsim)
+for (j in (1:nsim))
+{ print(j)
+  df <- mixt.iem(x[,j], theta0, K,1)
+  df <- mixt.ident(df)
+  df$rep <- j
+  diem <- rbind(diem,df)
+  df$rep <- NULL
+  df.iem[[j]] <- df
+}
+graphConvMC_new(diem, title="EM")
+
+
 ## EM
 print('EM')
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
-
+nbr <- 1
 for (j in (1:nsim))
 { print(j)
-  df <- mixt.oemvr(x[,j], theta0, K,nbr)
+  df <- mixt.oemvr(x[,j], theta0, K,nbr,0.003)
   df <- mixt.ident(df)
   df$rep <- j
   doemvr <- rbind(doemvr,df)
@@ -76,10 +94,22 @@ for (j in (1:nsim))
 graphConvMC_new(doemvr, title="EM")
 
 ################################################
+
+a1 = c(rep(theta$p[1],(K+1)))
+a2 = c(rep(theta$p[2],(K+1)))
+b1 = c(rep(theta$mu[1],(K+1)))
+b2 = c(rep(theta$mu[2],(K+1)))
+d1 = c(rep(theta$sigma[1],(K+1)))
+d2 = c(rep(theta$sigma[2],(K+1)))
+
+ML <- cbind(1:(K+1),a1,a2,b1,b2,d1,d2)
+
+
 print('EM')
 dem <- NULL
 
 df.em <- vector("list", length=nsim)
+Kem <- K/n
 
 nbr<-1
 diem <- NULL
@@ -90,7 +120,7 @@ df.oem <- vector("list", length=nsim)
 
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
-
+rho <- 0.0003
 for (j in (1:nsim))
 {
   print(j)
@@ -100,28 +130,31 @@ for (j in (1:nsim))
   xj<-mixt.simulate(n,weight,mu,sigma)
   x[,j] <- xj
 
-  df <- mixt.em(x[,j], theta0, K)
+  df <- mixt.em(x[,j], theta0, Kem)
   # ML <- df
   # ML[1:(K+1),2]<- df[(K+1),2]
-  # df[,2:7] <- df[,2:7] - ML[,2:7]
+  df[1:Kem,2:7] <- (df[1:Kem,2:7] - ML[1:Kem,2:7])^2
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
 
   df <- mixt.iem(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
 
   df <- mixt.oem(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   doem <- rbind(doem,df)
   df$rep <- NULL
   df.oem[[j]] <- df
 
-  df <- mixt.oemvr(x[,j], theta0, K,nbr)
+  df <- mixt.oemvr(x[,j], theta0, K,nbr,rho)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   doemvr <- rbind(doemvr,df)
   df$rep <- NULL
@@ -188,26 +221,34 @@ if (nsim>2) {
 oemvr[,2:7] <- 1/nsim*oemvr[,2:7]
 oemvr[,9]<-NULL
 
-
-
-em_scaled <- em
-em_scaled$iteration = seq(0, n*K, by=n)
-em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
-
-
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
 oemvr$algo <- 'OEMvr'
-em_scaled$algo <- 'EM'
+em$algo <- 'EM'
 
-em_scaled$rep <- NULL
+em$rep <- NULL
 iem$rep <- NULL
 oem$rep <- NULL
 oemvr$rep <- NULL
+
+
+
+
+### PER EPOCH
+epochs = seq(1, K, by=n)
+em_ep <- em[1:(K/n),]
+em_ep$iteration <- 1:(K/n)
+iem_ep <- iem[epochs,]
+iem_ep$iteration <- 1:(K/n)
+oem_ep <- oem[epochs,]
+oem_ep$iteration <- 1:(K/n)
+oemvr_ep <- oemvr[epochs,]
+oemvr_ep$iteration <- 1:(K/n)
 # m <- graphConvMC(em_scaled[0:K,c(1,2,8)],iem[0:K,c(1,2,8)],oem[0:K,c(1,2,8)])
 # m <- graphConvMC(em_scaled[0:K,c(1,2,9)],iem[0:K,c(1,2,9)],oem[0:K,c(1,2,9)],oemvr[0:K,c(1,2,9)])
 
 variance <- NULL
-variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
-# variance <- rbind(em_scaled[4:10,],iem[4:10,],oem[4:10,],oemvr[4:10,])
+variance <- rbind(em_ep[1:(K/n),],iem_ep[1:(K/n),],oemvr_ep[1:(K/n),], oem_ep[1:(K/n),])
+# variance <- rbind(iem_ep[2:(K/n),],oemvr_ep[2:(K/n),])
+variance <- rbind(em_ep[2:(K/n),],iem_ep[2:(K/n),],oemvr_ep[2:(K/n),], oem_ep[2:(K/n),])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)

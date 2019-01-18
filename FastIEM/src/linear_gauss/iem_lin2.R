@@ -2,6 +2,7 @@ source("algos.R")
 source("func.R")
 theme_set(theme_bw())
 # save.image("lin_gauss.RData")
+load("lin_gauss.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)

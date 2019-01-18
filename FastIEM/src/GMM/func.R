@@ -110,7 +110,7 @@ compute.stat_iem<-function(x,Z, tau.new, i)
 }
 
 
-compute.stat_oem<-function(x,Z, tau.new, i, rho)
+compute.stat_oem<-function(x,Z,s.old, tau.new, i, rho)
 {
   G<-dim(Z)[2]
   M<-dim(Z)[3]
@@ -125,16 +125,16 @@ compute.stat_oem<-function(x,Z, tau.new, i, rho)
   for (m in 1:M)
   {
     Z.m <- Z[,,m]
-    s1 <- s1 + colSums(Z.m) + rho*(tau.new- colSums(Z.m))
-    s2 <- s2 + x %*% Z.m + rho*(x[i]*tau.new- x %*% Z.m)
-    s3 <- s3 + (x^2) %*% Z.m + rho*(x[i]^2*tau.new- (x^2) %*% Z.m)
+    s1 <- s1 + s.old$s1 + rho*(tau.new- s.old$s1)
+    s2 <- s2 + s.old$s2 + rho*(x[i]*tau.new- s.old$s2)
+    s3 <- s3 + s.old$s3 + rho*(x[i]^2*tau.new- s.old$s3)
   }
   s <-list(s1=s1/M,s2=as.vector(s2/M),s3=as.vector(s3/M))
   return(s)
 }
 
 
-compute.stat_oemvr<-function(x,Z, tau.new,s.old.init,tau.old.init, i, rho)
+compute.stat_oemvr<-function(x,Z, tau.new,s.old,s.old.init,tau.old.init, i, rho)
 {
   G<-dim(Z)[2]
   M<-dim(Z)[3]
@@ -149,9 +149,9 @@ compute.stat_oemvr<-function(x,Z, tau.new,s.old.init,tau.old.init, i, rho)
   for (m in 1:M)
   {
     Z.m <- Z[,,m]
-    s1 <- s1 + colSums(Z.m) + rho*(tau.new - tau.old.init + s.old.init$s1- colSums(Z.m))
-    s2 <- s2 + x %*% Z.m + rho*(x[i]*tau.new - x[i]*tau.old.init + x[i]*s.old.init$s2 - x %*% Z.m)
-    s3 <- s3 + (x^2) %*% Z.m + rho*(x[i]^2*tau.new - x[i]^2*tau.old.init + x[i]^2*s.old.init$s3 - (x^2) %*% Z.m)
+    s1 <- s1 + s.old$s1 + rho*(tau.new - tau.old.init + s.old.init$s1- s.old$s1)
+    s2 <- s2 +s.old$s2 + rho*(x[i]*tau.new - x[i]*tau.old.init + s.old.init$s2 - s.old$s2)
+    s3 <- s3 + s.old$s3 + rho*(x[i]^2*tau.new - x[i]^2*tau.old.init + s.old.init$s3 - s.old$s3)
   }
   s <-list(s1=s1/M,s2=as.vector(s2/M),s3=as.vector(s3/M))
   return(s)

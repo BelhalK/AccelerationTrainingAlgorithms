@@ -141,9 +141,9 @@ mixt.oemvr <- function(x, theta0, K, alph,nbr)
   {
     if (k%%(n/nbr) == 1)
     { 
+      i<-1:nbr
       tau.old <- compute.tau(x[l[i]],theta,alph)
       s.old.init <- s
-      i<-1:nbr
     }
 
     # i<-sample(1:n,nbr)

@@ -29,10 +29,6 @@ mixt.em <- function(x, theta0, K)
   theta<-theta0
   for (k in 1:K)
   {
-    # if (k %% 1000==0)
-    # {
-    #   print(k)
-    # }
     s<-step.E(x,theta)
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
@@ -66,8 +62,10 @@ mixt.iem <- function(x, theta0, K,nbr)
       # l<-1:n
       i<-1:nbr
     }
-    tau.new <- compute.tau(x[i],theta)
-    s <- compute.stat_iem(x,tau, tau.new, i)
+    # tau.new <- compute.tau(x[i],theta)
+    # s <- compute.stat_iem(x,tau, tau.new, i)
+    tau[l[i],] <- compute.tau(x[l[i]],theta)
+    s <- compute.stat(x,tau)
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
     i = i+nbr
@@ -83,14 +81,16 @@ mixt.oem <- function(x, theta0, K,nbr)
 {
   G<-length(mu)
   kiter = 1:K
-  rho = 10/(kiter+10)
+  rho = 1/(kiter+1)
   col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
   
   theta.est <- matrix(NA,K+1,3*G+1)
   theta.est[1,] <- c(0, theta0$p, theta0$mu, theta0$sigma)
   theta<-theta0
+  
   tau<-compute.tau(x,theta)
-  s<-step.E(x,theta)
+  s<-compute.stat(x,tau)
+  s.old <- s
   theta<-step.M(s,n)
   n<-length(x)
   l <- NULL
@@ -103,7 +103,8 @@ mixt.oem <- function(x, theta0, K,nbr)
       i<-1:nbr
     }
     tau.new <- compute.tau(x[l[i]],theta)
-    s <- compute.stat_oem(x,tau, tau.new, i,rho[k])
+    s <- compute.stat_oem(x,tau,s.old, tau.new, l[i],rho[k])
+    s.old <- s
     i <- i+nbr
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
@@ -114,7 +115,7 @@ mixt.oem <- function(x, theta0, K,nbr)
   return(df)
 }
 
-mixt.oemvr <- function(x, theta0, K,nbr)
+mixt.oemvr <- function(x, theta0, K,nbr,rho)
 {
    G<-length(mu)
   col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -124,7 +125,8 @@ mixt.oemvr <- function(x, theta0, K,nbr)
   tau <- compute.tau(x,theta0)
   tau.old.init <- tau[1,]
   theta<-theta0
-  s<-step.E(x,theta)
+  s<-compute.stat(x,tau)
+  s.old <- s
   s.old.init <- s
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
@@ -134,10 +136,11 @@ mixt.oemvr <- function(x, theta0, K,nbr)
     { 
       i<-1:nbr
       tau.old.init <- compute.tau(x[i],theta)
-      s.old.init <- s
+      s.old.init <- compute.stat(x,tau)
     }
     tau.new <- compute.tau(x[i],theta)
-    s <- compute.stat_oemvr(x,tau, tau.new,s.old.init,tau.old.init, i,rho)
+    s <- compute.stat_oemvr(x,tau, tau.new,s.old,s.old.init,tau.old.init, i,rho)
+    s.old <- s
     i <- i+nbr
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
