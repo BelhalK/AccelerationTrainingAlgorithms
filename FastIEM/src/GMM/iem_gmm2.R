@@ -9,9 +9,9 @@ mu<-c(-2,2)
 sigma<-c(1,1)*1
 
 
-weight0<-c(.5,.5)
+weight0<-c(.8,.2)
 mu0<-c(-5,5)
-sigma0<-c(0.8,0.8)
+sigma0<-c(0.5,0.5)
 
 
 K <- 1000
@@ -120,7 +120,11 @@ df.oem <- vector("list", length=nsim)
 
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
-rho <- 0.0003
+
+rho.oemvr <- 0.003
+kiter = 1:K
+rho.oem <- 0.01/(kiter+10)
+
 for (j in (1:nsim))
 {
   print(j)
@@ -146,14 +150,14 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 
-  df <- mixt.oem(x[,j], theta0, K,nbr)
+  df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   doem <- rbind(doem,df)
   df$rep <- NULL
   df.oem[[j]] <- df
 
-  df <- mixt.oemvr(x[,j], theta0, K,nbr,rho)
+  df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   doemvr <- rbind(doemvr,df)
@@ -248,7 +252,6 @@ oemvr_ep$iteration <- 1:(K/n)
 # m <- graphConvMC(em_scaled[0:K,c(1,2,9)],iem[0:K,c(1,2,9)],oem[0:K,c(1,2,9)],oemvr[0:K,c(1,2,9)])
 
 variance <- NULL
-variance <- rbind(em_ep[1:(K/n),],iem_ep[1:(K/n),],oemvr_ep[1:(K/n),], oem_ep[1:(K/n),])
-# variance <- rbind(iem_ep[2:(K/n),],oemvr_ep[2:(K/n),])
+# variance <- rbind(em_ep[1:(K/n),],iem_ep[1:(K/n),],oemvr_ep[1:(K/n),], oem_ep[1:(K/n),])
 variance <- rbind(em_ep[2:(K/n),],iem_ep[2:(K/n),],oemvr_ep[2:(K/n),], oem_ep[2:(K/n),])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)

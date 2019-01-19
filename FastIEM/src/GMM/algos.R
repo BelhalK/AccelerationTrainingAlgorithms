@@ -177,11 +177,10 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
     }
 
     tau.indiv.new <- compute.tau(x[l[i]],theta)
-    s.indiv.new <- x[l[i]]*tau.indiv.new
 
     #Update statistic
     s$s1 <- s$s1 + rho[k]*(tau.indiv.new  - s$s1)
-    s$s2 <- s$s2 + rho[k]*(s.indiv.new  - s$s2)
+    s$s2 <- s$s2 + rho[k]*(x[l[i]]*tau.indiv.new  - s$s2)
     s$s3 <- s$s3 + rho[k]*(x[l[i]]^2*tau.indiv.new  - s$s3)
     theta <- step.M(s,n)
     theta.est[k+1,] <- c(k, theta$p, theta$mu, theta$sigma)
