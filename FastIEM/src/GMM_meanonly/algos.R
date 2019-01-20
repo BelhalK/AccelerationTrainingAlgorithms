@@ -195,6 +195,7 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
     #Update statistic
     s$s1 <- s$s1 + rho[k]*(tau.indiv.new  - s$s1)
     s$s2 <- s$s2 + rho[k]*(s.indiv.new  - s$s2)
+    
     theta$mu <- step.M(s,n)
     theta.est[k+1,] <- c(k, theta0$p, theta$mu, theta0$sigma)
 
