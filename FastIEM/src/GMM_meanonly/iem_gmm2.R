@@ -7,6 +7,7 @@ options(digits = 22)
 # save.image("gmm_mu2.RData")
 # save.image("gmm_mu3.RData")
 # save.image("gmm_mu_fixed.RData")
+load("gmm_mu_fixed.RData")
 # load("gmm_mu.RData")
 n <- 100
 weight<-c(0.2, 0.8) 
