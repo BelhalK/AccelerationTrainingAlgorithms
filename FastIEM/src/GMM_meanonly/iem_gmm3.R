@@ -3,7 +3,7 @@ source("func.R")
 source("plots.R")
 theme_set(theme_bw())
 options(digits = 22)
-save.image("gmm_mu.RData")
+# save.image("gmm_mu.RData")
 
 n <- 1000
 weight<-c(0.2, 0.8) 

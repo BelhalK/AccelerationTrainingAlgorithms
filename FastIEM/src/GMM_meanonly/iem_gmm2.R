@@ -9,7 +9,7 @@ options(digits = 22)
 # save.image("gmm_mu_fixed.RData")
 load("gmm_mu_fixed.RData")
 # load("gmm_mu.RData")
-n <- 100
+n <- 10000
 weight<-c(0.2, 0.8) 
 mu<-c(-1,1)
 sigma<-c(1,1)*1
@@ -20,7 +20,7 @@ mu0<-c(-2,2)
 sigma0<-sigma
 
 
-K <- 2000
+K <- 50000
 
 seed0=44444
 
@@ -158,7 +158,6 @@ for (j in (1:nsim))
 }
 
 
-
 # dem[,2:7] <- dem[,2:7]^2
 em <- NULL
 em <- dem[dem$rep==1,]
@@ -274,7 +273,8 @@ variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
                   oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)])
 variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
                   oem_ep[2:20,c(1,5,8)],em_ep[2:20,c(1,5,8)])
-variance <- rbind(oemvr_ep[5:20,c(1,5,8)],iem_ep[5:20,c(1,5,8)],
-                  oem_ep[5:20,c(1,5,8)],em_ep[5:20,c(1,5,8)])
+variance <- rbind(oemvr_ep[15:20,c(1,5,8)],iem_ep[15:20,c(1,5,8)],
+                  oem_ep[15:20,c(1,5,8)],em_ep[15:20,c(1,5,8)])
+variance <- rbind(oemvr_ep[15:20,c(1,5,8)],iem_ep[15:20,c(1,5,8)],em_ep[15:20,c(1,5,8)])
 # variance <- rbind(iem_ep[10:20,c(1,5,8)],em_ep[10:20,c(1,5,8)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
