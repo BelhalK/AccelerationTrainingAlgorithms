@@ -1,14 +1,13 @@
 source("algos.R")
 source("func.R")
 theme_set(theme_bw())
-# save.image("lin_gauss.RData")
-load("lin_gauss.RData")
+
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
 # sigma<-c(0.5,0.1)*1
 
-n <- 300
+n <- 5000
 mu<-c(10,0)
 mu0<-c(5,0)
 # sigma<-c(10,5)*1
@@ -17,7 +16,7 @@ sigma<-c(1,1)*1
 alph <- sigma[2]/(sigma[1]+sigma[2])
 gamm <- 1/(1/sigma[1]+1/sigma[2])
 
-K <- 3000
+K <- 20000
 # Several Chains for the same iteration
 M <- 1
 
@@ -38,10 +37,16 @@ xj<-mixt.simulate(n,mu,sigma)
 df <- mixt.em(xj, theta0, K, alph)
 
 
+
 b1 = c(rep(theta$mu[1],(K+1)))
 b2 = c(rep(theta$mu[2],(K+1)))
 
 ML <- cbind(1:(K+1),b1,b2)
+
+# ML <- df
+# for (i in (1:(K+1))){
+#   ML[i,2]<- c(theta$mu)
+# }
 
 ## EM
 print('EM')
@@ -67,7 +72,6 @@ for (j in (1:nsim))
   x <- NULL
   xj<-mixt.simulate(n,mu,sigma)
   x <- rbind(x,xj)
-  
 
   df <- mixt.em(xj, theta0, K, alph)
   # ML <- df
@@ -161,24 +165,54 @@ oemvr[,4]<-NULL
 
 
 
-em_scaled <- em
-em_scaled$iteration = seq(0, n*K, by=n)
-em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
+# em_scaled <- em
+# em_scaled$iteration = seq(0, n*K, by=n)
+# em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
+
+
+# iem$algo <- 'IEM'
+# oem$algo <- 'OEM'
+# oemvr$algo <- 'OEMvr'
+# em_scaled$algo <- 'EM'
+# em$algo <- 'EM'
+# # variance <- NULL
+# # variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
+# # colnames(variance) <- c("iteration","mu1","algo")
+
+# variance <- NULL
+# variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
 oemvr$algo <- 'OEMvr'
-em_scaled$algo <- 'EM'
+em$algo <- 'EM'
+
+em$rep <- NULL
+iem$rep <- NULL
+oem$rep <- NULL
+oemvr$rep <- NULL
+
+
 # variance <- NULL
-# variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
-# colnames(variance) <- c("iteration","mu1","algo")
+# # variance <- rbind(oemvr[1001:2001,c(1,5,8)],iem[1001:2001,c(1,5,8)],oem[1001:2001,c(1,5,8)],em_scaled[1001:2001,c(1,5,8)])
+# variance <- rbind(oemvr[2:(K+1),c(1,5,8)],iem[2:(K+1),c(1,5,8)],oem[2:(K+1),c(1,5,8)],em_scaled[2:(K+1),c(1,5,8)])
+# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
-variance <- NULL
-variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+
+epochs = seq(1, K, by=n)
+em_ep <- em[1:(K/n),]
+em_ep$iteration <- 1:(K/n)
+iem_ep <- iem[epochs,]
+iem_ep$iteration <- 1:(K/n)
+oem_ep <- oem[epochs,]
+oem_ep$iteration <- 1:(K/n)
+oemvr_ep <- oemvr[epochs,]
+oemvr_ep$iteration <- 1:(K/n)
+
+variance <- rbind(em_ep[,c(1,2,3)],iem_ep[,c(1,2,3)],oem_ep[,c(1,2,3)],oemvr_ep[,c(1,2,3)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
-
-
 
 # graphConvMC <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
 # {

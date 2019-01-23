@@ -63,6 +63,7 @@ mixt.iem <- function(x, theta0, K,nbr)
     if (k%%(n/nbr) == 1)
     { 
       i<-1:nbr
+      print(k)
     }
     
     tau[l[i],] <- compute.tau(x[l[i]],theta)
@@ -187,8 +188,8 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
     if (k%%(n/nbr) == 1)
     { 
       i<-1:nbr
+      print(k)
     }
-
     tau.indiv.new <- compute.tau(x[l[i]],theta)
     s.indiv.new <- x[l[i]]*tau.indiv.new
 
@@ -231,8 +232,8 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
     { 
       i<-1:nbr
       theta.e.0 <- theta
+      print(k)
     }
-
     tau.indiv.new <- compute.tau(x[l[i]],theta)
     s.indiv.new <- x[l[i]]*tau.indiv.new
 
@@ -251,7 +252,6 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
 
     #Update index
     i <- i+nbr
-
   }
   
   df <- as.data.frame(theta.est)
