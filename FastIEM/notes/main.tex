@@ -3,6 +3,7 @@
 \usepackage[a4paper]{geometry}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage{makecell}
+\usepackage{stackengine}
 \usepackage{enumitem}
 \usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}%
 \usepackage{url}            % simple URL typesetting
@@ -243,14 +244,65 @@ L(s;\theta) \triangleq \psi(\theta) - \langle \sum_{i=1}^N{s_i}, \phi(\theta)\ra
 \end{equation}
 Denote $s = \sum_{i=1}^N{s_i}$ and $\bar{s}_i(\theta) \triangleq \E_{p(z_i, \theta)}[\tilde{S}(z_i)]$. At iteration $k$ of epoch $e$, the E-step of those three algorithms consists in picking a single data $i_k$ and:
 \begin{itemize}
-\item \textbf{oEM algorithm:}  $s^{k} = s^{k-1} + \rho_k ( \bar{s}_{i_k}(\theta^{k-1})  - s^{k-1} )$
-\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{k-1}) - s_{i_k}^{e,0}+ s^{e,0} - s^{e,k-1} )$
-\item \textbf{MBEM algorithm: }  $s^{e,k} = s^{e,k-1} +  ( \bar{s}_{i_k}(\theta^{k-1})  - s_{i_k}^{e,k-1} )$
+\item \textbf{oEM algorithm:}  $s^{k} = s^{k-1} + \rho_k ( \bar{s}_{i_k}(\theta^{e,k-1})  - s^{k-1} )$
+\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{e,k-1}) - s_{i_k}^{e,0}+ s^{e,0} - s^{e,k-1} )$
+\item \textbf{MBEM algorithm: }  $s^{e,k} = s^{e,k-1} +  ( \bar{s}_{i_k}(\theta^{e,k-1})  - s_{i_k}^{e,k-1} )$
 \end{itemize}
 where $ s^{e,0}  = s^{e-1,M}$.
 
 \subsection{Local convergence of MBEM}
+\begin{assumption}
+For $i \in \inter$,  the function $\bar{s}_i: \Theta \to \mathsf{S}_i$ is $L_s$-Lipschitz.
+\end{assumption}
 
+\begin{assumption}
+The function $F: \mathsf{S} \to \mathsf{S}$ where for all $s \in  \mathsf{S}$, $F(s) = \sum_{i=1}^N \bar{s}_i (\hat{\theta}(s))$ is $\beta$-smooth.
+\end{assumption}
+For all $i \in \inter$, define a random variable $z_i^{e,k}$ that takes value $1-\frac{1}{n}$ with probability $\frac{1}{n}$ and $-\frac{1}{n}$ otherwise. Then for $i \in \inter$:
+\begin{equation}
+s_i^{e,k} = (1-\frac{1}{n}) s_i^{e,k-1} + \frac{1}{n}\bar{s}_{i_k}(\theta^{e,k-1}) + z_i^{e,k} \Big[\bar{s}_{i_k}(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
+\end{equation}
+and
+\begin{equation}
+s^{e,k} =  \sum_{i=1}^N s_i^{e,k} = (1-\frac{1}{n})  \sum_{i=1}^N s_i^{e,k-1} + \frac{1}{n}  \sum_{i=1}^N \bar{s}_{i_k}(\theta^{e,k-1}) +  \sum_{i=1}^N z_i^{e,k} \Big[\bar{s}_{i_k}(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
+\end{equation}
+
+Denote by $\Delta_k = s^{e,k} - s^*$, then:
+\begin{equation}
+\begin{split}
+\Delta_k & = s^{e,k} - s^* \\
+& = \underbrace{(1-\frac{1}{n}) s^{e,k-1} - s^*  +  \frac{1}{n}  F(s^{e,k-1})}_{\Delta_k^{(1)}}  + \underbrace{(\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]}_{\Delta_k^{(2)}}
+\end{split}
+\end{equation}
+which leads to $\E[\norm{\Delta_k}^2] \leq \norm{\Delta_k^{(1)}}^2 + \E[\norm{\Delta_k^{(2)}}^2] $.
+Define the following quantity $J_* = \frac{\partial F}{\partial s}(s^*)$, we can bound the first term as follows:
+\begin{equation}
+\begin{split}
+\Delta_k^{(1)} = (1-\frac{1}{n})\Delta_{k-1} + \frac{1}{n}J_* \Delta_{k-1} +  \frac{1}{n} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}\Big]
+\end{split}
+\end{equation}
+then:
+\begin{equation}
+\begin{split}
+\norm{\Delta_k^{(1)}}^2 & = \norm{(1-\frac{1}{n})\Delta_{k-1} + \frac{1}{n} J_* \Delta_{k-1} +  \frac{1}{n} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}\Big]}^2 \\
+& \leq \Big[ \norm{(1-\frac{1}{n}) \Delta_{k-1} + \frac{1}{n}J_* \Delta_{k-1} } + \frac{1}{n} \norm{ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}}\Big]^2 \\
+& \leq \Big[ (1-\frac{\lambda}{n})\norm{\Delta_{k-1}} + \frac{\beta}{2n} \norm{\Delta_{k-1}}^2 \Big]^2\\
+& \leq \Big[ 1 - \frac{1}{n}(\lambda - \frac{\beta}{2} \norm{\Delta_{k-1}}) \Big]^2 \norm{\Delta_{k-1}}^2\\
+& \leq (1 - \frac{\lambda}{2n})\norm{\Delta_{k-1}}^2
+\end{split}
+\end{equation}
+where we use the triangular identity, the fact that $\norm{(1 - \frac{1}{n})I + \frac{1}{n} J_*} \leq 1 - \frac{1}{n} + \frac{1}{n}(1-\lambda) = 1 - \frac{\lambda}{n}$ and finally the smoothness of the function $F(s)$ yields $\norm{F(s) - s^* - J_* (s - s^*)} \leq \frac{\beta}{2}\norm{s - s^*}^2$.
+
+Now we bound the second term $\E[\norm{\Delta_k^{(2)}}^2] $:
+\begin{equation}
+\begin{split}
+& \E \Big[\Big\{ (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big\}^\top (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big] \\
+& = \frac{1}{n} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[(\barbelow{z}^{e,k})^\top \barbelow{z}^{e,k}]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+& = \frac{1}{n} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1 - d^2}{n} I]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+& =  \frac{1-d^2}{n^2} \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2
+\end{split}
+\end{equation}
+We now need to upper bound the norm of the vector $\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2$.
 
 
 \clearpage 
