@@ -10,7 +10,7 @@
 # save.image("warfa_onlinesaem.RData")
 
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/incremental/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -34,9 +34,9 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R")
   source('main_estep_incremental.R')
 
 
-  source('/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/R/mixtureFunctions.R')
-  source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/plots.R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental")
+  source('/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/incremental/R/mixtureFunctions.R')
+  source("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/incremental/plots.R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/incremental")
 
 
 library("mlxR")
@@ -109,7 +109,7 @@ saemix.model<-saemixModel(model=model1cpt,description="warfarin",type="structura
   byrow=TRUE))
 
 
-# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/incremental/data/warfarin_data.txt", header=T)
+# warfa_data <- read.table("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/incremental/data/warfarin_data.txt", header=T)
 # saemix.data<-saemixData(name.data=warfa_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
 #   name.predictors=c("amount","time"),name.response=c("y1"), name.X="time")
 
