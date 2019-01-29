@@ -52,16 +52,8 @@
 \usepackage{mathtools}
 \usepackage{xargs}
 \usepackage{glossaries}
-
+\usepackage{shortcuts}
 \makeglossaries
-
-
-
- % \newglossaryentry{pointtoset}
- % {
- %     name=point-to-set map,
- %     description={Given two sets, $\mathcal{X}$ and $\mathcal{Y}$, a point-to-set mapping defined on X with range in $\mathcal{Y}$ is a map $\phi$ which assigns to each $x \in \mathcal{X}$ a subset $\phi(x)$ included in $\mathcal{Y}$ }
- % }
 
 
 \newglossaryentry{iterapp}
@@ -74,28 +66,6 @@ x_{n+1} \in A(x_n)
 }
 
 
-% \newglossaryentry{identfunc}
-% {
-%     name=Identification of a parametric function.,
-%     description={Let $\psi \colon \theta \to \delta$ be a function of $\theta$. The function $\psi$ is identifiable if for all $(\theta, \theta') \in \Theta^2$:
-% \begin{equation*}
-% P_{z|y,\theta}=P_{z|y,\theta'} \Rightarrow \psi(\theta) = \psi(\theta')
-% \end{equation*}}
-% }
-
-% \newglossaryentry{identmodel}
-% {
-%     name=Identification of a model.,
-%     description={A statistical model $(\mathcal{Z}, \mathcal{A}, \mathcal{P})$, with $\mathcal{Z}$ a set of possible observations, $\mathcal{A}$ a $\sigma$-algebra of events in $\mathcal{Z}$ and $\mathcal{P}$ a family of probability measures, is identifiable if all elements of $\Theta$ are}
-% }
-
-
-% \newglossaryentry{statpoint}
-% {
-%     name=stationary point,
-%     description={Consider a function $f:\Theta \to \mathbb{R}$ such as $f$ admits a directional derivative $\nabla f(\theta, \theta' - \theta)$ for all $(\theta, \theta') \in \Theta^2$. We say that $\theta$
-%  is a stationary point if for all $\theta' \in \Theta$, $\nabla f(\theta, \theta' - \theta) \geq 0$}
-% }
 
 \newglossaryentry{direcderivative}
 {
@@ -112,62 +82,7 @@ x_{n+1} \in A(x_n)
 \glsaddall
 
 
-
-\renewcommand\appendixpagename{Proofs}
-
-\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
-  #1\;\delimsize\|\;#2%
-}
-
-\def\eqs{\;}
-\def\argmax{\operatorname{argmax}}
-\newcommandx{\CPE}[3][1=]{{\mathbb E}_{#1}\left[\left. #2 \, \right| #3 \right]} %%%% esperance conditionnelle
-\newcommandx{\Zset}[1][1=i]{\mathsf{Z}_{#1}}
-\newcommandx{\Zsigma}[1][1=i]{\mathcal{Z}_{#1}}
-\newcommandx{\Eset}[1][1=i]{\mathsf{E}_{#1}}
-\newcommandx{\Esigma}[1][1=i]{\mathcal{E}_{#1}}
-\newcommand{\vois}{\mathcal{T}(\Theta)}
-\newcommand{\infdiv}{\operatorname{KL} \infdivx}
-\newcommand{\indic}{\mathbb{1}}
-\newcommand{\interi}{\llbracket1, n_i \rrbracket}
-\newcommand{\loglike}{\ell}
-\newcommand{\prob}{\mathbb{P}}
-\newcommand{\inter}{\llbracket1,N\rrbracket}
-\newcommand{\intersim}{\llbracket0,M_{k}-1\rrbracket}
-\newcommand{\obs}{y_{1:N}}
-\newcommand{\rset}{\mathbb{R}}
-\newcommand{\nset}{\mathbb{N}}
-
-\newcommand{\lat}{z_{1:N}}
-\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
-\newcommand{\partition}{\mathcal{P}_{[1,N]}}
-\DeclareMathOperator{\logit}{logit}
-\DeclareMathOperator*{\E}{\mathbb{E}}
-\DeclareMathOperator*{\St}{\tilde{S}}
-\DeclareMathOperator*{\s}{\barbelow{s}}
-\DeclareMathOperator{\Tr}{Tr}
-\theoremstyle{plain}
-\newtheorem{thm}{Theorem}
-\theoremstyle{definition}
-\newtheorem{defn}{Definition} % definition numbers are dependent on theorem numbers
-\newtheorem{exmp}{Example} % same for example numbers
-\newcommand{\Pt}{\~P}
-
-\newcommand{\dz}{\mathrm{d}z}
-\newcommand{\MC}{\mathrm{MC}}
-\newcommand\barbelow[1]{\stackunder[1.2pt]{$#1$}{\rule{.8ex}{.075ex}}}
-
-
-%\usepackage{fancyhdr} % Headers and footers
-%\pagestyle{fancy} % All pages have headers and footers
-%\fancyhead{} % Blank out the default header
-%\fancyfoot{} % Blank out the default footer
-%\setlength{\droptitle}{-12\baselineskip} % Move the title up
-%\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
-%\posttitle{\end{center}}
-
-\title{On the Convergence Properties of the Mini-Batch EM and MCEM
-Algorithms}
+\title{On the Convergence Properties of the Mini-Batch EM Algorithm}
 \author{%
 \textsc{Belhal Karimi, Marc Lavielle, Eric Moulines}\\
 \normalsize  CMAP, Ecole Polytechnique, Universite Paris-Saclay, 91128 Palaiseau, France\\ % Your institution

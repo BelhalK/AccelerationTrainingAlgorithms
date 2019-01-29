@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.23)  25 JAN 2019 10:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.23)  28 JAN 2019 17:30
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -723,15 +723,16 @@ Package: supertabular 2004/02/20 v4.1e the supertabular environment
 ty
 Package: glossary-tree 2018/04/07 v4.37 (NLCT)
 \glstreeindent=\skip87
-))
+)) (./shortcuts.sty
+\c@thm=\count187
+\c@defn=\count188
+\c@exmp=\count189
+)
 \glswrite=\write4
 \glo@main@file=\write5
 \openout5 = `main.glo'.
 
 Package glossaries Info: Writing glossary file main.glo on input line 56.
-\c@thm=\count187
-\c@defn=\count188
-\c@exmp=\count189
  (./main.aux
 
 LaTeX Warning: Label `curvedL' multiply defined.
@@ -742,20 +743,20 @@ LaTeX Warning: Label `curvedL@cref' multiply defined.
 )
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 136.
+LaTeX Font Info:    ... okay on input line 136.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -800,7 +801,7 @@ File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package color Info: Driver file: pdftex.def on input line 147.
 )
-Package hyperref Info: Link coloring ON on input line 182.
+Package hyperref Info: Link coloring ON on input line 136.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -810,15 +811,15 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count190
 )
-LaTeX Info: Redefining \ref on input line 182.
-LaTeX Info: Redefining \pageref on input line 182.
-LaTeX Info: Redefining \nameref on input line 182.
+LaTeX Info: Redefining \ref on input line 136.
+LaTeX Info: Redefining \pageref on input line 136.
+LaTeX Info: Redefining \nameref on input line 136.
 
 (./main.out) (./main.out)
 \@outlinefile=\write6
 \openout6 = `main.out'.
 
-LaTeX Info: Redefining \microtypecontext on input line 182.
+LaTeX Info: Redefining \microtypecontext on input line 136.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -872,7 +873,7 @@ Package: ltcaption 2013/06/09 v1.4-94 longtable captions (AR)
 )
 Package caption Info: supertabular package is loaded.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for U+msa on input line 185.
+LaTeX Font Info:    Try loading font information for U+msa on input line 139.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -880,7 +881,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (/usr/local/texlive/2018/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 185.
+LaTeX Font Info:    Try loading font information for U+msb on input line 139.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -888,11 +889,11 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (/usr/local/texlive/2018/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+stmry on input line 185.
+LaTeX Font Info:    Try loading font information for U+stmry on input line 139.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
-LaTeX Font Info:    Try loading font information for U+rsfs on input line 185.
+LaTeX Font Info:    Try loading font information for U+rsfs on input line 139.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
@@ -901,50 +902,50 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `cmss' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Try loading font information for U+bbold on input line 201.
+LaTeX Font Info:    Try loading font information for U+bbold on input line 155.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/bbold/Ubbold.fd)
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 236.
+put line 190.
  [1
 
 \openout4 = `main.ist'.
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 247.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 201.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 247.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 201.
  [2] [3] [4
 
 ]
 
 Package natbib Warning: Citation `lavielle2014Mixed' on page 5 undefined on inp
-ut line 344.
+ut line 298.
 
 <pics/iems.pdf, id=127, 941.19066pt x 535.58235pt>
 File: pics/iems.pdf Graphic file (type pdf)
 <use pics/iems.pdf>
-Package pdftex.def Info: pics/iems.pdf  used on input line 397.
+Package pdftex.def Info: pics/iems.pdf  used on input line 351.
 (pdftex.def)             Requested size: 329.42166pt x 187.45662pt.
 [5] [6 <./pics/iems.pdf>]
 
-LaTeX Warning: Reference `Ai' on page 7 undefined on input line 415.
+LaTeX Warning: Reference `Ai' on page 7 undefined on input line 369.
 
 
-LaTeX Warning: Reference `bounded' on page 1 undefined on input line 428.
+LaTeX Warning: Reference `bounded' on page 1 undefined on input line 382.
 
 [7
 
 ]
 
 Package natbib Warning: Citation `nesterov2007Gradient' on page 8 undefined on 
-input line 464.
+input line 418.
 
 [8] [9]
 No file main.bbl.
@@ -952,14 +953,14 @@ No file main.gls.
 
 Package natbib Warning: There were undefined citations.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 490.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 444.
 [10
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 490.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 444.
  (./main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 490.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 490.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 444.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 444.
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 8D67F9964C4CAF7C05518741AA113EC5;839.
 
@@ -971,13 +972,13 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 18181 strings out of 492649
- 289566 string characters out of 6129622
- 591497 words of memory out of 5000000
- 21584 multiletter control sequences out of 15000+600000
+ 18187 strings out of 492649
+ 289655 string characters out of 6129622
+ 591493 words of memory out of 5000000
+ 21587 multiletter control sequences out of 15000+600000
  16802 words of font info for 87 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 45i,26n,77p,1969b,596s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 45i,26n,77p,1991b,596s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/bbold-type1/bbold10.pf
 b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/bbold-type1/bbold7.pfb
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb>
@@ -1000,7 +1001,7 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2018/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/local/texlive/2018
 /texmf-dist/fonts/type1/public/stmaryrd/stmary10.pfb>
-Output written on main.pdf (10 pages, 1555374 bytes).
+Output written on main.pdf (10 pages, 1555178 bytes).
 PDF statistics:
  398 PDF objects out of 1000 (max. 8388607)
  329 compressed objects within 4 object streams
