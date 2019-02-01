@@ -26,7 +26,7 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorith
   source('SaemixData.R')
   source('SaemixModel.R') 
   source('SaemixRes.R') 
-  # source('SaemixRes_c.R') 
+  source('SaemixRes_c.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
   
