@@ -3,6 +3,7 @@
 \usepackage[a4paper]{geometry}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage{makecell}
+
 \usepackage{stackengine}
 \usepackage{enumitem}
 \usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}%
@@ -107,7 +108,7 @@ Abstract
 \section{Convergence of the mini-batch EM algorithm}\label{sec:mbem}
 
 \subsection{MBEM for a curved exponential family} \label{sssec:expo}
-In the particular case where for all $i \in \inter$ and $z_i \in \Zset$, the function $\theta \to f_i(z_i,\theta)$ belongs to the curved exponential family, we assume that:
+Let $\Theta \in \rset^d$ be  an open parameter set. In the particular case where for all $i \in \inter$ and $z_i \in \Zset$, the function $\theta \to f_i(z_i,\theta)$ belongs to the curved exponential family, we assume that:
 \begin{assumption_expo}
 For all $i \in \inter$ and $\theta \in \Theta$:
 \begin{equation}
@@ -133,19 +134,19 @@ In many models of practical interest for all $s \in \mathsf{S}$, $\theta \mapsto
 
 \begin{algorithm}[H]
 \textbf{Initialisation}: given an initial parameter estimate $\theta^0$, for all $i \in \inter$ compute $s^0_i = \bar{s}(\theta^0)$.\\
-\textbf{Iteration k}: given the current estimate $\theta^{k-1}$:
+\textbf{Epoch e, Iteration k}: given the current estimate $\theta^{e,k-1}$:
 \begin{enumerate}
-\item Pick a set $I_k$ uniformly on $\{A \subset \inter, \operatorname{card}(A)=p\}$.
+\item Pick a set $I_{e,k}$ uniformly on $\{A \subset \inter, \operatorname{card}(A)=p\}$.
 \item For $i \in \inter$, compute $s^k_{i}$ such as:
 \begin{align}
- s^k_i &=
+ s^{e,k}_i &=
   \begin{cases}
-   \bar{s}_i(\theta^{k-1})    & \text{if } i \in I_k.\\
-   s^{k-1}_i                               & \text{otherwise}.
+   \bar{s}_i(\theta^{e,k-1})    & \text{if } i \in I_{e,k}.\\
+   s^{e,k-1}_i                               & \text{otherwise}.
   \end{cases}
 \end{align}
 
-\item Set $\theta^{k} = \hat{\theta}(s^k)$ where $s^k = (s^k_i, i \in \inter)$.
+\item Set $\theta^{e,k} = \hat{\theta}(s^{e,k})$ where $s^{e,k} = (s^{e,k}_i, i \in \inter)$.
 
 \end{enumerate}
 \caption{mini-batch EM for a curved exponential family}
@@ -157,13 +158,16 @@ To study those three algorithms we assume a slightly different exponential famil
 \begin{equation}\label{curvedL}
 L(s;\theta) \triangleq \psi(\theta) - \langle \sum_{i=1}^N{s_i}, \phi(\theta)\rangle.
 \end{equation}
-Denote $s = \sum_{i=1}^N{s_i}$ and $\bar{s}_i(\theta) \triangleq \E_{p(z_i, \theta)}[\tilde{S}(z_i)]$. At iteration $k$ of epoch $e$, the E-step of those three algorithms consists in picking a single data $i_k$ and:
+Denote $s = \sum_{i=1}^N{s_i}$ and $\bar{s}_i(\theta) \triangleq \E_{p(z_i, \theta)}[\tilde{S}(z_i)]$ and the functions $F: \mathsf{S} \to \mathsf{S}$ and $f_i: \mathsf{S} \to \mathsf{S}$ where for all $s \in  \mathsf{S}$, 
+$$f_i(s) = \bar{s}_i (\hat{\theta}(s)) \quad \textrm{and} \quad F(s) = \sum_{i=1}^N \bar{s}_i (\hat{\theta}(s)) = \sum_{i=1}^N f_i (s)$$
+
+At iteration $k$ of epoch $e$, the E-step of those three algorithms consists in picking a single data $i_k$ and:
 \begin{itemize}
-\item \textbf{oEM algorithm:}  $s^{k} = s^{k-1} + \rho_k ( \bar{s}_{i_k}(\theta^{e,k-1})  - s^{k-1} )$
-\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{e,k-1}) - s_{i_k}^{e,0}+ s^{e,0} - s^{e,k-1} )$
+\item \textbf{oEM algorithm:}  $s^{e,k} = s^{e,k-1} + \rho_k ( \bar{s}_{i_k}(\theta^{e,k-1})  - s^{e,k-1} )$
+\item \textbf{oEM-vr algorithm: }  $s^{e,k} = s^{e,k-1} + \rho ( \bar{s}_{i_k}(\theta^{e,k-1}) - f_{i_k}(s^{e,0})+ F(s^{e,0}) - s^{e,k-1} )$
 \item \textbf{MBEM algorithm: }  $s^{e,k} = s^{e,k-1} +  ( \bar{s}_{i_k}(\theta^{e,k-1})  - s_{i_k}^{e,k-1} )$
 \end{itemize}
-where $ s^{e,0}  = s^{e-1,M}$.
+with $ s^{e,0}  = s^{e-1,M}$.
 
 \subsection{Local convergence of MBEM}
 \begin{assumption}
@@ -173,52 +177,81 @@ For $i \in \inter$,  the function $\bar{s}_i: \Theta \to \mathsf{S}_i$ is $L_s$-
 \begin{assumption}
 The function $F: \mathsf{S} \to \mathsf{S}$ where for all $s \in  \mathsf{S}$, $F(s) = \sum_{i=1}^N \bar{s}_i (\hat{\theta}(s))$ is $\beta$-smooth.
 \end{assumption}
-For all $i \in \inter$, define a random variable $z_i^{e,k}$ that takes value $1-\frac{1}{n}$ with probability $\frac{1}{n}$ and $-\frac{1}{n}$ otherwise. Then for $i \in \inter$:
+For all $i \in \inter$, define a random variable $z_i^{e,k}$ that takes value $1-\frac{1}{N}$ with probability $\frac{1}{N}$ and $-\frac{1}{N}$ otherwise and the associated vector $\barbelow{z}^{e,k} \in \rset^N$. Then for $i \in \inter$:
 \begin{equation}
-s_i^{e,k} = (1-\frac{1}{n}) s_i^{e,k-1} + \frac{1}{n}\bar{s}_{i_k}(\theta^{e,k-1}) + z_i^{e,k} \Big[\bar{s}_{i_k}(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
+s_i^{e,k} = (1-\frac{1}{N}) s_i^{e,k-1} + \frac{1}{N}\bar{s}_{i_k}(\theta^{e,k-1}) + z_i^{e,k} \Big[\bar{s}_{i_k}(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
 \end{equation}
 and
 \begin{equation}
-s^{e,k} =  \sum_{i=1}^N s_i^{e,k} = (1-\frac{1}{n})  \sum_{i=1}^N s_i^{e,k-1} + \frac{1}{n}  \sum_{i=1}^N \bar{s}_i(\theta^{e,k-1}) +  \sum_{i=1}^N z_i^{e,k} \Big[\bar{s}_i(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
+s^{e,k} =  \sum_{i=1}^N s_i^{e,k} = (1-\frac{1}{N})  \sum_{i=1}^N s_i^{e,k-1} + \frac{1}{N}  \sum_{i=1}^N \bar{s}_i(\theta^{e,k-1}) +  \sum_{i=1}^N z_i^{e,k} \Big[\bar{s}_i(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
 \end{equation}
 
-Denote by $\Delta_k = s^{e,k} - s^*$, then:
+Denote by $\Delta_{e,k} = s^{e,k} - s^*$, then:
 \begin{equation}
 \begin{split}
-\Delta_k & = s^{e,k} - s^* \\
-& = \underbrace{(1-\frac{1}{n}) s^{e,k-1} - s^*  +  \frac{1}{n}  F(s^{e,k-1})}_{\Delta_k^{(1)}}  + \underbrace{(\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]}_{\Delta_k^{(2)}}
+\Delta_{e,k} & = s^{e,k} - s^* \\
+& = \underbrace{(1-\frac{1}{N}) s^{e,k-1} - s^*  +  \frac{1}{N}  F(s^{e,k-1})}_{\Delta_{e,k}^{(1)}}  + \underbrace{(\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]}_{\Delta_{e,k}^{(2)}}
 \end{split}
 \end{equation}
-which leads to $\E[\norm{\Delta_k}^2] \leq \norm{\Delta_k^{(1)}}^2 + \E[\norm{\Delta_k^{(2)}}^2] $.
+which leads to $\E[\norm{\Delta_{e,k}}^2] \leq \norm{\Delta_{e,k}^{(1)}}^2 + \E[\norm{\Delta_{e,k}^{(2)}}^2] $. Note that both $\barbelow{F}(s^{e,k-1}), \barbelow{s}^{e,k-1}$ are in $\rset^{Nd}$.
 Define the following quantity $J_* = \frac{\partial F}{\partial s}(s^*)$ and its maximum eigenvalue $1-\lambda$, we can bound the first term as follows:
 \begin{equation}
 \begin{split}
-\Delta_k^{(1)} = (1-\frac{1}{n})\Delta_{k-1} + \frac{1}{n}J_* \Delta_{k-1} +  \frac{1}{n} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}\Big]
+\Delta_{e,k}^{(1)} = (1-\frac{1}{N})\Delta_{e,k-1} + \frac{1}{N}J_* \Delta_{e,k-1} +  \frac{1}{N} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{e,k-1}\Big]
 \end{split}
 \end{equation}
 then:
 \begin{equation}
 \begin{split}
-\norm{\Delta_k^{(1)}}^2 & = \norm{(1-\frac{1}{n})\Delta_{k-1} + \frac{1}{n} J_* \Delta_{k-1} +  \frac{1}{n} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}\Big]}^2 \\
-& \leq \Big[ \norm{(1-\frac{1}{n}) \Delta_{k-1} + \frac{1}{n}J_* \Delta_{k-1} } + \frac{1}{n} \norm{ F(s^{e,k-1}) - s^* -J_* \Delta_{k-1}}\Big]^2 \\
-& \leq \Big[ (1-\frac{\lambda}{n})\norm{\Delta_{k-1}} + \frac{\beta}{2n} \norm{\Delta_{k-1}}^2 \Big]^2\\
-& \leq \Big[ 1 - \frac{1}{n}(\lambda - \frac{\beta}{2} \norm{\Delta_{k-1}}) \Big]^2 \norm{\Delta_{k-1}}^2\\
-& \leq (1 - \frac{\lambda}{2n})\norm{\Delta_{k-1}}^2
+\norm{\Delta_{e,k}^{(1)}}^2 & = \norm{(1-\frac{1}{N})\Delta_{e,k-1} + \frac{1}{N} J_* \Delta_{e,k-1} +  \frac{1}{N} \Big[ F(s^{e,k-1}) - s^* -J_* \Delta_{e,k-1}\Big]}^2 \\
+& \leq \Big[ \norm{(1-\frac{1}{N}) \Delta_{e,k-1} + \frac{1}{N}J_* \Delta_{e,k-1} } + \frac{1}{N} \norm{ F(s^{e,k-1}) - s^* -J_* \Delta_{e,k-1}}\Big]^2 \\
+& \leq \Big[ (1-\frac{\lambda}{N})\norm{\Delta_{e,k-1}} + \frac{\beta}{2N} \norm{\Delta_{e,k-1}}^2 \Big]^2\\
+& \leq \Big[ 1 - \frac{1}{N}(\lambda - \frac{\beta}{2} \norm{\Delta_{e,k-1}}) \Big]^2 \norm{\Delta_{e,k-1}}^2\\
+& \leq (1 - \frac{\lambda}{2N})\norm{\Delta_{e,k-1}}^2
 \end{split}
 \end{equation}
-where we use the triangular identity, the fact that $\norm{(1 - \frac{1}{n})I + \frac{1}{n} J_*} \leq 1 - \frac{1}{n} + \frac{1}{n}(1-\lambda) = 1 - \frac{\lambda}{n}$ and finally the smoothness of the function $F(s)$ yields $\norm{F(s) - s^* - J_* (s - s^*)} \leq \frac{\beta}{2}\norm{s - s^*}^2$.
+where we use the triangular identity, the fact that $\norm{(1 - \frac{1}{N})I + \frac{1}{N} J_*} \leq 1 - \frac{1}{N} + \frac{1}{N}(1-\lambda) = 1 - \frac{\lambda}{N}$ and finally the smoothness of the function $F(s)$ yields $\norm{F(s) - s^* - J_* (s - s^*)} \leq \frac{\beta}{2}\norm{s - s^*}^2$.
 
-Now we bound the second term $\E[\norm{\Delta_k^{(2)}}^2] $:
+Bounding the second term $\E[\norm{\Delta_{e,k}^{(2)}}^2] $ gives:
 \begin{equation}
 \begin{split}
 & \E \Big[\Big\{ (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big\}^\top (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big] \\
-& = \frac{1}{n} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[(\barbelow{z}^{e,k})^\top \barbelow{z}^{e,k}]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
-& = \frac{1}{n} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1 - d^2}{n} I]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
-& =  \frac{1-d^2}{n^2} \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2
+& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[(\barbelow{z}^{e,k})^\top \barbelow{z}^{e,k}]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+%& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1}{N} I - \frac{1}{N^2} ee^\top]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+& =  (\frac{1}{N} - \frac{1}{N^2}) \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2
 \end{split}
 \end{equation}
 We now need to upper bound the norm of the vector $\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2$.
-
+Using the Lipschitzness of $F$ and the fact that $s^*$ is a stationary point of $F$ we obtain:
+\beq
+\begin{split}
+\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2 &  = \norm{ \barbelow{F}(s^{e,k-1}) - F(s^*) + s^* - \barbelow{s}^{e,k-1}}^2 \\
+& \leq \norm{\Delta_{e,k-1}}^2 + \norm{ \barbelow{F}(s^{e,k-1}) - F(s^*)}^2\\
+& \leq \norm{\Delta_{e,k-1}}^2 +L_{F}^2\norm{\Delta_{e,k-1}}^2\\
+& \leq (1+L_F^2) \norm{\Delta_{e,k-1}}^2
+\end{split}
+\eeq
+Rearranging terms yields
+\beq
+\begin{split}
+\E[\norm{\Delta_{e,k}}^2]  & \leq \norm{\Delta_{e,k}^{(1)}}^2 + \E[\norm{\Delta_{e,k}^{(2)}}^2] \\
+& \leq (1 - \frac{\lambda}{2N})\norm{\Delta_{e,k-1}}^2 +(\frac{1}{N} - \frac{1}{N^2}) (1+L_F^2) \norm{\Delta_{e,k-1}}^2 \\
+& \leq \left[ 1 - \frac{\lambda -1 - L_F^2}{N}  - \frac{L_F^2 + 1}{N^2}\right] \norm{\Delta_{e,k-1}}^2
+\end{split}
+\eeq
+Consider the last iteration $N$ of epoch $e$, then:
+\beq
+\begin{split}
+\E[\norm{\Delta_{e,N}}^2]  & \leq \left[ 1 - \frac{\lambda -1 - L_F^2}{N}  - \frac{L_F^2 + 1}{N^2}\right]^N \norm{\Delta_{e,0}}^2 \\
+& \leq \exp\left[-(\lambda -1 - L_F^2- \frac{L_F^2 + 1}{N}\right]\norm{\Delta_{e,0}}^2 \\
+\end{split}
+\eeq
+Then:
+\beq
+\begin{split}
+\E[\norm{s^{e,k} - s^*}^2]  & \leq \left\{\exp\left[-(\lambda -1 - L_F^2- \frac{L_F^2 + 1}{N}\right] \right\}^e \norm{s^{0,0} - s^*}^2
+\end{split}
+\eeq
 
 \clearpage 
 \begin{exmp}
@@ -347,9 +380,9 @@ As a result, the sequence $\left(\bar{A}^k(\theta^k)\right)_{k\geq0}$ is monoton
 \end{align}
 Inequality \eqref{eq:decreasing} gives :
 \begin{align}
-0 \leq \sum_{k=1}^{n}{A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})} \leq \sum_{k=1}^{n}{ \bar{A}^{k-1}(\theta^{k-1}) - \bar{A}^k(\theta^{k})} =  \bar{A}^{0}(\theta^{0}) - \bar{A}^n(\theta^{n})\eqs.
+0 \leq \sum_{k=1}^{N}{A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})} \leq \sum_{k=1}^{N}{ \bar{A}^{k-1}(\theta^{k-1}) - \bar{A}^k(\theta^{k})} =  \bar{A}^{0}(\theta^{0}) - \bar{A}^n(\theta^{N})\eqs.
 \end{align}
-Consequently, the sum of positive terms $\left(\sum_{k=1}^{n}{A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})} \right)_{n \geq 1}$ converges almost surely and $\left(A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})\right)_{k\geq1}$ converges almost surely to zero.
+Consequently, the sum of positive terms $\left(\sum_{k=1}^{N}{A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})} \right)_{n \geq 1}$ converges almost surely and $\left(A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})\right)_{k\geq1}$ converges almost surely to zero.
 The Beppo-Levi theorem and the Tower property of the conditional expectation imply:
 \begin{align}\label{Mdeter1}
 \mathsf{M} \triangleq \E \left[\sum_{k=0}^{\infty}{A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})}\right] & = \sum_{k=0}^{\infty}{\E \left[A^{k-1}_{I_{k}}(\theta^{k-1}) - \loglike_{I_{k}}(\theta^{k-1})\right]} \\
