@@ -216,9 +216,9 @@ Bounding the second term $\E[\norm{\Delta_{e,k}^{(2)}}^2] $ gives:
 \begin{equation}
 \begin{split}
 & \E \Big[\Big\{ (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big\}^\top (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big] \\
-& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[(\barbelow{z}^{e,k})^\top \barbelow{z}^{e,k}]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
-%& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1}{N} I - \frac{1}{N^2} ee^\top]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
-& =  (\frac{1}{N} - \frac{1}{N^2}) \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2
+& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[\barbelow{z}^{e,k} (\barbelow{z}^{e,k})^\top ]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+& = \frac{1}{N} \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1}{N} I - \frac{1}{N^2} ee^\top]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \\
+%& =  (\frac{1}{N} - \frac{1}{N^2}) \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2
 \end{split}
 \end{equation}
 We now need to upper bound the norm of the vector $\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2$.
