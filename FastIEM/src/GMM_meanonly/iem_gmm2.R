@@ -8,7 +8,7 @@ options(digits = 22)
 # save.image("gmm_mu3.RData")
 # save.image("gmm_mu_fixed.RData")
 
-# load("gmm_mu_fixed.RData")
+load("gmm_mu_fixed.RData")
 
 n <- 500
 weight<-c(0.2, 0.8) 
@@ -278,5 +278,6 @@ variance <- rbind(oemvr_ep[15:20,c(1,5,8)],iem_ep[15:20,c(1,5,8)],
                   oem_ep[15:20,c(1,5,8)],em_ep[15:20,c(1,5,8)])
 # variance <- rbind(oemvr_ep[15:20,c(1,5,8)],iem_ep[15:20,c(1,5,8)],em_ep[15:20,c(1,5,8)])
 # variance <- rbind(iem_ep[10:20,c(1,5,8)],em_ep[10:20,c(1,5,8)])
+graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 graphConvMC2_new(em_ep[,c(1,5,8)], title="IEMs",legend=TRUE)
