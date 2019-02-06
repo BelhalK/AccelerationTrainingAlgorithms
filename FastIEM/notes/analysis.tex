@@ -71,6 +71,10 @@ For $i \in \inter$,  the function $\bar{s}_i: \Theta \to \mathsf{S}_i$ is $L_s$-
 \begin{assumption}
 The function $F: \mathsf{S} \to \mathsf{S}$ where for all $s \in  \mathsf{S}$, $F(s) = \sum_{i=1}^N \bar{s}_i (\hat{\theta}(s))$ is $\beta$-smooth.
 \end{assumption}
+\begin{assumption}\label{ass:local}
+For any epoch $e$ and iteration $k$, $\norm{s^{e,k} - s^*} \leq \lambda/\beta$ where $1-\lambda$ is the maximum eigenvalue of $J_* = \frac{\partial F}{\partial s}(s^*)$ 
+\end{assumption}
+
 For all $i \in \inter$, define a random variable $z_i^{e,k}$ that takes value $1-\frac{1}{N}$ with probability $\frac{1}{N}$ and $-\frac{1}{N}$ otherwise and the associated vector $\barbelow{z}^{e,k} \in \rset^N$. Then for $i \in \inter$:
 \begin{equation}
 s_i^{e,k} = (1-\frac{1}{N}) s_i^{e,k-1} + \frac{1}{N}\bar{s}_{i_k}(\theta^{e,k-1}) + z_i^{e,k} \Big[\bar{s}_{i_k}(\theta^{e,k-1}) - s_i^{e,k-1}\Big]
@@ -107,7 +111,7 @@ then:
 & \leq (1 - \frac{\lambda}{2N})\norm{\Delta_{e,k-1}}^2
 \end{split}
 \end{equation}
-where we use the triangular identity, the fact that $\norm{(1 - \frac{1}{N})I + \frac{1}{N} J_*} \leq 1 - \frac{1}{N} + \frac{1}{N}(1-\lambda) = 1 - \frac{\lambda}{N}$ and finally the smoothness of the function $F(s)$ yields $\norm{F(s) - s^* - J_* (s - s^*)} \leq \frac{\beta}{2}\norm{s - s^*}^2$.
+where we use the triangular identity, the fact that $\norm{(1 - \frac{1}{N})I + \frac{1}{N} J_*} \leq 1 - \frac{1}{N} + \frac{1}{N}(1-\lambda) = 1 - \frac{\lambda}{N}$ and finally the smoothness of the function $F(s)$ yields $\norm{F(s) - s^* - J_* (s - s^*)} \leq \frac{\beta}{2}\norm{s - s^*}^2$ (for any smooth function $f$ we have $f(y) \leq f(x) + \nabla f(x) (y-x) + \beta/2 \norm{y-x}^2$.). The last line uses assumption M\ref{ass:local}.
 
 Bounding the second term $\E[\norm{\Delta_{e,k}^{(2)}}^2] $ gives:
 \begin{equation}
@@ -124,14 +128,7 @@ where $e = \begin{pmatrix}
 1  \\
 \vdots  \\
 1
-\end{pmatrix} \in \rset^{N}$ and the line before the last uses the Cauchy Schwartz inequality.
-%Observe that $[\frac{1}{N} I_{Nd} - \frac{1}{N^2} ee^\top] = (\frac{1}{N} - \frac{1}{N^2})I_{Nd} + U + U^\top$ where $U = \begin{pmatrix} 
-%0 & - \frac{1}{N^2} & \cdots & -  \frac{1}{N^2}\\
-%\vdots  & \ddots & \ddots & \vdots \\
-%\vdots  & \ddots & \ddots & - \frac{1}{N^2} \\
-%0  & \ddots & \ddots & 0 
-%\end{pmatrix} \in \rset^{Nd \times Nd}$
-
+\end{pmatrix} \in \rset^{N}$. The third line is due to the linearity of the Trace operator and the line before the last uses the Cauchy Schwartz inequality.
 
 We now need to upper bound the norm of the vector $\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2$.
 Using the Lipschitzness of $F$ and the fact that $s^*$ is a stationary point of $F$ we obtain:
