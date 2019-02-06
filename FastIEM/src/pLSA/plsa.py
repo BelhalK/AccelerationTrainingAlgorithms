@@ -173,6 +173,43 @@ def MStep_online(index):
             else:
                 lamda[i, k] /= denominator
 
+def MStep_onlinevr(index):
+    # update theta
+    for k in range(0, K):
+        denominator = 0
+        for j in range(0, M):
+            theta[k, j] = 0
+            oldsomme = 0
+            oldsomme0 = 0
+            somme_minibatch = 0
+            somme_minibatch0 = 0
+            for i in range(0,N):
+                oldsomme += X[i, j] * oldp[i, j, k]
+                oldsomme0 += X[i, j] * p0[i, j, k]
+            for i in index:
+                somme_minibatch += X[i, j] * p[i, j, k]
+                somme_minibatch0 += X[i, j] * p0[i, j, k]
+            theta[k, j] += oldsomme + rho*(somme_minibatch - somme_minibatch0 + oldsomme0 - oldsomme)
+            denominator += theta[k, j]
+        if denominator == 0:
+            for j in range(0, M):
+                theta[k, j] = 1.0 / M
+        else:
+            for j in range(0, M):
+                theta[k, j] /= denominator
+        
+    # update lamda
+    for i in range(0, N):
+        for k in range(0, K):
+            lamda[i, k] = 0
+            denominator = 0
+            for j in range(0, M):
+                lamda[i, k] += X[i, j] * p[i, j, k]
+                denominator += X[i, j];
+            if denominator == 0:
+                lamda[i, k] = 1.0 / K
+            else:
+                lamda[i, k] /= denominator
 
 # calculate the log likelihood
 def LogLikelihood():
@@ -226,7 +263,8 @@ def output():
     file.close()
     
 # set the default params and read the params from cmd
-datasetFilePath = 'dataset1.txt'
+# datasetFilePath = 'dataset1.txt'
+datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
 nb_epochs = 20
@@ -251,7 +289,7 @@ if(len(sys.argv) == 11):
 
 # preprocessing
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
-
+mini_batch_size = round(N/10) # Mini batch size for incremental and online methods
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
@@ -269,55 +307,54 @@ initializeParameters()
 oldLoglikelihood = 1
 newLoglikelihood = 1
 
-### Full EM
-# objectiveEM = []
-# for epoch in range(0, nb_epochs):
-#     EStep()
-#     MStep()
-#     newLoglikelihood = LogLikelihood()
-#     print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#     # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#     #     break
-#     objectiveEM.append(newLoglikelihood)
-#     oldLoglikelihood = newLoglikelihood
+## Full EM
+objectiveEM = []
+for epoch in range(0, nb_epochs):
+    EStep()
+    MStep()
+    newLoglikelihood = LogLikelihood()
+    print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+    # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+    #     break
+    objectiveEM.append(newLoglikelihood)
+    oldLoglikelihood = newLoglikelihood
 
-# with open('losses/emloss', 'wb') as fp:
-#     pickle.dump(objectiveEM, fp)
-
-
-# ### Incremental EM
-# objectiveIEM = []
-# mini_batch_size = round(N/2)
-# for epoch in range(0, nb_epochs):
-#     if epoch == 0:
-#         EStep()
-#         MStep()
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveIEM.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
-#     else:
-#         indices = [x for x in range(N)]
-#         random.shuffle(indices)
-#         mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-#         for mini_batch in mini_batches:
-#             EStep_incremental(mini_batch)
-#             MStep()
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveIEM.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
-# with open('losses/iemloss', 'wb') as fp: 
-#     pickle.dump(objectiveIEM, fp)
+with open('losses/emloss', 'wb') as fp:
+    pickle.dump(objectiveEM, fp)
 
 
-### Online EM
+### Incremental EM
+objectiveIEM = []
+for epoch in range(0, nb_epochs):
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        indices = [x for x in range(N)]
+        random.shuffle(indices)
+        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for mini_batch in mini_batches:
+            EStep_incremental(mini_batch)
+            MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+
+with open('losses/iemloss', 'wb') as fp: 
+    pickle.dump(objectiveIEM, fp)
+
+
+## Online EM
 objectiveoEM = []
-mini_batch_size = round(N/2)
 #stepsizes for online EM
 rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs))))
 
@@ -347,21 +384,44 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
-with open('losses/oemloss', 'wb') as fp: 
+with open('losses/oemlossbig', 'wb') as fp: 
     pickle.dump(objectiveoEM, fp)
 
 
-# objectiveoEM_vr = []
-# ### Online EM with VR
-# for i in range(0, maxIteration):
-#     EStep_online_vr()
-#     MStep()
-#     newLoglikelihood = LogLikelihood()
-#     print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", i+1, " iteration  ", str(newLoglikelihood))
-#     if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         break
-#     objectiveoEM_vr.append(newLoglikelihood)
-#     oldLoglikelihood = newLoglikelihood
+### Online EM with VR
+objectiveoEM_vr = []
+#stepsizes for online EM
+rho = 0.003
+
+for epoch in range(0, nb_epochs):
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM_vr.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        indices = [x for x in range(N)]
+        random.shuffle(indices)
+        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        p0 = p
+        for mini_batch in mini_batches:
+            oldp = p
+            EStep_incremental(mini_batch)
+            MStep_onlinevr(mini_batch)
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM_vr.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+
+
+with open('losses/oemvrlossbig', 'wb') as fp: 
+    pickle.dump(objectiveoEM_vr, fp)
 
 if __name__ == '__main__':
     output()
