@@ -289,7 +289,9 @@ if(len(sys.argv) == 11):
 
 # preprocessing
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
-mini_batch_size = round(N/10) # Mini batch size for incremental and online methods
+
+
+mini_batch_size = round(N/5) # Mini batch size for incremental and online methods
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
