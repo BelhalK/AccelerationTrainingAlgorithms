@@ -10,13 +10,6 @@ import time
 import codecs
 # import ipdb
 
-# segmentation, stopwords filtering and document-word matrix generating
-# [return]:
-# N : number of documents
-# M : length of dictionary (of topic)-
-# word2id : a map mapping terms to their corresponding ids
-# id2word : a map mapping ids to terms
-# X : document-word matrix, N*M, each line is the number of terms that show up in the document
 def preprocessing(datasetFilePath, stopwordsFilePath):
     
     # read the stopwords file
@@ -66,17 +59,6 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
 
     return N, M, word2id, id2word, X
 
-def initializeParameters():
-    for i in range(0, N):
-        normalization = sum(lamda[i, :])
-        for j in range(0, K):
-            lamda[i, j] /= normalization;
-
-    for i in range(0, K):
-        normalization = sum(theta[i, :])
-        for j in range(0, M):
-            theta[i, j] /= normalization;
-
 def EStep():
     for i in range(0, N):
         for j in range(0, M):
@@ -108,26 +90,6 @@ def EStep_incremental(index):
             else:
                 for k in range(0, K):
                     p[i, j, k] /= denominator;
-
-
-
-# def EStep_incremental(index):
-#     for i in range(1, N):
-#         if i in index:
-#             for j in range(0, M):
-#                 denominator = 0;
-#                 for k in range(0, K):
-#                     p[i, j, k] = theta[k, j] * lamda[i, k];
-#                     denominator += p[i, j, k];
-#                 if denominator == 0:
-#                     for k in range(0, K):
-#                         p[i, j, k] = 0;
-#                 else:
-#                     for k in range(0, K):
-#                         p[i, j, k] /= denominator;
-#         else:
-#             p[i,:,:] = p[i-1,:,:]
-
 
 
 def MStep():
@@ -287,7 +249,7 @@ datasetFilePath = 'dataset2.txt'
 # datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 10
+nb_epochs = 50
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -312,19 +274,6 @@ N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
 mini_batch_size = round(N/2) # Mini batch size for incremental and online methods
-# lamda[i, j] : p(zj|di)
-# lamda = random([N, K])
-lamda = np.random.sample([N, K])
-
-# theta[i, j] : p(wj|zi)
-# theta = random([K, M])
-theta = np.random.sample([K, M])
-
-# p[i, j, k] : p(zk|di,wj)
-p = zeros([N, M, K])
-
-initializeParameters()
-
 # EM algorithm
 oldLoglikelihood = 1
 newLoglikelihood = 1
@@ -339,7 +288,6 @@ for epoch in range(0, nb_epochs):
     random.seed(seed0*(epoch+3))
     random.shuffle(indices)
     list_indices.append(indices)
-
 
 
 ## REINITIALIZE
@@ -378,16 +326,6 @@ for epoch in range(0, round(nb_epochs)):
 
 with open('losses/localiemloss', 'wb') as fp: 
     pickle.dump(objectiveIEM, fp)
-
-# #Save resulting param Lambda and Theta (from IEM)
-# initial_lamda  = lamda
-# initial_theta  = theta
-
-# with open('initlamda', 'wb') as fp:
-#     pickle.dump(initial_lamda, fp)
-# with open('inittheta', 'wb') as fp:
-#     pickle.dump(initial_theta, fp)
-
 
 ## REINITIALIZE
 with open ('init/initlamda', 'rb') as fp:
@@ -502,17 +440,6 @@ for epoch in range(0, nb_epochs):
 with open('losses/localoemvrloss', 'wb') as fp: 
     pickle.dump(objectiveoEM_vr, fp)
 
-# import matplotlib.pyplot as plt
-# epochs = len(objectiveIEM)
-# plt.plot(np.arange(epochs), objectiveIEM, label='IEM')
-# plt.plot(np.arange(epochs), objectiveEM, label='EM')
-# plt.plot(np.arange(epochs), objectiveoEM, label='oEM')
-# plt.plot(np.arange(epochs), objectiveoEM_vr, label='oEMVR')
-# leg = plt.legend(fontsize=20,fancybox=True, loc='right')
-# leg.get_frame().set_alpha(0.5)
-# plt.xlabel('Epoch', fontsize=15)
-# plt.ylabel('Objective', fontsize=15)
-# plt.show()
 
 if __name__ == '__main__':
     output()
