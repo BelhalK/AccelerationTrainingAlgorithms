@@ -1,6 +1,6 @@
 
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/saemixB/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -24,8 +24,8 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/R")
   source('main_estep_incremental.R')
   source('mixtureFunctions.R')
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/")
-source("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/plots.R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/saemixB/")
+source("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/saemixB/plots.R")
 library("mlxR")
 library("psych")
 library("coda")
@@ -132,7 +132,7 @@ reg3 <- list(name='dose',
             value=30*(tobs>0))
 
 out  <- list(name='y', time=tobs)
-N  <- 200
+N  <- 100
 p <- c(beta0_pop= -4, o_beta0=0.3, 
        gamma0_pop= -1, o_gamma0=0.4,
        delta0_pop=1, o_delta0=0.3)
@@ -146,8 +146,8 @@ plot1 <- catplotmlx(res$y)
 print(plot1)
 
 
-writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/cat_data_isaem.csv")
-cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/saem/ISAEM/saemixB/data/cat_data_isaem.csv", header=T, sep=",")
+writeDatamlx(res, result.file = "/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/saemixB/data/cat_data_isaem.csv")
+cat_data.saemix<-read.table("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/ISAEM/saemixB/data/cat_data_isaem.csv", header=T, sep=",")
 saemix.data<-saemixData(name.data=cat_data.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"), name.predictors=c("y","dose","time"))
 
 
@@ -198,7 +198,7 @@ seed0 = 39546
 map_range = c(1:6)
 
 options<-list(seed=seed0,map=F,fim=F,ll.is=F,save.graphs=FALSE,nbiter.mcmc = c(2,2,2,2),map.range=map_range,
-  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=FALSE,nbiter.burn =0, nb.replacement=100,sampling='seq')
+  nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, nb.replacement=100,sampling='seq')
 theo_ref<-saemix_incremental(saemix.model,saemix.data,options)
 theo_ref <- data.frame(theo_ref$param)
 theo_ref <- cbind(iterations, theo_ref[-1,])
