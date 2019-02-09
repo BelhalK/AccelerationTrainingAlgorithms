@@ -10,6 +10,20 @@ import time
 import codecs
 # import ipdb
 
+
+
+def initializeParameters():
+    for i in range(0, N):
+        normalization = sum(lamda[i, :])
+        for j in range(0, K):
+            lamda[i, j] /= normalization;
+
+    for i in range(0, K):
+        normalization = sum(theta[i, :])
+        for j in range(0, M):
+            theta[i, j] /= normalization;
+
+            
 def preprocessing(datasetFilePath, stopwordsFilePath):
     
     # read the stopwords file
@@ -245,8 +259,8 @@ def output():
     file.close()
     
 # set the default params and read the params from cmd
+# datasetFilePath = 'dataset1.txt'
 datasetFilePath = 'dataset2.txt'
-# datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
 nb_epochs = 50
@@ -273,7 +287,20 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = round(N/2) # Mini batch size for incremental and online methods
+mini_batch_size = 10
+# lamda[i, j] : p(zj|di)
+# lamda = random([N, K])
+lamda = np.random.sample([N, K])
+
+# theta[i, j] : p(wj|zi)
+# theta = random([K, M])
+theta = np.random.sample([K, M])
+
+# p[i, j, k] : p(zk|di,wj)
+p = zeros([N, M, K])
+
+initializeParameters()
+
 # EM algorithm
 oldLoglikelihood = 1
 newLoglikelihood = 1
@@ -290,6 +317,43 @@ for epoch in range(0, nb_epochs):
     list_indices.append(indices)
 
 
+p = zeros([N, M, K])
+oldLoglikelihood = 1
+newLoglikelihood = 1
+### Incremental EM
+objectiveIEM = []
+for epoch in range(0, 20):
+# for epoch in range(0, 2):
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        # ipdb.set_trace()
+        mini_batches = [list_indices[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for mini_batch in mini_batches:
+            oldp = p
+            EStep_incremental(mini_batch)
+            MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+
+with open('init/initlamda', 'wb') as fp: 
+    pickle.dump(lamda, fp)
+with open('init/inittheta', 'wb') as fp: 
+    pickle.dump(theta, fp)
+
+print("initialization saved")
+
 ## REINITIALIZE
 with open ('init/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
@@ -300,7 +364,7 @@ oldLoglikelihood = 1
 newLoglikelihood = 1
 ### Incremental EM
 objectiveIEM = []
-for epoch in range(0, round(nb_epochs)):
+for epoch in range(0, nb_epochs):
 # for epoch in range(0, 2):
     if epoch == 0:
         EStep()
