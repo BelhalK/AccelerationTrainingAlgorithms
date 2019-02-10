@@ -120,8 +120,8 @@ Bounding the second term $\E[\norm{\Delta_{e,k}^{(2)}}^2] $ gives:
 & =  \E \Big[\operatorname{Tr}\left(\Big\{ (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \Big\}^\top (\barbelow{z}^{e,k})^\top \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big] \right) \Big] \\
 & = \operatorname{Tr}\left(\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top \E[\barbelow{z}^{e,k} (\barbelow{z}^{e,k})^\top ]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]\right) \\
 & = \operatorname{Tr}\left(\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top [\frac{1}{N} I_{N} - \frac{1}{N^2} ee^\top]  \Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]\right) \\
-& \leq\operatorname{Tr}\left(\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]\right) \operatorname{Tr} \left( \frac{1}{N} I_{N} - \frac{1}{N^2} ee^\top  \right) \\
-& \leq  (1 -  \frac{1}{N}  )\norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2 \\
+& \leq\operatorname{Tr}\left(\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]^\top\Big[ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1} \Big]\right) \sqrt{\operatorname{Tr} \left[\left( \frac{1}{N} I_{N} - \frac{1}{N^2} ee^\top  \right)^2\right]} \\
+& \leq  \frac{\sqrt{N-1}}{N} \norm{ \barbelow{F}(s^{e,k-1}) - \barbelow{s}^{e,k-1}}^2 \\
 \end{split}
 \end{equation}
 where $e = \begin{pmatrix} 
@@ -140,7 +140,7 @@ Using the Lipschitzness of $F$ and the fact that $s^*$ is a stationary point of 
 & \leq (1+L_F^2) \norm{\Delta_{e,k-1}}^2
 \end{split}
 \eeq
-Rearranging terms yields
+\textcolor{red}{Rearranging terms yields
 \beq
 \begin{split}
 \E[\norm{\Delta_{e,k}}^2]  & \leq \norm{\Delta_{e,k}^{(1)}}^2 + \E[\norm{\Delta_{e,k}^{(2)}}^2] \\
@@ -155,7 +155,7 @@ Consider the last iteration $N$ of epoch $e$ ($\Delta_{e,0} = \Delta_{e-1,N}$), 
 & \leq \exp\left[- \left(\frac{\lambda}{2}+1 +  L_F^2  -N(1+L_F^2)\right)\right]\norm{\Delta_{e,0}}^2 
 \end{split}
 \eeq
-\textcolor{red}{Then:
+Then:
 \beq
 \begin{split}
 \E[\norm{s^{e,k} - s^*}^2]  & \leq \left\{\exp\left[- \left(\frac{\lambda}{2}+1 +  L_F^2  -N(1+L_F^2)\right)\right]\right\}^e \norm{s^{0,0} - s^*}^2\\

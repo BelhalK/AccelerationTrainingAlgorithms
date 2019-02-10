@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.23)  6 FEB 2019 10:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.23)  9 FEB 2019 14:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -919,8 +919,12 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 60.
- [2] [3] [4]
-[5]) (./application.tex
+ [2] [3]
+Overfull \hbox (6.36464pt too wide) detected at line 126
+[]
+ []
+
+[4] [5]) (./application.tex
 
 Package natbib Warning: Citation `lavielle2014Mixed' on page 6 undefined on inp
 ut line 5.
@@ -1001,7 +1005,7 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2018/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/local/texlive/2018
 /texmf-dist/fonts/type1/public/stmaryrd/stmary10.pfb>
-Output written on main.pdf (12 pages, 1563944 bytes).
+Output written on main.pdf (12 pages, 1564352 bytes).
 PDF statistics:
  413 PDF objects out of 1000 (max. 8388607)
  342 compressed objects within 4 object streams
