@@ -127,7 +127,7 @@ K2 = 30
 iterations = 0:(K1+K2-1)
 end = K1+K2
 batchsize25 = 25
-batchsize50 = 50
+batchsize50 = 50 
 
 seed0=3456
 
