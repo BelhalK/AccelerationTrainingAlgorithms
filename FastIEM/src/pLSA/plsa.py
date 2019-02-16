@@ -9,7 +9,6 @@ import re
 import time
 import codecs
 # import ipdb
-
 # segmentation, stopwords filtering and document-word matrix generating
 # [return]:
 # N : number of documents
