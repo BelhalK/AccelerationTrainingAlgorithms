@@ -84,7 +84,7 @@ DEFINITION:
 y = {distribution=normal, prediction=C, sd=a}
 ")
 
-N=1000
+N=100
 
 param   <- c(
   ka_pop  = 2,    omega_ka  = 0.3,
