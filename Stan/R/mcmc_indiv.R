@@ -303,7 +303,7 @@ mcmc.indiv<-function(model,data,control=list()) {
 		} else{
 			U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 		}
-	  	df <- 4
+	  	df <- 3
 
 	for (m in 1:saemix.options$L_mcmc) {
 		if(m%%100==0){
@@ -311,13 +311,47 @@ mcmc.indiv<-function(model,data,control=list()) {
 		} 
 		eta_list[m,] <- etaM[indiv,]
 
+	  # 	for (u in 1:opt$nbiter.mcmc[4]) {
+			# #generate candidate eta
+			# Mi <- rnorm(nb.etas)%*%chol.Gamma[[indiv]]
+			# etaMc[indiv,varList$ind.eta]<- eta_map[indiv,varList$ind.eta] + Mi
+			# # etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma[[i]]
+			# phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
+			# psiMc<-transphi(phiMc,Dargs$transform.par)
+			# if(Dargs$type=="structural"){
+			# 	Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
+			# } else{
+			# 	Uc.y<-compute.LLy_d(phiMc,Uargs,Dargs,DYF)
+			# }
+			# Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
+
+			# propc[indiv] <- 0.5*rowSums((etaMc[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])*(etaMc[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])%*%inv.Gamma[[indiv]])
+			# prop[indiv] <- 0.5*rowSums((etaM[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])*(etaM[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])%*%inv.Gamma[[indiv]])
+			
+
+			# deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
+			# ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
+			# # print(length(ind)/Dargs$NM)
+			# etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
+			# phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
+			# psiM<-transphi(phiM,Dargs$transform.par)
+			# # psiM[ind,varList$ind.eta]<-psiMc[ind,varList$ind.eta]
+			# U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
+			# U.eta[ind]<-Uc.eta[ind]
+	  # 	}
+
+
+	  	### NEW KERNEL WITH STUDENT
 	  	for (u in 1:opt$nbiter.mcmc[4]) {
 			#generate candidate eta
-			Mi <- rnorm(nb.etas)%*%chol.Gamma[[indiv]]
-			etaMc[indiv,varList$ind.eta]<- eta_map[indiv,varList$ind.eta] + Mi
-			# etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + rt(nb.etas,df)%*%chol.Gamma[[i]]
+			for (i in 1:(Dargs$NM)){
+				# Mi <- rnorm(nb.etas)%*%chol.Gamma[[i]]
+				# etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + Mi
+				Mi <- rt(nb.etas,df)%*%chol.Gamma[[i]]
+				etaMc[i,varList$ind.eta]<- eta_map[i,varList$ind.eta] + Mi
+			}
+
 			phiMc[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaMc[,varList$ind.eta]
-			psiMc<-transphi(phiMc,Dargs$transform.par)
 			if(Dargs$type=="structural"){
 				Uc.y<-compute.LLy_c(phiMc,varList$pres,Uargs,Dargs,DYF)
 			} else{
@@ -325,19 +359,21 @@ mcmc.indiv<-function(model,data,control=list()) {
 			}
 			Uc.eta<-0.5*rowSums(etaMc[,varList$ind.eta]*(etaMc[,varList$ind.eta]%*%somega))
 
-			propc[indiv] <- 0.5*rowSums((etaMc[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])*(etaMc[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])%*%inv.Gamma[[indiv]])
-			prop[indiv] <- 0.5*rowSums((etaM[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])*(etaM[indiv,varList$ind.eta]-eta_map[indiv,varList$ind.eta])%*%inv.Gamma[[indiv]])
-			
+			for (i in 1:(Dargs$NM)){
+				# propc[i] <- 0.5*rowSums((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.Gamma[[i]])
+				# prop[i] <- 0.5*rowSums((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])*(etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.Gamma[[i]])
 
+				propc[i] <- -sum(log(dt((etaMc[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.chol.Gamma[[i]],df,log=FALSE)))
+				prop[i] <- -sum(log(dt((etaM[i,varList$ind.eta]-eta_map[i,varList$ind.eta])%*%inv.chol.Gamma[[i]],df,log=FALSE)))
+			}
+			
 			deltu<-Uc.y-U.y+Uc.eta-U.eta + prop - propc
 			ind<-which(deltu<(-1)*log(runif(Dargs$NM)))
 			# print(length(ind)/Dargs$NM)
 			etaM[ind,varList$ind.eta]<-etaMc[ind,varList$ind.eta]
-			phiM[,varList$ind.eta]<-mean.phiM[,varList$ind.eta]+etaM[,varList$ind.eta]
-			psiM<-transphi(phiM,Dargs$transform.par)
-			# psiM[ind,varList$ind.eta]<-psiMc[ind,varList$ind.eta]
 			U.y[ind]<-Uc.y[ind] # Warning: Uc.y, Uc.eta = vecteurs
 			U.eta[ind]<-Uc.eta[ind]
+
 	  	}
 
 	 

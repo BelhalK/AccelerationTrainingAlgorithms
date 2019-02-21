@@ -10,6 +10,7 @@ library(dplyr)
 library(data.table)
 library(rstan)
 load("hmc_quantile_indiv.RData")
+load("hmc_quantile_indiv_student.RData")
 # save.image("hmc_quantile_indiv.RData")
 setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
   source('aaa_generics.R') 
@@ -74,6 +75,18 @@ for (dim in 1:d){
 }
 
 
+qnew.student <- list(new.student[1:L_mcmc,],new.student[1:L_mcmc,],new.student[1:L_mcmc,])
+for (dim in 1:d){
+  print(dim)
+  for (k in 1:L_mcmc){
+    qnew.student[[dim]][k,1] <- quantile(new.student[1:k,dim], qlow)
+    qnew.student[[dim]][k,2] <- quantile(new.student[1:k,dim], qmed)
+    qnew.student[[dim]][k,3] <- quantile(new.student[1:k,dim], qhigh)
+  }
+  qnew.student[[dim]]$iteration <- 1:L_mcmc
+}
+
+
 
 qvi <- list(vi[1:L_mcmc,],vi[1:L_mcmc,],vi[1:L_mcmc,])
 for (dim in 1:d){
@@ -133,6 +146,16 @@ quantnew <- rbind(q1new[-c(1:burn),],q2new[-c(1:burn),],q3new[-c(1:burn),])
 colnames(quantnew)<-c("iteration","ka","V","k","quantile")
 
 
+q1new.student <- data.frame(cbind(iteration,qnew.student[[1]][,1],qnew.student[[2]][,1],qnew.student[[3]][,1]))
+q2new.student <- data.frame(cbind(iteration,qnew.student[[1]][,2],qnew.student[[2]][,2],qnew.student[[3]][,2]))
+q3new.student <- data.frame(cbind(iteration,qnew.student[[1]][,3],qnew.student[[2]][,3],qnew.student[[3]][,3]))
+q1new.student$quantile <- 1
+q2new.student$quantile <- 2
+q3new.student$quantile <- 3
+quantnew.student <- rbind(q1new.student[-c(1:burn),],q2new.student[-c(1:burn),],q3new.student[-c(1:burn),])
+colnames(quantnew.student)<-c("iteration","ka","V","k","quantile")
+
+
 q1vi <- data.frame(cbind(iteration,qvi[[1]][,1],qvi[[2]][,1],qvi[[3]][,1]))
 q2vi <- data.frame(cbind(iteration,qvi[[1]][,2],qvi[[2]][,2],qvi[[3]][,2]))
 q3vi <- data.frame(cbind(iteration,qvi[[1]][,3],qvi[[2]][,3],qvi[[3]][,3]))
@@ -163,11 +186,78 @@ q3advi.full$quantile <- 3
 quantadvi.full <- rbind(q1advi.full[-c(1:burn),],q2advi.full[-c(1:burn),],q3advi.full[-c(1:burn),])
 colnames(quantadvi.full)<-c("iteration","ka","V","k","quantile")
 
-plotquantile3(quantref,quantnew,quantnuts)
+plotquantile3(quantref,quantnew,quantnew.student)
 plotquantile3(quantref,quantnew,quantmala)
 plotquantile3(quantref,quantnew,quantadvi.full)
 
 plotquantile4(quantnew,quantnuts,quantmala,quantadvi.full)
+
+plotquantile4(quantnew,quantnuts,quantnew.student,quantmala)
+
+
+
+#Autocorrelation
+par(mfrow=c(1,3))
+acf(ref[,1], main="RWM")
+acf(new[,1], main="IMH (Gaussian)")
+acf(new.student[,1], main="IMH (Student)")
+par(mfrow=c(1,3))
+acf(mala[,1], main="MALA")
+acf(vi[,1], main="NUTS")
+acf(advi[,1], main="ADVI")
+
+par(mfrow=c(1,3))
+acf(ref[,2], main="RWM")
+acf(new[,2], main="IMH (Gaussian)")
+acf(new.student[,2], main="IMH (Student)")
+par(mfrow=c(1,3))
+acf(mala[,2], main="MALA")
+acf(vi[,2], main="NUTS")
+acf(advi[,2], main="ADVI")
+
+
+par(mfrow=c(1,3))
+acf(ref[,3], main="RWM")
+acf(new[,3], main="IMH (Gaussian)")
+acf(new.student[,3], main="IMH (Student)")
+par(mfrow=c(1,3))
+acf(mala[,3], main="MALA")
+acf(vi[,3], main="NUTS")
+acf(advi[,3], main="ADVI")
+
+
+
+
+#Autocorrelation
+par(mfrow=c(1,6))
+acf(ref[,1], main="RWM")
+acf(new[,1], main="IMH (Gaussian)")
+acf(new.student[,1], main="IMH (Student)")
+acf(mala[,1], main="MALA")
+acf(vi[,1], main="NUTS")
+acf(advi[,1], main="ADVI")
+
+par(mfrow=c(1,6))
+acf(ref[,2], main="RWM")
+acf(new[,2], main="IMH (Gaussian)")
+acf(new.student[,2], main="IMH (Student)")
+acf(mala[,2], main="MALA")
+acf(vi[,2], main="NUTS")
+acf(advi[,2], main="ADVI")
+
+
+par(mfrow=c(1,6))
+acf(ref[,3], main="RWM")
+acf(new[,3], main="IMH (Gaussian)")
+acf(new.student[,3], main="IMH (Student)")
+acf(mala[,3], main="MALA")
+acf(vi[,3], main="NUTS")
+acf(advi[,3], main="ADVI")
+
+
+
+
+
 
 abs(mu.vi - etamap[i,])/abs(etamap[i,])
 norm(Gamma.vi - Gammamap[[i]])/norm(Gammamap[[i]])

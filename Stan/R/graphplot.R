@@ -73,7 +73,7 @@ plotquantile3 <- function(df,df2,df3, title=NULL, ylim=NULL)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   for (j in (2:(ncol(df)-1)))
   {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=1)+
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=0.5) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=0.5)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=0.5)+
       xlab("")+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
                            size=15, angle=0),
           axis.text.y = element_text(face="bold", color="black", 
@@ -100,7 +100,10 @@ plotquantile4 <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
   o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   for (j in (2:(ncol(df)-1)))
   {
-    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=1) +geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=1)+geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=1)+geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="green",linetype = 2,size=1)+
+    grafj <- ggplot(df)+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),colour="blue",size=.5) +
+    geom_line(aes_string(df2[,1],df2[,j],by=df2[,ncol(df2)]),colour="red",linetype = 2,size=.5)+
+    geom_line(aes_string(df3[,1],df3[,j],by=df3[,ncol(df3)]),colour="black",linetype = 2,size=.5)+
+    geom_line(aes_string(df4[,1],df4[,j],by=df4[,ncol(df4)]),colour="green",linetype = 2,size=.5)+
       xlab("")+scale_x_log10()+ theme_bw() +ylab(names(df[j]))+ theme(axis.line = element_line(colour = "black"),axis.text.x = element_text(face="bold", color="black", 
                            size=15, angle=0),
           axis.text.y = element_text(face="bold", color="black", 

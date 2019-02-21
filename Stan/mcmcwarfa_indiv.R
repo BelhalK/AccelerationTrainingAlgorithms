@@ -11,33 +11,34 @@ library(data.table)
 library(rstan)
 load("RData/hmc_quantile_indiv.RData")
 # save.image("hmc_quantile_indiv.RData")
+# save.image("hmc_quantile_indiv_student.RData")
+save.image("hmc_quantile_indiv_averagechains.RData")
 # setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan/R")
-  source('aaa_generics.R') 
-  source('compute_LL.R') 
-  source('func_aux.R') 
-  source('func_distcond.R') 
-  source('func_FIM.R')
-  source('func_plots.R') 
-  source('func_simulations.R') 
-  source('estep_mcmc.R')
-  source('indiv_VI.R')
-  source('variationalinferencelinear.R')
-  source('main.R')
-  source('main_estep.R')
-  source('mcmc_final.R')
-  source('main_initialiseMainAlgo.R') 
-  source('main_mstep.R') 
-  source('check_linearvslaplace.R')
-  source('SaemixData.R')
-  source('SaemixModel.R') 
-  source('SaemixRes.R') 
-  # source('SaemixRes_c.R') 
-  source('SaemixObject.R') 
-  source('zzz.R')
-  source('graphplot.R')
+source('R/aaa_generics.R') 
+source('R/compute_LL.R') 
+source('R/func_aux.R') 
+source('R/func_distcond.R') 
+source('R/func_FIM.R')
+source('R/func_plots.R') 
+source('R/func_simulations.R') 
+source('R/estep_mcmc.R')
+source('R/indiv_VI.R')
+source('R/variationalinferencelinear.R')
+source('R/main.R')
+source('R/main_estep.R')
+source('R/mcmc_final.R')
+source('R/main_initialiseMainAlgo.R') 
+source('R/main_mstep.R') 
+source('R/check_linearvslaplace.R')
+source('R/SaemixData.R')
+source('R/SaemixModel.R') 
+source('R/SaemixRes.R') 
+# source('R/SaemixRes_c.R') 
+source('R/SaemixObject.R') 
+source('R/zzz.R')
+source('R/graphplot.R')
 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/Stan")
+
 
 
 
@@ -105,13 +106,14 @@ L_mcmc=20000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)
-ref<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
-
+# ref<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
 
 
 options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,
   displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)
-new<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
+# new<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
+
+new.student<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
 
 #MALA
 
@@ -212,16 +214,118 @@ viac <- autocorr.plot(vi.obj[,1])
 advi.obj <- as.mcmc(advi)
 adviac <- autocorr.plot(advi.obj[,1]) 
 
-
-par(mfrow=c(1,4))
+#Autocorrelation
+par(mfrow=c(1,5))
 acf(ref[,1], main="RWM")
-acf(new[,1], main="IMH")
+acf(new[,1], main="IMH (Gaussian)")
+acf(new.student[,1], main="IMH (Student)")
 acf(mala[,1], main="MALA")
 acf(vi[,1], main="NUTS")
-acf(advi[,1], main="VI")
+acf(advi[,1], main="ADVI")
+
+par(mfrow=c(1,5))
+acf(ref[,2], main="RWM")
+acf(new[,2], main="IMH")
+acf(mala[,2], main="MALA")
+acf(vi[,2], main="NUTS")
+acf(advi[,2], main="ADVI")
+
+
+par(mfrow=c(1,5))
+acf(ref[,3], main="RWM")
+acf(new[,3], main="IMH")
+acf(mala[,3], main="MALA")
+acf(vi[,3], main="NUTS")
+acf(advi[,3], main="ADVI")
+
+
 #MSJD
 mssd(ref[,1])
 mssd(new[,1])
+mssd(new.student[,1])
 mssd(mala[,1])
 mssd(advi[,1])
 mssd(vi[,1])
+
+
+
+# #Autocorrelation
+# rwm.obj <- as.mcmc(states.ref[[10]])
+# autocorr.plot(rwm.obj[,1]) + title("RWM Autocorrelation")
+
+# new.obj <- as.mcmc(states.new[[10]])
+# autocorr.plot(new.obj[,1]) + title("Laplace Autocorrelation")
+
+# mala.obj <- as.mcmc(states.mala[[10]])
+# autocorr.plot(mala.obj[,1]) + title("MALA Autocorrelation")
+
+# nuts.obj <- as.mcmc(states.nuts[[10]])
+# autocorr.plot(nuts.obj[,1]) + title("NUTS Autocorrelation")
+
+
+
+
+
+L_mcmc=200
+i <- 10
+nchains <- 5
+#REF
+listofrefchains <- list(ref,ref)
+for (m in 1:nchains){
+  options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
+  nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)
+  ref<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfa)$eta
+  listofrefchains[[m]] <- ref
+}
+
+
+#new
+listofnewchains <- list(ref,ref)
+for (m in 1:nchains){
+options_warfanew<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,6,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),nbiter.sa=0,
+  displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)
+new<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
+listofnewchains[[m]] <- new
+}
+# new.student<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfanew)$eta
+
+
+
+#MALA
+listofmalachains <- list(ref,ref)
+for (m in 1:nchains){
+options.mala<-list(seed=39546,map=F,fim=F,ll.is=F, av=0, sigma.val=0.002
+  ,gamma.val=0.1,L_mcmc=L_mcmc,nbiter.mcmc = c(0,0,0,0,6,0,0),nb.chains=1
+  , nbiter.saemix = c(K1,K2),nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0
+  , map.range=c(0), indiv.index = i)
+mala<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.mala)$eta
+listofmalachains[[m]] <- mala
+}
+
+
+#NUTS
+listofnutschains <- list(ref,ref)
+# listofnutschains <- 0
+for (m in 1:nchains){
+options.vi<-list(seed=39546*m,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
+  nbiter.mcmc = c(0,0,0,0,0,1,0),nb.chains=1, nbiter.saemix = c(K1,K2),
+  nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), 
+  modelstan = modelstan, indiv.index = i)
+vi<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options.vi)$eta
+  # listofnutschains <- listofnutschains + nuts
+listofnutschains[[m]] <- vi
+}
+
+
+
+#ADVI
+listofadvichains <- list(ref,ref)
+for (m in 1:nchains){
+options_warfavi<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc, mu=eta.vi,Gamma = Gammavi,
+        nbiter.mcmc = c(0,0,0,0,0,0,6),nb.chains=1, nbiter.saemix = c(K1,K2),
+        nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index = i)
+advi<-mcmc.indiv(saemix.model_warfa,saemix.data_warfa,options_warfavi)$eta
+listofadvichains[[m]] <- advi
+}
+
