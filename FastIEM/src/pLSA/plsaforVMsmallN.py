@@ -106,40 +106,40 @@ def EStep_incremental(index):
                     p[i, j, k] /= denominator;
 
 
-def EStep_saga1(index):
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = theta[k, j] * lamda[i, k];
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
+# def EStep_saga1(index):
+#     for i in range(0, N):
+#         for j in range(0, M):
+#             denominator = 0;
+#             for k in range(0, K):
+#                 if i in index:
+#                     p[i, j, k] = theta[k, j] * lamda[i, k];
+#                 else: 
+#                     p[i, j, k] = oldp[i, j, k]
+#                 denominator += p[i, j, k];
+#             if denominator == 0:
+#                 for k in range(0, K):
+#                     p[i, j, k] = 0;
+#             else:
+#                 for k in range(0, K):
+#                     p[i, j, k] /= denominator;
 
 
-def EStep_saga2(index):
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
+# def EStep_saga2(index):
+#     for i in range(0, N):
+#         for j in range(0, M):
+#             denominator = 0;
+#             for k in range(0, K):
+#                 if i in index:
+#                     p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
+#                 else: 
+#                     p[i, j, k] = oldp[i, j, k]
+#                 denominator += p[i, j, k];
+#             if denominator == 0:
+#                 for k in range(0, K):
+#                     p[i, j, k] = 0;
+#             else:
+#                 for k in range(0, K):
+#                     p[i, j, k] /= denominator;
 
 
 def MStep():
@@ -295,11 +295,11 @@ def output():
     file.close()
     
 # set the default params and read the params from cmd
-# datasetFilePath = 'dataset1.txt'
-datasetFilePath = 'dataset2.txt'
+datasetFilePath = 'dataset1.txt'
+# datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 50
+nb_epochs = 500
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -323,7 +323,7 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = 10
+mini_batch_size = 1
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
@@ -383,17 +383,17 @@ for epoch in range(0, 20):
         objectiveIEM.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
 
-with open('init/initlamda', 'wb') as fp: 
+with open('initsmall/initlamda', 'wb') as fp: 
     pickle.dump(lamda, fp)
-with open('init/inittheta', 'wb') as fp: 
+with open('initsmall/inittheta', 'wb') as fp: 
     pickle.dump(theta, fp)
 
 print("initialization saved")
 
 ## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
+with open ('initsmall/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
+with open ('initsmall/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
 oldLoglikelihood = 1
@@ -424,54 +424,54 @@ for epoch in range(0, nb_epochs):
         objectiveIEM.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
 
-with open('losses/localiemloss', 'wb') as fp: 
+with open('lossessmall/localiemloss', 'wb') as fp: 
     pickle.dump(objectiveIEM, fp)
 
 
+# ## REINITIALIZE
+# with open ('initsmall/initlamda', 'rb') as fp:
+#     lamda = pickle.load(fp)
+# with open ('initsmall/inittheta', 'rb') as fp:
+#     theta = pickle.load(fp)
+# p = zeros([N, M, K])
+# oldLoglikelihood = 1
+# newLoglikelihood = 1
+# ### SAGA EM
+# objectiveIEM = []
+# for epoch in range(0, nb_epochs):
+# # for epoch in range(0, 2):
+#     if epoch == 0:
+#         EStep()
+#         MStep()
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveIEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+#     else:
+#         mini_batches = [list_indices[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+#         for mini_batch in mini_batches:
+#             oldp = p
+#             EStep_saga1(mini_batch)
+#             MStep()
+#             oldp = p
+#             EStep_saga2(mini_batch)
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveIEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+
+# with open('lossessmall/localiemloss', 'wb') as fp: 
+#     pickle.dump(objectiveIEM, fp)
+
+
 ## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
+with open ('initsmall/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
-    theta = pickle.load(fp)
-p = zeros([N, M, K])
-oldLoglikelihood = 1
-newLoglikelihood = 1
-### SAGA EM
-objectiveIEM = []
-for epoch in range(0, nb_epochs):
-# for epoch in range(0, 2):
-    if epoch == 0:
-        EStep()
-        MStep()
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveIEM.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
-    else:
-        mini_batches = [list_indices[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-        for mini_batch in mini_batches:
-            oldp = p
-            EStep_saga1(mini_batch)
-            MStep()
-            oldp = p
-            EStep_saga2(mini_batch)
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveIEM.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
-
-with open('losses/localiemloss', 'wb') as fp: 
-    pickle.dump(objectiveIEM, fp)
-
-
-## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
-    lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
+with open ('initsmall/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
 oldLoglikelihood = 1
@@ -489,15 +489,15 @@ for epoch in range(0, nb_epochs):
     objectiveEM.append(newLoglikelihood)
     oldLoglikelihood = newLoglikelihood
 
-with open('losses/localemloss', 'wb') as fp:
+with open('lossessmall/localemloss', 'wb') as fp:
     pickle.dump(objectiveEM, fp)
 
 
 
 ## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
+with open ('initsmall/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
+with open ('initsmall/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
 oldLoglikelihood = 1
@@ -533,15 +533,15 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
-with open('losses/localoemloss', 'wb') as fp: 
+with open('lossessmall/localoemloss', 'wb') as fp: 
     pickle.dump(objectiveoEM, fp)
 
 
 
 ## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
+with open ('initsmall/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
+with open ('initsmall/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
 oldLoglikelihood = 1
@@ -578,7 +578,7 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
-with open('losses/localoemvrloss', 'wb') as fp: 
+with open('lossessmall/localoemvrloss', 'wb') as fp: 
     pickle.dump(objectiveoEM_vr, fp)
 
 
