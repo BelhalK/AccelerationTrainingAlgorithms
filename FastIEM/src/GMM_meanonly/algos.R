@@ -1,7 +1,7 @@
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
-
+library(rlist)
 mixt.simulate <-function(n,weight,mu,sigma)
 {
   G <- length(mu)
@@ -181,6 +181,68 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
   names(df) <- col.names
   return(df)
 }
+
+
+mixt.saga <- function(x, theta0, K,nbr)
+{
+   G<-length(mu)
+  col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
+  theta.est <- matrix(NA,K+1,3*G+1)
+  theta.est[1,] <- c(0, theta0$p, theta0$mu, theta0$sigma)
+  theta<-theta0
+  
+  #Init
+  tau <- compute.tau(x,theta)
+  s <- compute.stat(x,tau)
+  v <- compute.stat(x,tau)
+  n<-length(x)
+  li <- NULL
+  alphas <- rep(list(theta0),n)
+  # l <- sample(1:n,K,replace = TRUE)
+  # l <- rep(1:n,K/n)
+  li <- rep(sample(1:n,n), K/n)
+  lj <- NULL
+  for (index in 1:(K/n)){
+    lj <- list.append(lj, sample(li[(1+(index-1)*n):(index*n)]))
+  }
+  i <- 1:nbr
+  j <- 1:nbr
+  
+  for (k in 1:K)
+  {
+    if (k%%(n/nbr) == 1)
+    { 
+      i<-1:nbr
+      j<-1:nbr
+    }
+    newtau.i<- compute.tau(x[li[i]],theta)
+    oldtau.i<- compute.tau(x[li[i]],alphas[[li[i]]])
+    # tau[li[i],] <- (newtau.i - oldtau.i)*n
+    
+    v$s1 <- s$s1 + (newtau.i - oldtau.i)
+    v$s2 <- s$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)
+    
+    oldtheta <- theta
+    theta$mu<-step.M(v,n)
+    theta.est[k+1,] <- c(k, theta0$p, theta$mu, theta0$sigma)
+
+    oldalpha.j <- alphas[[lj[j]]]
+    alphas[[lj[j]]] <- oldtheta
+    newtau.j<- compute.tau(x[lj[j]],oldtheta)
+    oldtau.j<- compute.tau(x[lj[j]],oldalpha.j)
+    # tau[lj[j],] <- newtau.i - oldtau.i
+    s$s1 <- s$s1 + (newtau.j - oldtau.j)
+    s$s2 <- s$s2 + (x[lj[j]]*newtau.j - x[lj[j]]*oldtau.j)
+
+    i <- i+nbr
+    j <- j+nbr
+  }
+  
+  df <- as.data.frame(theta.est)
+  names(df) <- col.names
+  return(df)
+}
+
 
 
 
