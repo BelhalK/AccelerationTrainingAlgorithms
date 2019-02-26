@@ -2,7 +2,7 @@ source("algos.R")
 source("func.R")
 theme_set(theme_bw())
 # save.image("lin_gauss.RData")
-load("lin_gauss.RData")
+# load("lin_gauss.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
@@ -10,7 +10,7 @@ load("lin_gauss.RData")
 
 n <- 300
 mu<-c(10,0)
-mu0<-c(5,0)
+mu0<-c(9,0)
 # sigma<-c(10,5)*1
 sigma<-c(1,1)*1
 
@@ -26,7 +26,7 @@ M <- 1
 seed0=44444
 ylim <- c(0.3)
 
-nsim <- 2
+nsim <- 30
 G<-1
 col.names <- c("iteration", paste0("mu",1:G))
 theta<-list(mu=mu[1])
@@ -59,6 +59,9 @@ df.oem <- vector("list", length=nsim)
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
 
+dsaga <- NULL
+df.saga <- vector("list", length=nsim)
+
 for (j in (1:nsim))
 {
   print(j)
@@ -67,9 +70,7 @@ for (j in (1:nsim))
   x <- NULL
   xj<-mixt.simulate(n,mu,sigma)
   x <- rbind(x,xj)
-  
 
-  df <- mixt.em(xj, theta0, K, alph)
   # ML <- df
   # ML[1:(K+1),2]<- df[(K+1),2]
   df[,2] <- (df[,2] - ML[,2])^2
@@ -98,7 +99,37 @@ for (j in (1:nsim))
   doemvr <- rbind(doemvr,df)
   df$rep <- NULL
   df.oemvr[[j]] <- df
+
+  df <- mixt.saga(xj, theta0, K, alph,nbr)
+  df[,2] <- (df[,2] - ML[,2])^2
+  df$rep <- j
+  dsaga <- rbind(dsaga,df)
+  df$rep <- NULL
+  df.saga[[j]] <- df
+
 }
+
+
+# saga <- NULL
+# saga <- dsaga[dsaga$rep==1,]
+
+# if (nsim>2) {
+#     for (j in (2:nsim))
+#   {
+#     saga[,2] <- saga[,2]+dsaga[dsaga$rep==j,2]
+#   }
+# }
+
+# saga[,2] <- 1/nsim*saga[,2]
+# saga[,4]<-NULL
+
+# saga$algo <- 'saga'
+# variance <- NULL
+# # variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+# variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)],saga[0:(K+1),c(1,2,4)])
+# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+
+
 
 
 # dem[,2] <- dem[,2]^2
@@ -161,6 +192,23 @@ oemvr[,4]<-NULL
 
 
 
+
+
+saga <- NULL
+saga <- dsaga[dsaga$rep==1,]
+
+if (nsim>2) {
+    for (j in (2:nsim))
+  {
+    saga[,2] <- saga[,2]+dsaga[dsaga$rep==j,2]
+  }
+}
+
+saga[,2] <- 1/nsim*saga[,2]
+saga[,4]<-NULL
+
+
+
 em_scaled <- em
 em_scaled$iteration = seq(0, n*K, by=n)
 em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
@@ -169,13 +217,17 @@ em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
 oemvr$algo <- 'OEMvr'
+saga$algo <- 'saga'
 em_scaled$algo <- 'EM'
 # variance <- NULL
 # variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
 # colnames(variance) <- c("iteration","mu1","algo")
 
+
+
 variance <- NULL
-variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+# variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
+variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)],saga[0:(K+1),c(1,2,4)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 

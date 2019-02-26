@@ -56,7 +56,7 @@ graphConvMC2_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df,aes(colour=df$algo ))+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),show.legend = legend) +
-      xlab("iteration") + ylab(names(df[j])) 
+      xlab("iteration") + ylab(names(df[j])) +scale_y_log10()
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
@@ -126,6 +126,7 @@ step.M<-function(s,n)
   theta<-list(mu=mu)
   return(theta)
 }
+
 
 
 #simulation
