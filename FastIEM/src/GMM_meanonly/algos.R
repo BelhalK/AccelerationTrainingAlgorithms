@@ -31,7 +31,7 @@ mixt.em <- function(x, theta0, K)
   {
     # if (k %% 1000==0)
     # {
-    #   print(k)
+      # print(k)
     # }
     
     #Update the statistics
@@ -67,7 +67,7 @@ mixt.iem <- function(x, theta0, K,nbr)
     if (k%%(n/nbr) == 1)
     { 
       i<-1:nbr
-      print(k)
+      # print(k)
     }
     
     #Update the conditional expectation for the chosen datum
@@ -109,7 +109,7 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
     if (k%%(n/nbr) == 1)
     { 
       i<-1:nbr
-      print(k)
+      # print(k)
     }
     tau.indiv.new <- compute.tau(x[l[i]],theta)
     s.indiv.new <- x[l[i]]*tau.indiv.new
@@ -154,7 +154,7 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
     { 
       i<-1:nbr
       theta.e.0 <- theta
-      print(k)
+      # print(k)
     }
     tau.indiv.new <- compute.tau(x[l[i]],theta)
     s.indiv.new <- x[l[i]]*tau.indiv.new
@@ -218,9 +218,9 @@ mixt.saga <- function(x, theta0, K,nbr)
     newtau.i<- compute.tau(x[li[i]],theta)
     oldtau.i<- compute.tau(x[li[i]],alphas[[li[i]]])
     # tau[li[i],] <- (newtau.i - oldtau.i)*n
-    
-    v$s1 <- s$s1 + (newtau.i - oldtau.i)
-    v$s2 <- s$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)
+
+    v$s1 <- s$s1 + (newtau.i - oldtau.i)*n
+    v$s2 <- s$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)*n
     
     oldtheta <- theta
     theta$mu<-step.M(v,n)

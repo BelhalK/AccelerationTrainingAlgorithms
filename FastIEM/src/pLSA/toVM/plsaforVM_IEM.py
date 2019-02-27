@@ -468,118 +468,118 @@ with open('losses/localiemloss', 'wb') as fp:
 #     pickle.dump(objectiveIEM, fp)
 
 
-## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
-    lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
-    theta = pickle.load(fp)
-p = zeros([N, M, K])
-oldLoglikelihood = 1
-newLoglikelihood = 1
+# ## REINITIALIZE
+# with open ('init/initlamda', 'rb') as fp:
+#     lamda = pickle.load(fp)
+# with open ('init/inittheta', 'rb') as fp:
+#     theta = pickle.load(fp)
+# p = zeros([N, M, K])
+# oldLoglikelihood = 1
+# newLoglikelihood = 1
 
-## Full EM
-objectiveEM = []
-for epoch in range(0, nb_epochs):
-    EStep()
-    MStep()
-    newLoglikelihood = LogLikelihood()
-    print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-    # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-    #     break
-    objectiveEM.append(newLoglikelihood)
-    oldLoglikelihood = newLoglikelihood
+# ## Full EM
+# objectiveEM = []
+# for epoch in range(0, nb_epochs):
+#     EStep()
+#     MStep()
+#     newLoglikelihood = LogLikelihood()
+#     print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#     # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#     #     break
+#     objectiveEM.append(newLoglikelihood)
+#     oldLoglikelihood = newLoglikelihood
 
-with open('losses/localemloss', 'wb') as fp:
-    pickle.dump(objectiveEM, fp)
-
-
-
-## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
-    lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
-    theta = pickle.load(fp)
-p = zeros([N, M, K])
-oldLoglikelihood = 1
-newLoglikelihood = 1
-## Online EM
-objectiveoEM = []
-#stepsizes for online EM
-rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs))))
-
-for epoch in range(0, nb_epochs):
-    if epoch == 0:
-        EStep()
-        MStep()
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveoEM.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
-    else:
-        indices = [x for x in range(N)]
-        random.shuffle(indices)
-        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-        for mini_batch in mini_batches:
-            oldp = p
-            EStep_incremental(mini_batch)
-            MStep_online(mini_batch)
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveoEM.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
-
-
-with open('losses/localoemloss', 'wb') as fp: 
-    pickle.dump(objectiveoEM, fp)
+# with open('losses/localemloss', 'wb') as fp:
+#     pickle.dump(objectiveEM, fp)
 
 
 
-## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
-    lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
-    theta = pickle.load(fp)
-p = zeros([N, M, K])
-oldLoglikelihood = 1
-newLoglikelihood = 1
-### Online EM with VR
-objectiveoEM_vr = []
-#stepsizes for online EM
-rho = 0.003
+# ## REINITIALIZE
+# with open ('init/initlamda', 'rb') as fp:
+#     lamda = pickle.load(fp)
+# with open ('init/inittheta', 'rb') as fp:
+#     theta = pickle.load(fp)
+# p = zeros([N, M, K])
+# oldLoglikelihood = 1
+# newLoglikelihood = 1
+# ## Online EM
+# objectiveoEM = []
+# #stepsizes for online EM
+# rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs))))
 
-for epoch in range(0, nb_epochs):
-    if epoch == 0:
-        EStep()
-        MStep()
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveoEM_vr.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
-    else:
-        indices = [x for x in range(N)]
-        random.shuffle(indices)
-        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-        p0 = p
-        for mini_batch in mini_batches:
-            oldp = p
-            EStep_incremental(mini_batch)
-            MStep_onlinevr(mini_batch)
-        newLoglikelihood = LogLikelihood()
-        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-        #     break
-        objectiveoEM_vr.append(newLoglikelihood)
-        oldLoglikelihood = newLoglikelihood
+# for epoch in range(0, nb_epochs):
+#     if epoch == 0:
+#         EStep()
+#         MStep()
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveoEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+#     else:
+#         indices = [x for x in range(N)]
+#         random.shuffle(indices)
+#         mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+#         for mini_batch in mini_batches:
+#             oldp = p
+#             EStep_incremental(mini_batch)
+#             MStep_online(mini_batch)
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveoEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
 
 
-with open('losses/localoemvrloss', 'wb') as fp: 
-    pickle.dump(objectiveoEM_vr, fp)
+# with open('losses/localoemloss', 'wb') as fp: 
+#     pickle.dump(objectiveoEM, fp)
+
+
+
+# ## REINITIALIZE
+# with open ('init/initlamda', 'rb') as fp:
+#     lamda = pickle.load(fp)
+# with open ('init/inittheta', 'rb') as fp:
+#     theta = pickle.load(fp)
+# p = zeros([N, M, K])
+# oldLoglikelihood = 1
+# newLoglikelihood = 1
+# ### Online EM with VR
+# objectiveoEM_vr = []
+# #stepsizes for online EM
+# rho = 0.003
+
+# for epoch in range(0, nb_epochs):
+#     if epoch == 0:
+#         EStep()
+#         MStep()
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveoEM_vr.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+#     else:
+#         indices = [x for x in range(N)]
+#         random.shuffle(indices)
+#         mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+#         p0 = p
+#         for mini_batch in mini_batches:
+#             oldp = p
+#             EStep_incremental(mini_batch)
+#             MStep_onlinevr(mini_batch)
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveoEM_vr.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+
+
+# with open('losses/localoemvrloss', 'wb') as fp: 
+#     pickle.dump(objectiveoEM_vr, fp)
 
 
 if __name__ == '__main__':
