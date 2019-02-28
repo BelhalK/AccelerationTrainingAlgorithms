@@ -5,4 +5,4 @@
 
 #SBATCH --ntasks=1
 #SBATCH --partition=interactive
-python plsaforVM_EM.py
+python plsaforVM_OEM.py
