@@ -219,8 +219,8 @@ mixt.saga <- function(x, theta0, K,nbr)
     oldtau.i<- compute.tau(x[li[i]],alphas[[li[i]]])
     # tau[li[i],] <- (newtau.i - oldtau.i)*n
 
-    v$s1 <- s$s1 + (newtau.i - oldtau.i)*n
-    v$s2 <- s$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)*n
+    v$s1 <- s$s1 + (newtau.i - oldtau.i)
+    v$s2 <- s$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)
     
     oldtheta <- theta
     theta$mu<-step.M(v,n)

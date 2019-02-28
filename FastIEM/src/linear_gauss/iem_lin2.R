@@ -1,8 +1,9 @@
-source("algos.R")
-source("func.R")
+source("utils/algos.R")
+source("utils/func.R")
 theme_set(theme_bw())
-# save.image("lin_gauss.RData")
+# save.image("lin_gauss_saga.RData")
 # load("lin_gauss.RData")
+load("lin_gauss_saga.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
@@ -73,6 +74,7 @@ for (j in (1:nsim))
 
   # ML <- df
   # ML[1:(K+1),2]<- df[(K+1),2]
+  df <- mixt.em(xj, theta0, K, alph)
   df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   dem <- rbind(dem,df)
@@ -209,28 +211,51 @@ saga[,4]<-NULL
 
 
 
-em_scaled <- em
-em_scaled$iteration = seq(0, n*K, by=n)
-em_scaled <- em_scaled[rep(seq_len(nrow(em_scaled)), each=n),]
-
-
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
 oemvr$algo <- 'OEMvr'
 saga$algo <- 'saga'
-em_scaled$algo <- 'EM'
+em$algo <- 'EM'
 # variance <- NULL
 # variance <- rbind(em_scaled[0:K,],iem[0:K,],oem[0:K,],oemvr[0:K,])
 # colnames(variance) <- c("iteration","mu1","algo")
 
+epochs = seq(1, K, by=n)
+em_ep <- em[1:(K/n),]
+em_ep$iteration <- 1:(K/n)
+iem_ep <- iem[epochs,]
+iem_ep$iteration <- 1:(K/n)
+oem_ep <- oem[epochs,]
+oem_ep$iteration <- 1:(K/n)
+oemvr_ep <- oemvr[epochs,]
+oemvr_ep$iteration <- 1:(K/n)
+saga_ep <- saga[epochs,]
+saga_ep$iteration <- 1:(K/n)
+
+# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
+#                   oem_ep[2:20,c(1,5,8)],em_scaled_ep[2:20,c(1,5,8)])
+
+# variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
+#                   oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)])
+# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
+#                   oem_ep[2:20,c(1,5,8)],em_ep[2:20,c(1,5,8)])
+# variance <- rbind(oemvr_ep[5:20,c(1,5,8)],iem_ep[5:20,c(1,5,8)],
+#                   oem_ep[5:20,c(1,5,8)],em_ep[5:20,c(1,5,8)])
 
 
 variance <- NULL
 # variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
-variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)],saga[0:(K+1),c(1,2,4)])
+# variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)],saga[0:(K+1),c(1,2,4)])
+start = 0
+end = 10
+variance <- rbind(oemvr_ep[start:end,c(1,2,4)],iem_ep[start:end,c(1,2,4)],
+                  oem_ep[start:end,c(1,2,4)],em_ep[start:end,c(1,2,4)],saga_ep[start:end,c(1,2,4)])
+variance <- rbind(iem_ep[start:end,c(1,2,4)],
+                  saga_ep[start:end,c(1,2,4)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
-
+iem_ep[start:end,c(1,2,4)]
+saga_ep[start:end,c(1,2,4)]
 
 # graphConvMC <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
 # {

@@ -1,6 +1,6 @@
-source("algos.R")
-source("func.R")
-source("plots.R")
+source("utils/algos.R")
+source("utils/func.R")
+source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 # save.image("gmm_mu.RData")
@@ -10,16 +10,16 @@ options(digits = 22)
 # save.image("gmm_mu_fixed_saga.RData")
 
 # load("gmm_mu_fixed.RData")
-load("gmm_mu_fixed_saga.RData")
+# load("RData/gmm_mu_fixed_saga.RData")
 
-n <- 500
+n <- 200
 weight<-c(0.2, 0.8)
-mu<-c(-1,1)
-sigma<-c(1,1)*1
+mu<-c(1,-1)
+sigma<-c(0.5,0.5)*1
 
 
 weight0<-weight
-mu0<-c(-2,2)
+mu0<-c(2,-2)
 sigma0<-sigma
 
 K <- 10000
@@ -31,7 +31,6 @@ seed0=44444
 ylim <- c(0.3)
 
 M <- 1
-nsim <- 3
 #
 G<-length(mu)
 col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:G))
@@ -41,6 +40,7 @@ theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
 
 
 ##  Simulation
+nsim <- 3
 x <- matrix(0,nrow=n,ncol=nsim)
 for (j in (1:nsim))
 {
@@ -120,12 +120,12 @@ df.saga <- vector("list", length=nsim)
 
 rho.oemvr <- 0.5
 kiter = 1:K
-rho.oem = 1/(kiter)
+rho.oem = 3/(kiter+10)
 
-
+nsim=2
 x <- matrix(0,nrow=n,ncol=nsim)
-# nsim=3
-nsim=20
+
+
 for (j in (1:nsim))
 {
   print(j)
@@ -220,21 +220,6 @@ oem[,9]<-NULL
 
 
 
-# doemvr <- NULL
-# df.oemvr <- vector("list", length=nsim)
-# rho <- 0.001
-# for (j in (1:nsim))
-# {
-#   print(j)
-#   df <- mixt.oemvr(x[,j], theta0, K,nbr, rho)
-#   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-#   df$rep <- j
-#   doemvr <- rbind(doemvr,df)
-#   df$rep <- NULL
-#   df.oemvr[[j]] <- df
-# }
-
-
 oemvr <- NULL
 oemvr <- doemvr[doemvr$rep==1,]
 
@@ -263,12 +248,6 @@ if (nsim>2) {
 saga[,2:7] <- 1/nsim*saga[,2:7]
 saga[,9]<-NULL
 
-# oemvr$algo <- 'OEMvr'
-# oemvr$rep <- NULL
-# variance <- NULL
-# variance <- rbind(oemvr[1:(K+1),c(1,5,8)],iem[1:(K+1),c(1,5,8)],oem[1:(K+1),c(1,5,8)],em_scaled[1:(K+1),c(1,5,8)])
-# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
-
 
 iem$algo <- 'IEM'
 oem$algo <- 'OEM'
@@ -283,11 +262,6 @@ oemvr$rep <- NULL
 saga$rep <- NULL
 
 
-# variance <- NULL
-# # variance <- rbind(oemvr[1001:2001,c(1,5,8)],iem[1001:2001,c(1,5,8)],oem[1001:2001,c(1,5,8)],em_scaled[1001:2001,c(1,5,8)])
-# variance <- rbind(oemvr[2:(K+1),c(1,5,8)],iem[2:(K+1),c(1,5,8)],oem[2:(K+1),c(1,5,8)],em_scaled[2:(K+1),c(1,5,8)])
-# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
-
 ### PER EPOCH
 epochs = seq(1, K, by=n)
 em_ep <- em[1:(K/n),]
@@ -301,18 +275,8 @@ oemvr_ep$iteration <- 1:(K/n)
 saga_ep <- saga[epochs,]
 saga_ep$iteration <- 1:(K/n)
 
-# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
-#                   oem_ep[2:20,c(1,5,8)],em_scaled_ep[2:20,c(1,5,8)])
-
-# variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
-#                   oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)])
-# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
-#                   oem_ep[2:20,c(1,5,8)],em_ep[2:20,c(1,5,8)])
-# variance <- rbind(oemvr_ep[5:20,c(1,5,8)],iem_ep[5:20,c(1,5,8)],
-#                   oem_ep[5:20,c(1,5,8)],em_ep[5:20,c(1,5,8)])
-
 start = 2
-end = 13
+end = 30
 variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],saga_ep[start:end,c(1,5,8)])
 # variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],

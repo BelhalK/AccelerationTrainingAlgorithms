@@ -98,6 +98,42 @@ def EStep_incremental(index):
 
 
 
+def EStep_saga1(index):
+    for i in range(0, N):
+        for j in range(0, M):
+            denominator = 0;
+            for k in range(0, K):
+                if i in index:
+                    p[i, j, k] = p[i, j, k] + N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
+                else: 
+                    p[i, j, k] = oldp[i, j, k]
+                denominator += p[i, j, k];
+            if denominator == 0:
+                for k in range(0, K):
+                    p[i, j, k] = 0;
+            else:
+                for k in range(0, K):
+                    p[i, j, k] /= denominator;
+
+def EStep_saga2(index):
+    for i in range(0, N):
+        for j in range(0, M):
+            denominator = 0;
+            for k in range(0, K):
+                if i in index:
+                    p[i, j, k] = theta[k, j] * lamda[i, k];
+                else: 
+                    p[i, j, k] = oldp[i, j, k]
+                denominator += p[i, j, k];
+            if denominator == 0:
+                for k in range(0, K):
+                    p[i, j, k] = 0;
+            else:
+                for k in range(0, K):
+                    p[i, j, k] /= denominator;
+
+
+
 def MStep():
     # update theta
     for k in range(0, K):
@@ -168,3 +204,5 @@ def LogLikelihood():
             if tmp > 0:
                 loglikelihood += X[i, j] * log(tmp)
     return loglikelihood
+
+
