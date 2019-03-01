@@ -132,6 +132,7 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
   return(df)
 }
 
+
 mixt.oemvr <- function(x, theta0, K,nbr,rho)
 {
    G<-length(mu)
@@ -154,20 +155,18 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
     { 
       i<-1:nbr
       theta.e.0 <- theta
+      tau.e.0 <- compute.tau(x,theta.e.0)
+      s.e.0 <- x%*%tau.e.0
       # print(k)
     }
+    #browser()
     tau.indiv.new <- compute.tau(x[l[i]],theta)
-    s.indiv.new <- x[l[i]]*tau.indiv.new
 
     tau.indiv.e.0 <- compute.tau(x[l[i]],theta.e.0)
-    s.indiv.e.0 <- x[l[i]]*tau.indiv.e.0
 
-    tau.e.0 <- compute.tau(x,theta.e.0)
-    s.e.0 <- x%*%tau.e.0
-
-    #Update statistic
+    #Update statistics
     s$s1 <- s$s1 + rho*(tau.indiv.new - tau.indiv.e.0 + colSums(tau.e.0) - s$s1)
-    s$s2 <- s$s2 + rho*(s.indiv.new - s.indiv.e.0 + s.e.0 - s$s2)
+    s$s2 <- s$s2 + rho*(x[l[i]]*tau.indiv.new - x[l[i]]*tau.indiv.e.0 + s.e.0 - s$s2)
 
     #M-step
     theta$mu <- step.M(s,n)

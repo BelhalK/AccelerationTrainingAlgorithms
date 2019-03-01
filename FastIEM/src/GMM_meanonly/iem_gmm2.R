@@ -12,17 +12,17 @@ options(digits = 22)
 # load("gmm_mu_fixed.RData")
 # load("RData/gmm_mu_fixed_saga.RData")
 
-n <- 200
+n <- 2000
 weight<-c(0.2, 0.8)
 mu<-c(1,-1)
-sigma<-c(0.5,0.5)*1
+sigma<-c(1,1)*1
 
 
 weight0<-weight
-mu0<-c(2,-2)
+mu0<-c(0.9,-0.9)
 sigma0<-sigma
 
-K <- 10000
+K <- 20000
 
 seed0=44444
 
@@ -118,11 +118,11 @@ df.oemvr <- vector("list", length=nsim)
 dsaga <- NULL
 df.saga <- vector("list", length=nsim)
 
-rho.oemvr <- 0.5
+rho.oemvr <- 0.0à3
 kiter = 1:K
 rho.oem = 3/(kiter+10)
 
-nsim=2
+nsim=10
 x <- matrix(0,nrow=n,ncol=nsim)
 
 
@@ -142,6 +142,7 @@ for (j in (1:nsim))
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
+  print('em done')
 
   df <- mixt.iem(x[,j], theta0, K,nbr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -149,6 +150,7 @@ for (j in (1:nsim))
   diem <- rbind(diem,df)
   df$rep <- NULL
   df.iem[[j]] <- df
+  print('iem done')
 
   df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -156,6 +158,7 @@ for (j in (1:nsim))
   doem <- rbind(doem,df)
   df$rep <- NULL
   df.oem[[j]] <- df
+  print('oem done')
 
   df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -163,6 +166,7 @@ for (j in (1:nsim))
   doemvr <- rbind(doemvr,df)
   df$rep <- NULL
   df.oemvr[[j]] <- df
+  print('oemvr done')
 
   df <- mixt.saga(x[,j], theta0, K,nbr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -170,6 +174,7 @@ for (j in (1:nsim))
   dsaga <- rbind(dsaga,df)
   df$rep <- NULL
   df.saga[[j]] <- df
+  print('saga done')
 
 }
 
@@ -275,8 +280,10 @@ oemvr_ep$iteration <- 1:(K/n)
 saga_ep <- saga[epochs,]
 saga_ep$iteration <- 1:(K/n)
 
-start = 2
-end = 30
+
+epochs
+start =2
+end = 10
 variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],saga_ep[start:end,c(1,5,8)])
 # variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
@@ -285,4 +292,7 @@ variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
 # variance <- rbind(iem_ep[10:20,c(1,5,8)],em_ep[10:20,c(1,5,8)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
-# graphConvMC2_new(em_ep[,c(1,5,8)], title="IEMs",legend=TRUE)
+variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
+                  oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)],saga_ep[,c(1,5,8)])
+graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+graphConvMC2_new(em_ep[,c(1,5,8)], title="IEMs",legend=TRUE)
