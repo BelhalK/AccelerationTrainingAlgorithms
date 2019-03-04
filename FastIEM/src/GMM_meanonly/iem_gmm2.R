@@ -9,7 +9,7 @@ options(digits = 22)
 # save.image("gmm_mu_fixed.RData")
 # save.image("gmm_mu_fixed_saga.RData")
 
-# load("gmm_mu_fixed.RData")
+load("RData/gmm_mu_fixed.RData")
 # load("RData/gmm_mu_fixed_saga.RData")
 
 n <- 2000

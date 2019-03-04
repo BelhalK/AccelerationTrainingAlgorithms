@@ -297,7 +297,7 @@ def output():
 datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 1000
+nb_epochs = 900
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -321,7 +321,7 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = 10
+mini_batch_size = 50
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
