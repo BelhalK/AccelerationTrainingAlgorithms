@@ -1,6 +1,3 @@
-require(ggplot2)
-require(gridExtra)
-require(reshape2)
 
 
 mixt.ident <- function(df)

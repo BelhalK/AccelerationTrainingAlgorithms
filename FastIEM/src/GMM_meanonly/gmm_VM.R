@@ -1,23 +1,13 @@
-require(ggplot2)
-require(gridExtra)
-require(reshape2)
 library(rlist)
-
 source("utils/algos.R")
 source("utils/func.R")
-source("utils/plots.R")
-theme_set(theme_bw())
 options(digits = 22)
-# save.image("gmm_mu.RData")
-# save.image("gmm_mu2.RData")
-# save.image("gmm_mu3.RData")
-# save.image("gmm_mu_fixed.RData")
-# save.image("gmm_mu_fixed_saga.RData")
 
-# load("RData/gmm_mu_fixed.RData")
-# load("RData/gmm_mu_fixed_saga.RData")
 
-n <- 200
+n <- 100000
+K <- n*100
+nsim=1
+
 weight<-c(0.2, 0.8)
 mu<-c(1,-1)
 sigma<-c(1,1)*1
@@ -26,9 +16,6 @@ sigma<-c(1,1)*1
 weight0<-weight
 mu0<-c(0.9,-0.9)
 sigma0<-sigma
-
-K <- 20000
-
 seed0=44444
 
 
@@ -42,58 +29,6 @@ col.names <- c("iteration", paste0("p",1:G), paste0("mu",1:G), paste0("sigma",1:
 theta<-list(p=weight,mu=mu,sigma=sigma)
 theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
 # theta0<-theta
-
-
-##  Simulation
-nsim <- 3
-x <- matrix(0,nrow=n,ncol=nsim)
-for (j in (1:nsim))
-{
-  seed <- j*seed0
-  set.seed(seed)
-  xj<-mixt.simulate(n,weight,mu,sigma)
-  x[,j] <- xj
-}
-
-
-# ## EM
-# print('EM')
-# dem <- NULL
-# df.em <- vector("list", length=nsim)
-# Kem <- K/n
-# for (j in (1:nsim))
-# { print(j)
-#   df <- mixt.em(x[,j], theta0, Kem)
-#   df <- mixt.ident(df)
-#   df$rep <- j
-#   dem <- rbind(dem,df)
-#   df$rep <- NULL
-#   df.em[[j]] <- df
-# }
-# graphConvMC_new(dem, title="EM")
-
-
-# ## EM
-# print('EM')
-# doemvr <- NULL
-# df.oemvr <- vector("list", length=nsim)
-# nbr <- 1
-# for (j in (1:nsim))
-# { print(j)
-#   df <- mixt.oemvr(x[,j], theta0, K,nbr,0.01)
-#   df <- mixt.ident(df)
-#   df$rep <- j
-#   doemvr <- rbind(doemvr,df)
-#   df$rep <- NULL
-#   df.oemvr[[j]] <- df
-# }
-# graphConvMC_new(doemvr, title="EM")
-
-################################################
-# ML <- df
-# for (i in (1:(100+1))){
-#   ML[i,2:7]<- c(theta$p,theta$mu,theta$sigma)
-# }
 
 a1 = c(rep(theta$p[1],(K+1)))
 a2 = c(rep(theta$p[2],(K+1)))
@@ -123,12 +58,12 @@ df.oemvr <- vector("list", length=nsim)
 dsaga <- NULL
 df.saga <- vector("list", length=nsim)
 
-rho.oemvr <- 0.03
-rho.saga <- 0.03
+rho.oemvr <- 1/n**(2/3)
+rho.saga <- 1/n**(2/3)
 kiter = 1:K
 rho.oem = 3/(kiter+10)
 
-nsim=2
+
 x <- matrix(0,nrow=n,ncol=nsim)
 
 
@@ -287,18 +222,32 @@ saga_ep <- saga[epochs,]
 saga_ep$iteration <- 1:(K/n)
 
 
-epochs
-start =0
-end = 10
-variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
-                  oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],saga_ep[start:end,c(1,5,8)])
-# variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
-#                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)])
-# variance <- rbind(oemvr_ep[15:20,c(1,5,8)],iem_ep[15:20,c(1,5,8)],em_ep[15:20,c(1,5,8)])
-# variance <- rbind(iem_ep[10:20,c(1,5,8)],em_ep[10:20,c(1,5,8)])
-graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
-variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
-                  oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)],saga_ep[,c(1,5,8)])
-graphConvMC2_new(variance, title="IEMs",legend=TRUE)
-graphConvMC2_new(em_ep[,c(1,5,8)], title="IEMs",legend=TRUE)
+# start =0
+# end = 10
+# variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
+#                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],saga_ep[start:end,c(1,5,8)])
+
+
+
+df <- NULL
+em <- iem <- oem <- oemvr <- saga <- NULL
+dem <- NULL
+
+df.em <- vector("list", length=nsim)
+Kem <- K/n
+
+nbr<-1
+diem <- NULL
+df.iem <- vector("list", length=nsim)
+
+doem <- NULL
+df.oem <- vector("list", length=nsim)
+
+doemvr <- NULL
+df.oemvr <- vector("list", length=nsim)
+
+dsaga <- NULL
+df.saga <- vector("list", length=nsim)
+
+save.image("RData/gmm_big2.RData")
