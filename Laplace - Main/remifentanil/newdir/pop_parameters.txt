@@ -1,0 +1,141 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset remi_data 
+    Structured data: DV ~ AMT + TIME | ID 
+    X variable for graphs: TIME () 
+Dataset characteristics:
+    number of subjects:     19 
+    number of observations: 838 
+    average/min/max nb obs: 44.11  /  35  /  52 
+First 10 lines of data:
+   ID    AMT TIME    DV mdv cens occ ytype
+1   1 1439.8 1.50  9.51   0    0   1     1
+2   1 1439.8 2.00 11.50   0    0   1     1
+3   1 1439.8 2.52 14.10   0    0   1     1
+4   1 1439.8 3.02 16.70   0    0   1     1
+5   1 1439.8 3.63 17.10   0    0   1     1
+6   1 1439.8 4.05 16.80   0    0   1     1
+7   1 1439.8 5.02 18.70   0    0   1     1
+8   1 1439.8 6.02 14.20   0    0   1     1
+9   1 1439.8 7.03 15.80   0    0   1     1
+10  1 1439.8 8.03 15.10   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  remifantenil  Model type:  structural
+function(psi,id,xidep) { 
+  dose<-xidep[,1]
+  time<-xidep[,2]  
+  V<-psi[id,1]
+  k<-psi[id,2]
+  k12<-psi[id,3]
+  k21<-psi[id,4]
+  k13<-psi[id,5]
+  k31<-psi[id,6]
+
+
+  a0 <- k*k21*k31
+  a1 <- k*k31 + k21*k31 + k21*k13 + k*k21 + k31*k12
+  a2 <- k + k12 + k13 + k21 + k31
+  p <- a1 - a2^2/3
+  q <- 2*a2^3/27 - a1*a2/3 + a0
+  r1 <- sqrt(-(p^3/27))
+  r2 <- 2*r1^(1/3)
+  phi <- acos(-q/(2*r1))/3
+  alpha <- -(cos(phi)*r2 - a2/3)
+  beta <- -(cos(phi + 2*pi/3)*r2 - a2/3)
+  gamma <- -(cos(phi + 4*pi/3)*r2 - a2/3)
+
+  A <- (k21 - alpha)*(k31 - alpha)/(V*(alpha-beta)*(alpha-gamma))
+  B <- (k21 - beta)*(k31 - beta)/(V*(beta-alpha)*(beta-gamma))
+  C <- (k21 - gamma)*(k31 - gamma)/(V*(gamma-beta)*(gamma-alpha))
+
+  ypred<-dose*(A/alpha*(1-exp(-alpha*time))+ B/beta*(1-exp(-beta*time)) + C/gamma*(1-exp(-gamma*time)))
+  return(ypred)
+}
+<bytecode: 0x7fa72072b2c8>
+  Nb of parameters: 6 
+      parameter names:  V k k12 k21 k13 k31 
+      distribution:
+     Parameter Distribution Estimated
+[1,] V         log-normal   Estimated
+[2,] k         log-normal   Estimated
+[3,] k12       log-normal   Estimated
+[4,] k21       log-normal   Estimated
+[5,] k13       log-normal   Estimated
+[6,] k31       log-normal   Estimated
+  Variance-covariance matrix:
+    V k k12 k21 k13 k31
+V   1 0   0   0   0   0
+k   0 1   0   0   0   0
+k12 0 0   1   0   0   0
+k21 0 0   0   1   0   0
+k13 0 0   0   0   1   0
+k31 0 0   0   0   0   1
+  Error model: constant , initial values: a=1 
+    No covariate in the model.
+    Initial values
+             V   k k12 k21 k13 k31
+Pop.CondInit 5 0.4 0.2 0.1   1   1
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Estimation of log-likelihood by importance sampling
+    Number of iterations:  K1=100, K2=100 
+    Number of chains:  1 
+    Seed:  395246 
+    Number of MCMC iterations for IS:  5000 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  TRUE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter Estimate
+[1,] V          9.250  
+[2,] k         15.755  
+[3,] k12        0.076  
+[4,] k21        0.014  
+[5,] k13        0.139  
+[6,] k31        4.281  
+[7,] a         33.133  
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+    Parameter  Estimate
+V   omega2.V   2.5e-06 
+k   omega2.k   1.7e-06 
+k12 omega2.k12 2.0e-04 
+k21 omega2.k21 3.2e-04 
+k13 omega2.k13 1.3e-02 
+k31 omega2.k31 3.2e-04 
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+           omega2.V omega2.k omega2.k12 omega2.k21 omega2.k13 omega2.k31
+omega2.V   1        0        0          0          0          0         
+omega2.k   0        1        0          0          0          0         
+omega2.k12 0        0        1          0          0          0         
+omega2.k21 0        0        0          1          0          0         
+omega2.k13 0        0        0          0          1          0         
+omega2.k31 0        0        0          0          0          1         
+----------------------------------------------------
+---------------  Statistical criteria  -------------
+----------------------------------------------------
+
+Likelihood computed by importance sampling
+      -2LL= 8244.939 
+      AIC = 8270.939 
+      BIC = 8283.217 
+----------------------------------------------------
