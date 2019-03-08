@@ -111,7 +111,7 @@ def EStep_saga1(index):
             denominator = 0;
             for k in range(0, K):
                 if i in index:
-                    p[i, j, k] = theta[k, j] * lamda[i, k];
+                    p[i, j, k] = p[i, j, k] + N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
                 else: 
                     p[i, j, k] = oldp[i, j, k]
                 denominator += p[i, j, k];
@@ -129,7 +129,7 @@ def EStep_saga2(index):
             denominator = 0;
             for k in range(0, K):
                 if i in index:
-                    p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
+                    p[i, j, k] = theta[k, j] * lamda[i, k];
                 else: 
                     p[i, j, k] = oldp[i, j, k]
                 denominator += p[i, j, k];
@@ -139,6 +139,9 @@ def EStep_saga2(index):
             else:
                 for k in range(0, K):
                     p[i, j, k] /= denominator;
+
+
+
 
 
 def MStep():
@@ -412,6 +415,8 @@ with open ('init/initlamda', 'rb') as fp:
 with open ('init/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
+v = zeros([N, M, K])
+h = zeros([N, M, K])
 oldLoglikelihood = 1
 newLoglikelihood = 1
 ### SAGA EM

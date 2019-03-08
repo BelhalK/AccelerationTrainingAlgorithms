@@ -25,7 +25,7 @@ mixt.em <- function(x, theta0, K)
   theta<-theta0
   for (k in 1:K)
   {
-    if (k %% 1000==0)
+    if (k %% n==0)
     {
       print('EM')
       print(k)
@@ -61,7 +61,7 @@ mixt.iem <- function(x, theta0, K,nbr)
   for (k in 1:K)
   {
 
-    if (k %% 1000==0)
+    if (k %% n==0)
     {
       print('IEM')
       print(k)
@@ -110,7 +110,7 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
   for (k in 1:K)
   {
 
-    if (k %% 1000==0)
+    if (k %% n==0)
     {
       print('OEM')
       print(k)
@@ -162,7 +162,7 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
   for (k in 1:K)
   {
 
-    if (k %% 1000==0)
+    if (k %% n==0)
     {
       print('OEMVR')
       print(k)
@@ -226,7 +226,7 @@ mixt.saga <- function(x, theta0, K,nbr, rho.saga)
   
   for (k in 1:K)
   {
-    if (k %% 1000==0)
+    if (k %% n==0)
     {
       print('SAGA')
       print(k)
