@@ -7,8 +7,9 @@ library(abind)
 require(ggplot2)
 require(gridExtra)
 require(reshape2)
-library("rCMA")
-library(rstan)
+
+# save.image("rtte_newdesign.RData")
+# setwd("/Users/karimimohammedbelhal/Desktop/package_contrib/saemixB/R")
 
   source('R/aaa_generics.R') 
   source('R/compute_LL.R') 
@@ -17,8 +18,9 @@ library(rstan)
   source('R/func_FIM.R')
   source('R/func_plots.R') 
   source('R/func_simulations.R') 
+
   source('R/main.R')
-  source('R/main_estep.R')
+  source('R/main_estep_NEW.R')
   source('R/main_initialiseMainAlgo.R') 
   source('R/main_mstep.R') 
   source('R/SaemixData.R')
@@ -27,65 +29,65 @@ library(rstan)
   # source('R/SaemixRes_c.R') 
   source('R/SaemixObject.R') 
   source('R/zzz.R') 
+  
 source('R/graphplot.R') 
 
+# remi_data <- read.table("remi.csv", header=T,sep=";")
+# test <- remi_data[which(remi_data$YTYPE!=2),]
+# N <- length(unique(test$ID))
 
-# bolus_data <- read.table("data/bolus1_data.txt", header=T)
-# saemix.data<-saemixData(name.data=tobra_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
-#   name.predictors=c("amt","time"),name.response=c("y"), name.X="time")
+# for (i in 1:N){
+#   temp <- test[which(test$ID==i),]
+#   test[which(test$ID==i),"AMT"] <- temp$AMT[1]
+# }
+# test[which(test$DV > 0)]
+# write.csv(test, file = "final.csv")
 
-tobra_data <- read.table("data/tobramycin.txt", header=T)
-saemix.data<-saemixData(name.data=tobra_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
-  name.predictors=c("DOSE","TIME", "EVID"),name.response=c("CP"), name.X="TIME")
+
+remi_data <- read.table("final.csv", header=T,sep=";")
+remi_data <- remi_data[which(remi_data$ID < 30),]
+saemix.data<-saemixData(name.data=remi_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
+  name.predictors=c("AMT","TIME"),name.response=c("DV"), name.X="TIME")
+
+
+test = remi_data[which(remi_data[,2]>0),]
+plotdata(test[,c(2,4,1)])
+
+# ggsave(file="/Users/karimimohammedbelhal/Desktop/data.pdf", width = 900, height = 300, units = "mm")
+
 
 
 model1cpt<-function(psi,id,xidep) { 
   dose<-xidep[,1]
-  time<-xidep[,2]
-  event<-xidep[,3]  
+  time<-xidep[,2]  
+  V<-psi[id,1]
+  k<-psi[id,2]
+  k12<-psi[id,3]
+  k21<-psi[id,4]
 
-  dose.index <- which(event==1)
-  obs.index <- which(event==0)
-
-  t.dose <- time[dose.index]
-  t.obs <- time[obs.index]
+  beta <- 0.5*(k12+k21+k-sqrt((k12+k21+k)^2-4*k21*k))
+  alpha <- k21*k/beta
 
 
-  D <- dose[dose.index]
-  V<-psi[id[obs.index],1]
-  k<-psi[id[obs.index],2]
+  A <- (alpha - k21)/(V*(alpha-beta))
+  B <- (beta - k21)/(V*(beta-alpha))
 
-  V.dose<-psi[id[dose.index],1]
-  k.dose<-psi[id[dose.index],2]
 
-  cumsum <- D*exp(-k.dose*t.dose)
-
-  N <- length(obs.index)
-  Nsubj <- length(unique(id))
-  ypred <- rep(0,N)
-
-  browser()
-  i = 1 #obs
-  j = 2 #obs per indiv
-
-  for (i in 1:N){
-    indiv <- id[dose.index][i]
-    for (j in 1:length(obs.index[id==indiv])){
-      ypred[i] <- sum(cumsum[id==indiv][0:(obs.index[id==indiv][j])])
-    }  
-  }
-  
-  
-
-  
+  ypred<-dose*(A/alpha*(1-exp(-alpha*time))+ B/beta*(1-exp(-beta*time)))
   return(ypred)
 }
 
 # Default model, no covariate
-saemix.model<-saemixModel(model=model1cpt,description="tobra",type="structural",
-  ,psi0=matrix(c(1,7),ncol=2,byrow=TRUE, dimnames=list(NULL, c("V","k"))),
-  transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,1),ncol=2,byrow=TRUE),covariance.model=matrix(c(1,0,0,1),ncol=2, 
-  byrow=TRUE))
+omega.init = matrix(diag(4),ncol=4,byrow=TRUE)
+covariance = matrix(diag(4),ncol=4,byrow=TRUE)
+# cov.model = matrix(0,nrow=8,ncol=8,byrow=TRUE)
+# cov.model[1,1] <- 1
+# cov.model[2,2] <- 1
+saemix.model<-saemixModel(model=model1cpt,description="remifantenil",type="structural",
+  ,psi0=matrix(c(5,0.4,0.2,0.1),ncol=4,byrow=TRUE, dimnames=list(NULL, c("V","k","k12","k21"))),
+  transform.par=c(1,1,1,1),
+  omega.init=omega.init,
+  covariance.model=covariance)
 
 
 K1 = 100
@@ -94,7 +96,7 @@ iterations = 1:(K1+K2+1)
 end = K1+K2
 
 
-replicate = 3
+replicate = 2
 seed0 = 395246
 seed1 = 3952
 
@@ -103,70 +105,56 @@ final_rwm <- 0
 final_mix <- 0
 final_mala <- 0
 
-
 m=1
 for (m in 1:replicate){
   print(m)
-  l = list(c(50,2),c(80,3),c(60,4))
+  l = list(c(5,0.4,0.2,0.1),c(7,1.4,0.5,0.3),c(9,0.8,1,0.8))
   # l = list(c(1,5,2,0,0,0),c(3,12,5,0,0,0),c(6,3,7,0,0,0),c(1.4,6.6,1.4,0,0,0))
-  saemix.model<-saemixModel(model=model1cpt,description="tobra",type="structural"
-  ,psi0=matrix(l[[m]],ncol=2,byrow=TRUE, dimnames=list(NULL, c("V","k"))),
-  transform.par=c(1,1),omega.init=matrix(c(1/m,0,0,1/m),ncol=2,byrow=TRUE))
+  omega.init = 1/m*matrix(diag(4),ncol=4,byrow=TRUE)
+  saemix.model<-saemixModel(model=model1cpt,description="remifantenil",type="structural",
+  ,psi0=matrix(c(5,0.4,0.2,0.1),ncol=4,byrow=TRUE, dimnames=list(NULL, c("V","k","k12","k21"))),
+  transform.par=c(1,1,1,1),
+  omega.init=omega.init,
+  covariance.model=covariance)
 
   options<-list(seed=seed0/m,map=F,fim=F,ll.is=T,nb.chains = 1,
-   nbiter.mcmc = c(2,2,2,0,0,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
-  tobra_ref<-data.frame(saemix(saemix.model,saemix.data,options)$par)
-  tobra_ref <- cbind(iterations, tobra_ref)
-  tobra_ref[,4:6] <- sqrt(tobra_ref[,4:6])
-  tobra_ref['individual'] <- m
-  final_rwm <- rbind(final_rwm,tobra_ref[-1,])
+   nbiter.mcmc = c(2,2,2,0,0,0),nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
+  theo_ref<-data.frame(saemix(saemix.model,saemix.data,options)$par)
+  theo_ref <- cbind(iterations, theo_ref)
+  theo_ref[,5:7] <- sqrt(theo_ref[,5:7])
+  theo_ref['individual'] <- m
+  final_rwm <- rbind(final_rwm,theo_ref[-1,])
 
-  options.new<-list(seed=m*seed1,map=F,fim=F,ll.is=T,nb.chains = 1,
-   nbiter.mcmc = c(2,2,2,2,0,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),
-   map.range=c(1:4),nbiter.burn =0)
-  tobra_new_ref<-data.frame(saemix(saemix.model,saemix.data,options.new)$par)
-  tobra_mix <- cbind(iterations, tobra_new_ref)
-  tobra_mix[,4:6] <- sqrt(tobra_mix[,4:6])
-  tobra_mix['individual'] <- m
-  final_mix <- rbind(final_mix,tobra_mix[-1,])
+  options.new<-list(seed=seed0/m,map=F,fim=F,ll.is=T,nb.chains = 1,
+   nbiter.mcmc = c(2,2,2,2,0,0),nbiter.saemix = c(K1,K2),map.range=c(1:7),nbiter.burn =0)
+  theo_new_ref<-data.frame(saemix(saemix.model,saemix.data,options.new)$par)
+  theo_mix <- cbind(iterations, theo_new_ref)
+  theo_mix[,5:7] <- sqrt(theo_mix[,5:7])
+  theo_mix['individual'] <- m
+  final_mix <- rbind(final_mix,theo_mix[-1,])
 
-  #  options.mala<-list(seed=seed0/m,map=F,fim=F,ll.is=T,nb.chains = 1,
+  #  options.mala<-list(seed=seed0/m,map=F,fim=F,ll.is=F,nb.chains = 1,
   #   nbiter.mcmc = c(2,2,2,0,2,0),
   #   nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(1),nbiter.burn =0,sigma.val=0.002,gamma.val=0.1)
-  # tobra_mala_ref<-data.frame(saemix(saemix.model,saemix.data,options.mala)$par)
-  # tobra_mala <- cbind(iterations, tobra_mala_ref)
-  # tobra_mala[,4:6] <- sqrt(tobra_mala[,4:6])
-  # tobra_mala['individual'] <- m
-  # final_mala <- rbind(final_mala,tobra_mala[-1,])
+  # theo_mala_ref<-data.frame(saemix(saemix.model,saemix.data,options.mala)$par)
+  # theo_mala <- cbind(iterations, theo_mala_ref)
+  # theo_mala[,5:7] <- sqrt(theo_mala[,5:7])
+  # theo_mala['individual'] <- m
+  # final_mala <- rbind(final_mala,theo_mala[-1,])
 
-  #  options.nuts<-list(seed=seed0/m,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,0,0,6),
-  #   nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(1:15),nbiter.burn =0,sigma.val=0.002,gamma.val=0.1, modelstan = modelstan)
-  # tobra_nuts_ref<-data.frame(saemix(saemix.model,saemix.data,options.nuts)$par)
-  # tobra_nuts <- cbind(iterations, tobra_nuts_ref)
-  # tobra_nuts[,5:7] <- sqrt(tobra_nuts[,5:7])
-  # tobra_nuts['individual'] <- m
-  # final_nuts <- rbind(final_nuts,tobra_nuts[-1,])
 
 }
 
-
-convpop <- graphConvMC_diffpk1(final_rwm[,c(1,3,7)],final_mix[,c(1,3,7)])
-convvar <- graphConvMC_diffpk1(final_rwm[,c(1,5,7)],final_mix[,c(1,5,7)])
-
-convpop <- graphConvMC_diffpk1(final_rwm[,c(1,2,7)],final_mix[,c(1,2,7)])
-convvar <- graphConvMC_diffpk1(final_rwm[,c(1,4,7)],final_mix[,c(1,4,7)])
-
-
-
-
-
+convpop <- graphConvMC_diffpk1(final_rwm[,c(1,3,11)],final_mix[,c(1,3,11)])
+convpop <- graphConvMC_diffpk1(final_rwm[,c(1,7,11)],final_mix[,c(1,7,11)])
 
 
 convpop <- graphConvMC_diffpk2_3df(final_rwm[,c(1,3,9)],final_mix[,c(1,3,9)],final_mala[,c(1,3,9)])
 convvar <- graphConvMC_diffpk1_3df(final_rwm[,c(1,6,9)],final_mix[,c(1,6,9)],final_mala[,c(1,6,9)])
 
-convpop <- graphConvMC_diffpk2(final_rwm[,c(1,3,9)],final_mix[,c(1,3,9)])
-convvar <- graphConvMC_diffpk1(final_rwm[,c(1,6,9)],final_mix[,c(1,6,9)])
+
+convpop <- graphConvMC_diffpk2(final_rwm[,c(1,7,15)],final_mix[,c(1,7,15)])
+convvar <- graphConvMC_diffpk1(final_rwm[,c(1,6,15)],final_mix[,c(1,6,15)])
 
 save <- grid.arrange(convpop,convvar, ncol=2)
 # ggsave(save,file="pics_square/convpkseednew.pdf", width = 900, height = 225, units = "mm")
@@ -183,9 +171,9 @@ convpop3 <- graphConvMC_diffpk2(final_rwm[,c(1,4,9)],final_mix[,c(1,4,9)])
 convvar3 <- graphConvMC_diffpk1(final_rwm[,c(1,7,9)],final_mix[,c(1,7,9)])
 
 
-ka_true <- 8
-V_true <- 10
-k_true <- 0.1
+ka_true <- 1
+V_true <- 8
+k_true <- 0.01
 o_ka <- 0.5
 o_V <- 0.2
 o_k <- 0.2
@@ -241,38 +229,38 @@ res <- simulx(model     = myModel,
               output    = list(name='y', time=seq(0,10,by=1)))
   
 
-  tobra.saemix <- res$y
-  tobra.saemix$amount <- 100
+  remifantenil.saemix <- res$y
+  remifantenil.saemix$amount <- 100
   
-  saemix.model<-saemixModel(model=model1cpt,description="tobra",type="structural"
+  saemix.model<-saemixModel(model=model1cpt,description="remifantenil",type="structural"
   ,psi0=matrix(c(1,10,1,0,0,0),ncol=3,byrow=TRUE, dimnames=list(NULL, c("ka","V","k"))),
   transform.par=c(1,1,1),omega.init=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3,byrow=TRUE))
 
 
-saemix.data<-saemixData(name.data=tobra.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
+saemix.data<-saemixData(name.data=remifantenil.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y"), name.X="time")
 
 
-  options<-list(seed=seed0,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
-  tobra_ref<-data.frame(saemix(saemix.model,saemix.data,options)$par)
-  tobra_ref <- cbind(iterations, tobra_ref)
-  tobra_ref[,5:8] <- sqrt(tobra_ref[,5:8])
-  ML <- tobra_ref[,2:8]
-  ML[1:(end+1),]<- tobra_ref[end+1,2:8]
-  error_rwm <- error_rwm + (tobra_ref[,2:8]-ML)^2
-  tobra_ref['individual'] <- m
-  final_rwm <- rbind(final_rwm,tobra_ref)
+  options<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,0),nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(0),nbiter.burn =0)
+  theo_ref<-data.frame(saemix(saemix.model,saemix.data,options)$par)
+  theo_ref <- cbind(iterations, theo_ref)
+  theo_ref[,5:8] <- sqrt(theo_ref[,5:8])
+  ML <- theo_ref[,2:8]
+  ML[1:(end+1),]<- theo_ref[end+1,2:8]
+  error_rwm <- error_rwm + (theo_ref[,2:8]-ML)^2
+  theo_ref['individual'] <- m
+  final_rwm <- rbind(final_rwm,theo_ref)
   
 
-  options.new<-list(seed=seed0,map=F,fim=F,ll.is=T,nb.chains = 1, nbiter.mcmc = c(2,2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(1:6),nbiter.burn =0)
-  tobra_mix<-data.frame(saemix(saemix.model,saemix.data,options.new)$par)
-  tobra_mix <- cbind(iterations, tobra_mix)
-  tobra_mix[,5:8] <- sqrt(tobra_mix[,5:8])
-  ML <- tobra_mix[,2:8]
-  ML[1:(end+1),]<- tobra_mix[end+1,2:8]
-  error_mix <- error_mix + (tobra_mix[,2:8]-ML)^2
-  tobra_mix['individual'] <- m
-  final_mix <- rbind(final_mix,tobra_mix)
+  options.new<-list(seed=seed0,map=F,fim=F,ll.is=F,nb.chains = 1, nbiter.mcmc = c(2,2,2,2),nbiter.sa=0,nbiter.saemix = c(K1,K2),map.range=c(1:6),nbiter.burn =0)
+  theo_mix<-data.frame(saemix(saemix.model,saemix.data,options.new)$par)
+  theo_mix <- cbind(iterations, theo_mix)
+  theo_mix[,5:8] <- sqrt(theo_mix[,5:8])
+  ML <- theo_mix[,2:8]
+  ML[1:(end+1),]<- theo_mix[end+1,2:8]
+  error_mix <- error_mix + (theo_mix[,2:8]-ML)^2
+  theo_mix['individual'] <- m
+  final_mix <- rbind(final_mix,theo_mix)
 }
 
 error_rwm <- 1/replicate*error_rwm
@@ -283,8 +271,8 @@ error_mix <- cbind(iterations, error_mix)
 error_rwm[2,] = error_mix[2,]
 
 
-err_mix<- tobra_ref
-err_rwm<- tobra_ref
+err_mix<- theo_ref
+err_rwm<- theo_ref
 err_rwm[,2:8] <- error_rwm[,2:8]
 err_mix[,2:8] <- error_mix[,2:8]
 

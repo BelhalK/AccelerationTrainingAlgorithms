@@ -41,10 +41,14 @@ source('R/graphplot.R')
 
 
 
+# bolus_data <- read.table("data/bolus_data.txt", header=T)
+# saemix.data<-saemixData(name.data=bolus_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
+#   name.predictors=c("amt","time"),name.response=c("y"), name.X="time")
 
-bolus_data <- read.table("data/bolus1_data.txt", header=T)
-saemix.data<-saemixData(name.data=bolus_data,header=TRUE,sep=" ",na=NA, name.group=c("id"),
-  name.predictors=c("amt","time"),name.response=c("y"), name.X="time")
+bolus_data <- read.table("data/tobramycin.txt", header=T)
+bolus_data <- bolus_data[bolus_data$EVID==0,]
+saemix.data<-saemixData(name.data=bolus_data,header=TRUE,sep=" ",na=NA, name.group=c("ID"),
+  name.predictors=c("DOSE","TIME"),name.response=c("CP"), name.X="TIME")
 
 
 
@@ -54,14 +58,13 @@ model1cpt<-function(psi,id,xidep) {
   V<-psi[id,1]
   k<-psi[id,2]
   CL<-k*V
-  ypred<-dose/(V*k)*exp(-k*tim)
+  # ypred<-dose/(V*k)*exp(-k*tim)
+  ypred<-1/(V*k)*exp(-k*tim)
   return(ypred)
 }
 
 
-
 ##RUNS
-
 K1 = 400
 K2 = 100
 iterations = 1:(K1+K2+1)
@@ -74,9 +77,9 @@ saemix.model_warfa<-saemixModel(model=model1cpt,description="warfarin",type="str
   byrow=TRUE))
 
 
-i = 5
+i = 2
 
-L_mcmc=5000
+L_mcmc=20000
 options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,L_mcmc=L_mcmc,
   nbiter.mcmc = c(2,2,2,0,0,0,0),nb.chains=1, nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0, map.range=c(0), indiv.index=i)

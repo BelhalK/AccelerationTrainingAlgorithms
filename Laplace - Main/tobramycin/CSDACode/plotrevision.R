@@ -10,7 +10,8 @@ library(dplyr)
 library(data.table)
 library(rstan)
  
- d <- ncol(ref)
+
+d <- ncol(ref)
 i <- 10
 start_interval <- 200
 zero <- as.data.frame(matrix(0,nrow = L_mcmc-start_interval,ncol = 3))
@@ -22,75 +23,72 @@ qmed <- 0.5
 qhigh <- 0.8
 
 
-qref <- list(ref[1:L_mcmc,],ref[1:L_mcmc,],ref[1:L_mcmc,])
+qref <- list(ref[1:L_mcmc,],ref[1:L_mcmc,])
+qnew <- list(new[1:L_mcmc,],new[1:L_mcmc,])
+
 for (dim in 1:d){
   print(dim)
   for (k in 1:L_mcmc){
-    qref[[dim]][k,1] <- quantile(ref[1:k,dim], qlow)
-    qref[[dim]][k,2] <- quantile(ref[1:k,dim], qmed)
-    qref[[dim]][k,3] <- quantile(ref[1:k,dim], qhigh)
+    qref[[dim]][k,1] <- quantile(ref[1:k,dim], qmed)
+    qnew[[dim]][k,1] <- quantile(new[1:k,dim], qmed)
+    qnew.student[[dim]][k,1] <- quantile(new.student[1:k,dim], qmed)
   }
   qref[[dim]]$iteration <- 1:L_mcmc
-}
-
-
-qnew <- list(new[1:L_mcmc,],new[1:L_mcmc,],new[1:L_mcmc,])
-for (dim in 1:d){
-  print(dim)
-  for (k in 1:L_mcmc){
-    qnew[[dim]][k,1] <- quantile(new[1:k,dim], qlow)
-    qnew[[dim]][k,2] <- quantile(new[1:k,dim], qmed)
-    qnew[[dim]][k,3] <- quantile(new[1:k,dim], qhigh)
-  }
   qnew[[dim]]$iteration <- 1:L_mcmc
+  qnew.student[[dim]]$iteration <- 1:L_mcmc
 }
 
 
-qnew.student <- list(new.student[1:L_mcmc,],new.student[1:L_mcmc,],new.student[1:L_mcmc,])
+qnew.student <- list(new.student[1:L_mcmc,],new.student[1:L_mcmc,])
 for (dim in 1:d){
   print(dim)
   for (k in 1:L_mcmc){
-    qnew.student[[dim]][k,1] <- quantile(new.student[1:k,dim], qlow)
-    qnew.student[[dim]][k,2] <- quantile(new.student[1:k,dim], qmed)
-    qnew.student[[dim]][k,3] <- quantile(new.student[1:k,dim], qhigh)
+    qnew.student[[dim]][k,1] <- quantile(new.student[1:k,dim], qmed)
   }
   qnew.student[[dim]]$iteration <- 1:L_mcmc
 }
 
 
-
 iteration <- 1:L_mcmc
 burn <- 100
 
-q1ref <- data.frame(cbind(iteration,qref[[1]][,1],qref[[2]][,1]))
-q2ref <- data.frame(cbind(iteration,qref[[1]][,2],qref[[2]][,2]))
-q3ref <- data.frame(cbind(iteration,qref[[1]][,3],qref[[2]][,3]))
-q1ref$quantile <- 1
-q2ref$quantile <- 2
-q3ref$quantile <- 3
-quantref <- rbind(q2ref[-c(1:burn),])
+quantref <- data.frame(cbind(iteration,qref[[1]][,1],qref[[2]][,1]))
+quantref$quantile <- 1
+quantref <- quantref[-c(1:burn),]
 colnames(quantref) <- c("iteration","V","k","quantile")
 
-q1new <- data.frame(cbind(iteration,qnew[[1]][,1],qnew[[2]][,1]))
-q2new <- data.frame(cbind(iteration,qnew[[1]][,2],qnew[[2]][,2]))
-q3new <- data.frame(cbind(iteration,qnew[[1]][,3],qnew[[2]][,3]))
-q1new$quantile <- 1
-q2new$quantile <- 2
-q3new$quantile <- 3
-quantnew <- rbind(q2new[-c(1:burn),])
-colnames(quantnew)<-c("iteration","V","k","quantile")
+quantnew <- data.frame(cbind(iteration,qnew[[1]][,1],qnew[[2]][,1]))
+quantnew$quantile <- 1
+quantnew <- quantnew[-c(1:burn),]
+colnames(quantnew) <- c("iteration","V","k","quantile")
+
+quantnew.student <- data.frame(cbind(iteration,qnew.student[[1]][,1],qnew.student[[2]][,1]))
+quantnew.student$quantile <- 1
+quantnew.student <- quantnew.student[-c(1:burn),]
+colnames(quantnew.student) <- c("iteration","V","k","quantile")
 
 
-q1new.student <- data.frame(cbind(iteration,qnew.student[[1]][,1],qnew.student[[2]][,1]))
-q2new.student <- data.frame(cbind(iteration,qnew.student[[1]][,2],qnew.student[[2]][,2]))
-q3new.student <- data.frame(cbind(iteration,qnew.student[[1]][,3],qnew.student[[2]][,3]))
-q1new.student$quantile <- 1
-q2new.student$quantile <- 2
-q3new.student$quantile <- 3
-quantnew.student <- rbind(q2new.student[-c(1:burn),])
-colnames(quantnew.student)<-c("iteration","V","k","quantile")
 
 plotquantile(quantref,quantnew)
+
+
+
+q1ref[,2] <- q1ref[,2] + 1 
+q2ref[,2] <- q2ref[,2] + 1
+q3ref[,2] <- q3ref[,2] + 1
+
+q1new[,2] <- q1new[,2] + 1
+q2new[,2] <- q2new[,2] + 1
+q3new[,2] <- q3new[,2] + 1
+
+
+q1ref[,3] <- q1ref[,3] + 8 
+q2ref[,3] <- q2ref[,3] + 8
+q3ref[,3] <- q3ref[,3] + 8
+
+q1new[,3] <- q1new[,3] + 8
+q2new[,3] <- q2new[,3] + 8
+q3new[,3] <- q3new[,3] + 8
 
 
 plotquantile.univariate1 <- function(df,df2, title=NULL, ylim=NULL)

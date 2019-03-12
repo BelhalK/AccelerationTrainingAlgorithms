@@ -303,7 +303,7 @@ mcmc.indiv<-function(model,data,control=list()) {
 		} else{
 			U.y <- compute.LLy_d(phiM,Uargs,Dargs,DYF)
 		}
-		df <- 3
+		df <- 2
 		
 	for (m in 1:saemix.options$L_mcmc) {
 		if(m%%100==0){
