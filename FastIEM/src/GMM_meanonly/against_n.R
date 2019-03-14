@@ -9,11 +9,12 @@ source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 
+# save.image('RData/saga_1000.RData')
 
 # n <- 10
-n <- 10000
+n <- 1000
 # n <- 100000
-K <- n*10
+K <- n*50
 nsim=1
 
 weight<-c(0.2, 0.8)
@@ -81,13 +82,13 @@ df.oem <- vector("list", length=nsim)
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
 
-dsaga <- NULL
-df.saga <- vector("list", length=nsim)
+# dsaga <- NULL
+# df.saga <- vector("list", length=nsim)
 
 
-rho.oemvr <- 0.003
+rho.oemvr <- 0.5
 # rho.saga <-  0.0095
-rho.saga <-  0.005
+rho.saga <-  0.05
 # rho.oemvr <- 1/n**(2/3)
 # rho.saga <- 1/n**(2/3)
 kiter = 1:K
@@ -121,13 +122,13 @@ for (j in (1:nsim))
   # df.iem[[j]] <- df
   # print('iem done')
 
-  df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
-  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  df$rep <- j
-  doem <- rbind(doem,df)
-  df$rep <- NULL
-  df.oem[[j]] <- df
-  print('oem done')
+  # df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
+  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  # df$rep <- j
+  # doem <- rbind(doem,df)
+  # df$rep <- NULL
+  # df.oem[[j]] <- df
+  # print('oem done')
 
   df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -137,13 +138,13 @@ for (j in (1:nsim))
   df.oemvr[[j]] <- df
   print('oemvr done')
 
-  df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
-  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  df$rep <- j
-  dsaga <- rbind(dsaga,df)
-  df$rep <- NULL
-  df.saga[[j]] <- df
-  print('saga done')
+  # df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
+  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  # df$rep <- j
+  # dsaga <- rbind(dsaga,df)
+  # df$rep <- NULL
+  # df.saga[[j]] <- df
+  # print('saga done')
 
 }
 
@@ -277,12 +278,20 @@ saga_ep$iteration <- 1:(K/n)
 
 
 epochs
-start =2
-end = 10
+start =1
+end = 30
 
 variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],
                   saga_ep[start:end,c(1,5,8)])
+
+variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+                  iem_ep[start:end,c(1,4,8)],
+                  # oem_ep[start:end,c(1,4,8)],
+                  em_ep[start:end,c(1,4,8)],
+                  saga_ep[start:end,c(1,4,8)])
+
+
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 

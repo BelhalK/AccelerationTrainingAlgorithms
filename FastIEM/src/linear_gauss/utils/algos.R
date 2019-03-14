@@ -42,22 +42,12 @@ mixt.iem <- function(x, theta0, K, alph,nbr)
   tau<-compute.tau(x,theta,alph)
   n<-length(x)
   l <- NULL
-  # for (j in 1:(K/n))
-  # {
-  #   l <- c(l, sample(1:n,n))
-  # }
-  # l <- sample(1:n,K,replace = TRUE)
-  # l <- rep(1:n,K/n)
+  
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
   for (k in 1:K)
   {
-    if (k%%(n/nbr) == 1)
-    { 
-      # l<-sample(1:n,n)
-      # l<-1:n
-      i<-1:nbr
-    }
+
 
     # i<-sample(1:n,nbr)
     tau[l[i],] <- compute.tau(x[l[i]],theta,alph)
@@ -73,11 +63,10 @@ mixt.iem <- function(x, theta0, K, alph,nbr)
   return(df)
 }
 
-mixt.oem <- function(x, theta0, K, alph,nbr)
+mixt.oem <- function(x, theta0, K, alph,nbr,rho.oemvr)
 {
   G<-1
   kiter = 1:K
-  rho = 3/(kiter+10)
   col.names <- c("iteration", paste0("mu",1:G))
   theta.est <- matrix(NA,K+1,2)
   theta.est[1,] <- c(0, theta0$mu)
@@ -86,28 +75,17 @@ mixt.oem <- function(x, theta0, K, alph,nbr)
   s <- compute.stat(x,tau)
   n<-length(x)
   l <- NULL
-  # for (j in 1:(K/n))
-  # {
-  #   l <- c(l, sample(1:n,n))
-  # }
-  # l <- sample(1:n,K,replace = TRUE)
-  # l <- rep(1:n,K/n)
+ 
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
   for (k in 1:K)
   {
-    if (k%%(n/nbr) == 1)
-    { 
-      # l<-sample(1:n,n)
-      # l<-1:n
-      i<-1:nbr
-    }
-
+   
     # i<-sample(1:n,nbr)
     s.old <- compute.stat(x,tau)
     tau[l[i],] <- compute.tau(x[l[i]],theta,alph)
     # s <- compute.stat(x,tau)
-    s$s1 <- s.old$s1 + rho[k]*(tau[l[i],] - s.old$s1)
+    s$s1 <- s.old$s1 + rho.oemvr[k]*(tau[l[i],] - s.old$s1)
     i <- i+nbr
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k,theta$mu)
@@ -119,10 +97,9 @@ mixt.oem <- function(x, theta0, K, alph,nbr)
 }
 
 
-mixt.oemvr <- function(x, theta0, K, alph,nbr)
+mixt.oemvr <- function(x, theta0, K, alph,nbr,rho.oemvr)
 {
   G<-1
-  rho =0.1
   col.names <- c("iteration", paste0("mu",1:G))
   theta.est <- matrix(NA,K+1,2)
   theta.est[1,] <- c(0, theta0$mu)
@@ -141,7 +118,7 @@ mixt.oemvr <- function(x, theta0, K, alph,nbr)
   {
     if (k%%(n/nbr) == 1)
     { 
-      i<-1:nbr
+      # i<-1:nbr
       tau.old <- compute.tau(x[l[i]],theta,alph)
       s.old.init <- s
     }
@@ -150,7 +127,7 @@ mixt.oemvr <- function(x, theta0, K, alph,nbr)
     s.old <- compute.stat(x,tau)
     tau[l[i],] <- compute.tau(x[l[i]],theta,alph)
     # s <- compute.stat(x,tau)
-    s$s1 <- s.old$s1 + rho*(tau[l[i],] - tau.old + s.old.init$s1 - s.old$s1)
+    s$s1 <- s.old$s1 + rho.oemvr*(tau[l[i],] - tau.old + s.old.init$s1 - s.old$s1)
     i <- i+nbr
     theta<-step.M(s,n)
     theta.est[k+1,] <- c(k,theta$mu)
@@ -162,18 +139,15 @@ mixt.oemvr <- function(x, theta0, K, alph,nbr)
 }
 
 
-mixt.saga <- function(x, theta0, K, alph,nbr)
+mixt.saga <- function(x, theta0, K, alph,nbr, rho.saga)
 {
   G<-1
-  kiter = 1:K
-  rho = 3/(kiter+10)
   col.names <- c("iteration", paste0("mu",1:G))
   theta.est <- matrix(NA,K+1,2)
   theta.est[1,] <- c(0, theta0$mu)
   theta<-theta0
   tau<-compute.tau(x,theta,alph)
-  s <- compute.stat(x,tau)
-  v <- compute.stat(x,tau)
+  s <- v <- h <- compute.stat(x,tau)
   n<-length(x)
   li <- NULL
   alphas <- rep(theta0,n)
@@ -188,22 +162,16 @@ mixt.saga <- function(x, theta0, K, alph,nbr)
   j <- 1:nbr
   for (k in 1:K)
   {
-    if (k%%(n/nbr) == 1)
-    { 
-      # l<-sample(1:n,n)
-      # l<-1:n
-      i<-1:nbr
-      j<-1:nbr
-    }
 
-    # print(li[i] == lj[j])
+    # browser()
     newtau.i<- compute.tau(x[li[i]],theta,alph)
     oldtau.i<- compute.tau(x[li[i]],alphas[li[i]],alph)
-    # tau[li[i],] <- (newtau.i - oldtau.i)*n
-    v$s1 <- s$s1 + (newtau.i - oldtau.i)
-    
+
+    v$s1 <- h$s1 + (newtau.i - oldtau.i)*n
+    s$s1 <- s$s1 - rho.saga*v$s1
+
     oldtheta <- theta
-    theta<-step.M(v,n)
+    theta<-step.M(s,n)
     theta.est[k+1,] <- c(k,theta$mu)
 
     oldalpha.j <- alphas[lj[j]]
@@ -211,7 +179,7 @@ mixt.saga <- function(x, theta0, K, alph,nbr)
     newtau.j<- compute.tau(x[lj[j]],oldtheta,alph)
     oldtau.j<- compute.tau(x[lj[j]],oldalpha.j,alph)
     # tau[lj[j],] <- newtau.i - oldtau.i
-    s$s1 <- s$s1 + (newtau.j - oldtau.j)
+    h$s1 <- h$s1 + (newtau.j - oldtau.j)
 
     i <- i+nbr
     j <- j+nbr

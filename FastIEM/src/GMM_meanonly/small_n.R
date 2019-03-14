@@ -9,7 +9,7 @@ source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 
-load('RData/saga_1000.RData')
+# load('RData/saga_1000.RData')
 # save.image('RData/saga_1000.RData')
 
 # n <- 10
@@ -83,8 +83,8 @@ df.oem <- vector("list", length=nsim)
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
 
-# dsaga <- NULL
-# df.saga <- vector("list", length=nsim)
+dsaga <- NULL
+df.saga <- vector("list", length=nsim)
 
 
 rho.oemvr <- 0.5
@@ -105,31 +105,31 @@ for (j in (1:nsim))
   ML <- mls[[j]]
   print("ML calculation done")
 
-  # df <- mixt.em(x[,j], theta0, Kem)
-  # # ML <- df
-  # # ML[1:(K+1),2:7]<- df[(K+1),2:7]
-  # df[,2:7] <- (df[,2:7] - ML[1:(Kem+1),2:7])^2
-  # df$rep <- j
-  # dem <- rbind(dem,df)
-  # df$rep <- NULL
-  # df.em[[j]] <- df
-  # print('em done')
+  df <- mixt.em(x[,j], theta0, Kem)
+  # ML <- df
+  # ML[1:(K+1),2:7]<- df[(K+1),2:7]
+  df[,2:7] <- (df[,2:7] - ML[1:(Kem+1),2:7])^2
+  df$rep <- j
+  dem <- rbind(dem,df)
+  df$rep <- NULL
+  df.em[[j]] <- df
+  print('em done')
 
-  # df <- mixt.iem(x[,j], theta0, K,nbr)
-  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  # df$rep <- j
-  # diem <- rbind(diem,df)
-  # df$rep <- NULL
-  # df.iem[[j]] <- df
-  # print('iem done')
+  df <- mixt.iem(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  diem <- rbind(diem,df)
+  df$rep <- NULL
+  df.iem[[j]] <- df
+  print('iem done')
 
-  # df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
-  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  # df$rep <- j
-  # doem <- rbind(doem,df)
-  # df$rep <- NULL
-  # df.oem[[j]] <- df
-  # print('oem done')
+  df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  doem <- rbind(doem,df)
+  df$rep <- NULL
+  df.oem[[j]] <- df
+  print('oem done')
 
   df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -139,13 +139,13 @@ for (j in (1:nsim))
   df.oemvr[[j]] <- df
   print('oemvr done')
 
-  # df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
-  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  # df$rep <- j
-  # dsaga <- rbind(dsaga,df)
-  # df$rep <- NULL
-  # df.saga[[j]] <- df
-  # print('saga done')
+  df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  dsaga <- rbind(dsaga,df)
+  df$rep <- NULL
+  df.saga[[j]] <- df
+  print('saga done')
 
 }
 
@@ -276,7 +276,7 @@ saga_ep$iteration <- 1:(K/n)
 # save.image("RData/test_bign.RData")
 
 epochs
-start =1
+start =30
 end = 50
 
 variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],

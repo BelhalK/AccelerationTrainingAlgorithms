@@ -57,6 +57,7 @@ mixt.iem <- function(x, theta0, K,nbr)
   # s <- compute.stat_iem(x,tau, tau.old,1)
 
   l <- rep(sample(1:n,n), K/n)
+  # l <- rep(1:n, K/n)
   i <- 1:nbr
   for (k in 1:K)
   {
@@ -66,13 +67,6 @@ mixt.iem <- function(x, theta0, K,nbr)
       print('IEM')
       print(k)
     }
-
-    if (k%%(n/nbr) == 1)
-    { 
-      i<-1:nbr
-      # print(k)
-    }
-    
     #Update the conditional expectation for the chosen datum
     tau[l[i],] <- compute.tau(x[l[i]],theta)
     
@@ -116,11 +110,6 @@ mixt.oem <- function(x, theta0, K,nbr,rho)
       print(k)
     }
 
-    if (k%%(n/nbr) == 1)
-    { 
-      i<-1:nbr
-      # print(k)
-    }
     tau.indiv.new <- compute.tau(x[l[i]],theta)
     s.indiv.new <- x[l[i]]*tau.indiv.new
 
@@ -171,11 +160,9 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
 
     if (k%%(n/nbr) == 1)
     { 
-      i<-1:nbr
       theta.e.0 <- theta
       tau.e.0 <- compute.tau(x,theta.e.0)
       s.e.0 <- x%*%tau.e.0
-      # print(k)
     }
     #browser()
     tau.indiv.new <- compute.tau(x[l[i]],theta)
@@ -232,12 +219,6 @@ mixt.saga <- function(x, theta0, K,nbr, rho.saga)
       print(k)
     }
 
-
-    if (k%%(n/nbr) == 1)
-    { 
-      i<-1:nbr
-      j<-1:nbr
-    }
     newtau.i<- compute.tau(x[li[i]],theta)
     oldtau.i<- compute.tau(x[li[i]],alphas[[li[i]]])
     # tau[li[i],] <- (newtau.i - oldtau.i)*n

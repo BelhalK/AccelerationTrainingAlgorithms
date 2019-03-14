@@ -2,14 +2,14 @@ source("utils/algos.R")
 source("utils/func.R")
 theme_set(theme_bw())
 # save.image("lin_gauss_saga.RData")
-load("RData/lin_gauss.RData")
+# load("RData/lin_gauss.RData")
 # load("lin_gauss_saga.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
 # sigma<-c(0.5,0.1)*1
 
-n <- 300
+n <- 1000
 mu<-c(10,0)
 mu0<-c(9,0)
 # sigma<-c(10,5)*1
@@ -18,7 +18,7 @@ sigma<-c(1,1)*1
 alph <- sigma[2]/(sigma[1]+sigma[2])
 gamm <- 1/(1/sigma[1]+1/sigma[2])
 
-K <- 3000
+K <- n*10
 # Several Chains for the same iteration
 M <- 1
 
@@ -27,7 +27,7 @@ M <- 1
 seed0=44444
 ylim <- c(0.3)
 
-nsim <- 30
+nsim <- 4
 G<-1
 col.names <- c("iteration", paste0("mu",1:G))
 theta<-list(mu=mu[1])
@@ -63,6 +63,13 @@ df.oemvr <- vector("list", length=nsim)
 dsaga <- NULL
 df.saga <- vector("list", length=nsim)
 
+
+rho.saga <- 0.1
+rho.oemvr <- 0.00001
+kiter = 1:K
+rho.oem = 3/(kiter+10)
+
+
 for (j in (1:nsim))
 {
   print(j)
@@ -88,21 +95,21 @@ for (j in (1:nsim))
   df$rep <- NULL
   df.iem[[j]] <- df
 
-  df <- mixt.oem(xj, theta0, K, alph,nbr)
+  df <- mixt.oem(xj, theta0, K, alph,nbr,rho.oem)
   df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   doem <- rbind(doem,df)
   df$rep <- NULL
   df.oem[[j]] <- df
 
-  df <- mixt.oemvr(xj, theta0, K, alph,nbr)
+  df <- mixt.oemvr(xj, theta0, K, alph,nbr,rho.oemvr)
   df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   doemvr <- rbind(doemvr,df)
   df$rep <- NULL
   df.oemvr[[j]] <- df
 
-  df <- mixt.saga(xj, theta0, K, alph,nbr)
+  df <- mixt.saga(xj, theta0, K, alph,nbr,rho.saga)
   df[,2] <- (df[,2] - ML[,2])^2
   df$rep <- j
   dsaga <- rbind(dsaga,df)
@@ -110,7 +117,7 @@ for (j in (1:nsim))
   df.saga[[j]] <- df
 
 }
-
+theta0<-list(mu=6)
 
 # saga <- NULL
 # saga <- dsaga[dsaga$rep==1,]
