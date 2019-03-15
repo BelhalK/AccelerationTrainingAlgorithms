@@ -9,17 +9,19 @@ source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 
-load('RData/saga_10000.RData')
+# load('RData/saga_10000.RData')
+# load('RData/saga_10000_bis.RData')
 # save.image('RData/saga_10000.RData')
+load('RData/saga_1e5.RData')
 
 # n <- 10
-n <- 10000
+n <- 100000
 # n <- 100000
-K <- n*50
+K <- n*10
 nsim=1
 
 weight<-c(0.2, 0.8)
-mean <- 2
+mean <- 1
 mu<-c(mean,-mean)
 sigma<-c(1,1)*1
 
@@ -88,13 +90,14 @@ dsaga <- NULL
 df.saga <- vector("list", length=nsim)
 
 
-rho.oemvr <- 0.5
-# rho.saga <-  0.0095
-rho.saga <-  0.01
-# rho.oemvr <- 1/n**(2/3)
+# rho.oemvr <- 0.5
+rho.saga <-  0.03
+
+rho.oemvr <- 1/n**(2/3)
 # rho.saga <- 1/n**(2/3)
+
 kiter = 1:K
-rho.oem = 1/(kiter)
+rho.oem = 1/(kiter+5)
 
 
 for (j in (1:nsim))
@@ -278,12 +281,12 @@ saga_ep$iteration <- 1:(K/n)
 
 
 epochs
-start =2
-end = 50
+start =1
+end = 10
 
-variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
-                  oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],
-                  saga_ep[start:end,c(1,5,8)])
+# variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
+#                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],
+#                   saga_ep[start:end,c(1,5,8)])
 
 variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
                   iem_ep[start:end,c(1,4,8)],
@@ -291,10 +294,37 @@ variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
                   em_ep[start:end,c(1,4,8)],
                    saga_ep[start:end,c(1,4,8)])
 
+graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
+
+
+
+em_ep
+oemvr_ep
+
+epochs
+start =7
+end = 10
+variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+                  iem_ep[start:end,c(1,4,8)],
+                  em_ep[start:end,c(1,4,8)],
+                   saga_ep[start:end,c(1,4,8)])
 
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+
+
+# epochs
+# start =2
+# end = 10
+
+# variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+#                   iem_ep[start:end,c(1,4,8)],
+#                   oem_ep[start:end,c(1,4,8)],
+#                   em_ep[start:end,c(1,4,8)])
+
+
+# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 # graphConvMC2_new(iem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
 # graphConvMC2_new(oem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
 # graphConvMC2_new(oemvr_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
-graphConvMC2_new(saga_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
+# graphConvMC2_new(saga_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)

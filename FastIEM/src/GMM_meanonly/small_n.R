@@ -9,11 +9,11 @@ source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 
-# load('RData/saga_1000.RData')
+load('RData/saga_1000.RData')
 # save.image('RData/saga_1000.RData')
 
 # n <- 10
-n <- 1000
+n <- 10000
 # n <- 100000
 K <- n*50
 nsim=1
@@ -276,7 +276,7 @@ saga_ep$iteration <- 1:(K/n)
 # save.image("RData/test_bign.RData")
 
 epochs
-start =30
+start =1
 end = 50
 
 variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
@@ -292,7 +292,7 @@ variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
 
 variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
                   iem_ep[start:end,c(1,4,8)],
-                  # oem_ep[start:end,c(1,4,8)],
+                  oem_ep[start:end,c(1,4,8)],
                   em_ep[start:end,c(1,4,8)], saga_ep[start:end,c(1,4,8)])
 
 
