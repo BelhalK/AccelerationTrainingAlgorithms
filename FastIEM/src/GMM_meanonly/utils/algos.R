@@ -147,31 +147,27 @@ mixt.oemvr <- function(x, theta0, K,nbr,rho)
   l <- NULL
   l <- rep(sample(1:n,n), K/n)
   i <- 1:nbr
-  
+  theta.e.0 <- theta
+  tau.e.0 <- compute.tau(x,theta.e.0)
+  s.e.0 <- x%*%tau.e.0
   for (k in 1:K)
   {
 
-    if (k %% n==0)
-    {
+    if (k%%(n/nbr) == 0)
+    { 
       print('OEMVR')
       print(k)
-    }
-
-
-    if (k%%(n/nbr) == 1)
-    { 
       theta.e.0 <- theta
       tau.e.0 <- compute.tau(x,theta.e.0)
       s.e.0 <- x%*%tau.e.0
     }
     #browser()
     tau.indiv.new <- compute.tau(x[l[i]],theta)
-
     tau.indiv.e.0 <- compute.tau(x[l[i]],theta.e.0)
 
     #Update statistics
-    s$s1 <- s$s1 + rho*(tau.indiv.new - tau.indiv.e.0 + colSums(tau.e.0) - s$s1)
-    s$s2 <- s$s2 + rho*(x[l[i]]*tau.indiv.new - x[l[i]]*tau.indiv.e.0 + s.e.0 - s$s2)
+    s$s1 <- (1-rho)*s$s1 + rho*(tau.indiv.new - tau.indiv.e.0 + colSums(tau.e.0))
+    s$s2 <- (1-rho)*s$s2 + rho*(x[l[i]]*tau.indiv.new - x[l[i]]*tau.indiv.e.0 + s.e.0)
 
     #M-step
     theta$mu <- step.M(s,n)
@@ -227,11 +223,12 @@ mixt.saga <- function(x, theta0, K,nbr, rho.saga)
     v$s2 <- h$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)*n
     
   
-    s$s1 <- s$s1 - rho.saga*v$s1
-    s$s2 <- s$s2 - rho.saga*v$s2
+    s$s1 <- (1-rho.saga)*s$s1 - rho.saga*v$s1
+    s$s2 <- (1-rho.saga)*s$s2 - rho.saga*v$s2
 
     oldtheta <- theta
     theta$mu<-step.M(s,n)
+
     theta.est[k+1,] <- c(k, theta0$p, theta$mu, theta0$sigma)
 
     oldalpha.j <- alphas[[lj[j]]]

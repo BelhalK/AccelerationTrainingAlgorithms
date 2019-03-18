@@ -12,22 +12,23 @@ options(digits = 22)
 # load('RData/saga_10000.RData')
 # load('RData/saga_10000_bis.RData')
 # save.image('RData/saga_10000.RData')
-load('RData/saga_1e5.RData')
+# load('RData/saga_1e5.RData')
 
 # n <- 10
-n <- 100000
+n <- 10000
 # n <- 100000
 K <- n*10
 nsim=1
 
 weight<-c(0.2, 0.8)
-mean <- 1
+mean <- 0.5
 mu<-c(mean,-mean)
 sigma<-c(1,1)*1
 
 
 weight0<-weight
-mu0<-c(0.9,-0.9)
+mean0 <- 1
+mu0<-c(mean0,-mean0)
 sigma0<-sigma
 seed0=23422
 
@@ -45,7 +46,7 @@ theta0<-list(p=weight0,mu=mu0,sigma=sigma0)
 
 x <- matrix(0,nrow=n,ncol=nsim)
 mls <- list()
-end <- 2000
+end <- 200
 for (j in (1:nsim))
 {
 
@@ -82,19 +83,20 @@ df.iem <- vector("list", length=nsim)
 doem <- NULL
 df.oem <- vector("list", length=nsim)
 
-doemvr <- NULL
-df.oemvr <- vector("list", length=nsim)
-
 
 dsaga <- NULL
 df.saga <- vector("list", length=nsim)
 
 
-# rho.oemvr <- 0.5
-rho.saga <-  0.03
+doemvr <- NULL
+df.oemvr <- vector("list", length=nsim)
 
-rho.oemvr <- 1/n**(2/3)
-# rho.saga <- 1/n**(2/3)
+rho.oemvr <- 0.3
+# rho.saga <-  0.03
+
+# rho.oemvr <- 1/n**(2/3)
+
+rho.saga <- 1/n**(2/3)
 
 kiter = 1:K
 rho.oem = 1/(kiter+5)
@@ -119,13 +121,13 @@ for (j in (1:nsim))
   df.em[[j]] <- df
   print('em done')
 
-  df <- mixt.iem(x[,j], theta0, K,nbr)
-  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  df$rep <- j
-  diem <- rbind(diem,df)
-  df$rep <- NULL
-  df.iem[[j]] <- df
-  print('iem done')
+  # df <- mixt.iem(x[,j], theta0, K,nbr)
+  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  # df$rep <- j
+  # diem <- rbind(diem,df)
+  # df$rep <- NULL
+  # df.iem[[j]] <- df
+  # print('iem done')
 
   df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -143,13 +145,13 @@ for (j in (1:nsim))
   df.oemvr[[j]] <- df
   print('oemvr done')
 
-  df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
-  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  df$rep <- j
-  dsaga <- rbind(dsaga,df)
-  df$rep <- NULL
-  df.saga[[j]] <- df
-  print('saga done')
+  # df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
+  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  # df$rep <- j
+  # dsaga <- rbind(dsaga,df)
+  # df$rep <- NULL
+  # df.saga[[j]] <- df
+  # print('saga done')
 
 }
 
@@ -289,6 +291,14 @@ end = 10
 #                   saga_ep[start:end,c(1,5,8)])
 
 variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+                  oem_ep[start:end,c(1,4,8)],
+                  em_ep[start:end,c(1,4,8)])
+
+graphConvMC2_new(variance, title="GMM Stochastic EM",legend=TRUE)
+
+
+
+variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
                   iem_ep[start:end,c(1,4,8)],
                   oem_ep[start:end,c(1,4,8)],
                   em_ep[start:end,c(1,4,8)],
@@ -297,19 +307,21 @@ variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
 graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
 
 
-
+saga_ep
 em_ep
 oemvr_ep
 
-epochs
-start =7
-end = 10
-variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
-                  iem_ep[start:end,c(1,4,8)],
-                  em_ep[start:end,c(1,4,8)],
-                   saga_ep[start:end,c(1,4,8)])
+em_ep[start:end,c(1,4)]- oemvr_ep[start:end,c(1,4)]
 
-graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+# epochs
+# start =7
+# end = 10
+# variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+#                   iem_ep[start:end,c(1,4,8)],
+#                   em_ep[start:end,c(1,4,8)],
+#                    saga_ep[start:end,c(1,4,8)])
+
+# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 
 # epochs

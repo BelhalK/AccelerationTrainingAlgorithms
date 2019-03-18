@@ -3,13 +3,13 @@ source("utils/func.R")
 theme_set(theme_bw())
 # save.image("lin_gauss_saga.RData")
 # load("RData/lin_gauss.RData")
-# load("lin_gauss_saga.RData")
+load("lin_gauss_saga.RData")
 # n <- 100
 # mu<-c(1,0)
 # mu0<-c(0.1,0)
 # sigma<-c(0.5,0.1)*1
 
-n <- 1000
+n <- 10000
 mu<-c(10,0)
 mu0<-c(9,0)
 # sigma<-c(10,5)*1
@@ -239,30 +239,31 @@ oemvr_ep$iteration <- 1:(K/n)
 saga_ep <- saga[epochs,]
 saga_ep$iteration <- 1:(K/n)
 
-# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
-#                   oem_ep[2:20,c(1,5,8)],em_scaled_ep[2:20,c(1,5,8)])
 
-# variance <- rbind(oemvr_ep[,c(1,5,8)],iem_ep[,c(1,5,8)],
-#                   oem_ep[,c(1,5,8)],em_ep[,c(1,5,8)])
-# variance <- rbind(oemvr_ep[2:20,c(1,5,8)],iem_ep[2:20,c(1,5,8)],
-#                   oem_ep[2:20,c(1,5,8)],em_ep[2:20,c(1,5,8)])
-# variance <- rbind(oemvr_ep[5:20,c(1,5,8)],iem_ep[5:20,c(1,5,8)],
-#                   oem_ep[5:20,c(1,5,8)],em_ep[5:20,c(1,5,8)])
 
 
 variance <- NULL
 # variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)])
 # variance <- rbind(em_scaled[0:(K+1),c(1,2,4)],iem[0:(K+1),c(1,2,4)],oem[0:(K+1),c(1,2,4)],oemvr[0:(K+1),c(1,2,4)],saga[0:(K+1),c(1,2,4)])
-start = 0
+epochs
+start = 1
 end = 10
 variance <- rbind(oemvr_ep[start:end,c(1,2,4)],iem_ep[start:end,c(1,2,4)],
                   oem_ep[start:end,c(1,2,4)],em_ep[start:end,c(1,2,4)],saga_ep[start:end,c(1,2,4)])
+
+graphConvMC2_new(variance, title="IEMs Linear Gauss",legend=TRUE)
+
+
 variance <- rbind(iem_ep[start:end,c(1,2,4)],
                   saga_ep[start:end,c(1,2,4)])
 graphConvMC2_new(variance, title="IEMs",legend=TRUE)
 
 iem_ep[start:end,c(1,2,4)]
 saga_ep[start:end,c(1,2,4)]
+
+iem_ep[start:end,c(1,2)] - saga_ep[start:end,c(1,2)]
+
+
 
 # graphConvMC <- function(df,df2,df3,df4, title=NULL, ylim=NULL)
 # {
