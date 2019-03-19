@@ -413,8 +413,8 @@ newLoglikelihood = 1
 ### SAGA EM
 rhosaga = 0.003
 objectiveSAGA = []
+
 for epoch in range(0, nb_epochs):
-# for epoch in range(0, 2):
     if epoch == 0:
         EStep()
         MStep()
@@ -445,11 +445,23 @@ for epoch in range(0, nb_epochs):
                         for k in range(0, K):
                             v[i, j, k] /= denominator;
                 p[i,:,:] = (1 - rhosaga)*p[i,:,:] - rhosaga*v[i,:,:]
+            oldtheta = theta
             MStep()
-
-
-            # oldp = p
-            # EStep_saga2(mini_batches_j[m])
+            for i in range(0, N):
+                for j in range(0, M):
+                    denominator = 0;
+                    for k in range(0, K):
+                        if i in mini_batches_j[m]:
+                            h[i, j, k] = h[i, j, k] + (oldtheta[k, j] * lamda[i, k] - h[i, j, k]);
+                        else: 
+                            h[i, j, k] = h[i, j, k]
+                        denominator += h[i, j, k];
+                    if denominator == 0:
+                        for k in range(0, K):
+                            h[i, j, k] = 0;
+                    else:
+                        for k in range(0, K):
+                            h[i, j, k] /= denominator;
         newLoglikelihood = LogLikelihood()
         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
