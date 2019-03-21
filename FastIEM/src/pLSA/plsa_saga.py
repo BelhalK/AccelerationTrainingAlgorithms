@@ -428,7 +428,7 @@ for epoch in range(0, nb_epochs):
         mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
         mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
         for m in range(len(mini_batches_i)):
-            #Update stats
+            #Update v and s stats
             for i in range(0, N):
                 for j in range(0, M):
                     denominator = 0;
@@ -446,7 +446,11 @@ for epoch in range(0, nb_epochs):
                             v[i, j, k] /= denominator;
                 p[i,:,:] = (1 - rhosaga)*p[i,:,:] - rhosaga*v[i,:,:]
             oldtheta = theta
+
+            #Mstep
             MStep()
+
+            #Update h stats
             for i in range(0, N):
                 for j in range(0, M):
                     denominator = 0;

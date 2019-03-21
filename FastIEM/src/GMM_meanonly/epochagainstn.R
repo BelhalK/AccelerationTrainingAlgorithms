@@ -9,17 +9,17 @@ source("utils/plots.R")
 theme_set(theme_bw())
 options(digits = 22)
 
-load("RData/precisionagainstn.RData")
-
+# save.image("RData/precisionagainstn.RData")
+load("RData/precisionagainstn_VM.RData")
 
 eml <- ieml <- oeml <- oemvrl <- sagal <- list()
-datasizes <- c(1000, 10000,20000)
+datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000)
 
+nsim=1
 
 for (i in (1:length(datasizes))){
   n <- datasizes[i]
   K <- n*10
-  nsim=1
 
   weight<-c(0.2, 0.8)
   mean <- 0.5
@@ -52,7 +52,7 @@ for (i in (1:length(datasizes))){
   {
 
     print(j)
-    seed <- j*seed0
+    seed <- 1*seed0
     set.seed(seed)
     xj<-mixt.simulate(n,weight,mu,sigma)
     x[,j] <- xj
@@ -97,6 +97,7 @@ for (i in (1:length(datasizes))){
 
   # rho.oemvr <- 1/n**(2/3)
   rho.saga <- 1/n**(2/3)
+  # rho.saga <- 0.001
 
   kiter = 1:K
   rho.oem = 1/(kiter+5)
@@ -129,21 +130,21 @@ for (i in (1:length(datasizes))){
     df.iem[[j]] <- df
     print('iem done')
 
-    df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
-    df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-    df$rep <- j
-    doem <- rbind(doem,df)
-    df$rep <- NULL
-    df.oem[[j]] <- df
-    print('oem done')
+    # df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
+    # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+    # df$rep <- j
+    # doem <- rbind(doem,df)
+    # df$rep <- NULL
+    # df.oem[[j]] <- df
+    # print('oem done')
 
-    df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
-    df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-    df$rep <- j
-    doemvr <- rbind(doemvr,df)
-    df$rep <- NULL
-    df.oemvr[[j]] <- df
-    print('oemvr done')
+    # df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
+    # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+    # df$rep <- j
+    # doemvr <- rbind(doemvr,df)
+    # df$rep <- NULL
+    # df.oemvr[[j]] <- df
+    # print('oemvr done')
 
     df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
     df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -250,30 +251,30 @@ for (i in (1:length(datasizes))){
   em_ep$iteration <- 1:(K/n)
   iem_ep <- iem[epochs,]
   iem_ep$iteration <- 1:(K/n)
-  oem_ep <- oem[epochs,]
-  oem_ep$iteration <- 1:(K/n)
-  oemvr_ep <- oemvr[epochs,]
-  oemvr_ep$iteration <- 1:(K/n)
+  # oem_ep <- oem[epochs,]
+  # oem_ep$iteration <- 1:(K/n)
+  # oemvr_ep <- oemvr[epochs,]
+  # oemvr_ep$iteration <- 1:(K/n)
   saga_ep <- saga[epochs,]
   saga_ep$iteration <- 1:(K/n)
 
   eml[[i]] <- em_ep
   ieml[[i]] <- iem_ep
-  oeml[[i]] <- oem_ep
-  oemvrl[[i]] <- oemvr_ep
+  # oeml[[i]] <- oem_ep
+  # oemvrl[[i]] <- oemvr_ep
   sagal[[i]] <- saga_ep
 
 }
 
 
-precision = 0.001
+precision = 0.00001
 emindex <- iemindex <- oemindex <- oemvrindex <- sagaindex <- c()
 
 for (i in (1:length(datasizes))){
   emindex[i] <- which(eml[[i]][,c(4)] < precision)[1]
   iemindex[i] <- which(ieml[[i]][,c(4)] < precision)[1]
-  oemindex[i] <- which(oeml[[i]][,c(4)] < precision)[1]
-  oemvrindex[i] <- which(oemvrl[[i]][,c(4)] < precision)[1]
+  # oemindex[i] <- which(oeml[[i]][,c(4)] < precision)[1]
+  # oemvrindex[i] <- which(oemvrl[[i]][,c(4)] < precision)[1]
   sagaindex[i] <- which(sagal[[i]][,c(4)] < precision)[1]
 }
 
@@ -284,19 +285,101 @@ oemindex
 oemvrindex
 sagaindex
 
+
+for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7)){
+  emindex <- iemindex  <- sagaindex <- c()
+
+  for (i in (1:length(datasizes))){
+    emindex[i] <- which(eml[[i]][,c(4)] < precision)[1]
+    iemindex[i] <- which(ieml[[i]][,c(4)] < precision)[1]
+    sagaindex[i] <- which(sagal[[i]][,c(4)] < precision)[1]
+  }
+  print(precision)
+  print("EM")
+  print(emindex)
+  print("IEM")
+  print(iemindex)
+  print("SAGA")
+  print(sagaindex)
+  # print(c("EM:",emindex))
+  # print(c("IEM:",iemindex))
+  # print(c("SAGA:",sagaindex))
+
+  x  <- datasizes
+  y1 <- emindex
+  y2 <- iemindex
+  y3 <- sagaindex
+  df <- data.frame(x,y1,y2, y3)
+
+
+  print(ggplot(df, aes(x),show.legend = TRUE) +                    
+  geom_line(aes(y=y1), colour="red") +  
+  geom_line(aes(y=y2), colour="green") +
+  geom_line(aes(y=y3), colour="purple") +
+  xlab("Dataset size") + ylab("Iteration")  +
+  ggtitle(precision))
+
+
+}
+
+
+
+curvesaga <- sagal
+curveem <- eml
+curveiem <- ieml
+
+for (i in (1:length(datasizes))){
+  curvesaga[[i]]$size <- datasizes[i]
+  curveem[[i]]$size <- datasizes[i]
+  curveiem[[i]]$size <- datasizes[i]
+}
+
+
+
+
+plot.saga <- rbind(curvesaga[[1]][start:end,c(1,4,9)],
+                  curvesaga[[2]][start:end,c(1,4,9)],
+                  curvesaga[[3]][start:end,c(1,4,9)],
+                  curvesaga[[4]][start:end,c(1,4,9)],
+                  curvesaga[[5]][start:end,c(1,4,9)],
+                  curvesaga[[6]][start:end,c(1,4,9)],
+                  curvesaga[[7]][start:end,c(1,4,9)],
+                  curvesaga[[8]][start:end,c(1,4,9)])
+plotagainstn(plot.saga, title="IEMs GMM 1e5",legend=TRUE)
+
+
+plot.iem <- rbind(curveiem[[1]][start:end,c(1,4,9)],
+                  curveiem[[2]][start:end,c(1,4,9)],
+                  curveiem[[3]][start:end,c(1,4,9)],
+                  curveiem[[4]][start:end,c(1,4,9)],
+                  curveiem[[5]][start:end,c(1,4,9)],
+                  curveiem[[6]][start:end,c(1,4,9)],
+                  curveiem[[7]][start:end,c(1,4,9)],
+                  curveiem[[8]][start:end,c(1,4,9)])
+plotagainstn(plot.iem, title="IEMs GMM 1e5",legend=TRUE)
+
+
+
+plot.em <- rbind(curveem[[1]][start:end,c(1,4,9)],
+                  curveem[[2]][start:end,c(1,4,9)],
+                  curveem[[3]][start:end,c(1,4,9)],
+                  curveem[[4]][start:end,c(1,4,9)],
+                  curveem[[5]][start:end,c(1,4,9)],
+                  curveem[[6]][start:end,c(1,4,9)],
+                  curveem[[7]][start:end,c(1,4,9)],
+                  curveem[[8]][start:end,c(1,4,9)])
+plotagainstn(plot.em, title="IEMs GMM 1e5",legend=TRUE)
+
+
+
 epochs
 start =1
-end = 10
+end = 20
 
-# variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
-#                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],
-#                   saga_ep[start:end,c(1,5,8)])
-
-variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
-                  iem_ep[start:end,c(1,4,8)],
-                  oem_ep[start:end,c(1,4,8)],
-                  em_ep[start:end,c(1,4,8)],
-                   saga_ep[start:end,c(1,4,8)])
+i = 4
+variance <- rbind(ieml[[i]][start:end,c(1,4,8)],
+                  eml[[i]][start:end,c(1,4,8)],
+                   sagal[[i]][start:end,c(1,4,8)])
 
 graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
 

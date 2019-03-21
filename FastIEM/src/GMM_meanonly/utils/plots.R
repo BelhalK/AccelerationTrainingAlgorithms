@@ -94,3 +94,23 @@ panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),a
   do.call("grid.arrange", c(graf, ncol=1, top=title))
 }
 
+
+
+
+plotagainstn <- function(df, title=NULL, ylim=NULL, legend=TRUE)
+{
+  G <- (ncol(df)-2)/3
+  df$size <- as.factor(df$size)
+  ylim <-rep(ylim,each=2)
+  graf <- vector("list", ncol(df)-2)
+  o <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  for (j in (2:(ncol(df)-1)))
+  {
+    grafj <- ggplot(df,aes(colour=df$size ))+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),show.legend = legend) +
+      xlab("epochs")+ scale_y_log10()  + ylab(names(df[j])) 
+    if (!is.null(ylim))
+      grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
+    graf[[o[j]]] <- grafj
+  }
+  do.call("grid.arrange", c(graf, ncol=1, top=title))
+}

@@ -1,5 +1,0 @@
-srun --ntasks=1 --pty -p interactive python plsaforVM_EM.py -nodisplay
-srun --ntasks=1 --pty -p interactive python plsaforVM_IEM.py -nodisplay
-srun --ntasks=1 --pty -p interactive python plsaforVM_OEM.py -nodisplay
-srun --ntasks=1 --pty -p interactive python plsaforVM_OEMVR.py -nodisplay
-srun --ntasks=1 --pty -p interactive python plsaforVM_SAGA.py -nodisplay

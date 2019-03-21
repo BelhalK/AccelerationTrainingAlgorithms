@@ -111,7 +111,7 @@ def EStep_saga1(index):
             denominator = 0;
             for k in range(0, K):
                 if i in index:
-                    p[i, j, k] = theta[k, j] * lamda[i, k];
+                    p[i, j, k] = p[i, j, k] + N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
                 else: 
                     p[i, j, k] = oldp[i, j, k]
                 denominator += p[i, j, k];
@@ -129,7 +129,7 @@ def EStep_saga2(index):
             denominator = 0;
             for k in range(0, K):
                 if i in index:
-                    p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
+                    p[i, j, k] = theta[k, j] * lamda[i, k];
                 else: 
                     p[i, j, k] = oldp[i, j, k]
                 denominator += p[i, j, k];
@@ -139,6 +139,9 @@ def EStep_saga2(index):
             else:
                 for k in range(0, K):
                     p[i, j, k] /= denominator;
+
+
+
 
 
 def MStep():
@@ -294,10 +297,11 @@ def output():
     file.close()
     
 # set the default params and read the params from cmd
-datasetFilePath = 'dataset2.txt'
+datasetFilePath = 'dataset1.txt'
+# datasetFilePath = 'dataset2.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 900
+nb_epochs = 5
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -321,7 +325,7 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = 50
+mini_batch_size = 2
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
@@ -411,6 +415,8 @@ with open ('init/initlamda', 'rb') as fp:
 with open ('init/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
+v = zeros([N, M, K])
+h = zeros([N, M, K])
 oldLoglikelihood = 1
 newLoglikelihood = 1
 ### SAGA EM
@@ -442,8 +448,8 @@ for epoch in range(0, nb_epochs):
         objectiveSAGA.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
 
-with open('losses/localsagaloss', 'wb') as fp: 
-    pickle.dump(objectiveSAGA, fp)
+# with open('losses/localsagaloss', 'wb') as fp: 
+#     pickle.dump(objectiveSAGA, fp)
 
 
 if __name__ == '__main__':

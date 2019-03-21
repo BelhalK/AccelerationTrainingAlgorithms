@@ -54,7 +54,7 @@ mixt.iem <- function(x, theta0, K,nbr)
   tau <- compute.tau(x,theta0)
   theta<-theta0
   # tau.old <- compute.tau(x[1],theta0)
-  # s <- compute.stat_iem(x,tau, tau.old,1)
+  s <- compute.stat(x,tau)
 
   l <- rep(sample(1:n,n), K/n)
   # l <- rep(1:n, K/n)
@@ -68,10 +68,13 @@ mixt.iem <- function(x, theta0, K,nbr)
       print(k)
     }
     #Update the conditional expectation for the chosen datum
+    oldtau <- tau[l[i],]
     tau[l[i],] <- compute.tau(x[l[i]],theta)
     
     #Update the statistics
-    s <- compute.stat(x,tau)
+    s$s1 <- s$s1 + tau[l[i],] - oldtau
+    s$s2 <- s$s2 + x[l[i]]*(tau[l[i],] - oldtau)
+    # s <- compute.stat(x,tau)
     
     #M-step
     theta$mu<-step.M(s,n)
@@ -223,8 +226,8 @@ mixt.saga <- function(x, theta0, K,nbr, rho.saga)
     v$s2 <- h$s2 + (x[li[i]]*newtau.i - x[li[i]]*oldtau.i)*n
     
   
-    s$s1 <- (1-rho.saga)*s$s1 - rho.saga*v$s1
-    s$s2 <- (1-rho.saga)*s$s2 - rho.saga*v$s2
+    s$s1 <- (1-rho.saga)*s$s1 + rho.saga*v$s1
+    s$s2 <- (1-rho.saga)*s$s2 + rho.saga*v$s2
 
     oldtheta <- theta
     theta$mu<-step.M(s,n)
