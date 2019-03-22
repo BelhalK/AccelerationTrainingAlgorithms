@@ -10,8 +10,10 @@ theme_set(theme_bw())
 options(digits = 22)
 
 # save.image("RData/precisionagainstn.RData")
-load("RData/precisionagainstn_VM.RData")
+# load("RData/precisionagainstn_VM.RData")
+load("RData_VM/precisionagainstn_VM.RData")
 
+length(datasizes)
 eml <- ieml <- oeml <- oemvrl <- sagal <- list()
 datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000)
 
@@ -267,32 +269,33 @@ for (i in (1:length(datasizes))){
 }
 
 
-precision = 0.00001
-emindex <- iemindex <- oemindex <- oemvrindex <- sagaindex <- c()
+# precision = 0.00001
+# emindex <- iemindex <- oemindex <- oemvrindex <- sagaindex <- c()
 
-for (i in (1:length(datasizes))){
-  emindex[i] <- which(eml[[i]][,c(4)] < precision)[1]
-  iemindex[i] <- which(ieml[[i]][,c(4)] < precision)[1]
-  # oemindex[i] <- which(oeml[[i]][,c(4)] < precision)[1]
-  # oemvrindex[i] <- which(oemvrl[[i]][,c(4)] < precision)[1]
-  sagaindex[i] <- which(sagal[[i]][,c(4)] < precision)[1]
-}
-
-
-emindex
-iemindex
-oemindex
-oemvrindex
-sagaindex
+# for (i in (1:length(datasizes))){
+#   emindex[i] <- which(eml[[i]][,c(4)] < precision)[1]
+#   iemindex[i] <- which(ieml[[i]][,c(4)] < precision)[1]
+#   # oemindex[i] <- which(oeml[[i]][,c(4)] < precision)[1]
+#   # oemvrindex[i] <- which(oemvrl[[i]][,c(4)] < precision)[1]
+#   sagaindex[i] <- which(sagal[[i]][,c(4)] < precision)[1]
+# }
 
 
-for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7)){
+# emindex
+# iemindex
+# oemindex
+# oemvrindex
+# sagaindex
+
+
+precision = 1e-7
+for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11)){
   emindex <- iemindex  <- sagaindex <- c()
 
   for (i in (1:length(datasizes))){
-    emindex[i] <- which(eml[[i]][,c(4)] < precision)[1]
-    iemindex[i] <- which(ieml[[i]][,c(4)] < precision)[1]
-    sagaindex[i] <- which(sagal[[i]][,c(4)] < precision)[1]
+    emindex[i] <- datasizes[[i]]*which(emiter[[i]][,c(4)] < precision)[1]
+    iemindex[i] <- which(iemiter[[i]][,c(4)] < precision)[1]
+    sagaindex[i] <- which(sagaiter[[i]][,c(4)] < precision)[1]
   }
   print(precision)
   print("EM")
@@ -301,9 +304,6 @@ for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7)){
   print(iemindex)
   print("SAGA")
   print(sagaindex)
-  # print(c("EM:",emindex))
-  # print(c("IEM:",iemindex))
-  # print(c("SAGA:",sagaindex))
 
   x  <- datasizes
   y1 <- emindex
@@ -311,17 +311,95 @@ for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7)){
   y3 <- sagaindex
   df <- data.frame(x,y1,y2, y3)
 
-
   print(ggplot(df, aes(x),show.legend = TRUE) +                    
   geom_line(aes(y=y1), colour="red") +  
   geom_line(aes(y=y2), colour="green") +
   geom_line(aes(y=y3), colour="purple") +
-  xlab("Dataset size") + ylab("Iteration")  +
+  xlab("Dataset size") + ylab("Epoch")  +
   ggtitle(precision))
-
 
 }
 
+
+
+eqiem = function(x){x}
+eqsaga = function(x){x**(2/3)}
+
+x  <- datasizes
+y1 <- eqiem(datasizes)
+y2 <- eqsaga(datasizes)
+df <- data.frame(x,y1,y2)
+
+ggplot(df, aes(x),show.legend = TRUE) +                    
+  geom_line(aes(y=y1), colour="red") +  
+  geom_line(aes(y=y2), colour="green") +
+  xlab("Dataset size") + ylab("Epoch")  +
+  ggtitle(precision)
+
+
+plot(eqsaga(1000:100000), type='l')
+
+
+
+for (precision in c(1e-2,1e-3,1e-4,1e-5)){
+  emindex <- iemindex  <- sagaindex <- c()
+
+  for (i in (1:length(datasizes))){
+    iemindex[i] <- which(iemiter[[i]][,c(4)] < precision)[1]
+    iemseqindex[i] <- which(iemseqiter[[i]][,c(4)] < precision)[1]
+    sagaindex[i] <- which(sagaiter[[i]][,c(4)] < precision)[1]
+    oemvrindex[i] <- which(oemvriter[[i]][,c(4)] < precision)[1]
+  }
+  print("IEM")
+  print(iemindex)
+  print("SAGA")
+  print(sagaindex)
+
+  x  <- datasizes
+  y1 <- iemindex
+  y2 <- iemseqindex
+  y3 <- sagaindex
+  y4 <- oemvrindex
+  ytwothird <- eqsaga(datasizes)
+  ylin <- eqiem(datasizes)
+  df <- data.frame(x,y2, y3,ytest)
+
+  print(ggplot(df, aes(x),show.legend = TRUE) +                    
+    geom_line(aes(y=y1), colour="red") +
+  geom_line(aes(y=y2), colour="blue") +
+  geom_line(aes(y=y3), colour="green") +
+  geom_line(aes(y=y4), colour="purple") +
+  geom_line(aes(y=ytwothird), colour="black") +
+  geom_line(aes(y=ylin), colour="brown") +
+  scale_y_log10()  + scale_x_log10() +
+  xlab("Dataset size") + ylab("Epoch")  +
+  ggtitle(precision))
+
+}
+
+
+
+
+for (precision in c(1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11)){
+  emindex <- iemindex  <- sagaindex <- c()
+
+  for (i in (1:length(datasizes))){
+    sagaindex[i] <- which(sagaiter[[i]][,c(4)] < precision)[1]
+  }
+
+  print("SAGA")
+  print(sagaindex)
+
+  x  <- datasizes
+  y3 <- sagaindex
+  df <- data.frame(x,y2, y3)
+
+  print(ggplot(df, aes(x),show.legend = TRUE) +                    
+  geom_line(aes(y=y3), colour="purple") +
+  xlab("Dataset size") + ylab("Epoch")  +
+  ggtitle(precision))
+
+}
 
 
 curvesaga <- sagal
@@ -336,16 +414,25 @@ for (i in (1:length(datasizes))){
 
 
 
+epochs
+start =1
+end = 10
 
-plot.saga <- rbind(curvesaga[[1]][start:end,c(1,4,9)],
-                  curvesaga[[2]][start:end,c(1,4,9)],
-                  curvesaga[[3]][start:end,c(1,4,9)],
-                  curvesaga[[4]][start:end,c(1,4,9)],
-                  curvesaga[[5]][start:end,c(1,4,9)],
-                  curvesaga[[6]][start:end,c(1,4,9)],
-                  curvesaga[[7]][start:end,c(1,4,9)],
-                  curvesaga[[8]][start:end,c(1,4,9)])
-plotagainstn(plot.saga, title="IEMs GMM 1e5",legend=TRUE)
+plot.saga <- NULL
+for (i in (1:length(datasizes))){
+  plot.saga <- rbind(plot.saga, curvesaga[[i]][start:end,c(1,4,9)])
+
+}
+
+# plot.saga <- rbind(curvesaga[[1]][start:end,c(1,4,9)],
+#                   curvesaga[[2]][start:end,c(1,4,9)],
+#                   curvesaga[[3]][start:end,c(1,4,9)],
+#                   curvesaga[[4]][start:end,c(1,4,9)],
+#                   curvesaga[[5]][start:end,c(1,4,9)],
+#                   curvesaga[[6]][start:end,c(1,4,9)],
+#                   curvesaga[[7]][start:end,c(1,4,9)],
+#                   curvesaga[[8]][start:end,c(1,4,9)])
+plotagainstn(plot.saga, title="SAGA-EM for different dataset size",legend=TRUE)
 
 
 plot.iem <- rbind(curveiem[[1]][start:end,c(1,4,9)],

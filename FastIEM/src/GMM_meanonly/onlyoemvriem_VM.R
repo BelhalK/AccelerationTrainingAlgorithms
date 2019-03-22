@@ -1,12 +1,12 @@
-# require(ggplot2)
-# require(gridExtra)
-# require(reshape2)
+require(ggplot2)
+require(gridExtra)
+require(reshape2)
 library(rlist)
 
 source("utils/algos.R")
 source("utils/func.R")
-# source("utils/plots.R")
-# theme_set(theme_bw())
+source("utils/plots.R")
+theme_set(theme_bw())
 options(digits = 22)
 
 
@@ -15,7 +15,7 @@ eml <- ieml <- iemseql <- oeml <- oemvrl <- sagal <- list()
 emiter <- iemiter <-iemseqiter <- oemiter <- oemvriter <- sagaiter <- list()
 datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000, 100000)
 
-nsim=5
+nsim=1
 
 for (i in (1:length(datasizes))){
   n <- datasizes[i]
@@ -80,9 +80,6 @@ for (i in (1:length(datasizes))){
   nbr<-1
   diem <- NULL
   df.iem <- vector("list", length=nsim)
-
-  diemseq <- NULL
-  df.iemseq <- vector("list", length=nsim)
 
   doem <- NULL
   df.oem <- vector("list", length=nsim)

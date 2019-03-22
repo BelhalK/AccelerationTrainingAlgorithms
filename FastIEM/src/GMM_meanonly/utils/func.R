@@ -47,6 +47,7 @@ compute.tau<-function(x,theta)
 }
 
 
+
 compute.stat<-function(x,Z)
 {
   G<-dim(Z)[2]

@@ -27,7 +27,7 @@ sigma<-c(1,1)*1
 
 
 weight0<-weight
-mean0 <- 1
+mean0 <- 0.4
 mu0<-c(mean0,-mean0)
 sigma0<-sigma
 seed0=23422
@@ -80,6 +80,9 @@ nbr<-1
 diem <- NULL
 df.iem <- vector("list", length=nsim)
 
+diemseq <- NULL
+df.iemseq <- vector("list", length=nsim)
+
 doem <- NULL
 df.oem <- vector("list", length=nsim)
 
@@ -91,12 +94,12 @@ df.saga <- vector("list", length=nsim)
 doemvr <- NULL
 df.oemvr <- vector("list", length=nsim)
 
-rho.oemvr <- 0.3
-# rho.saga <-  0.03
+rho.oemvr <- 0.003
+rho.saga <-  0.003
 
 # rho.oemvr <- 1/n**(2/3)
 
-rho.saga <- 1/n**(2/3)
+# rho.saga <- 1/n**(2/3)
 
 kiter = 1:K
 rho.oem = 1/(kiter+5)
@@ -112,22 +115,30 @@ for (j in (1:nsim))
   print("ML calculation done")
 
   df <- mixt.em(x[,j], theta0, Kem)
-  # ML <- df
-  # ML[1:(K+1),2:7]<- df[(K+1),2:7]
   df[,2:7] <- (df[,2:7] - ML[1:(Kem+1),2:7])^2
+  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
   df$rep <- j
   dem <- rbind(dem,df)
   df$rep <- NULL
   df.em[[j]] <- df
   print('em done')
 
-  # df <- mixt.iem(x[,j], theta0, K,nbr)
-  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  # df$rep <- j
-  # diem <- rbind(diem,df)
-  # df$rep <- NULL
-  # df.iem[[j]] <- df
-  # print('iem done')
+  df <- mixt.iem(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  diem <- rbind(diem,df)
+  df$rep <- NULL
+  df.iem[[j]] <- df
+  print('iem done')
+
+  df <- mixt.iem.seq(x[,j], theta0, K,nbr)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  diemseq <- rbind(diemseq,df)
+  df$rep <- NULL
+  df.iemseq[[j]] <- df
+  print('iemseq done')
+
 
   df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
   df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -145,13 +156,13 @@ for (j in (1:nsim))
   df.oemvr[[j]] <- df
   print('oemvr done')
 
-  # df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
-  # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-  # df$rep <- j
-  # dsaga <- rbind(dsaga,df)
-  # df$rep <- NULL
-  # df.saga[[j]] <- df
-  # print('saga done')
+  df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
+  df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+  df$rep <- j
+  dsaga <- rbind(dsaga,df)
+  df$rep <- NULL
+  df.saga[[j]] <- df
+  print('saga done')
 
 }
 
@@ -183,6 +194,21 @@ if (nsim>2) {
 
 iem[,2:7] <- 1/nsim*iem[,2:7]
 iem[,9]<-NULL
+
+
+
+iemseq <- NULL
+iemseq <- diemseq[diemseq$rep==1,]
+
+if (nsim>2) {
+    for (j in (2:nsim))
+  {
+    iemseq[,2:7] <- iemseq[,2:7]+diemseq[diemseq$rep==j,2:7]
+  }
+}
+
+iemseq[,2:7] <- 1/nsim*iemseq[,2:7]
+iemseq[,9]<-NULL
 
 
 
@@ -232,6 +258,7 @@ saga[,9]<-NULL
 
 
 iem$algo <- 'IEM'
+iemseq$algo <- 'IEMseq'
 oem$algo <- 'OEM'
 oemvr$algo <- 'OEMvr'
 saga$algo <- 'saga'
@@ -239,6 +266,7 @@ em$algo <- 'EM'
 
 em$rep <- NULL
 iem$rep <- NULL
+iemseq$rep <- NULL
 oem$rep <- NULL
 oemvr$rep <- NULL
 saga$rep <- NULL
@@ -258,7 +286,9 @@ saga_ep <- saga[epochs,]
 saga_ep$iteration <- 1:(K/n)
 
 
+oemvr_ep
 
+em_ep
 # df <- NULL
 # em <- iem <- oem <- oemvr <- saga <- NULL
 # dem <- NULL
@@ -282,20 +312,42 @@ saga_ep$iteration <- 1:(K/n)
 # save.image("RData/test_bign.RData")
 
 
+start =10000
+end = 100000
+
+
+
+
+em_ep <- em
+em_ep$iteration <- n*em$iteration
+
+
+
+variance <- rbind(oemvr[start:end,c(1,4,8)],
+                  iem[start:end,c(1,4,8)],
+                  oem[start:end,c(1,4,8)],
+                  iemseq[start:end,c(1,4,8)],
+                  em_ep[,c(1,4,8)])
+
+graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
+
+
+
+
+
+
+variance <- rbind(oemvr[start:end,c(1,4,8)],
+                  iem[start:end,c(1,4,8)],
+                  iemseq[start:end,c(1,4,8)],
+                  oem[start:end,c(1,4,8)],
+                  em_ep[,c(1,4,8)],
+                   saga[start:end,c(1,4,8)])
+
+graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
+
 epochs
-start =1
+start =2
 end = 10
-
-# variance <- rbind(oemvr_ep[start:end,c(1,5,8)],iem_ep[start:end,c(1,5,8)],
-#                   oem_ep[start:end,c(1,5,8)],em_ep[start:end,c(1,5,8)],
-#                   saga_ep[start:end,c(1,5,8)])
-
-variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
-                  oem_ep[start:end,c(1,4,8)],
-                  em_ep[start:end,c(1,4,8)])
-
-graphConvMC2_new(variance, title="GMM Stochastic EM",legend=TRUE)
-
 
 
 variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
