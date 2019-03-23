@@ -12,6 +12,7 @@ options(digits = 22)
 # save.image("RData/precisionagainstn.RData")
 # load("RData/precisionagainstn_VM.RData")
 load("RData_VM/precisionagainstn_VM.RData")
+load("RData_VM/precisionagainstn_VM_onlyoemvriem.RData")
 
 length(datasizes)
 eml <- ieml <- oeml <- oemvrl <- sagal <- list()
@@ -339,6 +340,41 @@ ggplot(df, aes(x),show.legend = TRUE) +
 
 plot(eqsaga(1000:100000), type='l')
 
+
+iemiternew <- iemiter
+iemseqiternew <- iemseqiter
+oemvriternew <- oemvriter
+
+for (precision in c(1e-2,1e-3,1e-4,1e-5)){
+  iemseqindex <- iemindex  <- oemvrindex <- c()
+
+  for (i in (1:length(datasizes))){
+    iemindex[i] <- which(iemiter[[i]][,c(4)] < precision)[1]
+    iemseqindex[i] <- which(iemseqiter[[i]][,c(4)] < precision)[1]
+    # sagaindex[i] <- which(sagaiter[[i]][,c(4)] < precision)[1]
+    oemvrindex[i] <- which(oemvriter[[i]][,c(4)] < precision)[1]
+  }
+
+  x  <- datasizes
+  y1 <- iemindex
+  y2 <- iemseqindex
+  # y3 <- sagaindex
+  y4 <- oemvrindex
+  ytwothird <- eqsaga(datasizes)
+  ylin <- eqiem(datasizes)
+  df <- data.frame(x,y1,y2,y4,ytwothird,ylin)
+
+  print(ggplot(df, aes(x),show.legend = TRUE) +                    
+    geom_line(aes(y=y1), colour="red") +
+  geom_line(aes(y=y2), colour="blue") +
+  geom_line(aes(y=y4), colour="purple") +
+  geom_line(aes(y=ytwothird), colour="black") +
+  geom_line(aes(y=ylin), colour="brown") +
+  scale_y_log10()  + scale_x_log10() +
+  xlab("Dataset size") + ylab("Iteration")  +
+  ggtitle(precision))
+
+}
 
 
 for (precision in c(1e-2,1e-3,1e-4,1e-5)){

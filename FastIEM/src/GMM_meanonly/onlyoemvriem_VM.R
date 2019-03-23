@@ -1,21 +1,17 @@
-require(ggplot2)
-require(gridExtra)
-require(reshape2)
+
 library(rlist)
 
 source("utils/algos.R")
 source("utils/func.R")
-source("utils/plots.R")
-theme_set(theme_bw())
 options(digits = 22)
 
 
 
 eml <- ieml <- iemseql <- oeml <- oemvrl <- sagal <- list()
 emiter <- iemiter <-iemseqiter <- oemiter <- oemvriter <- sagaiter <- list()
-datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000, 100000)
-
-nsim=1
+# datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000, 100000)
+datasizes <- seq(1000, 106000, 5000)
+nsim=5
 
 for (i in (1:length(datasizes))){
   n <- datasizes[i]
@@ -81,6 +77,9 @@ for (i in (1:length(datasizes))){
   diem <- NULL
   df.iem <- vector("list", length=nsim)
 
+  diemseq <- NULL
+  df.iemseq <- vector("list", length=nsim)
+  
   doem <- NULL
   df.oem <- vector("list", length=nsim)
 
@@ -112,15 +111,15 @@ for (i in (1:length(datasizes))){
     ML <- mls[[j]]
     print("ML calculation done")
 
-    df <- mixt.em(x[,j], theta0, Kem)
-    # ML <- df
-    # ML[1:(K+1),2:7]<- df[(K+1),2:7]
-    df[,2:7] <- (df[,2:7] - ML[1:(Kem+1),2:7])^2
-    df$rep <- j
-    dem <- rbind(dem,df)
-    df$rep <- NULL
-    df.em[[j]] <- df
-    print('em done')
+    # df <- mixt.em(x[,j], theta0, Kem)
+    # # ML <- df
+    # # ML[1:(K+1),2:7]<- df[(K+1),2:7]
+    # df[,2:7] <- (df[,2:7] - ML[1:(Kem+1),2:7])^2
+    # df$rep <- j
+    # dem <- rbind(dem,df)
+    # df$rep <- NULL
+    # df.em[[j]] <- df
+    # print('em done')
 
     df <- mixt.iem(x[,j], theta0, K,nbr)
     df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -138,13 +137,13 @@ for (i in (1:length(datasizes))){
     df.iemseq[[j]] <- df
     print('iemseq done')
 
-    df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
-    df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-    df$rep <- j
-    doem <- rbind(doem,df)
-    df$rep <- NULL
-    df.oem[[j]] <- df
-    print('oem done')
+    # df <- mixt.oem(x[,j], theta0, K,nbr,rho.oem)
+    # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+    # df$rep <- j
+    # doem <- rbind(doem,df)
+    # df$rep <- NULL
+    # df.oem[[j]] <- df
+    # print('oem done')
 
     df <- mixt.oemvr(x[,j], theta0, K,nbr,rho.oemvr)
     df[,2:7] <- (df[,2:7] - ML[,2:7])^2
@@ -154,29 +153,29 @@ for (i in (1:length(datasizes))){
     df.oemvr[[j]] <- df
     print('oemvr done')
 
-    df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
-    df[,2:7] <- (df[,2:7] - ML[,2:7])^2
-    df$rep <- j
-    dsaga <- rbind(dsaga,df)
-    df$rep <- NULL
-    df.saga[[j]] <- df
-    print('saga done')
+    # df <- mixt.saga(x[,j], theta0, K,nbr,rho.saga)
+    # df[,2:7] <- (df[,2:7] - ML[,2:7])^2
+    # df$rep <- j
+    # dsaga <- rbind(dsaga,df)
+    # df$rep <- NULL
+    # df.saga[[j]] <- df
+    # print('saga done')
 
   }
 
 
-  # dem[,2:7] <- dem[,2:7]^2
-  em <- NULL
-  em <- dem[dem$rep==1,]
+  # # dem[,2:7] <- dem[,2:7]^2
+  # em <- NULL
+  # em <- dem[dem$rep==1,]
 
-  if (nsim>2) {
-     for (j in (2:nsim))
-  	{
-  	  em[,2:7] <- em[,2:7]+dem[dem$rep==j,2:7]
-  	}
-  }
-  em[,2:7] <- 1/nsim*em[,2:7]
-  em[,9]<-NULL
+  # if (nsim>2) {
+  #    for (j in (2:nsim))
+  # 	{
+  # 	  em[,2:7] <- em[,2:7]+dem[dem$rep==j,2:7]
+  # 	}
+  # }
+  # em[,2:7] <- 1/nsim*em[,2:7]
+  # em[,9]<-NULL
 
 
 
@@ -208,18 +207,18 @@ for (i in (1:length(datasizes))){
   iemseq[,9]<-NULL
 
 
-  oem <- NULL
-  oem <- doem[doem$rep==1,]
+  # oem <- NULL
+  # oem <- doem[doem$rep==1,]
 
-  if (nsim>2) {
-      for (j in (2:nsim))
-    {
-      oem[,2:7] <- oem[,2:7]+doem[doem$rep==j,2:7]
-    }
-  }
+  # if (nsim>2) {
+  #     for (j in (2:nsim))
+  #   {
+  #     oem[,2:7] <- oem[,2:7]+doem[doem$rep==j,2:7]
+  #   }
+  # }
 
-  oem[,2:7] <- 1/nsim*oem[,2:7]
-  oem[,9]<-NULL
+  # oem[,2:7] <- 1/nsim*oem[,2:7]
+  # oem[,9]<-NULL
 
 
 
@@ -239,69 +238,69 @@ for (i in (1:length(datasizes))){
 
 
 
-  saga <- NULL
-  saga <- dsaga[dsaga$rep==1,]
+  # saga <- NULL
+  # saga <- dsaga[dsaga$rep==1,]
 
-  if (nsim>2) {
-      for (j in (2:nsim))
-    {
-      saga[,2:7] <- saga[,2:7]+dsaga[dsaga$rep==j,2:7]
-    }
-  }
+  # if (nsim>2) {
+  #     for (j in (2:nsim))
+  #   {
+  #     saga[,2:7] <- saga[,2:7]+dsaga[dsaga$rep==j,2:7]
+  #   }
+  # }
 
-  saga[,2:7] <- 1/nsim*saga[,2:7]
-  saga[,9]<-NULL
+  # saga[,2:7] <- 1/nsim*saga[,2:7]
+  # saga[,9]<-NULL
 
 
   iem$algo <- 'IEM'
   iemseq$algo <- 'IEMseq'
-  oem$algo <- 'OEM'
+  # oem$algo <- 'OEM'
   oemvr$algo <- 'OEMvr'
-  saga$algo <- 'saga'
-  em$algo <- 'EM'
+  # saga$algo <- 'saga'
+  # em$algo <- 'EM'
 
-  em$rep <- NULL
+  # em$rep <- NULL
   iem$rep <- NULL
   iemseq$rep <- NULL
-  oem$rep <- NULL
+  # oem$rep <- NULL
   oemvr$rep <- NULL
-  saga$rep <- NULL
+  # saga$rep <- NULL
 
 
   ### PER EPOCH
   epochs = seq(1, K, by=n)
-  em_ep <- em[1:(K/n),]
-  em_ep$iteration <- 1:(K/n)
+  # em_ep <- em[1:(K/n),]
+  # em_ep$iteration <- 1:(K/n)
   iem_ep <- iem[epochs,]
   iem_ep$iteration <- 1:(K/n)
   iemseq_ep <- iemseq[epochs,]
   iemseq_ep$iteration <- 1:(K/n)
-  oem_ep <- oem[epochs,]
-  oem_ep$iteration <- 1:(K/n)
+  # oem_ep <- oem[epochs,]
+  # oem_ep$iteration <- 1:(K/n)
   oemvr_ep <- oemvr[epochs,]
   oemvr_ep$iteration <- 1:(K/n)
-  saga_ep <- saga[epochs,]
-  saga_ep$iteration <- 1:(K/n)
+  # saga_ep <- saga[epochs,]
+  # saga_ep$iteration <- 1:(K/n)
 
 
-  emiter[[i]] <- em
+  # emiter[[i]] <- em
   iemiter[[i]] <- iem
   iemseqiter[[i]] <- iemseq
-  oemiter[[i]] <- oem
+  # oemiter[[i]] <- oem
   oemvriter[[i]] <- oemvr
-  sagaiter[[i]] <- saga
+  # sagaiter[[i]] <- saga
 
-  eml[[i]] <- em_ep
+  # eml[[i]] <- em_ep
   ieml[[i]] <- iem_ep
   iemseql[[i]] <- iemseq_ep
-  oeml[[i]] <- oem_ep
+  # oeml[[i]] <- oem_ep
   oemvrl[[i]] <- oemvr_ep
-  sagal[[i]] <- saga_ep
+  # sagal[[i]] <- saga_ep
 
 }
 
 
-save.image("RData/precisionagainstn_VM.RData")
+save.image("RData/precisionagainstn_VM_onlyoemvriem.RData")
 
 # precision = 0.00001
 # emindex <- iemindex <- oemindex <- oemvrindex <- sagaindex <- c()

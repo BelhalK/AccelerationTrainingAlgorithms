@@ -13,7 +13,9 @@ options(digits = 22)
 
 eml <- ieml <- iemseql <- oeml <- oemvrl <- sagal <- list()
 emiter <- iemiter <-iemseqiter <- oemiter <- oemvriter <- sagaiter <- list()
-datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000, 100000)
+# datasizes <- c(1000, 5000, 10000, 20000, 30000, 40000,50000, 100000)
+
+datasizes <- seq(1000, 106000, 5000)
 
 nsim=5
 
