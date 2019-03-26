@@ -18,20 +18,17 @@ load("RData_VM2/precisionagainstn_VM.RData")
 # library("R.utils")
 # value <- loadToEnv("RData_VM2/precisionagainstn_VM.RData")[["datasizes"]];
 
-
-# save(emiter,file="emiter.RData")
-# save(iemiter,file="iemiter.RData")
-# save(iemseqiter,file="iemseqiter.RData")
-# save(oemvriter,file="oemvriter.RData")
-# save(sagaiter,file="sagaiter.RData")
-# save(oemiter,file="oemiter.RData")
+datasizes <- seq(1000, 106000, 5000)
+# # save(emiter,file="emiter.RData")
+# save(iemiter,file="RData/iemiter.RData")
+# save(iemseqiter,file="RData/iemseqiter.RData")
+# save(oemvriter,file="RData/oemvriter.RData")
+# save(sagaiter,file="RData/sagaiter.RData")
+# save(oemiter,file="RData/oemiter.RData")
 
 # iemiternew <- iemiter
 # iemseqiternew <- iemseqiter
 # oemvriternew <- oemvriter
-
-e1 <- new.env() 
-load("RData_VM2/precisionagainstn_VM.RData",e1)
 
 
 length(datasizes)
