@@ -10,40 +10,29 @@ theme_set(theme_bw())
 options(digits = 22)
 
 
-# load("RData_VM/precisionagainstn_VM2.RData")
-load("RData_VM2/precisionagainstn_VM.RData")
-
-
-
-# library("R.utils")
-# value <- loadToEnv("RData_VM2/precisionagainstn_VM.RData")[["datasizes"]];
-
 datasizes <- seq(1000, 106000, 5000)
-# # save(emiter,file="emiter.RData")
-# save(iemiter,file="RData/iemiter.RData")
-# save(iemseqiter,file="RData/iemseqiter.RData")
-# save(oemvriter,file="RData/oemvriter.RData")
-# save(sagaiter,file="RData/sagaiter.RData")
-# save(oemiter,file="RData/oemiter.RData")
 
-# iemiternew <- iemiter
-# iemseqiternew <- iemseqiter
-# oemvriternew <- oemvriter
+
+load("RData_sep/emiter.RData")
+load("RData_sep/iemiter.RData")
+load("RData_sep/iemseqiter.RData")
+load("RData_sep/oemiter.RData")
+load("RData_sep/oemvriter.RData")
+load("RData_sep/sagaiter.RData")
+
+
+
 
 
 length(datasizes)
-length(oemiter)
 
-em_ep <- eml
-for (i in (1:length(datasizes))){
-	em_ep[[i]]$iteration <- datasizes[i]*eml[[i]]$iteration
-}
+
 
 eqiem = function(x){x+100}
 eqsaga = function(x){x**(2/3)}
 
 
-for (precision in c(1e-2,1e-3,1e-4,1e-5)){
+for (precision in c(1e-2,1e-3,1e-4,1e-5, 1e-20)){
   emindex  <- iemseqindex <- iemindex  <- oemvrindex <- sagaindex  <- c()
 
   for (i in (1:length(datasizes))){
@@ -77,5 +66,146 @@ for (precision in c(1e-2,1e-3,1e-4,1e-5)){
   ggtitle(precision))
 
 }
+
+
+
+em_ep <- emiter
+for (i in (1:length(datasizes))){
+  em_ep[[i]]$iteration <- datasizes[i]*emiter[[i]]$iteration
+}
+
+
+
+i = 15
+start = 0
+end = 20000
+variance <- rbind(emiter[[i]][start:end,c(1,4,8)],
+                  iemseqiter[[i]][start:end,c(1,4,8)],
+                  sagaiter[[i]][start:end,c(1,4,8)],
+                   oemvriter[[i]][start:end,c(1,4,8)])
+
+graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
+
+
+length(oemvrl)
+curveoemvr <- oemvriter
+curvesaga <- sagaiter
+curveem <- emiter
+curveiem <- iemiter
+curveiemseq <- iemseqiter
+
+for (i in (1:length(datasizes))){
+  curveoemvr[[i]]$size <- datasizes[i]
+  curvesaga[[i]]$size <- datasizes[i]
+  curveem[[i]]$size <- datasizes[i]
+  curveiem[[i]]$size <- datasizes[i]
+  curveiemseq[[i]]$size <- datasizes[i]
+}
+
+
+
+epochs
+start =1
+end = 100000
+plot.oemvr <- NULL
+plot.saga <- NULL
+for (i in (1:length(datasizes))){
+  plot.oemvr <- rbind(plot.oemvr, curveoemvr[[i]][start:end,c(1,4,9)])
+  plot.saga <- rbind(plot.saga, curvesaga[[i]][start:end,c(1,4,9)])
+
+}
+
+plotagainstn(plot.oemvr, title="SAGA-EM for different dataset size",legend=TRUE)
+plotagainstn(plot.saga, title="SAGA-EM for different dataset size",legend=TRUE)
+
+
+
+
+### EPOCH WISE
+
+### PER EPOCH
+eml <- ieml <- iemseql <- oeml <- oemvrl <- sagal <- list()
+
+
+em_ep <- emiter
+for (i in (1:length(datasizes))){
+  em_ep[[i]]$iteration <- datasizes[i]*emiter[[i]]$iteration
+}
+
+
+for (i in (1:length(datasizes))){
+  n <- datasizes[i]
+  K = 20*n
+  epochs = seq(1, K, by=n)
+  iem_ep <- iemiter[[i]][epochs,]
+  iem_ep$iteration <- 1:(K/n)
+  iemseq_ep <- iemseqiter[[i]][epochs,]
+  iemseq_ep$iteration <- 1:(K/n)
+  oem_ep <- oemiter[[i]][epochs,]
+  oem_ep$iteration <- 1:(K/n)
+  oemvr_ep <- oemvriter[[i]][epochs,]
+  oemvr_ep$iteration <- 1:(K/n)
+  saga_ep <- sagaiter[[i]][epochs,]
+  saga_ep$iteration <- 1:(K/n)
+
+
+  ieml[[i]] <- iem_ep
+  iemseql[[i]] <- iemseq_ep
+  oeml[[i]] <- oem_ep
+  oemvrl[[i]] <- oemvr_ep
+  sagal[[i]] <- saga_ep
+}
+
+
+curveoemvr <- oemvrl
+curvesaga <- sagal
+curveiem <- ieml
+curveiemseq <- iemseql
+
+for (i in (1:length(datasizes))){
+  curveoemvr[[i]]$size <- datasizes[i]
+  curvesaga[[i]]$size <- datasizes[i]
+  curveiem[[i]]$size <- datasizes[i]
+  curveiemseq[[i]]$size <- datasizes[i]
+}
+
+
+
+epochs
+start =1
+end = 10
+plot.iemseq <- NULL
+plot.oem <- NULL
+plot.oemvr <- NULL
+plot.saga <- NULL
+for (i in (1:length(datasizes))){
+  plot.iemseq <- rbind(plot.iemseq, curveiemseq[[i]][start:end,c(1,4,9)])
+  plot.oemvr <- rbind(plot.oemvr, curveoemvr[[i]][start:end,c(1,4,9)])
+  plot.saga <- rbind(plot.saga, curvesaga[[i]][start:end,c(1,4,9)])
+
+}
+
+plotagainstn(plot.oemvr, title="OEM-vr for different dataset size",legend=TRUE)
+plotagainstn(plot.saga, title="SAGA-EM for different dataset size",legend=TRUE)
+plotagainstn(plot.iemseq, title="IEM Seq for different dataset size",legend=TRUE)
+
+
+
+
+### JUST ONE RUN
+
+
+
+start =1
+end = 100000
+
+i = 15
+variance <- rbind(oemvriter[[i]][start:end,c(1,4,8)],
+                  iemiter[[i]][start:end,c(1,4,8)],
+                  oemiter[[i]][start:end,c(1,4,8)],
+                  iemseqiter[[i]][start:end,c(1,4,8)],
+                  sagaiter[[i]][start:end,c(1,4,8)])
+
+graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
 
 
