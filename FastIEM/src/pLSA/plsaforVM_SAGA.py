@@ -11,7 +11,6 @@ import codecs
 # import ipdb
 
 
-
 def initializeParameters():
     for i in range(0, N):
         normalization = sum(lamda[i, :])
@@ -171,6 +170,46 @@ def MStep():
             else:
                 lamda[i, k] /= denominator
 
+def MStepsaga(index_i, index_j):
+    # update theta
+    for k in range(0, K):
+        denominator = 0
+        for j in range(0, M):
+            theta[k, j] = 0
+            tmp = 0
+            for i in index_i:
+                tmp +=  N*(X[i, j] * p[i, j, k])
+            Vsomme = Hsomme + tmp
+            Ssomme = (1- rho_saga)*Ssomme - rho_saga*Vsomme
+            theta[k, j] = Ssomme
+            denominator += theta[k, j]
+        if denominator == 0:
+            for j in range(0, M): 
+                theta[k, j] = 1.0 / M
+        else:
+            for j in range(0, M):
+                theta[k, j] /= denominator
+        for i in index_j:
+            for j in range(0, M):
+                for k in range(0, K):
+                    p[i, j, k] = theta[[i]][k, j] * lamda[i, k];
+                tmph +=  (X[i, j] * p[i, j, k] - X[i, j] * oldp[i, j, k])
+            Hsomme = Hsomme + tmph
+        
+    # update lamda
+    for i in range(0, N):
+        for k in range(0, K):
+            lamda[i, k] = 0
+            denominator = 0
+            for j in range(0, M):
+                lamda[i, k] += X[i, j] * p[i, j, k]
+                denominator += X[i, j];
+            if denominator == 0:
+                lamda[i, k] = 1.0 / K
+            else:
+                lamda[i, k] /= denominator
+
+
 def MStep_online(index):
     # update theta
     for k in range(0, K):
@@ -295,11 +334,11 @@ def output():
     file.close()
     
 # set the default params and read the params from cmd
-# datasetFilePath = 'dataset1.txt'
-datasetFilePath = 'dataset2.txt'
+# datasetFilePath = 'dataset2.txt'
+datasetFilePath = 'dataset1.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 1000
+nb_epochs = 10
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -323,7 +362,7 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = 10
+mini_batch_size = 1
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
@@ -345,58 +384,115 @@ newLoglikelihood = 1
 #LIST OF INDICES FOR INCREMENTAL METHODS
 seed0 = 333888
 indices = [x for x in range(N)]
-list_indices = []
+list_indices_i = []
 for epoch in range(0, nb_epochs):
     indices = [x for x in range(N)]
     random.seed(seed0*(epoch+3))
     random.shuffle(indices)
-    list_indices.append(indices)
+    list_indices_i.append(indices)
+
+list_indices_j = []
+for epoch in range(0, nb_epochs):
+    indices_j = list_indices_i[epoch]
+    random.seed(1999*(epoch+1))
+    random.shuffle(indices_j)
+    list_indices_j.append(indices_j)
+
+seed0 = 333888
+indices = [x for x in range(N)]
+list_indices_i = []
+for epoch in range(0, nb_epochs):
+    indices = [x for x in range(N)]
+    random.seed(seed0*(epoch+3))
+    random.shuffle(indices)
+    list_indices_i.append(indices)
 
 
+# ## REINITIALIZE
+# with open ('init/initlamda', 'rb') as fp:
+#     lamda = pickle.load(fp)
+# with open ('init/inittheta', 'rb') as fp:
+#     theta = pickle.load(fp)
+# p = zeros([N, M, K])
+# oldLoglikelihood = 1
+# newLoglikelihood = 1
+# ### Incremental EM
+# objectiveIEM = []
+# for epoch in range(0, nb_epochs):
+# # for epoch in range(0, 2):
+#     if epoch == 0:
+#         EStep()
+#         MStep()
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveIEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
+#     else:
+#         mini_batches = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+#         for mini_batch in mini_batches:
+#             oldp = p
+#             EStep_incremental(mini_batch)
+#             MStep()
+#         newLoglikelihood = LogLikelihood()
+#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+#         #     break
+#         objectiveIEM.append(newLoglikelihood)
+#         oldLoglikelihood = newLoglikelihood
 
+# with open('losses/localiemloss', 'wb') as fp: 
+#     pickle.dump(objectiveIEM, fp)
 
+rho_saga = 0.003
 ## REINITIALIZE
-with open ('init/initlamda', 'rb') as fp:
+with open ('init_More/initlamda', 'rb') as fp:
     lamda = pickle.load(fp)
-with open ('init/inittheta', 'rb') as fp:
+with open ('init_More/inittheta', 'rb') as fp:
     theta = pickle.load(fp)
 p = zeros([N, M, K])
 oldLoglikelihood = 1
 newLoglikelihood = 1
-### Online EM with VR
-objectiveoEM_vr = []
-#stepsizes for online EM
-rho = 0.003
-
+### SAGA EM
+objectiveSAGA = []
+Hsomme = 0
+Ssomme = 0
+Vsomme = 0
 for epoch in range(0, nb_epochs):
-    p0 = p
+# for epoch in range(0, 2):
     if epoch == 0:
         EStep()
         MStep()
+        for k in range(0, K):
+            for j in range(0, M):
+                theta[k, j] = 0
+                for i in range(0,N):
+                    Ssomme += X[i, j] * oldp[i, j, k]
+        Hsomme = Ssomme
+        Vsomme = Ssomme
         newLoglikelihood = LogLikelihood()
         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
         #     break
-        objectiveoEM_vr.append(newLoglikelihood)
+        objectiveSAGA.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
     else:
-        indices = [x for x in range(N)]
-        random.shuffle(indices)
-        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-        for mini_batch in mini_batches:
+        mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for m in range(len(mini_batches_i)):
             oldp = p
-            EStep_incremental(mini_batch)
-            MStep_onlinevr(mini_batch)
+            # EStep_saga(mini_batches_i[m])
+            MStepsaga(mini_batches_i[m], mini_batches_j[m])
         newLoglikelihood = LogLikelihood()
         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
         #     break
-        objectiveoEM_vr.append(newLoglikelihood)
+        objectiveSAGA.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
 
-
-with open('losses/localoemvrloss', 'wb') as fp: 
-    pickle.dump(objectiveoEM_vr, fp)
+with open('losses/localsagaloss', 'wb') as fp: 
+    pickle.dump(objectiveSAGA, fp)
 
 
 if __name__ == '__main__':
