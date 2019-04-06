@@ -1,3 +1,4 @@
+### https://github.com/laserwave/plsa
 import numpy as np
 from numpy import zeros, int8, log
 # from pylab import random
@@ -22,7 +23,7 @@ def initializeParameters():
         for j in range(0, M):
             theta[i, j] /= normalization;
 
-            
+    
 def preprocessing(datasetFilePath, stopwordsFilePath):
     
     # read the stopwords file
@@ -87,6 +88,7 @@ def EStep():
                     p[i, j, k] /= denominator;
 
 
+
 def EStep_incremental(index):
     for i in range(0, N):
         for j in range(0, M):
@@ -94,42 +96,6 @@ def EStep_incremental(index):
             for k in range(0, K):
                 if i in index:
                     p[i, j, k] = theta[k, j] * lamda[i, k];
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
-
-
-def EStep_saga1(index):
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = theta[k, j] * lamda[i, k];
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
-
-
-def EStep_saga2(index):
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
                 else: 
                     p[i, j, k] = oldp[i, j, k]
                 denominator += p[i, j, k];
@@ -164,6 +130,7 @@ def MStep():
             denominator = 0
             for j in range(0, M):
                 lamda[i, k] += X[i, j] * p[i, j, k]
+                # lamda[i, k] += 1
                 denominator += X[i, j];
             if denominator == 0:
                 lamda[i, k] = 1.0 / K
@@ -172,16 +139,28 @@ def MStep():
 
 def MStepsaga(index_i, index_j):
     # update theta
+    for i in index_i:
+        for j in range(0, M):
+            denominator = 0;
+            for k in range(0, K):
+                h[i, j, k] = listofthetas[i][k, j] * listoflamdas[i, k];
+                denominator += h[i, j, k];
+            if denominator == 0:
+                for k in range(0, K):
+                    h[i, j, k] = 0;
+            else:
+                for k in range(0, K):
+                    h[i, j, k] /= denominator;
     for k in range(0, K):
         denominator = 0
         for j in range(0, M):
             theta[k, j] = 0
             tmp = 0
             for i in index_i:
-                tmp +=  N*(X[i, j] * p[i, j, k])
-            Vsomme = Hsomme + tmp
-            Ssomme = (1- rho_saga)*Ssomme - rho_saga*Vsomme
-            theta[k, j] = Ssomme
+                tmp +=  X[i, j] * p[i, j, k] - X[i, j] * h[i, j, k]
+            Vsomme = Hsomme[k,j] + N*tmp
+            Ssomme[k,j] = (1- rho_saga)*Ssomme[k,j] + rho_saga*Vsomme
+            theta[k, j] = Ssomme[k,j]
             denominator += theta[k, j]
         if denominator == 0:
             for j in range(0, M): 
@@ -189,13 +168,6 @@ def MStepsaga(index_i, index_j):
         else:
             for j in range(0, M):
                 theta[k, j] /= denominator
-        for i in index_j:
-            for j in range(0, M):
-                for k in range(0, K):
-                    p[i, j, k] = theta[[i]][k, j] * lamda[i, k];
-                tmph +=  (X[i, j] * p[i, j, k] - X[i, j] * oldp[i, j, k])
-            Hsomme = Hsomme + tmph
-        
     # update lamda
     for i in range(0, N):
         for k in range(0, K):
@@ -203,84 +175,23 @@ def MStepsaga(index_i, index_j):
             denominator = 0
             for j in range(0, M):
                 lamda[i, k] += X[i, j] * p[i, j, k]
+                # lamda[i, k] += 1
                 denominator += X[i, j];
             if denominator == 0:
                 lamda[i, k] = 1.0 / K
             else:
                 lamda[i, k] /= denominator
-
-
-def MStep_online(index):
-    # update theta
-    for k in range(0, K):
-        denominator = 0
-        for j in range(0, M):
-            theta[k, j] = 0
-            oldsomme = 0
-            somme_minibatch = 0
-            for i in range(0,N):
-                oldsomme += X[i, j] * oldp[i, j, k]
-            for i in index:
-                somme_minibatch += X[i, j] * p[i, j, k]        
-            theta[k, j] += oldsomme + rho[epoch]*(somme_minibatch - oldsomme)
-            denominator += theta[k, j]
-        if denominator == 0:
-            for j in range(0, M):
-                theta[k, j] = 1.0 / M
-        else:
-            for j in range(0, M):
-                theta[k, j] /= denominator
-        
-    # update lamda
-    for i in range(0, N):
+    for j in range(0, M):
         for k in range(0, K):
-            lamda[i, k] = 0
-            denominator = 0
-            for j in range(0, M):
-                lamda[i, k] += X[i, j] * p[i, j, k]
-                denominator += X[i, j];
-            if denominator == 0:
-                lamda[i, k] = 1.0 / K
-            else:
-                lamda[i, k] /= denominator
+            tmph = 0
+            for i in index_j:
+                h[i, j, k] = listofthetas[i][k, j] * listoflamdas[i, k];
+                tmph +=  (X[i, j] * p[i, j, k] - X[i, j] * h[i, j, k])
+            Hsomme[k,j] += tmph
+    for i in index_j:
+        listofthetas[i] = theta
+        listoflamdas[i,] = lamda[i,]
 
-def MStep_onlinevr(index):
-    # update theta
-    for k in range(0, K):
-        denominator = 0
-        for j in range(0, M):
-            theta[k, j] = 0
-            oldsomme = 0
-            oldsomme0 = 0
-            somme_minibatch = 0
-            somme_minibatch0 = 0
-            for i in range(0,N):
-                oldsomme += X[i, j] * oldp[i, j, k]
-                oldsomme0 += X[i, j] * p0[i, j, k]
-            for i in index:
-                somme_minibatch += X[i, j] * p[i, j, k]
-                somme_minibatch0 += X[i, j] * p0[i, j, k]
-            theta[k, j] += oldsomme + rho*(somme_minibatch - somme_minibatch0 + oldsomme0 - oldsomme)
-            denominator += theta[k, j]
-        if denominator == 0:
-            for j in range(0, M):
-                theta[k, j] = 1.0 / M
-        else:
-            for j in range(0, M):
-                theta[k, j] /= denominator
-        
-    # update lamda
-    for i in range(0, N):
-        for k in range(0, K):
-            lamda[i, k] = 0
-            denominator = 0
-            for j in range(0, M):
-                lamda[i, k] += X[i, j] * p[i, j, k]
-                denominator += X[i, j];
-            if denominator == 0:
-                lamda[i, k] = 1.0 / K
-            else:
-                lamda[i, k] /= denominator
 
 # calculate the log likelihood
 def LogLikelihood():
@@ -338,7 +249,7 @@ def output():
 datasetFilePath = 'dataset1.txt'
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 10
+nb_epochs = 4
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -362,7 +273,7 @@ if(len(sys.argv) == 11):
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 
-mini_batch_size = 1
+mini_batch_size = 4
 # lamda[i, j] : p(zj|di)
 # lamda = random([N, K])
 lamda = np.random.sample([N, K])
@@ -373,7 +284,6 @@ theta = np.random.sample([K, M])
 
 # p[i, j, k] : p(zk|di,wj)
 p = zeros([N, M, K])
-
 initializeParameters()
 
 # EM algorithm
@@ -403,70 +313,73 @@ indices = [x for x in range(N)]
 list_indices_i = []
 for epoch in range(0, nb_epochs):
     indices = [x for x in range(N)]
-    random.seed(seed0*(epoch+3))
+    random.seed(seed0*(epoch+30))
     random.shuffle(indices)
     list_indices_i.append(indices)
 
-
 # ## REINITIALIZE
-# with open ('init/initlamda', 'rb') as fp:
-#     lamda = pickle.load(fp)
-# with open ('init/inittheta', 'rb') as fp:
-#     theta = pickle.load(fp)
-# p = zeros([N, M, K])
-# oldLoglikelihood = 1
-# newLoglikelihood = 1
-# ### Incremental EM
-# objectiveIEM = []
-# for epoch in range(0, nb_epochs):
-# # for epoch in range(0, 2):
-#     if epoch == 0:
-#         EStep()
-#         MStep()
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveIEM.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
-#     else:
-#         mini_batches = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-#         for mini_batch in mini_batches:
-#             oldp = p
-#             EStep_incremental(mini_batch)
-#             MStep()
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveIEM.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
+p = zeros([N, M, K])
+oldLoglikelihood = 1
+newLoglikelihood = 1
+### Incremental EM
+objectiveIEM = []
+for epoch in range(0, nb_epochs):
+# for epoch in range(0, 2):
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        mini_batches = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for mini_batch in mini_batches:
+            oldp = p
+            EStep_incremental(mini_batch)
+            MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveIEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
 
 # with open('losses/localiemloss', 'wb') as fp: 
 #     pickle.dump(objectiveIEM, fp)
 
 rho_saga = 0.003
 ## REINITIALIZE
-with open ('init_More/initlamda', 'rb') as fp:
-    lamda = pickle.load(fp)
-with open ('init_More/inittheta', 'rb') as fp:
-    theta = pickle.load(fp)
+lamda = np.random.sample([N, K])
+theta = np.random.sample([K, M])
 p = zeros([N, M, K])
+initializeParameters()
+p = zeros([N, M, K])
+h = p
 oldLoglikelihood = 1
 newLoglikelihood = 1
 ### SAGA EM
 objectiveSAGA = []
-Hsomme = 0
-Ssomme = 0
+Hsomme = zeros([K, M])
+Ssomme = zeros([K, M])
 Vsomme = 0
+
+listofthetas = {}
+for i in range(N):
+    listofthetas[i] = theta
+listoflamdas = lamda
+
+
 for epoch in range(0, nb_epochs):
 # for epoch in range(0, 2):
+    oldp = p
     if epoch == 0:
         EStep()
         MStep()
         for k in range(0, K):
             for j in range(0, M):
-                theta[k, j] = 0
                 for i in range(0,N):
                     Ssomme += X[i, j] * oldp[i, j, k]
         Hsomme = Ssomme
@@ -481,8 +394,8 @@ for epoch in range(0, nb_epochs):
         mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
         mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
         for m in range(len(mini_batches_i)):
-            oldp = p
-            # EStep_saga(mini_batches_i[m])
+            EStep_incremental(mini_batches_i[m])
+            EStep_incremental(mini_batches_j[m])
             MStepsaga(mini_batches_i[m], mini_batches_j[m])
         newLoglikelihood = LogLikelihood()
         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
@@ -490,9 +403,6 @@ for epoch in range(0, nb_epochs):
         #     break
         objectiveSAGA.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
-
-with open('losses/localsagaloss', 'wb') as fp: 
-    pickle.dump(objectiveSAGA, fp)
 
 
 if __name__ == '__main__':
