@@ -417,9 +417,7 @@ newLoglikelihood = 1
 objectiveSAGA = []
 for epoch in range(0, nb_epochs):
 # for epoch in range(0, 2):
-    if epoch < 100000:
-        EStep()
-        MStep()
+    if epoch == 0:
         EStep()
         MStep()
         newLoglikelihood = LogLikelihood()

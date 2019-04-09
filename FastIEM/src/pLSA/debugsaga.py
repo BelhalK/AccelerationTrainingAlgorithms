@@ -21,13 +21,12 @@ for i in range(N):
 listoflamdas = lamda
 
 #FIRST BATCH EM STEP
-oldp = p
 EStep()
 MStep()
 for k in range(0, K):
     for j in range(0, M):
         for i in range(0,N):
-            Ssomme += X[i, j] * oldp[i, j, k]
+            Ssomme += X[i, j] * p[i, j, k]
 Hsomme = Ssomme
 Vsomme = Ssomme
 newLoglikelihood = LogLikelihood()
