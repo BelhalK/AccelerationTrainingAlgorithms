@@ -137,6 +137,78 @@ def MStep():
             else:
                 lamda[i, k] /= denominator
 
+def MStep_online(index):
+    # update theta
+    for k in range(0, K):
+        denominator = 0
+        for j in range(0, M):
+            theta[k, j] = 0
+            oldsomme = 0
+            somme_minibatch = 0
+            for i in range(0,N):
+                oldsomme += X[i, j] * oldp[i, j, k]
+            for i in index:
+                somme_minibatch += X[i, j] * p[i, j, k]        
+            theta[k, j] += oldsomme + rho[epoch]*(somme_minibatch - oldsomme)
+            denominator += theta[k, j]
+        if denominator == 0:
+            for j in range(0, M):
+                theta[k, j] = 1.0 / M
+        else:
+            for j in range(0, M):
+                theta[k, j] /= denominator
+        
+    # update lamda
+    for i in range(0, N):
+        for k in range(0, K):
+            lamda[i, k] = 0
+            denominator = 0
+            for j in range(0, M):
+                lamda[i, k] += X[i, j] * p[i, j, k]
+                denominator += X[i, j];
+            if denominator == 0:
+                lamda[i, k] = 1.0 / K
+            else:
+                lamda[i, k] /= denominator
+
+def MStep_onlinevr(index):
+    # update theta
+    for k in range(0, K):
+        denominator = 0
+        for j in range(0, M):
+            theta[k, j] = 0
+            oldsomme = 0
+            oldsomme0 = 0
+            somme_minibatch = 0
+            somme_minibatch0 = 0
+            for i in range(0,N):
+                oldsomme += X[i, j] * oldp[i, j, k]
+                oldsomme0 += X[i, j] * p0[i, j, k]
+            for i in index:
+                somme_minibatch += X[i, j] * p[i, j, k]
+                somme_minibatch0 += X[i, j] * p0[i, j, k]
+            theta[k, j] += oldsomme + rho*(somme_minibatch - somme_minibatch0 + oldsomme0 - oldsomme)
+            denominator += theta[k, j]
+        if denominator == 0:
+            for j in range(0, M):
+                theta[k, j] = 1.0 / M
+        else:
+            for j in range(0, M):
+                theta[k, j] /= denominator
+        
+    # update lamda
+    for i in range(0, N):
+        for k in range(0, K):
+            lamda[i, k] = 0
+            denominator = 0
+            for j in range(0, M):
+                lamda[i, k] += X[i, j] * p[i, j, k]
+                denominator += X[i, j];
+            if denominator == 0:
+                lamda[i, k] = 1.0 / K
+            else:
+                lamda[i, k] /= denominator
+
 def MStepsaga(index_i, index_j):
     # update theta
     for i in index_i:
@@ -269,21 +341,11 @@ if(len(sys.argv) == 11):
     dictionary = sys.argv[9]
     topicWords = sys.argv[10]
 
+
+
 # preprocessing
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
-
-
-mini_batch_size = 4
-
-lamda = np.random.sample([N, K])
-theta = np.random.sample([K, M])
-p = zeros([N, M, K])
-initializeParameters()
-
-# EM algorithm
-oldLoglikelihood = 1
-newLoglikelihood = 1
 
 
 #LIST OF INDICES FOR INCREMENTAL METHODS
@@ -312,10 +374,26 @@ for epoch in range(0, nb_epochs):
     random.shuffle(indices)
     list_indices_i.append(indices)
 
+
+mini_batch_size = 4
+
+#REINITIALIZE
+lamda = np.random.sample([N, K])
+theta = np.random.sample([K, M])
+p = zeros([N, M, K])
+initializeParameters()
+
+# EM algorithm
+oldLoglikelihood = 1
+newLoglikelihood = 1
+
 # ## REINITIALIZE
 p = zeros([N, M, K])
 oldLoglikelihood = 1
 newLoglikelihood = 1
+
+
+
 ### Batch EM
 objectiveEM = []
 for epoch in range(0, nb_epochs):
@@ -333,13 +411,6 @@ for epoch in range(0, nb_epochs):
 
 
 
-# ## REINITIALIZE
-lamda = np.random.sample([N, K])
-theta = np.random.sample([K, M])
-p = zeros([N, M, K])
-initializeParameters()
-oldLoglikelihood = 1
-newLoglikelihood = 1
 ### Incremental EM
 objectiveIEM = []
 for epoch in range(0, nb_epochs):
@@ -367,73 +438,80 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
+### Online EM
+objectiveoEM = []
+rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs))))
+
+for epoch in range(0, nb_epochs):
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        indices = [x for x in range(N)]
+        random.shuffle(indices)
+        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for mini_batch in mini_batches:
+            oldp = p
+            EStep_incremental(mini_batch)
+            MStep_online(mini_batch)
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+
+
+### Online EM with VR
+objectiveoEM_vr = []
+#stepsizes for online EM
+rho = 0.1
+
+for epoch in range(0, nb_epochs):
+    p0 = p
+    if epoch == 0:
+        EStep()
+        MStep()
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM_vr.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+    else:
+        indices = [x for x in range(N)]
+        random.shuffle(indices)
+        mini_batches = [indices[k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
+        for mini_batch in mini_batches:
+            oldp = p
+            EStep_incremental(mini_batch)
+            MStep_onlinevr(mini_batch)
+        newLoglikelihood = LogLikelihood()
+        print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
+        # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
+        #     break
+        objectiveoEM_vr.append(newLoglikelihood)
+        oldLoglikelihood = newLoglikelihood
+
 
 
 import matplotlib.pyplot as plt
 epochs = len(objectiveIEM)
 plt.plot(np.arange(epochs), objectiveIEM, label='IEM')
-plt.plot(np.arange(epochs), objectiveEM, label='EM')
-# plt.plot(np.arange(epochs), objectiveoEM, label='oEM')
-# plt.plot(np.arange(epochs), objectiveoEM_vr, label='oEMVR')
+plt.plot(np.arange(epochs), objectiveEM, label='oEM')
+plt.plot(np.arange(epochs), objectiveoEM, label='EM')
+plt.plot(np.arange(epochs), objectiveoEM_vr, label='oEMVR')
 leg = plt.legend(fontsize=20,fancybox=True, loc='right')
 leg.get_frame().set_alpha(0.5)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Objective', fontsize=15)
 plt.show()
-
-# rho_saga = 0.003
-# ## REINITIALIZE
-# lamda = np.random.sample([N, K])
-# theta = np.random.sample([K, M])
-# p = zeros([N, M, K])
-# initializeParameters()
-# p = zeros([N, M, K])
-# h = p
-# oldLoglikelihood = 1
-# newLoglikelihood = 1
-# ### SAGA EM
-# objectiveSAGA = []
-# Hsomme = zeros([K, M])
-# Ssomme = zeros([K, M])
-# Vsomme = 0
-
-# listofthetas = {}
-# for i in range(N):
-#     listofthetas[i] = theta
-# listoflamdas = lamda
-
-
-# for epoch in range(0, nb_epochs):
-# # for epoch in range(0, 2):
-#     oldp = p
-#     if epoch == 0:
-#         EStep()
-#         MStep()
-#         for k in range(0, K):
-#             for j in range(0, M):
-#                 for i in range(0,N):
-#                     Ssomme += X[i, j] * oldp[i, j, k]
-#         Hsomme = Ssomme
-#         Vsomme = Ssomme
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveSAGA.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
-#     else:
-#         mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-#         mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
-#         for m in range(len(mini_batches_i)):
-#             EStep_incremental(mini_batches_i[m])
-#             EStep_incremental(mini_batches_j[m])
-#             MStepsaga(mini_batches_i[m], mini_batches_j[m])
-#         newLoglikelihood = LogLikelihood()
-#         print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " iteration  ", str(newLoglikelihood))
-#         # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
-#         #     break
-#         objectiveSAGA.append(newLoglikelihood)
-#         oldLoglikelihood = newLoglikelihood
 
 
 if __name__ == '__main__':
