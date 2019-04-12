@@ -505,7 +505,7 @@ newLoglikelihood = 1
 ### Online EM with VR
 objectiveoEM_vr = []
 #stepsizes for online EM
-rho = 0.003
+rho = 0.001
 
 for epoch in range(0, nb_epochs):
     p0 = p
@@ -594,7 +594,7 @@ def MStepsaga(index_i, index_j):
         listofthetas[i] = theta
         listoflamdas[i,] = lamda[i,]
 
-rho_saga = 0.003
+rho_saga = 0.001
 ## REINITIALIZE
 lamda = np.random.sample([N, K])
 theta = np.random.sample([K, M])
@@ -648,6 +648,7 @@ for epoch in range(0, nb_epochs):
         objectiveSAGA.append(newLoglikelihood)
         oldLoglikelihood = newLoglikelihood
 ############ SAGA EM #################
+
 
 # import matplotlib.pyplot as plt
 # epochs = len(objectiveIEM)

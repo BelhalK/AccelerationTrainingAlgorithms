@@ -9,6 +9,7 @@ import jieba
 import re
 import time
 import codecs
+import matplotlib.pyplot as plt
 # import ipdb
 
 
@@ -33,6 +34,7 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
     
     # read the documents
     file = codecs.open(datasetFilePath, 'r', 'utf-8')
+    # file = codecs.open(datasetFilePath, 'r', encoding="latin-1")
     documents = [document.strip() for document in file] 
     file.close()
 
@@ -317,11 +319,17 @@ def output():
     file.close()
     
 
-# datasetFilePath = 'dataset2.txt'
+
 datasetFilePath = 'dataset1.txt'
+# datasetFilePath = 'dataset2.txt'
+# datasetFilePath = 'dataset5.txt'
+
+# datasetFilePath = 'dataset100k.txt'
+# datasetFilePath = 'dataset10k.txt'
+
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
-nb_epochs = 4
+nb_epochs = 10
 maxIteration = 30
 threshold = 10.0
 topicWordsNum = 10
@@ -342,10 +350,11 @@ if(len(sys.argv) == 11):
     topicWords = sys.argv[10]
 
 
-
 # preprocessing
 N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
+print(M)
+print(X.shape)
 
 
 #LIST OF INDICES FOR INCREMENTAL METHODS
@@ -382,17 +391,8 @@ lamda = np.random.sample([N, K])
 theta = np.random.sample([K, M])
 p = zeros([N, M, K])
 initializeParameters()
-
-# EM algorithm
 oldLoglikelihood = 1
 newLoglikelihood = 1
-
-# ## REINITIALIZE
-p = zeros([N, M, K])
-oldLoglikelihood = 1
-newLoglikelihood = 1
-
-
 
 ### Batch EM
 objectiveEM = []
@@ -410,6 +410,13 @@ for epoch in range(0, nb_epochs):
 #     pickle.dump(objectiveIEM, fp)
 
 
+#REINITIALIZE
+lamda = np.random.sample([N, K])
+theta = np.random.sample([K, M])
+p = zeros([N, M, K])
+initializeParameters()
+oldLoglikelihood = 1
+newLoglikelihood = 1
 
 ### Incremental EM
 objectiveIEM = []
@@ -438,9 +445,17 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
+#REINITIALIZE
+lamda = np.random.sample([N, K])
+theta = np.random.sample([K, M])
+p = zeros([N, M, K])
+initializeParameters()
+oldLoglikelihood = 1
+newLoglikelihood = 1
+
 ### Online EM
 objectiveoEM = []
-rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs))))
+rho = list(map(lambda x: 3/(x+10), list(range(nb_epochs)))) #STEPSIZE
 
 for epoch in range(0, nb_epochs):
     if epoch == 0:
@@ -468,10 +483,19 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
+
+#REINITIALIZE
+lamda = np.random.sample([N, K])
+theta = np.random.sample([K, M])
+p = zeros([N, M, K])
+initializeParameters()
+oldLoglikelihood = 1
+newLoglikelihood = 1
+
 ### Online EM with VR
 objectiveoEM_vr = []
 #stepsizes for online EM
-rho = 0.1
+rho = 0.1 #STEPSIZE FOR VR
 
 for epoch in range(0, nb_epochs):
     p0 = p
@@ -501,18 +525,16 @@ for epoch in range(0, nb_epochs):
 
 
 
-import matplotlib.pyplot as plt
+#### PLOTTING #######
 epochs = len(objectiveIEM)
 plt.plot(np.arange(epochs), objectiveIEM, label='IEM')
 plt.plot(np.arange(epochs), objectiveEM, label='oEM')
 plt.plot(np.arange(epochs), objectiveoEM, label='EM')
 plt.plot(np.arange(epochs), objectiveoEM_vr, label='oEMVR')
+plt.plot(np.arange(epochs), objectiveSAGA, label='FI-EM')
 leg = plt.legend(fontsize=20,fancybox=True, loc='right')
 leg.get_frame().set_alpha(0.5)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Objective', fontsize=15)
 plt.show()
 
-
-if __name__ == '__main__':
-    output()
