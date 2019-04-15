@@ -1,22 +1,19 @@
-setwd("/Users/karimimohammedbelhal/Desktop/R_Package/package_contrib_withConnectors/saemixB/R")
-  source('aaa_generics.R') 
-  source('compute_LL.R') 
-  source('func_aux.R') 
-  source('func_distcond.R') 
-  source('func_FIM.R')
-  source('func_plots.R') 
-  source('func_simulations.R') 
-
-  source('main.R')
-  source('main_estep.R')
-  source('main_initialiseMainAlgo.R') 
-  source('main_mstep.R') 
-  source('SaemixData.R')
-  source('SaemixModel.R') 
-  source('SaemixRes.R') 
-  source('SaemixObject.R') 
-  source('zzz.R') 
-setwd("/Users/karimimohammedbelhal/Desktop/R_Package/package_contrib_withConnectors/saemixB")
+source('R/aaa_generics.R') 
+source('R/compute_LL.R') 
+source('R/func_aux.R') 
+source('R/func_distcond.R') 
+source('R/func_FIM.R')
+source('R/func_plots.R') 
+source('R/func_simulations.R') 
+source('R/main.R')
+source('R/main_estep.R')
+source('R/main_initialiseMainAlgo.R') 
+source('R/main_mstep.R') 
+source('R/SaemixData.R')
+source('R/SaemixModel.R') 
+source('R/SaemixRes.R') 
+source('R/SaemixObject.R') 
+source('R/zzz.R') 
 
 library("mlxR")
 library(MlxConnectors)
@@ -33,7 +30,6 @@ warfarin.saemix <- warfarin.saemix[order(warfarin.saemix$id),]
 
 saemix.data<-saemixData(name.data=warfarin.saemix,header=TRUE,sep=" ",na=NA, name.group=c("id"),
   name.predictors=c("amount","time"),name.response=c("y_1"), name.X="time")
-
 
 
 model1cpt<-function(psi,id,xidep) { 
@@ -94,17 +90,6 @@ options_warfa<-list(seed=39546,map=F,fim=F,ll.is=F,
   nbiter.mcmc = c(2,2,2), nbiter.saemix = c(K1,K2),
   nbiter.sa=0,displayProgress=TRUE,nbiter.burn =0,nb.chains=1,monolix=TRUE)
 warfa<-saemix(model=saemix.model,data=saemix.data,options_warfa)
-
-
-
-
-
-
-
-
-
-
-
 
 ################################################################ MonolixProject ####################################################################################################################################
 
