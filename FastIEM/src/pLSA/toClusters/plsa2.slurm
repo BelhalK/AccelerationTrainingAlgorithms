@@ -5,4 +5,4 @@
 
 #SBATCH --ntasks=1
 #SBATCH --partition=interactive
-python plsaforVM_IEM.py
+python plsaforVM_IEM.py -d dataset1k.txt -s 20 -e 10

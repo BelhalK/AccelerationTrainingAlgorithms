@@ -37,7 +37,7 @@ states.new<-mcmc(saemix.model,saemix.data,options.mcmc.new)$eta
 
 
 
-#### Avec le MLE #####
+#### With the MLE #####
   ###SAEM###
 K1 = 400
 K2 = 100
@@ -58,6 +58,6 @@ saemix.model.mcmc<-saemixModel(model=model1cpt,description="warfarin",type="stru
 
 L_mcmc=100
 options.mcmc<-list(seed=39546,L_mcmc=L_mcmc,nbiter.mcmc = c(2,2,2,0))
-sates<-mcmc(saemix.model.mcmc,saemix.data,options.mcmc)$eta
+states<-mcmc(saemix.model.mcmc,saemix.data,options.mcmc)$eta
 ####################
 

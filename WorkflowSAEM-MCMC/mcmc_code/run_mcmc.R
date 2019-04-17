@@ -38,7 +38,7 @@ states.new<-mcmc(saemix.model,saemix.data,options.mcmc.new)$eta
 
 
 
-#### Avec le MLE #####
+#### with the MLE #####
   ###SAEM###
 K1 = 400
 K2 = 100
