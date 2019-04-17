@@ -9,6 +9,8 @@ import re
 import time
 import codecs
 import argparse
+import operator
+import collections
 # import ipdb
 
 ap = argparse.ArgumentParser()
@@ -69,6 +71,9 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
                     wordCount[word] = 1
         wordCounts.append(wordCount);
     
+    word2id = collections.OrderedDict(sorted(word2id.items(), key=operator.itemgetter(1)))
+    MAX_RESULTS = 300
+    word2id = dict(word2id.items()[:MAX_RESULTS])
     # length of dictionary
     M = len(word2id)  
 
@@ -277,7 +282,7 @@ def output():
 # mini_batch_size = 4
 
 datasetFilePath = args["dataset"]
-mini_batch_size = args["size"]
+mini_batch_size = int(args["size"])
 
 
 stopwordsFilePath = 'stopwords.dic'
