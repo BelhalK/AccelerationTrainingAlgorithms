@@ -1,0 +1,134 @@
+Nonlinear mixed-effects model fit by the SAEM algorithm
+-----------------------------------
+----          Data             ----
+-----------------------------------
+Object of class SaemixData
+    longitudinal data for use with the SAEM algorithm
+Dataset cat_data.saemix 
+    Structured data: y ~ y + dose + time | id 
+    X variable for graphs: time () 
+Dataset characteristics:
+    number of subjects:     900 
+    number of observations: 13500 
+    average/min/max nb obs: 15.00  /  15  /  15 
+First 10 lines of data:
+   id y dose time y.1 mdv cens occ ytype
+1   1 1    0  -20   1   0    0   1     1
+2   1 1    0  -15   1   0    0   1     1
+3   1 1    0  -10   1   0    0   1     1
+4   1 1    0   -5   1   0    0   1     1
+5   1 1    0    0   1   0    0   1     1
+6   1 0   10    5   0   0    0   1     1
+7   1 0   10   10   0   0    0   1     1
+8   1 0   10   15   0   0    0   1     1
+9   1 0   10   20   0   0    0   1     1
+10  1 0   10   25   0   0    0   1     1
+-----------------------------------
+----          Model            ----
+-----------------------------------
+Nonlinear mixed-effects model
+  Model function:  cat model  Model type:  likelihood
+function(psi,id,xidep) {
+level<-xidep[,1]
+dose<-xidep[,2]
+time<-xidep[,3]
+
+beta0 <- psi[id,1]
+beta1 <- psi[id,2]
+
+gamma0 <- psi[id,3]
+gamma1 <- psi[id,4]
+
+delta0 <- psi[id,5]
+delta1 <- psi[id,6]
+
+lm0 <- beta0+gamma0*time + delta0*dose
+lm1 <- beta1+gamma1*time + delta1*dose
+
+D <- exp(lm0)+exp(lm1)+1
+
+P0 <- exp(lm0)/D
+P1 <- exp(lm1)/D
+P2 <- 1/D
+
+
+P.obs = (level==0)*P0+(level==1)*P1+(level==2)*P2
+
+return(P.obs)
+}
+  Nb of parameters: 6 
+      parameter names:  beta0 beta1 gamma0 gamma1 delta0 delta1 
+      distribution:
+     Parameter Distribution Estimated
+[1,] beta0     normal       Estimated
+[2,] beta1     normal       Estimated
+[3,] gamma0    normal       Estimated
+[4,] gamma1    normal       Estimated
+[5,] delta0    normal       Estimated
+[6,] delta1    normal       Estimated
+  Variance-covariance matrix:
+       beta0 beta1 gamma0 gamma1 delta0 delta1
+beta0      1     0      0      0      0      0
+beta1      0     1      0      0      0      0
+gamma0     0     0      1      0      0      0
+gamma1     0     0      0      1      0      0
+delta0     0     0      0      0      1      0
+delta1     0     0      0      0      0      1
+  Error model: constant , initial values: a=1 
+    No covariate in the model.
+    Initial values
+             beta0 beta1 gamma0 gamma1 delta0 delta1
+Pop.CondInit     3     2      1     -5     -2      1
+-----------------------------------
+----    Key algorithm options  ----
+-----------------------------------
+    Algorithms: estimation only
+    Number of iterations:  K1=400, K2=1 
+    Number of chains:  1 
+    Seed:  444 
+    Simulations:
+        nb of simulated datasets used for npde:  1000 
+        nb of simulated datasets used for VPC:  100 
+    Input/output
+        save the results to a file:  TRUE 
+        save the graphs to files:  FALSE 
+        directory where results should be saved:  newdir 
+----------------------------------------------------
+----                  Results                   ----
+----------------------------------------------------
+-----------------  Fixed effects  ------------------
+----------------------------------------------------
+     Parameter Estimate
+[1,] beta0      3.04   
+[2,] beta1      1.06   
+[3,] gamma0    -0.43   
+[4,] gamma1    -1.20   
+[5,] delta0     1.66   
+[6,] delta1    -0.29   
+----------------------------------------------------
+-----------  Variance of random effects  -----------
+----------------------------------------------------
+       Parameter     Estimate
+beta0  omega2.beta0  1.815   
+beta1  omega2.beta1  1.914   
+gamma0 omega2.gamma0 0.026   
+gamma1 omega2.gamma1 0.141   
+delta0 omega2.delta0 0.072   
+delta1 omega2.delta1 0.396   
+----------------------------------------------------
+------  Correlation matrix of random effects  ------
+----------------------------------------------------
+              omega2.beta0 omega2.beta1 omega2.gamma0 omega2.gamma1
+omega2.beta0  1            0            0             0            
+omega2.beta1  0            1            0             0            
+omega2.gamma0 0            0            1             0            
+omega2.gamma1 0            0            0             1            
+omega2.delta0 0            0            0             0            
+omega2.delta1 0            0            0             0            
+              omega2.delta0 omega2.delta1
+omega2.beta0  0             0            
+omega2.beta1  0             0            
+omega2.gamma0 0             0            
+omega2.gamma1 0             0            
+omega2.delta0 1             0            
+omega2.delta1 0             1            
