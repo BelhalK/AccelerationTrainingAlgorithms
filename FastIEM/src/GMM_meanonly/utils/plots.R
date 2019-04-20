@@ -55,12 +55,18 @@ graphConvMC2_new <- function(df, title=NULL, ylim=NULL, legend=TRUE)
   for (j in (2:(ncol(df)-1)))
   {
     grafj <- ggplot(df,aes(colour=df$algo ))+geom_line(aes_string(df[,1],df[,j],by=df[,ncol(df)]),show.legend = legend) +
-      xlab("epochs")+ scale_y_log10()  + ylab(names(df[j])) 
+      xlab("epochs")+ scale_y_log10() +ylab("")+scale_x_continuous(breaks = round(seq(1, 14, by = 2),1))   + 
+      guides(color = guide_legend(override.aes = list(size = 2))) +
+      theme(axis.text.x = element_text(face="bold", color="black", 
+                           size=20, angle=0),
+          axis.text.y = element_text(face="bold", color="black", 
+                           size=20, angle=0),axis.title = element_text( color="black", face="bold",size=20),legend.text=element_text(size=20),
+          legend.title = element_blank(),legend.position = c(0.2, 0.2))
     if (!is.null(ylim))
       grafj <- grafj + ylim(ylim[j-1]*c(-1,1))
     graf[[o[j]]] <- grafj
   }
-  do.call("grid.arrange", c(graf, ncol=1, top=title))
+  do.call("grid.arrange", c(graf, ncol=1))
 }
 
 

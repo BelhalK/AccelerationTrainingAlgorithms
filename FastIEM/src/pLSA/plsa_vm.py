@@ -10,6 +10,8 @@ import re
 import time
 import codecs
 import matplotlib.pyplot as plt
+import operator
+import collections
 # import ipdb
 
 
@@ -24,7 +26,7 @@ def initializeParameters():
         for j in range(0, M):
             theta[i, j] /= normalization;
 
-    
+
 def preprocessing(datasetFilePath, stopwordsFilePath):
     
     # read the stopwords file
@@ -62,9 +64,17 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
                     wordCount[word] = 1
         wordCounts.append(wordCount);
     
+    word2id = collections.OrderedDict(sorted(word2id.items(), key=operator.itemgetter(1)))
+    MAX_RESULTS = 300
+    word2id = dict(word2id.items()[:MAX_RESULTS])
+
+    # id2word = collections.OrderedDict(sorted(id2word.items(), key=operator.itemgetter(1)))
+    # MAX_RESULTS = 500
+    # id2word = dict(id2word.items()[:MAX_RESULTS])
+
     # length of dictionary
     M = len(word2id)  
-
+    print(M)
     # generate the document-word matrix
     X = zeros([N, M], int8)
     for word in word2id.keys():
@@ -74,6 +84,7 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
                 X[i, j] = wordCounts[i][word];    
 
     return N, M, word2id, id2word, X
+
 
 def EStep():
     for i in range(0, N):
@@ -580,9 +591,8 @@ for epoch in range(1, nb_epochs):
     mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
     mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
     for m in range(mini_batch_size):
-        for _ in range(2):
-            SAGAStep(mini_batches_i[m],mini_batches_j[m])
-            MStep()
+        SAGAStep(mini_batches_i[m],mini_batches_j[m])
+        MStep()
     newLoglikelihood = LogLikelihood() 
     print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " epoch  ", str(newLoglikelihood))
     # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):

@@ -385,6 +385,7 @@ datasetFilePath = 'dataset1.txt'
 
 # datasetFilePath = 'dataset100k.txt'
 # datasetFilePath = 'dataset10k.txt'
+datasetFilePath = 'dataset1k.txt'
 
 stopwordsFilePath = 'stopwords.dic'
 K = 10    # number of topic
@@ -414,7 +415,7 @@ N, M, word2id, id2word, X = preprocessing(datasetFilePath, stopwordsFilePath)
 print(N)
 print(M)
 print(X.shape)
-
+print(len(word2id))
 
 #LIST OF INDICES FOR INCREMENTAL METHODS
 seed0 = 333888
@@ -505,6 +506,7 @@ for epoch in range(0, nb_epochs):
         oldLoglikelihood = newLoglikelihood
 
 
+
 #REINITIALIZE
 lamda = np.random.sample([N, K])
 theta = np.random.sample([K, M])
@@ -585,6 +587,49 @@ for epoch in range(0, nb_epochs):
 
 
 
+# with open ('lossesjap/emloss', 'rb') as fp:
+#     objectiveEM = pickle.load(fp)
+
+# with open('losses/sagaloss', 'wb') as fp: 
+#     pickle.dump(objectiveSAGA, fp)
+
+# with open ('lossesjap/sagaloss', 'rb') as fp:
+#     objectiveSAGA = pickle.load(fp)
+# with open ('lossesjap/iemloss', 'rb') as fp:
+#     objectiveIEM = pickle.load(fp)
+# with open ('lossesjap/oemloss', 'rb') as fp:
+#     objectiveoEM = pickle.load(fp)
+# with open ('lossesjap/oemvrloss', 'rb') as fp:
+#     objectiveoEM_vr = pickle.load(fp)
+
+# #### PLOTTING #######
+# plt.plot(np.arange(nb_epochs), objectiveIEM, label='IEM')
+# plt.plot(np.arange(nb_epochs), objectiveEM, label='EM')
+# plt.plot(np.arange(nb_epochs), objectiveoEM, label='oEM')
+# plt.plot(np.arange(nb_epochs), objectiveoEM_vr, label='oEMVR')
+# plt.plot(np.arange(nb_epochs), objectiveSAGA, label='FI-EM')
+# leg = plt.legend(fontsize=20,fancybox=True, loc='right')
+# leg.get_frame().set_alpha(0.5)
+# plt.xlabel('Epoch', fontsize=15)
+# plt.ylabel('Objective', fontsize=15)
+# plt.show()
+
+
+
+with open ('losses1k/emloss', 'rb') as fp:
+    objectiveEM = pickle.load(fp)
+nb_epochs = len(objectiveEM)
+with open ('losses1k/sagaloss', 'rb') as fp:
+    objectiveSAGA = pickle.load(fp)
+with open ('losses1k/iemloss', 'rb') as fp:
+    objectiveIEM = pickle.load(fp)
+with open ('losses1k/oemloss', 'rb') as fp:
+    objectiveoEM = pickle.load(fp)
+with open ('losses1k/oemvrloss', 'rb') as fp:
+    objectiveoEM_vr = pickle.load(fp)
+
+
+
 #### PLOTTING #######
 plt.plot(np.arange(nb_epochs), objectiveIEM, label='IEM')
 plt.plot(np.arange(nb_epochs), objectiveEM, label='EM')
@@ -596,4 +641,5 @@ leg.get_frame().set_alpha(0.5)
 plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('Objective', fontsize=15)
 plt.show()
+
 
