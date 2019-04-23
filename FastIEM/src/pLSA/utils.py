@@ -66,20 +66,6 @@ def preprocessing(datasetFilePath, stopwordsFilePath):
 
     return N, M, word2id, id2word, X
 
-def EStep():
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                p[i, j, k] = theta[k, j] * lamda[i, k];
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
-
 
 def EStep_incremental(index):
     for i in range(0, N):
@@ -99,33 +85,12 @@ def EStep_incremental(index):
                     p[i, j, k] /= denominator;
 
 
-def EStep_saga1(index):
+def EStep():
     for i in range(0, N):
         for j in range(0, M):
             denominator = 0;
             for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = theta[k, j] * lamda[i, k];
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
-                denominator += p[i, j, k];
-            if denominator == 0:
-                for k in range(0, K):
-                    p[i, j, k] = 0;
-            else:
-                for k in range(0, K):
-                    p[i, j, k] /= denominator;
-
-
-def EStep_saga2(index):
-    for i in range(0, N):
-        for j in range(0, M):
-            denominator = 0;
-            for k in range(0, K):
-                if i in index:
-                    p[i, j, k] = p[i, j, k] + 1/N*(theta[k, j] * lamda[i, k] - p[i, j, k]);
-                else: 
-                    p[i, j, k] = oldp[i, j, k]
+                p[i, j, k] = theta[k, j] * lamda[i, k];
                 denominator += p[i, j, k];
             if denominator == 0:
                 for k in range(0, K):
@@ -164,13 +129,16 @@ def MStep():
             else:
                 lamda[i, k] /= denominator
 
-def MStepsaga(index_i, index_j):
-    # update theta
+
+
+def SAGAStep(index_i, index_j):
+    # compute new and old individual h_i
+    oldh = h
     for i in index_i:
         for j in range(0, M):
             denominator = 0;
             for k in range(0, K):
-                h[i, j, k] = listofthetas[i][k, j] * listoflamdas[i, k];
+                h[i, j, k] = theta[k, j] * lamda[i, k];
                 denominator += h[i, j, k];
             if denominator == 0:
                 for k in range(0, K):
@@ -178,17 +146,17 @@ def MStepsaga(index_i, index_j):
             else:
                 for k in range(0, K):
                     h[i, j, k] /= denominator;
-
+    
+    # update theta
     for k in range(0, K):
         denominator = 0
-        for j in range(0, M):
-            theta[k, j] = 0
+        for j in range(0, M):    
             tmp = 0
             for i in index_i:
-                tmp +=  N*(X[i, j] * p[i, j, k] - X[i, j] * h[i, j, k])
-            Vsomme = Hsomme[k,j] + tmp
-            Ssomme[k,j] = (1- rho_saga)*Ssomme[k,j] + rho_saga*Vsomme
-            theta[k, j] = Ssomme[k,j]
+                tmp += X[i, j] *(h[i, j, k] - oldh[i, j, k])
+            Vsomme[k,j] = Hsomme[k,j] + N*tmp
+            Ssomme[k,j] = (1-rho_saga)*Ssomme[k,j] + rho_saga*Vsomme[k,j]
+            theta[k, j] = Ssomme[k, j]
             denominator += theta[k, j]
         if denominator == 0:
             for j in range(0, M): 
@@ -196,30 +164,29 @@ def MStepsaga(index_i, index_j):
         else:
             for j in range(0, M):
                 theta[k, j] /= denominator
+
     # update lamda
     for i in range(0, N):
         for k in range(0, K):
             lamda[i, k] = 0
             denominator = 0
             for j in range(0, M):
-                # lamda[i, k] += X[i, j] * p[i, j, k]
-                lamda[i, k] += 1
+                lamda[i, k] += X[i, j] * p[i, j, k]
                 denominator += X[i, j];
             if denominator == 0:
                 lamda[i, k] = 1.0 / K
             else:
                 lamda[i, k] /= denominator
-    for j in range(0, M):
-        for k in range(0, K):
-            tmph = 0
+
+    for k in range(0, K):
+        for j in range(0, M):
             for i in index_j:
-                h[i, j, k] = listofthetas[i][k, j] * listoflamdas[i, k];
-                tmph +=  (X[i, j] * p[i, j, k] - X[i, j] * h[i, j, k])
-                Hsomme[k,j] += tmph
+                Hsomme[k,j] += X[i, j] *(theta[k, j] * lamda[i, k] - listofthetas[i][k, j] * listoflamdas[i, k]);
+    #save all parameters per individual
     for i in index_j:
         listofthetas[i] = theta
-        listoflamdas[i,] = lamda[i,]
-   
+        for k in range(0, K):
+            listoflamdas[i,k] = lamda[i,k]
 
 
 def MStep_online(index):

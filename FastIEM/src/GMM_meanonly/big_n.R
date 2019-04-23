@@ -7,11 +7,11 @@ source("utils/algos.R")
 source("utils/func.R")
 source("utils/plots.R")
 theme_set(theme_bw())
-options(digits = 22)
-
+options(digits = 2)
+load('RData/finalplot.RData')
 # load('RData/saga_10000.RData')
 # load('RData/saga_10000_bis.RData')
-# save.image('RData/saga_10000.RData')
+# save.image('RData/finalplot.RData')
 # load('RData/saga_1e5.RData')
 
 # n <- 10
@@ -258,10 +258,10 @@ saga[,9]<-NULL
 
 
 iem$algo <- 'IEM'
-iemseq$algo <- 'IEMseq'
+iemseq$algo <- 'IEM seq'
 oem$algo <- 'OEM'
-oemvr$algo <- 'OEMvr'
-saga$algo <- 'saga'
+oemvr$algo <- 'SVR-EM'
+saga$algo <- 'FI-EM'
 em$algo <- 'EM'
 
 em$rep <- NULL
@@ -327,68 +327,97 @@ variance <- rbind(oemvr[start:end,c(1,4,8)],
                   iem[start:end,c(1,4,8)],
                   oem[start:end,c(1,4,8)],
                   iemseq[start:end,c(1,4,8)],
-                  em_ep[,c(1,4,8)])
+                  em_ep[2:length(epochs),c(1,4,8)],saga[start:end,c(1,4,8)])
 
-graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
-
-
+graphConvMC2_new(variance, title="",legend=TRUE)
 
 
+testoemvr <- oemvr
+testiem <- iem
+testoem <- oem
+testiemseq <- iemseq
+testem_ep <- em_ep
+testsaga <- saga
+
+testoemvr$iteration <- testoemvr$iteration/n
+testiem$iteration <- testiem$iteration/n
+testoem$iteration <- testoem$iteration/n
+testiemseq$iteration <- testiemseq$iteration/n
+testsaga$iteration <- testsaga$iteration/n
+testem_ep$iteration <- testem_ep$iteration/n
+testiemseq$algo <- 'IEM'
+
+start =10000
+end = 100000
+variance <- rbind(testoemvr[start:end,c(1,4,8)],
+                  testoem[start:end,c(1,4,8)],
+                  testiemseq[start:end,c(1,4,8)],
+                  testem_ep[2:11,c(1,4,8)],testsaga[start:end,c(1,4,8)])
+
+save <- graphConvMC2_new(variance, title="",legend=TRUE)
+
+testoemvr[start:(start+15),c(1,4,8)]
+write.csv(variance, file = "notebooks/singlerun.csv")
+
+ggsave(save,file="/Users/karimimohammedbelhal/Desktop/test.pdf", width = 200, height = 200, units = "mm")
 
 
-variance <- rbind(oemvr[start:end,c(1,4,8)],
-                  iem[start:end,c(1,4,8)],
-                  iemseq[start:end,c(1,4,8)],
-                  oem[start:end,c(1,4,8)],
-                  em_ep[,c(1,4,8)],
-                   saga[start:end,c(1,4,8)])
-
-graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
-
-epochs
-start =2
-end = 10
 
 
-variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
-                  iem_ep[start:end,c(1,4,8)],
-                  oem_ep[start:end,c(1,4,8)],
-                  em_ep[start:end,c(1,4,8)],
-                   saga_ep[start:end,c(1,4,8)])
 
-graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
+# variance <- rbind(oemvr[start:end,c(1,4,8)],
+#                   iem[start:end,c(1,4,8)],
+#                   iemseq[start:end,c(1,4,8)],
+#                   oem[start:end,c(1,4,8)],
+#                   em_ep[,c(1,4,8)],
+#                    saga[start:end,c(1,4,8)])
 
-
-saga_ep
-em_ep
-oemvr_ep
-
-em_ep[start:end,c(1,4)]- oemvr_ep[start:end,c(1,4)]
-
-# epochs
-# start =7
-# end = 10
-# variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
-#                   iem_ep[start:end,c(1,4,8)],
-#                   em_ep[start:end,c(1,4,8)],
-#                    saga_ep[start:end,c(1,4,8)])
-
-# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
-
+# graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
 
 # epochs
 # start =2
 # end = 10
 
+
 # variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
 #                   iem_ep[start:end,c(1,4,8)],
 #                   oem_ep[start:end,c(1,4,8)],
-#                   em_ep[start:end,c(1,4,8)])
+#                   em_ep[start:end,c(1,4,8)],
+#                    saga_ep[start:end,c(1,4,8)])
+
+# graphConvMC2_new(variance, title="IEMs GMM 1e5",legend=TRUE)
 
 
-# graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+# saga_ep
+# em_ep
+# oemvr_ep
 
-# graphConvMC2_new(iem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
-# graphConvMC2_new(oem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
-# graphConvMC2_new(oemvr_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
-# graphConvMC2_new(saga_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
+# em_ep[start:end,c(1,4)]- oemvr_ep[start:end,c(1,4)]
+
+# # epochs
+# # start =7
+# # end = 10
+# # variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+# #                   iem_ep[start:end,c(1,4,8)],
+# #                   em_ep[start:end,c(1,4,8)],
+# #                    saga_ep[start:end,c(1,4,8)])
+
+# # graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+
+
+# # epochs
+# # start =2
+# # end = 10
+
+# # variance <- rbind(oemvr_ep[start:end,c(1,4,8)],
+# #                   iem_ep[start:end,c(1,4,8)],
+# #                   oem_ep[start:end,c(1,4,8)],
+# #                   em_ep[start:end,c(1,4,8)])
+
+
+# # graphConvMC2_new(variance, title="IEMs",legend=TRUE)
+
+# # graphConvMC2_new(iem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
+# # graphConvMC2_new(oem_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
+# # graphConvMC2_new(oemvr_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
+# # graphConvMC2_new(saga_ep[start:end,c(1,4,8)], title="IEMs",legend=TRUE)
