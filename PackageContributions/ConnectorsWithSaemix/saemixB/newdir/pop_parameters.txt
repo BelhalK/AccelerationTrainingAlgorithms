@@ -4,76 +4,63 @@ Nonlinear mixed-effects model fit by the SAEM algorithm
 -----------------------------------
 Object of class SaemixData
     longitudinal data for use with the SAEM algorithm
-Dataset hcv.saemix 
-    Structured data: Y ~ time | id 
-    Predictor: time () 
+Dataset warfarin.saemix 
+    Structured data: y1 ~ amount + time | id 
+    X variable for graphs: time () 
 Dataset characteristics:
-    number of subjects:     56 
-    number of observations: 669 
-    average/min/max nb obs: 11.95  /  7  /  15 
+    number of subjects:     31 
+    number of observations: 271 
+    average/min/max nb obs: 8.74  /  7  /  18 
 First 10 lines of data:
-   id time      Y mdv cens occ ytype
-1   1    0 7.0626   0    0   1     1
-2   1   28 5.3154   0    0   1     1
-3   1   56 5.0490   0    0   1     1
-4   1   84 5.6806   0    0   1     1
-5   1  112 4.0028   0    0   1     1
-6   1  317 3.6217   0    0   1     1
-7   1  337 3.0000   0    0   1     1
-8   1  363 5.5407   0    0   1     1
-9   1  398 5.8491   0    0   1     1
-10  1  421 5.9858   0    0   1     1
+   id amount  time  y1 mdv cens occ ytype
+1   1    100   0.0 0.0   0    0   1     1
+2   1    100  24.0 9.2   0    0   1     1
+3   1    100  36.0 8.5   0    0   1     1
+4   1    100  48.0 6.4   0    0   1     1
+5   1    100  72.0 4.8   0    0   1     1
+6   1    100  96.0 3.1   0    0   1     1
+7   1    100 120.0 2.5   0    0   1     1
+8   2    100   0.0 0.0   0    0   1     1
+9   2    100   0.5 0.0   0    0   1     1
+10  2    100   2.0 8.4   0    0   1     1
 -----------------------------------
 ----          Model            ----
 -----------------------------------
 Nonlinear mixed-effects model
-  Model function:  hcv  Model type:  structural
+  Model function:  warfarin  Model type:  structural
 function(psi,id,xidep) { 
   dose<-xidep[,1]
-  s<-psi[id,1]
-  d<-psi[id,2]
-  beta<-psi[id,3]
-  delta<-psi[id,4]
-  p<-psi[id,5]
-  c<-psi[id,6]
-  eta<-psi[id,7]
-  epsilon<-psi[id,8]
-  ypred<-1
+  tim<-xidep[,2]  
+  ka<-psi[id,1]
+  V<-psi[id,2]
+  Cl<-psi[id,3]
+  k<-Cl/V
+  ypred<-dose*ka/(V*(ka-k))*(exp(-k*tim)-exp(-ka*tim))
   return(ypred)
 }
-  Nb of parameters: 8 
-      parameter names:  s d beta delta p c eta epsilon 
+  Nb of parameters: 3 
+      parameter names:  ka V Cl 
       distribution:
      Parameter Distribution Estimated
-[1,] s         log-normal   Estimated
-[2,] d         log-normal   Estimated
-[3,] beta      log-normal   Fixed    
-[4,] delta     log-normal   Fixed    
-[5,] p         log-normal   Fixed    
-[6,] c         log-normal   Fixed    
-[7,] eta       probit       Fixed    
-[8,] epsilon   probit       Fixed    
+[1,] ka        log-normal   Estimated
+[2,] V         log-normal   Estimated
+[3,] Cl        log-normal   Estimated
   Variance-covariance matrix:
-        s d beta delta p c eta epsilon
-s       1 0    0     0 0 0   0       0
-d       0 1    0     0 0 0   0       0
-beta    0 0    0     0 0 0   0       0
-delta   0 0    0     0 0 0   0       0
-p       0 0    0     0 0 0   0       0
-c       0 0    0     0 0 0   0       0
-eta     0 0    0     0 0 0   0       0
-epsilon 0 0    0     0 0 0   0       0
+   ka V Cl
+ka  1 0  0
+V   0 1  0
+Cl  0 0  1
   Error model: constant , initial values: a=1 
     No covariate in the model.
     Initial values
-                s d  beta delta  p c eta epsilon
-Pop.CondInit 1000 1 5e-05  0.05 20 5 0.9     0.7
+             ka V Cl
+Pop.CondInit  1 1  1
 -----------------------------------
 ----    Key algorithm options  ----
 -----------------------------------
     Algorithms: estimation only
-    Number of iterations:  K1=2000, K2=1000 
-    Number of chains:  5 
+    Number of iterations:  K1=200, K2=50 
+    Number of chains:  1 
     Seed:  39546 
     Simulations:
         nb of simulated datasets used for npde:  1000 
@@ -87,25 +74,22 @@ Pop.CondInit 1000 1 5e-05  0.05 20 5 0.9     0.7
 ----------------------------------------------------
 -----------------  Fixed effects  ------------------
 ----------------------------------------------------
-      Parameter Estimate
- [1,] s         2.7e+03 
- [2,] d         1.0e-01 
- [3,] beta      5.0e-05 
- [4,] delta     5.0e-02 
- [5,] p         2.0e+01 
- [6,] c         5.0e+00 
- [7,] eta       9.0e-01 
- [8,] epsilon   7.0e-01 
- [9,] a         NaN     
+     Parameter Estimate
+[1,] ka        0.21    
+[2,] V         2.10    
+[3,] Cl        5.49    
+[4,] a         6.84    
 ----------------------------------------------------
 -----------  Variance of random effects  -----------
 ----------------------------------------------------
-  Parameter Estimate
-s omega2.s  4.2     
-d omega2.d  6.1     
+   Parameter Estimate
+ka omega2.ka 5.7e-07 
+V  omega2.V  6.6e-05 
+Cl omega2.Cl 1.4e-05 
 ----------------------------------------------------
 ------  Correlation matrix of random effects  ------
 ----------------------------------------------------
-         omega2.s omega2.d
-omega2.s 1        0       
-omega2.d 0        1       
+          omega2.ka omega2.V omega2.Cl
+omega2.ka 1         0        0        
+omega2.V  0         1        0        
+omega2.Cl 0         0        1        
