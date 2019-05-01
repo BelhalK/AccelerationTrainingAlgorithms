@@ -147,9 +147,8 @@ for epoch in range(1, nb_epochs):
     mini_batches_i = [list_indices_i[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
     mini_batches_j = [list_indices_j[epoch][k:k+mini_batch_size] for k in range(0, N, mini_batch_size)]
     for m in range(mini_batch_size):
-        for _ in range(2):
-            SAGAStep(mini_batches_i[m],mini_batches_j[m])
-            MStep()
+        SAGAStep(mini_batches_i[m],mini_batches_j[m])
+        MStep()
     newLoglikelihood = LogLikelihood() 
     print("[", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), "] ", epoch+1, " epoch  ", str(newLoglikelihood))
     # if(oldLoglikelihood != 1 and newLoglikelihood - oldLoglikelihood < threshold):
