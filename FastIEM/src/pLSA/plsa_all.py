@@ -617,16 +617,16 @@ for epoch in range(0, nb_epochs):
 
 
 with open ('losses1k/emloss', 'rb') as fp:
-    objectiveEM = pickle.load(fp)
-nb_epochs = len(objectiveEM)
+    objectiveEM_1k = pickle.load(fp)
+nb_epochs = len(objectiveEM_1k)
 with open ('losses1k/sagaloss', 'rb') as fp:
-    objectiveSAGA = pickle.load(fp)
+    objectiveSAGA_1k = pickle.load(fp)
 with open ('losses1k/iemloss', 'rb') as fp:
-    objectiveIEM = pickle.load(fp)
+    objectiveIEM_1k = pickle.load(fp)
 with open ('losses1k/oemloss', 'rb') as fp:
-    objectiveoEM = pickle.load(fp)
+    objectiveoEM_1k = pickle.load(fp)
 with open ('losses1k/oemvrloss', 'rb') as fp:
-    objectiveoEM_vr = pickle.load(fp)
+    objectiveoEM_vr_1k = pickle.load(fp)
 
 
 
@@ -643,3 +643,66 @@ plt.ylabel('Objective', fontsize=15)
 plt.show()
 
 
+
+### 10k
+with open ('losses10k/emloss', 'rb') as fp:
+    objectiveEM = pickle.load(fp)
+nb_epochs = len(objectiveEM)
+with open ('losses10k/sagaloss', 'rb') as fp:
+    objectiveSAGA = pickle.load(fp)
+with open ('losses10k/iemloss', 'rb') as fp:
+    objectiveIEM = pickle.load(fp)
+with open ('losses10k/oemloss', 'rb') as fp:
+    objectiveoEM = pickle.load(fp)
+with open ('losses10k/oemvrloss', 'rb') as fp:
+    objectiveoEM_vr = pickle.load(fp)
+
+
+#### PLOTTING #######
+plt.plot(np.arange(nb_epochs), objectiveIEM, label='IEM')
+plt.plot(np.arange(nb_epochs), objectiveEM, label='EM')
+plt.plot(np.arange(nb_epochs), objectiveoEM, label='oEM')
+plt.plot(np.arange(nb_epochs), objectiveoEM_vr, label='oEMVR')
+plt.plot(np.arange(nb_epochs), objectiveSAGA, label='FI-EM')
+leg = plt.legend(fontsize=20,fancybox=True, loc='right')
+leg.get_frame().set_alpha(0.5)
+plt.xlabel('Epoch', fontsize=15)
+plt.ylabel('Objective', fontsize=15)
+plt.show()
+
+
+
+
+
+xaxis = np.arange(nb_epochs)
+
+fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 6))
+ax = plt.subplot(1, 2, 1)
+plt.plot(xaxis, objectiveIEM_1k, label='IEM', marker='^')
+plt.plot(xaxis, objectiveEM_1k, label='EM', marker='^')
+plt.plot(xaxis, objectiveSAGA_1k, label='FI-EM', marker='^')
+plt.plot(xaxis, objectiveoEM_vr_1k, label='SVR-EM', marker='^')
+plt.plot(xaxis, objectiveoEM_1k, label='OEM', marker='^')
+leg = plt.legend(fontsize=20,fancybox=True, loc=0,ncol=2)
+leg.get_frame().set_alpha(0.5)
+plt.xticks(fontsize=14)
+plt.xlabel('Epoch', fontsize=15)
+plt.ylabel('Objective', fontsize=15)
+plt.yticks(fontsize=14)
+plt.grid(linestyle='dotted',linewidth=2)
+
+ax = plt.subplot(1, 2, 2)
+plt.plot(xaxis, objectiveIEM, label='IEM', marker='^')
+plt.plot(xaxis, objectiveEM, label='EM', marker='^')
+plt.plot(xaxis, objectiveSAGA, label='FI-EM', marker='^')
+plt.plot(xaxis, objectiveoEM_vr, label='SVR-EM', marker='^')
+plt.plot(xaxis, objectiveoEM, label='OEM', marker='^')
+leg = plt.legend(fontsize=20,fancybox=True, loc=0,ncol=2)
+leg.get_frame().set_alpha(0.5)
+plt.xlabel('Epoch', fontsize=15)
+plt.ylabel('Objective', fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.grid(linestyle='dotted',linewidth=2)
+fig.tight_layout()
+plt.show()
