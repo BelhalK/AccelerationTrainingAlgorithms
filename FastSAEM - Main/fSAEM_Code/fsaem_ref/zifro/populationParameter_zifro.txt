@@ -1,0 +1,12 @@
+Tlag_pop 0.78877
+ka_pop 1
+V_pop 8
+alpha_pop 1
+beta_pop 1
+omega_Tlag 0.57421
+omega_ka 0.5
+omega_V 0.2
+omega_alpha 0
+omega_beta 0
+a 0.26629
+

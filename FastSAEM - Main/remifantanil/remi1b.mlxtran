@@ -1,0 +1,62 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'remifentanil_data.csv'
+delimiter = comma
+header = {ID, TIME, AMT, RATE, DV, YTYPE, MDV, AGE, SEX, LBM, TINFCAT}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+AMT = {use=amount}
+RATE = {use=rate}
+DV = {use=observation, name={y1, y2}, yname={'1', '2'}, type={continuous, continuous}}
+YTYPE = {use=observationtype}
+MDV = {use=missingdependentvariable}
+AGE = {use=covariate, type=continuous}
+SEX = {use=covariate, type=categorical}
+LBM = {use=covariate, type=continuous}
+TINFCAT = {use=covariate, type=categorical}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {V_pop, omega_V, k_pop, omega_k}
+
+DEFINITION:
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+k = {distribution=logNormal, typical=k_pop, sd=omega_k}
+
+[LONGITUDINAL]
+input = {a1, b1}
+
+file = 'infusion_1cpt.txt'
+
+DEFINITION:
+y1 = {distribution=normal, prediction=Cc, errorModel=combined1(a1, b1)}
+
+<FIT>
+data = y1
+model = y1
+
+<PARAMETER>
+V_pop = {value=5.489644696418746, method=MLE}
+a1 = {value=1, method=MLE}
+b1 = {value=0.3, method=MLE}
+k_pop = {value=0.4535061360751424, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'remi1b'
+
