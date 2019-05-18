@@ -21,57 +21,7 @@ load("RData_sep/oemvriter.RData")
 load("RData_sep/sagaiter.RData")
 
 
-
-
-
 length(datasizes)
-
-
-
-# eqiem = function(x){x+100}
-# eqsaga = function(x){x**(2/3)}
-
-
-# for (precision in c(1e-3,1e-4,1e-5)){
-#   emindex  <- iemseqindex <- iemindex  <- oemvrindex <- sagaindex  <- c()
-
-#   for (i in (1:length(datasizes))){
-#   	emindex[i] <- datasizes[[i]]*which(emiter[[i]][,c(4)] < precision)[1]
-#     iemindex[i] <- which(iemiter[[i]][,c(4)] < precision)[1]
-#     iemseqindex[i] <- which(iemseqiter[[i]][,c(4)] < precision)[1]
-#     sagaindex[i] <- which(sagaiter[[i]][,c(4)] < precision)[1]
-#     oemvrindex[i] <- which(oemvriter[[i]][,c(4)] < precision)[1]
-#   }
-
-#   x  <- datasizes
-#   y1 <- iemindex
-#   y2 <- iemseqindex
-#   y3 <- sagaindex
-#   y4 <- oemvrindex
-#   y5 <- emindex
-#   ytwothird <- eqsaga(datasizes)
-#   ylin <- eqiem(datasizes)
-#   df <- data.frame(x,y1,y2,y4,y5,ytwothird,ylin)
-
-#   print(ggplot(df, aes(x),show.legend = TRUE) +                    
-#     geom_line(aes(y=y1), colour="red") +
-#     geom_line(aes(y=y3), colour="pink") +
-#   geom_line(aes(y=y2), colour="blue") +
-#   geom_line(aes(y=y4), colour="purple") +
-#   geom_line(aes(y=y5), colour="green") +
-#   geom_line(aes(y=ytwothird), colour="black", linetype= "dotted") +
-#   geom_line(aes(y=ylin), colour="brown", linetype= "dotted") +
-#   scale_y_log10()  + scale_x_log10() +
-#   xlab("Dataset size") + ylab("Iteration")  +
-#   ggtitle(precision))
-
-# }
-
-
-
-
-
-
 
 eqiem = function(x){x*5}
 eqsaga = function(x){(x*10)**(2/3)}
@@ -100,12 +50,12 @@ ylin <- data.frame(iteration=datasizes, prec = eqiem(datasizes), algo = "f(n) = 
 sublin = eqsaga(datasizes)
 lin = eqiem(datasizes)
 list(sublin)[[1]]
-write.table(list(sublin)[[1]], 'notebooks/test.txt')
+# write.table(list(sublin)[[1]], 'notebooks/test.txt')
 
 df <- rbind(y2,y3,y4,y5,ytwothird,ylin)
 colnames(df) <- c("iteration","prec","algo")
 
-write.csv(df, file = "notebooks/rates.csv")
+# write.csv(df, file = "notebooks/rates.csv")
 # df.m <- melt(df, id.var = c("iteration","algo"))
 
 # testdf <- df.m[,c(1,4,2)]
