@@ -4,7 +4,7 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 class ConvNetMISSO(object):
-  def __init__(self, dropout=0.5):
+  def __init__(self, dropout=0):
     #self._input = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
     self._input = tf.keras.layers.Input(shape=[28, 28, 1], dtype='float32')
     self._training = tf.placeholder_with_default(False, shape=[])
@@ -14,22 +14,22 @@ class ConvNetMISSO(object):
     out = self._input 
     if dropout:
       out = tf.layers.dropout(out, rate=0.2 if dropout > 0.2 else dropout, training=self._training)
-    out = tfp.layers.Convolution2DFlipout(6,kernel_size=5,padding="SAME",activation=tf.nn.relu)(out)
+    out = tfp.layers.Convolution2DReparameterization(6,kernel_size=5,padding="SAME",activation=tf.nn.relu)(out)
     out = tf.layers.max_pooling2d(out, pool_size=2, strides=2) # 12
     if dropout:
       out = tf.layers.dropout(out, rate=dropout, training=self._training)
-    out = tfp.layers.Convolution2DFlipout(16,kernel_size=5,padding="SAME",activation=tf.nn.relu, name='layer1')(out)
+    out = tfp.layers.Convolution2DReparameterization(16,kernel_size=5,padding="SAME",activation=tf.nn.relu, name='layer1')(out)
     out = tf.layers.max_pooling2d(out, pool_size=2, strides=2) # 4
     if dropout:
       out = tf.layers.dropout(out, rate=dropout, training=self._training)
     out = tf.contrib.layers.flatten(out)
-    out = tfp.layers.DenseFlipout(120, activation=tf.nn.relu, name='layer2')(out)
+    out = tfp.layers.DenseReparameterization(120, activation=tf.nn.relu, name='layer2')(out)
     if dropout:
       out = tf.layers.dropout(out, rate=dropout, training=self._training)
-    out = tfp.layers.DenseFlipout(84, activation=tf.nn.relu, name='layer3')(out)
+    out = tfp.layers.DenseReparameterization(84, activation=tf.nn.relu, name='layer3')(out)
     if dropout:
       out = tf.layers.dropout(out, rate=dropout, training=self._training)
-    out = tfp.layers.DenseFlipout(10, name='layer4')(out)
+    out = tfp.layers.DenseReparameterization(10, name='layer4')(out)
     
     
     self._inference_op = out
@@ -104,15 +104,10 @@ class ConvNetMISSO(object):
 
 
 
-def run_experiment(average_gradients, batch_size, iterations, verbose):
+def run_experimentbis(average_gradients, batch_size, iterations, verbose):
   batch_size = batch_size
   tf.reset_default_graph()
-  net = ConvNet()
-
-  validation_batch = mnist.test.images
-  val_count = validation_batch.shape[0]
-  validation_batch = np.reshape(validation_batch, (val_count, 28, 28, 1))
-  validation_labels = mnist.test.labels
+  net = ConvNetMISSO()
 
   net.setup_train(average_gradients=average_gradients)
   training_log = []
@@ -120,21 +115,43 @@ def run_experiment(average_gradients, batch_size, iterations, verbose):
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     indivgrads = []
-    for indiv in range(0,total,batch_size)
-
-      indivgrads.append()
-    for i in range(iterations):
-      batch = mnist.train.next_batch(batch_size)
-      input_batch = np.reshape(batch[0], (batch_size, 28, 28, 1))
-      loss = net.train(sess, input_batch, batch[1], indivgrads)
-      listloss.append(loss)
-      if (i+1) % 100 == 0:
-        accuracy = net.evaluate(sess, validation_batch, validation_labels)
-        training_log.append((accuracy, i+1))
-        if verbose:
-          print('[{:d}/{:d}] loss: {:.3g}, accuracy: {:.3g}%'.format(i+1, iterations, loss, accuracy))
-    accuracy = net.evaluate(sess, validation_batch, validation_labels)
-    training_log.append((accuracy, iterations))
-    best = sorted(training_log, key=lambda x: x[0], reverse=True)[0]
-    print('Training finished. Best accuracy: {:.3g} at iteration {:d}.'.format(best[0], best[1]))
+    for indiv in range(0,total,batch_size):
+      print(indiv)
+      grads = tf.gradients(net._loss_op, tf.trainable_variables())
+      var_updates = []
+      var_list = tf.trainable_variables()
+      for grad, var in zip(grads, var_list):
+          var_updates.append(var.assign_sub(0.001 * grad))
+      net._train_op = tf.group(*var_updates)
+      indivgrads.append(grads)
+    for epoch in range(10):
+      for index in range(0,int(total/batch_size)):
+        print(index)
+        batch = mnist.train.next_batch(batch_size)
+        input_batch = np.reshape(batch[0], (batch_size, 28, 28, 1))
+        feed_dict = {net._input: input_batch,net._labels: batch[1],net._training: True}
+        # # loss, grads = sess.run([net._loss_op, net._grad_op], feed_dict=feed_dict)
+        # grads = tf.gradients(net._loss_op, tf.trainable_variables())
+        # indivgrads[index] = grads
+        # for i, placeholder in enumerate(net._grad_placeholders):
+        #   feed_dict[placeholder] = np.stack([g[i] for g in indivgrads], axis=0).mean(axis=0)
+        # sess.run(self._train_op, feed_dict=feed_dict)
+        # # loss = net.train(sess, input_batch, batch[1])
+        # loss = sess.run(net._loss_op, feed_dict=feed_dict)
+        grads = tf.gradients(net._loss_op, tf.trainable_variables())
+        indivgrads[index] = grads
+        var_updates = []
+        var_list = tf.trainable_variables()
+        print('ok')
+        for gradstemp in indivgrads:
+            for grad, var in zip(gradstemp, var_list):
+                var_updates.append(var.assign_sub(0.001 * grad))
+        net._train_op = tf.group(*var_updates)
+        sess.run(net._train_op,feed_dict=feed_dict)
+        loss = sess.run(net._loss_op, feed_dict=feed_dict)
+        listloss.append(loss)
+    print('Training finished.')
     return listloss
+
+
+
