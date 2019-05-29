@@ -1,0 +1,18 @@
+DESCRIPTION: Generalized Poisson model
+
+[LONGITUDINAL]
+input = {delta, lambda}
+
+DEFINITION:
+Y = {  type = count,
+  if k > 0
+    aux = log(lambda) + (k-1)*log(lambda+k*delta) - (lambda+k*delta) - factln(k)
+  else
+    aux = -lambda
+  end
+
+  log(P(Y=k)) = aux
+}
+
+OUTPUT:
+output = Y 

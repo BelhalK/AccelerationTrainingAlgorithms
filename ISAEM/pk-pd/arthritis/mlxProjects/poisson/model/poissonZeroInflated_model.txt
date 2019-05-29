@@ -1,0 +1,19 @@
+DESCRIPTION: Zero inflated Poisson model
+
+[LONGITUDINAL]
+input = {p0, lambda}
+
+DEFINITION:
+Y = { type = count,
+
+  if k > 0
+    aux = log(1-p0) - lambda + k*log(lambda) - factln(k)
+  else
+    aux = log(p0+(1-p0)*exp(-lambda))
+  end
+
+  log(P(Y=k)) = aux
+}
+
+OUTPUT:
+output = Y 

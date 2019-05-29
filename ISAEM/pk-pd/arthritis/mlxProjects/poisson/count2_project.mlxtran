@@ -1,0 +1,46 @@
+<DATAFILE>
+
+[FILEINFO]
+file = 'data/count2_data.txt'
+delimiter = tab
+header = {ID, TIME, Y}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+Y = {use=observation, name=Y, type=discrete}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {a_pop, omega_a, b_pop, omega_b}
+
+DEFINITION:
+a = {distribution=logNormal, typical=a_pop, sd=omega_a}
+b = {distribution=logNormal, typical=b_pop, sd=omega_b}
+
+[LONGITUDINAL]
+file = 'model/poissonTimeVarying_model.txt'
+<FIT>
+data = Y
+model = y
+
+<PARAMETER>
+a_pop = {value=100, method=MLE}
+b_pop = {value=0.1, method=MLE}
+omega_a = {value=1, method=MLE}
+omega_b = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {outputplot, indfits, obspred, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'count2_project'
+

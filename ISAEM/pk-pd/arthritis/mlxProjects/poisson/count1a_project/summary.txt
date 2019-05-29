@@ -1,0 +1,18 @@
+********************************************************************************
+*                         count1a_project.mlxtran                              *
+*                         October 11, 2018 at 10:12:42                         *
+*                         Monolix version : 5.0.1                              *
+********************************************************************************
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------
+lambda_pop                     :     0.476
+
+Standard Deviation of the Random Effects -
+omega_lambda                   :      1.06
+
+Elapsed time (seconds) :      2.3
+CPU time     (seconds) :        8
+ _______________________________________________________________________________
+

@@ -1,0 +1,16 @@
+DESCRIPTION:
+Poisson model for count data with time varying parameter
+
+[LONGITUDINAL]
+input =  {a,b}
+                           
+EQUATION:
+lambda= a*exp(-b*t)
+                           
+DEFINITION:
+y = {type = count, 
+      P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)
+}
+
+OUTPUT:
+output = y
