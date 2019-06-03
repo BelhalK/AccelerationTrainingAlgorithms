@@ -1,0 +1,817 @@
+\documentclass[11pt]{article}
+%\usepackage{fullpage,graphicx,algorithm,algorithmic,bm,amsmath,amsthm,amssymb,color,hyperref,cite,natbib}
+
+% if you need to pass options to natbib, use, e.g.:
+%\PassOptionsToPackage{numbers}{natbib}
+\usepackage{natbib,fullpage}
+\usepackage{bm,amsmath,amsthm,amssymb,multicol,algorithmic,algorithm,enumitem}
+
+% ready for submission
+\usepackage[preprint]{neurips_2019}
+
+\usepackage[colorlinks=true,
+linkcolor=red,
+urlcolor=blue,
+citecolor=blue]{hyperref}
+
+\setlength{\parskip}{.2cm}
+
+\newtheorem{Fact}{Fact}
+\newtheorem{Lemma}{Lemma}
+\newtheorem{Prop}{Proposition}
+\newtheorem{Theorem}{Theorem}
+\newtheorem{Def}{Definition}
+\newtheorem{Corollary}{Corollary}
+\newtheorem{Conjecture}{Conjecture}
+\newtheorem{Property}{Property}
+\newtheorem{Observation}{Observation}
+%\theorembodyfont{\rmfamily}
+\newtheorem{Exa}{Example}
+\newtheorem{assumption}{H\!\!}
+\newtheorem{Remark}{Remark}
+
+%%%%%%%%%%% Stuffs for Tikz %%%%%%%%%%%%%%%%%%
+\usepackage{pgfplots}
+\usepackage{xargs}
+\usepackage{stmaryrd}
+\usetikzlibrary{arrows,shapes,calc,tikzmark,backgrounds,matrix,decorations.markings}
+\usepgfplotslibrary{fillbetween}
+\bibliographystyle{plainnat}
+\pgfplotsset{compat=1.3}
+
+\usepackage{relsize}
+\tikzset{fontscale/.style = {font=\relsize{#1}}
+    }
+
+\definecolor{lavander}{cmyk}{0,0.48,0,0}
+\definecolor{violet}{cmyk}{0.79,0.88,0,0}
+\definecolor{burntorange}{cmyk}{0,0.52,1,0}
+
+\def\lav{lavander!90}
+\def\oran{orange!30}
+
+\definecolor{asuorange}{rgb}{1,0.699,0.0625}
+\definecolor{asured}{rgb}{0.598,0,0.199}
+\definecolor{asuborder}{rgb}{0.953,0.484,0}
+\definecolor{asugrey}{rgb}{0.309,0.332,0.340}
+\definecolor{asublue}{rgb}{0,0.555,0.836}
+\definecolor{asugold}{rgb}{1,0.777,0.008}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage{shortcuts_OPT}
+
+%\renewcommand{\textwidth}{5.5in}
+
+% Here's the definition of Sb, stolen from amstex
+    \makeatletter
+    \def\multilimits@{\bgroup
+  \Let@
+  \restore@math@cr
+  \default@tag
+ \baselineskip\fontdimen10 \scriptfont\tw@
+ \advance\baselineskip\fontdimen12 \scriptfont\tw@
+ \lineskip\thr@@\fontdimen8 \scriptfont\thr@@
+ \lineskiplimit\lineskip
+ \vbox\bgroup\ialign\bgroup\hfil$\m@th\scriptstyle{##}$\hfil\crcr}
+    \def\Sb{_\multilimits@}
+    \def\endSb{\crcr\egroup\egroup\egroup}
+\makeatother
+
+\newtheoremstyle{t}         %name
+    {\baselineskip}{2\topsep}      %space above and below
+    {\rm}                   %Body font
+    {0pt}{\bfseries}  %Heading indent and font
+    {}                      %after heading
+    { }                      %head after space
+    {\thmname{#1}\thmnumber{#2}.}
+
+\theoremstyle{t}
+\newtheorem{q}{Q}
+\parindent=0pt 
+
+\makeatletter
+\DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
+\makeatother
+
+\begin{document}
+\title{MISSO: Minimization by Incremental Stochastic Surrogate for large-scale nonconvex Optimization}
+%\author{}
+\date{\today}
+
+\maketitle
+
+
+\begin{abstract}
+\noindent Many nonconvex optimization problems can be solved using the Majorization-Minimization (MM) algorithm that consists in upper bounding, at each iteration of the algorithm, the objective function by a surrogate that is easier to minimize. 
+When the objective function can be expressed as a large sum of individual losses, incremental version of the MM algorithm is often used. 
+However, in many cases of interest (Generalized Linear Mixed Model or Variational Bayesian inference) those surrogates are intractable. 
+In this contribution, we propose a generalization of incremental MM algorithm using Monte Carlo approximation of the aforementioned surrogates.
+We provide a comprehensive statistical theory of our unifying scheme for possibly nonconvex objective function including both finte-time guarantees and almost sure convergence of the algorithm.
+Finally, we apply our new framework to train a binary logistic regression on a French registry of severely traumatized patients in order to predict high risk of hemmorhage and a Bayesian neural network on the MNIST dataset and compare its convergence behaviour with state-of-the-art optimization methods.
+\end{abstract}
+
+\section{Introduction}
+We are interested in the constrained minimization of a large sum of nonconvex functions defined as:
+\beq\label{eq:obj}
+\min_{ \param \in \Param }~ {\cal L} ( \param ) \eqdef \frac{1}{n} \sum_{i=1}^n {\cal L}_i( \param)
+\eeq
+where $\Theta$ is a closed and convex subset of $\rset^p$, for all $i \in \inter$, ${\cal L} _i: \rset^p \to \rset$ are continuously differentiable, bounded from below and possibly nonconvex.
+In this paper, we solve this minimization problem using an MM algorithm \citep{book:lange, luo} which works by finding iteratively a surrogate function that majorizes the objective function. By minimizing at each iteration the surrogate function, we drive the objective function downwards until convergence to a stationary point.
+MM algorithms become very popular in machine learning and computational statistics \citep{book:lange}. Examples include the proximal gradient algorithm \citep{beck:fista, boyd}, the Expectation-Maximization (EM) algorithm \citep{mclachlan} and variational inference methods \citep{jordan}. 
+
+When the objective function is a finite-sum, \citep{mairal} developed an incremental MM scheme, called MISO, taking advantage of the finite-sum structure with a cost per iteration that is independent of $N$. Incremental methods have recently become very popular; in particular these methods proved to be an essential component to develop variance reduced stochastic gradient methods \citep{roux, bach}. See \citep{mairal} and the references therein.
+
+However, the MISO framework rests upon the computation of tractable surrogates such as quadratic or variational functions. Yet, in many cases, those surrogates are intractable and need to be approximated. For instance, in the Bayesian machine learning literature \citep{ghahramani2015probabilistic}, uncertainty is put on the parameters and the optimization problem boils down to finding the true distribution of those parameters given any observed data. 
+To this end, variational inference methods, as approximate inference methods, \citep{blei:bbvi, kingma} have been extensively studied to find an approximation of this distribution. 
+More recently, Bayesian neural networks \citep{neal:bnn, book:deeplearning}, vastly studied in \citep{rezende, blundell,thesis:gal,polson,mullachery}, can  produce probabilistic guarantees on their predictions and also generate the distribution of the parameters that it has learnt from the observations. 
+These two characteristics make them highly attractive to theoreticians as well as practitioners. 
+
+Variational inference methods mentioned above, are used for training such neural network, see for instance \citep{pawlowski, gal,trippe}. 
+To scale to large datasets, this optimization is typically performed using Stochastic Gradient Descent (SGD), or any of its variants  (see \citep{bottou2018optimization}).
+To this end, the Stochastic Variational Inference (SVI) algorithm proposed in \citep{hofman} approximates the full gradient from mini-batches relying on stochastic optimization \citep{robbins1951A} and processing the data in an online fashion.
+
+In \citep{archambeau2015incremental}, an incremental variant of the variational inference algorithm is proposed to address the issue of stepsize tuning in the SVI. The method consists in updating a minibatch of statistics at each iteration and keeping the others unchanged.
+To our best knowledge, the global convergence guarantees have not been studied yet.
+
+In Generalized Linear Mixed Models, Maximum Likelihood Estimation is performed to fit the parameters of a model to the observed data. Random effects are considered as latent variables and the optimization procedure requires augmenting the observed data with the latent structure. The EM algorithm \citep{mclachlan} is a reference method to execute this task. In particular, the Incremental EM, introduced by \citep{neal}, updates upper-bounds of the negated log-likelihood incrementally and can be shown to be a special case of the MISO framework. When those upper-bounds are intractable, the MCEM \citep{wei} algorithm optimizes their Monte Carlo integrations. While many convergence results of this algorithm have been provided \citep{gersende, neath}, neither finite-time guarantees nor almost sure convergence are proven for its mini-batch variant.
+
+Ultimately, MISO convergence guarantees can not be applied on those cases where approximation of surrogates are used and they often rely on Robbins and Monro \citep{robbins1951A} convergence results for stochastic optimization.
+
+
+The contributions of this paper can be summarized as follows.
+\begin{itemize}
+\item We propose a unifying framework of analysis for incremental stochastic surrogate optimization when the MISO surrogate functions are intractable. The proposed framework, called MISSO, is built on the Monte Carlo integration of the intractable surrogate function.
+Variational inference and Monte Carlo EM algorithms are shown to be instances of this optimization framework.
+\item We establish both almost sure convergence and finite-time rates, in the nonconvex setting, for the proposed stochastic optimization framework MISSO and show that the convergence rate for the deterministic MISO framework can be obtained as a special case and takes $\mathcal{O}(n/\epsilon)$ iterations to find an $\epsilon-$stationary point. 
+\end{itemize}
+
+The paper is organized as follows. In Section \ref{sec:framework}, we recall the MISO framework, as introduced in \citep{mairal}, and present a class of intractable surrogate functions expressed as an expectation over a latent space. The MISSO framework is thus introduced for this class of surrogate functions. In Section \ref{sec:analysis}, we derive asymptotic convergence and non asymptotic convergence rate for the MISSO framework and its special instance, the MISO. 
+Finally, Section \ref{sec:numerical} presents numerical applications to illustrate our findings.
+
+
+\section{Incremental minimization of large sum of nonconvex functions}\label{sec:framework}
+In this section, we analyze incremental MM algorithms to minimize the objective function \eqref{eq:obj}. To that end, the following assumptions need to be made:
+\begin{assumption}\label{ass:differentiability}
+For all $i \in \inter$, ${\cal L}_i$ is continuously differentiable on $\Theta$ where $\Theta$ is a closed and convex subset of $\rset^p$.
+\end{assumption}
+\begin{assumption}\label{ass:bounded}
+For all $i \in \inter$, ${\cal L}_i$ is bounded from below, i.e. there exist a constant $M_i \in \rset$ such as for all $\param \in \Theta$, ${\cal L}_i(\param) \geq M_i$.
+\end{assumption}
+
+Define the class of surrogate functions as follows:
+For any $\param \in \Theta$ and $i \in \inter$, we say, following \citep{mairal} that a function $\sur{i}{\cdot}{\param} :\rset^p \to \rset$ is a surrogate of ${\cal L}_i$ at $\param$ if the following properties are satisfied:
+\begin{enumerate}[label=\textbf{S.\arabic*}]
+\item \label{diff} the function $\vartheta \to  \sur{i}{\vartheta}{\param}$ is continuously differentiable on $\Theta$.
+\item \label{major} for all $\vartheta \in \Theta$, $\sur{i}{\vartheta}{\param} \geq {\cal L}_i(\vartheta)$ , $\sur{i}{\param}{\param} = {\cal L}_i(\param)$ and $\nabla \sur{i}{\vartheta}{\param}\Bigr|_{\substack{\vartheta=\param}} = \nabla {\cal L}_i(\vartheta)\Bigr|_{\substack{\vartheta=\param}}$.
+\end{enumerate}
+
+
+\paragraph{Using incremental deterministic surrogate functions: the MISO framework: }
+The MISO (Minimization by Incremental Surrogate Optimization) algorithm, developed in \citep{mairal}, reads:
+
+\begin{minipage}{1\linewidth}
+        \begin{algorithm}[H]
+\textbf{Initialization}: given an initial parameter estimate $\hp0$, for all $i \in \inter$ compute a surrogate function $\param \to     \sur{i}{\param}{\hp{0}}$.\\
+\textbf{Iteration k}: given the current estimate $\hp{k-1}$:
+\begin{enumerate}
+\item Pick an index $i_k$ uniformly on $\inter$
+\item Compute $\param \to \sur{i_k}{\param}{\hp{k}}$, a surrogate of ${\cal L}_{i_k}$ at $\hp{k}$.
+\item Set $\hp{k+1} \in \arg \min \limits_{\param \in \Theta} \frac{1}{n} \sum_{i=1}^{n}{ \tafctdet{i}{k+1}{\param}}$ where $a^k_i(\param)$ are defined recursively as follows:
+\begin{align}
+ \tafctdet{i}{k+1}{\param} &\triangleq
+  \begin{cases}
+   \sur{i}{\param}{\hp{k}}        & \text{if } i = i_k \\
+ \tafctdet{i}{k}{\param}         & \text{otherwise}
+  \end{cases}
+\end{align}
+\end{enumerate}
+\caption{MISO algorithm}
+\label{alg:miso}
+        \end{algorithm}
+    \end{minipage}
+
+Note that:
+\beq
+\hp{k+1} \in \arg \min \limits_{\param \in \Theta} \frac{1}{n} \sum_{i=1}^{n}{ \tafctdet{i}{k+1}{\param}} = \frac{1}{n} \sum_{i=1}^{n}{\sur{i}{\param}{\hp{\tau_i^{k+1}}} }
+\eeq
+where the indices $\tau_{i}^{k}$ are defined recursively as follows:
+ \begin{equation}\label{notation_miso}
+\tau_{i}^{k+1} = k \quad \textrm{if $i = i_k$} \quad \textrm{and $\tau_{i}^{k+1} = \tau_{i}^{k}$ otherwise}
+\end{equation}
+This algorithm is a general framework 
+\paragraph{An extension to approximate surrogate optimization: }
+The proposed MISSO (Minimization by Incremental Stochastic Surrogate Optimization) algorithm considers a stochastic surrogate function when the deterministic one introduced above is intractable.
+Let $p_i : \zset \times \Param \rightarrow \rset_+$ be a distribution, and $r_i : \Param \times \Param \times \zset \rightarrow \rset$ be a measurable function. We consider surrogate functions that can be expressed in the following form:
+\begin{equation}\label{eq:integralsurrogate}
+\sur{i}{\param}{\op} \triangleq \int_{\zset}{\rsur{i}{\param}{\op}{z_i}  p_i(z_i ; \op)\mu_i(dz_i)}\quad \forall~(\param,\op) \in \Param \times \Param.
+\end{equation}
+We assume the following:
+\begin{assumption} \label{ass:lips}
+For all $i \in \inter$, $\op \in \Param$, $z_i \in \zset$, the measurable function $\rsur{i}{\param}{\op}{z_i}$ is convex in $\param$ and lower bounded such that $\rsur{i}{\param}{\op}{z_i} > -\infty$ for all $\param \in \Param$. 
+%Subsequently, the surrogate function
+%$\sur{i}{\param}{\op}$ is also convex in $\param$ and is lower bounded.
+\end{assumption}
+\begin{assumption} \label{ass:sur} For all $i \in \inter$, it holds 
+\beq
+\sur{i}{\param}{\op} \geq {\cal L}_i( \param ),~\forall~\param, \op \in \Param^2.
+\eeq
+and the equality holds when $\param = \op$. Moreover, the difference function $\frac{1}{n} \sum_{i=1}^n \sur{i}{\param}{\op_i } - {\cal L}( \param)$ is $2L$-smooth for any $\op_i \in \Param$, $i \in \inter$.
+\end{assumption}
+%Denote $e_i( \param  ; \op ) \eqdef \sur{i}{\param}{\op} - {\cal L}_i( \param )$ as the error function. We have $e_i( \param  ; \op ) \geq 0$ and $e_i( \op ; \op ) = 0$ for any $\param, \op \in \Param^2$.
+%Moreover, both ${\cal L}_i( \param)$ and $\sur{i}{\param}{\op}$ are $L$-smooth in $\param$, and thus the error function $e_i( \param ; \op )$ is $2L$-smooth with respect to $\param$.
+
+Let $z_m \in \zset$, $m=1,...,M$ be  samples drawn from the distribution $p_i( \cdot ; \op )$, e.g., using an MCMC procedure. Define
+\beq
+\ssur{i}{\param}{\op}{ \{ z_m \}_{m=1}^{M}} \eqdef \frac{1}{M}\sum_{m=1}^{M} \rsur{i}{\param}{\op}{z_m}
+\eeq
+as the Monte Carlo approximation of $\sur{i}{\param}{\op}$.
+
+We are particularly interested in the \emph{constrained optimization} setting where $\Param$ is a bounded set. 
+To this end, we control the supremum norm of the fluctuations of the above approximation as: 
+\begin{assumption}\label{controlapprox}
+%For all $i \in \inter$, $\op \in \Param$, t
+There exists constants $C_{\sf r}$ and $C_{\sf gr}$ such that 
+\beq
+C_{\sf r} \geq \sup \limits_{\op \in \Param} \sup \limits_{M >0} \frac{1}{\sqrt{M}} \EE_{\op}\left[ \sup \limits_{\param \in \Param} \left| \sum_{m=1}^{M}{ \left\{ r_i (\param ; \op, z_{i,m})  - \sur{i}{\param}{\op} \right\} } \right| \right] 
+\eeq
+\beq
+C_{\sf gr} \geq \sup \limits_{\op \in \Param} \sup \limits_{M >0} \sqrt{M} \EE_{\op}\left[ \sup \limits_{\param \in \Param} \left| \frac{1}{{M}} \sum_{m=1}^{M}{ \left\{ \frac{
+-r_i' (\param, \param - \op ; \op,  z_{i,m} ) + \widehat{\cal L}_i'( \param , \param - \op; \op )}{\| \op - \param\|} \right\} }\right|^2 \right] 
+\eeq
+for all $i \in \inter$,  and 
+%scalars satisfy $f_i( r_i ( \cdot ; \op ) ) \leq C_{\sf r}$ and 
+%$f_i( \grd r_i( \cdot; \op ) ) \leq C_{\sf gr}$.
+we denoted by $\mathbb{E}_{\op} [\cdot]$ the expectation \wrt a Markov chain $\{z_{i,m}\}_{m=1}^{\infty}$ with  initial distribution $\xi_{i} (\cdot; \op)$, transition kernel $P_{i,\op}$, and stationary distribution $p_{i}(\cdot; \op)$.
+\end{assumption} 
+
+
+\begin{algorithm}[t]
+\algsetup{indent=1em}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} initialization $\hp{0}$; a non-decreasing sequence of number $\{ \Bsize{k} \}_{k=0}^\infty$.
+\STATE For all $i \in \inter$, draw $\Bsize{0}$ Monte-Carlo samples with the stationary distribution $p_i(\cdot; \hp{0})$.
+\STATE Initialize the surrogate function as
+\beq
+\tafct{i}{0}{ \param } \eqdef \ssur{i}{\param}{\hp{0}}{ \{ z_{i,m}^{(0)} \}_{m=1}^{\Bsize{k}} },~i \in \inter. \vspace{-.2cm}
+\eeq
+\FOR {$k=0,1,...$}
+\STATE Pick a function index $i_k$ uniformly on $\inter$.
+\STATE Draw $\Bsize{k}$ Monte-Carlo samples with the stationary distribution $p_i(\cdot; \hp{k})$.
+\STATE Set $\hp{k+1} \in \argmin_{ \param \in \Param } \sumSur{k+1}{\param} \eqdef  \frac{1}{n} \sum_{i=1}^n \tafct{i}{k+1}{\param}$, where $\tafct{i}{k+1}{\param}$ is a function defined recursively as:
+\beq
+\tafct{i}{k+1}{\param} = \begin{cases}
+\ssur{i}{\param}{\hp{k}}{ \{ z_{i,m}^{(k)} \}_{m=1}^{\Bsize{k}} }, & \text{if}~i = i_k \\
+\tafct{i}{k}{\param}, & \text{otherwise}.
+\end{cases}
+\eeq
+\ENDFOR
+\end{algorithmic}
+\caption{MISSO algorithm}
+\label{alg:misso}
+        \end{algorithm}
+
+The constants $C_{\sf r}$ and $C_{\sf gr}$ play a key role in the convergence of the algorithm since they ensure that the difference between a deterministic quantity, either the measurable function $r_i$ or its directional derivative, and its Monte Carlo approximation to be bounded at each iteration.
+When the approximation is computed through an MCMC procedure, H\ref{controlapprox} can be achieved through on maximal inequality for beta-mixing sequences obtained in \citep{rio}. The condition may also be implied by a number of drift and minorization conditions (see \citep{meyn}). Finally, we consider the following assumption on the number of simulations:
+\begin{assumption}\label{assumptiondecreasing}
+$\{\Bsize{k}\}_{k \geq 0}$ is a non deacreasing sequence of integers which satisfies $\sum_{k=0}^{\infty}{\Bsize{k}^{-1/2}} < \infty$.
+\end{assumption}
+Algorithm~\ref{alg:misso} summarizes the MISSO algorithm. 
+
+\section{Global Convergence of Incremental Surrogate Optimization methods}\label{sec:analysis}
+We establish non-asymptotic rates for the \emph{global convergence} of incremental optimization framework based on the MM principle. Either the surrogate function is computed exactly or approximated at each iteration, the following results apply.
+
+We focus on the following stationarity measure:
+\beq
+g ( \op ) \eqdef \inf_{ \param \in \Param } \frac{ {\cal L}'( \op , \param - \op  ) }{ \| \op - \param \|}~~~~\text{and}~~~~g( \op )  = g_+( \op )  - g_- ( \op ) 
+\eeq
+where ${\cal L}' ( \param , {\bm d} )$ denotes the directional derivative of ${\cal L}$ at $\param$ along the direction ${\bm d}$, and $g_+ ( \op ) \eqdef \max\{ 0, g(\op) \} \geq 0$, $g_- ( \op )  \eqdef - \min\{0, g(\op)\} \geq 0$ denote the positive and negative part of $g( \op ) $, respectively. 
+Note that $\op$ is a stationary point if and only if $g_-( \op ) = 0$, see \citep{pang2016computing} for more details on stationarity for constrained optimization. 
+To gain insights, observe that if $\op \in {\rm int}( \Param )$, then ${\cal L}'( \op , \param - \op  ) = \pscal{ \grd {\cal L}( \op ) }{ \param - \op }$ and $g( \op ) = - \| \grd {\cal L}( \op ) \| = - g_- ( \op )$.
+Therefore if $\op \in {\rm int}( \Param )$  and $g_- ( \op ) = 0$, then $\op$ is a stationary point to \eqref{eq:opt}.
+
+Suppose that the sequence $\{ \hp{k} \}_{k \geq 0}$ has a limit point $\op$ that is a stationary point, then one has $\lim_{k \rightarrow \infty} g_-( \hp{k} ) = 0$.
+% and therefore 
+%$\liminf_{k \rightarrow \infty} g( \hp{k} ) \geq 0$
+In this sense, the sequence $\{ \hp{k} \}_{k \geq 0}$ is said to satisfy an \emph{asymptotic stationary point condition}\footnote{Note this condition is equivalent to \citep[Definition 2.4]{mairal}.}.
+
+To facilitate our analysis, we define $\tau_i^k$ as the iteration index where the $i$th function is last accessed in the MISSO algorithm prior to iteration $k$. For example, we have $\tau_{i_k}^{k+1} = k$. Moreover, we define the following functions for the stochastic surrogate:
+\beq
+\Sur{k}{\param} \eqdef {\textstyle \frac{1}{n} \sum_{i=1}^n} \sur{i}{\param}{\hp{\tau_i^k}},~~~
+\eSur{k}{\param} \eqdef \Sur{k}{\param}- {\cal L} ( \param ).
+\eeq
+Note that $\eSur{k}{\param} \geq 0$ and under H\ref{ass:sur}, the function $\eSur{k}{\param} $ is $2L$-smooth even if neither $\sur{i}{\param}{\op}$ nor ${\cal L}(\param)$ is non-smooth.
+
+The following theorem establishes the convergence rate of it:
+\begin{Theorem} Under H\ref{ass:lips}, H\ref{ass:sur}, H\ref{controlapprox}, H\ref{assumptiondecreasing}. For any $K_{\sf max} \in \NN$, let $K$ be an independent discrete r.v.~drawn uniformly from $\{0,...,K_{\sf max}-1\}$ and define the following quantity:
+\beq
+\Delta( K_{\sf max} ) \eqdef 4 n L \EE[  \sumSur{0}{\hp{0}} - \sumSur{K_{\sf max}}{\hp{K_{\sf max}}} ] +  \sum_{k=0}^{K_{\sf max}-1} \frac{8L C_{\sf r} }{\sqrt{\Bsize{k}}} ,
+\eeq
+note that $\Delta( K_{\sf max} )$ is finite for any $K_{\sf max} \in \NN$.
+ The following results hold:
+\begin{enumerate}
+\item We have the following non-asymptotic bounds:
+\beq \label{eq:misso_rate}
+\hspace{-1cm}\EE \big[ \| \grd \eSur{K}{\hp{K}} \|^2 \big] \leq \frac{\Delta( K_{\sf max} )}{K_{\sf max}},~~
+\EE[ g_-( \hp{K} ) ] \leq \sqrt{\frac{ \Delta( K_{\sf max} ) }{ K_{\sf max} }} + \frac{C_{\sf gr}}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \Bsize{k}^{-1/2}.
+\eeq
+\end{enumerate}
+\end{Theorem}
+
+\begin{proof}
+See Appendix \ref{appendix:misso}
+\end{proof}
+We remark that the original MISO algorithm can be analyzed with $C_{\sf r} = 0$ [cf.~H\ref{controlapprox}]. In this case, while the asymptotic convergence is well known (see \citep{mairal}), our rate in \eqref{eq:misso_rate} gives $\EE[ \| \grd {\cal L}(\hp{K}) \|^2] = {\cal O}( n L / K_{\sf max} )$ which is a new result to our best knowledge. 
+
+
+\begin{Theorem} Under H\ref{ass:differentiability}-H\ref{controlapprox}. The following results hold for the MISSO algorithm:
+\begin{enumerate}
+\item The negative part of the stationarity measure converges almost surely to zero, \ie $\textstyle \lim_{ k \rightarrow \infty} g_-( \hp{k}) = 0$ a.s.. 
+\item The objective value ${\cal L} ( \hp{k} )$ converges almost surely to a finite number $\underline{\cal L}$, \ie $\lim_{k \rightarrow \infty} {\cal L} ( \hp{k} ) = \underline{\cal L}$ a.s..
+\end{enumerate}
+\end{Theorem}
+
+\begin{proof}
+See Appendix \ref{appendix:missoasymptotic}
+\end{proof}
+ 
+\section{Numerical Applications}\label{sec:numerical}
+\subsection{Incremental Monte Carlo EM as a MISSO instance}
+The Expectation-Maximization (EM) algorithm is the reference method to perform Maximum Likelihood Estimation in incomplete data problem \citep{mclachlan}.
+Let $ \{f_i(z_i,\param), \param \in \Theta \}$ be a family of positive $\mu_i$-integrable Borel functions on $\zset$. Define, for all $i \in \inter$ and $\param \in \Theta$, $g_i(\param) \triangleq \int_{\zset}{f_i(z_i,\param) \mu_i(dz_i)}$. In the missing data context, $f_i(z_i,\param)$ is the joint likelihood of the observations and the latent data referred to as the complete likelihood and $g_i(\param)$ is the likelihood of the observations (in which the latent variables are marginalized).
+The incremental EM algorithm falls into the MISO framework. In such case, for $i \in \inter$ and $\param \in \Theta$ the loss function ${\cal L}_i(\param)$ is the negated incomplete log-likelihood ${\cal L}_i(\param) \triangleq - \log g_i(\param)$, for $\op \in \Theta$ the surrogate function $\sur{i}{\param}{\op}$ is defined by the pair $\left(    \rsur{i}{\param}{\op}{z_i}, p_i(z_i,\op)\right)$ such as:
+\begin{equation}\label{pairmcem}
+    \rsur{i}{\param}{\op}{z_i} \triangleq \log \left(p_i(z_{i},\op)/f_i(z_{i},\param)\right) \quad \textrm{and} \quad p_i(z_i,\op) \triangleq  f_i(z_i,\op)/g_i(\op) \quad \textrm{if $g_i(\op) \neq 0$}
+\end{equation}
+% which yields:
+% \begin{equation}
+%     \sur{i}{\param}{\op} = \int_{\zset}{p_i(z_i,\param) \log \left(p_i(z_{i},\param)/p_i(z_{i},\op)\right)  \mu_i(dz_i)} + {\cal L}_i(\op)
+% \end{equation}
+% that can be shown to satisfy \ref{diff} and \ref{major}.
+With these notations, the MISO algorithm outlined in Algorithm \ref{alg:miso} coincides with the incremental EM algorithm introduced in the pioneering paper \citep{neal} by Neal and Hinton.
+
+In most cases, the surrogate of the incremental EM algorithm defined as:
+\begin{equation}
+\sur{i}{\param}{\op} \triangleq \int_{\zset}{\log \frac{p_i(z_i,\op)}{f_i(z_i,\param)}p_i(z_i,\op)\mu_i(dz_i)}\quad \textrm{for all $i \in \inter$ and $(\param,\op) \in \Theta^2$}.
+\end{equation}
+is intractable. With our notations, we define the Monte Carlo approximation of this surrogate as:
+\begin{equation}\label{eq:mcemsurrogate}
+    \ssur{i}{\param}{\{ z_{i,m} \}_{m=1}^M}{\op} \triangleq  \frac{1}{M}\sum_{m=0}^{M-1}{\log \frac{p_i(\{ z_{i,m} \}_{m=1}^M,\op)}{f_i(\{ z_{i,m} \}_{m=1}^M,\param)}}\quad \textrm{for all $i \in \inter$ and $(\param,\op) \in \Theta^2$}.
+\end{equation}
+where $\{z_i^{m}\}_{m=0}^{M-1}$ is a Monte Carlo batch sampled from $p_i(z_i,\op)$ using an MCMC procedure. The MISSO algorithm coincides with the mini-batch version of the MCEM algorithm which yields, at iteration $k$, the following update of the parameter:
+\begin{equation}\label{eq:misso.mcem}
+    \hp{k} \in \arg \min \limits_{\param \in \Theta} -\sum_{i=0}^{N}{\frac{1}{M_{\tau_i^k}}\sum_{m=0}^{M_{\tau_{i,k}}-1}{\log f_i(\{ z_{i,m}^{(k)} \}_{m=1}^{M_k},\param)}}
+\end{equation}
+where $\{ z_{i,m}^{(k)} \}_{m=1}^{M_k}$ is a Monte Carlo batch sampled from $p_i(z_i,\hp{\tau_i^k})$.
+
+
+\paragraph{Binary logistic regression with missing values:}
+Let $y = (y_i, i \in \inter)$ be the vector of binary responses where for all $i \in \inter$, $y_i $ is a random variable taking its value in $\{0,1\}$. 
+Let $z = (z_{i,j} \in \rset, i \in \inter, j \in \llbracket 1, p \rrbracket)$ a matrix of observed covariates.
+We consider a logistic regression problem to predict the binary responses $y$ in the context of missing observations.
+First, for all $i \in \inter$, we assume that $z_i$ are independent and marginally distributed according to $\mathcal{N}(\beta, \Omega)$. 
+We consider that the vector of covariates $z_i$ is composed of a missing part $z_{i,mis}$ and an observed part $z_{i,obs}$.
+
+The conditional distribution of the observations $y_i$ given the latent variables $z_i$ is given by:
+\beq\label{eq:logistic}
+\textrm{logit} (\mathbb{P}(y_{i} = 0|z_i; \theta)) = \delta_0 + \sum_{j=1}^p \delta_j z_{ij}
+\eeq
+where $\delta = (\delta_0, \cdots, \delta_p)$ is the vector of parameters of the logistic regression and $\theta = (\delta, \beta, \Omega)$.
+
+
+The complete log-likelihood is expressed as:
+\beq
+\log f(z,\theta) \propto  \sum_{i=1}^{n}{\sum_{j=1}^{p}\{y_{i} \delta_j z_{ij} - \log(1+e^{\delta_j z_{ij}})\}} - \sum_{i=1}^{n}\{\frac{1}{2}\log(|\Omega|) + \frac{1}{2}{\rm Tr} \left(\Omega^{-1}(z_i - \beta)(z_i - \beta)^\top \right)\}
+\eeq
+
+\paragraph{Predicting hemorrhagic shock on the TraumaBase dataset:}
+The TraumaBase is a multicenter prospective trauma registry created out of the collaboration of 15 French trauma centers that collected detailed high-quality clinical data from major trauma. 
+This dataset includes information from the first stage of the trauma, namely initial observations on the accident site to the last stage being intense care at the hospital.
+More than $200$ variables were measured for more than $7\,000$ patients.
+
+
+Since the very first stage of the trauma, it is of utmost importance to rapidly predict the risk of a severe hemorrhage.
+We are thus using a logistic regression model, as in \citep{jiang2018logistic} and detailled in \eqref{eq:logistic}, to predict such risk.
+
+We compare the convergence behavior of the estimated parameters using the SAEM (Stochastic Approximation of the EM) algorithm developed in \citep{jiang2018logistic}, the Monte Carlo EM and our MISSO framework.
+
+\subsection{Incremental Variational Inference as a MISSO instance}
+Let $x = (x_i,  i \in \inter)$ and $y = (y_i,  i \in \inter)$ be i.i.d. input-output pairs and $w$ be a global latent variable taking values in $W$ a subset of $\rset^J$. A natural decomposition of the joint distribution is:
+\begin{equation}
+    p(y,x,w) = p(w)\prod_{i=1}^{N}{p_i(y_i|x_i, w)}
+\end{equation}
+The goal is to calculate the posterior distribution $p(w|y,x)$. Variational inference algorithm consists in minimizing the Kullback Leibler (KL) divergence between a candidate family of parametric distributions $\{q(w,\param), \param \in \Theta \subset \rset^d\}$ and the posterior distribution $p(w|y,x)$ of the global latent variable $w$. In most implementations, $q(w; \param)$ belongs to a simple family of distributions such as the multivariate Gaussian family with mean $\rho$ and covariance matrix $\sigma^2 I$ in which case $\param = (\rho, \sigma^2) \in \Theta = \mathbb{R}\times \mathbb{R}^{*}_{+}$. 
+% Denote the standard Gaussian by $\epsilon$, we use the reparametrization trick introduced in \citep{blundell} setting $\sigma = \log(1+\mathrm{exp}(v))$ so that it is always nonnegative.
+Using our notations, the variational inference problem boils down to minimizing the following KL divergence:
+\begin{equation}
+\theta^*  = \arg \min \limits_{\param \in \Theta} \frac{1}{n}\KL{q(w;\param)}{p(w|y,x)} = \arg \min \limits_{\param \in \Theta} {\cal L}(\param)
+\end{equation}
+where for all $\param \in \Theta$, ${\cal L}(\param)  = \frac{1}{n}\sum_{i=1}^{n}{{\cal L}_i(\param)}$ with :
+\begin{equation}\label{eq:variatinalobjective}
+{\cal L}_i(\param) \triangleq -\int_{W}{q(w;\param) \log p_i(y_i,x_i|w) \mathrm{d}w}+ \KL{q(w;\param)}{p(w)} = r_i(\param) + d(\param)
+\end{equation}
+
+Even though this procedure makes inference analytical for a large class of models, it still lacks in many ways. This technique does not scale to large data (evaluating the reconstruction term \eqref{eq:variatinalobjective} requires calculations over the entire dataset) and the approach does not adapt to complex models (models in which this last integral cannot be evaluated analytically) such as Bayesian neural networks \citep{neal:bnn, thesis:gal}. Monte Carlo integration and mini-batch strategies, as in \citep{hofman, titsias, kucukelbir, kingma} are thus preferred here.
+Optimization of this criterion can be performed using our incremental stochastic surrogate optimization framework.
+We use the following quadratic surrogate at $\param \in \Theta$:
+\begin{equation}
+\sur{i}{\vartheta}{\param} \triangleq {\cal L}_i(\param) + \nabla {\cal L}_i(\param)^\top (\vartheta - \param)+\frac{L}{2}\|\vartheta-\param\|_2^2
+\end{equation}
+where $\| \cdot\|_2$ is the $\ell_2$-norm and $L$ is an upper bound of the spectral norm of the Hessian of ${\cal L}_i$ at $\param$.
+The gradient $\nabla {\cal L}_i(\param)$ can be computed several ways \citep{paisley2013}. We use the reparametrization trick suggested in \citep{kingma, blundell}. For $\param \in \Theta$ and $e \in \mathbb{R}^d$, let $t: \Theta \times \rset^d \mapsto \rset^d$ be a function and $\phi$ be the density of the standard multivariate normal distribution $\mathcal{N}_d(0,I)$. We assume that for all $\param \in \Theta$, the distribution of the random vector $W = t(\param, \epsilon)$ where $\epsilon \sim \mathcal{N}_d(0,I)$ has a density $q(\cdot, \param)$. Then, following \citep[Proposition~1]{blundell}:
+$$
+\nabla \int_{W}{\log p_i(y_i,x_i|w)q(w,\param)\mathrm{d}w} =  \int_{W}{\jacob{\param}{t}{e}  \nabla \log p_i(y_i,x_i|t(\param,e))\phi(e)\mathrm{d}e}
+$$
+where for each $e \in \mathbb{R}^d$, $\jacob{\param}{t}{e}$ is the Jacobian of the function $t(\cdot,e)$ with respect to $\param$. Note that we abuse the $\nabla$ notation to maintain consistency with the rest of the text (instead of switching to $\partial$).
+Consequently, the pair $\left(\ssur{i}{\vartheta}{\param}{e}, \phi(e)\right)$ defining $\sur{i}{\param}{\vartheta}$ is given by:
+\begin{align}\label{pairvi}
+\ssur{i}{\vartheta}{\param}{e}  \triangleq & \left( - \log p_i(y_i,x_i|t(\param,e)) +  d(\param) \right) \nonumber \\
+& + \left(- \jacob{\param}{t}{e}\nabla \log p_i(y_i,x_i|t(\param,e))+ \nabla d(\param)\right)^\top (\vartheta - \param)+\frac{L}{2}\|\vartheta-\param\|_2^2 
+\end{align}
+
+The MISO surrogate defined for all $(\vartheta, \param) \in \Theta^2$ by the pair $(\ssur{i}{\vartheta}{\param}{e},\phi(e))$ with $\ssur{i}{\vartheta}{\param}{e}$ defined by \eqref{pairvi} is often intractable. 
+The MISSO algorithm coincides with a mini-batch version of the Variational Inference algorithm. At iteration $k$, the MISSO algorithm consists in:
+\begin{enumerate}
+    \item Pick a function index $i_k$ uniformly on $\inter$.
+    \item Sampling a Monte Carlo batch $\{\epsilon^{k,m}\}_{m=0}^{M_k-1}$ from the standard Gaussian distribution.
+    \item Setting $\hp{k} = \frac{1}{N}\sum_{i=1}^{N}{\hp{\tau_{i}^{k}}} - \frac{1}{2 \gamma} \sum_{i=1}^{N}{\hat{{\bm{m}}}^k_i}$ where $\hat{{\bm{m}}}^k_i$ are defined recursively as follows:
+\begin{align}\label{missoupdate}
+ \hat{{\bm{m}}}^k_i &\triangleq
+  \begin{cases}
+  - \frac{1}{M_k}\sum_{m=0}^{M_k-1}{ \jacob{\param}{t}{e^{k,m}}\nabla_{\param} \log p_i(y_i,x_i|t(\param,e^{k,m}))} + \nabla d(\hp{k-1})     & \text{if } i \in I_k \\
+  \hat{{\bm{m}}}^{k-1}_{i}         & \text{otherwise}
+  \end{cases}
+\end{align}
+\end{enumerate}
+
+\paragraph{Fitting a Bayesian Neural Net on MNIST:}
+We apply variational inference for a 2-layer Bayesian neural network on the MNIST dataset \citep{lecun1998gradient} with our MISSO scheme. The training set is composed of $N=55\,000$ handwritten digits, $28 \times 28$ images, $d=784$.
+Our neural network is composed of an input layer with $d=784$ units, a single hidden layer of $p=100$ hyperbolic tangent units and a final softmax output layer with $K=10$ classes.
+
+We use the MISSO framework with $p(w) = \mathcal{N}(0,I)$ and $p(y_i|x_i,w) = \textrm{Softmax}(f(x_i,w))$ where $f(x_i,w)$ is the nested function describing the two layer fitted in this example. 
+The variational distribution $q(w,\theta)$ is set to be the multivariate Gaussian distribution $\mathcal{N}(\rho, \sigma^2 I)$. At the $k$-th iteration, the update of the MISSO algorithm is given by \eqref{missoupdate}.
+
+We compare the convergence behaviors of the following state of the art optimization algorithms, using their vanilla implementations on TensorFlow \citep{tensorflow2015-whitepaper}: the SGD \citep{kiefer1952}, the ADAM \citep{kingma:adam}, the SAG \citep{roux} and the Momentum \citep{sutskever} algorithms versus our MISSO update with a constant learning rate of $10^{-5}$. The loss function \eqref{eq:variatinalobjective} and its gradients were computed by Monte Carlo integration using Edward library \citep{tran2016edward}, based on the reparametrization trick.  We run those algorithms using $1\%$ and $10\%$ of the training set.
+Figure~\ref{fig:misso} shows the convergence of the objective function through the epochs. 
+For both mini-batch sizes, our framework does better than SGD and ADAM. 
+
+%\begin{figure}[H]
+%  \centering
+%    % \includegraphics[width=\textwidth]{pic_paper/bnn5.png}
+%    \includegraphics[width=\textwidth]{pic_paper/bnnwithmisso.png}
+%  \caption{(Incremental Variational Inference) Convergence of the negated ELBO for 40 epochs over the training set. Runs for two different mini-batch sizes (1\% left and 10\% right).}
+%  \label{fig:misso}
+%\end{figure}
+
+
+\section{Conclusion}
+
+\newpage
+\bibliography{ref.bib}
+\newpage
+
+\appendix
+\section{Proofs}
+%\subsection{Proof of Theorem 1}\label{appendix:miso}
+%We observe the following properties for the surrogate functions. For all $i \in \{1,...,n\}$, $\hat{\cal L}_i (\param ; \hat{\param} )$ is a majorizing surrogate to ${\cal L}_i( \param)$, \ie it satisfies
+%\beq
+%\hat{\cal L}_i (\param ; \hat{\param} )  \geq {\cal L}_i( \param),~\forall~\param, \hat{\param} \in \Param^2, 
+%\eeq
+%and the equality holds when $\hat{\param} = \param$.
+%Denote $e_i( \param  ; \hat\param ) \eqdef \hat{\cal L}_i (\param ; \hat{\param} ) - {\cal L}_i( \param)$ as the error function. We have $e_i( \param  ; \hat\param ) \geq 0$ and $e_i( \hat\param  ; \hat\param ) = 0$ for any $\param, \hat{\param}$.
+%Moreover, since both ${\cal L}_i( \param)$ and $\hat{\cal L}_i( \param; \hat{\param})$ are $L$-smooth in $\param$ ({\color{red}need to check}), the error function $e_i( \param ; \hat\param)$ is $2L$-smooth with respect to $\param$.
+%
+%Next, we derive a \emph{non-asymptotic} convergence rate for the MISO method. Notice that our analysis can be straightforwardly generalized to the incremental MM method. To begin our analysis, define
+%\beq
+%\overline{\cal L}^{(k+1)} ( \param ) \eqdef \Pen( \param ) +  \frac{1}{n} \sum_{i=1}^n \hat{\cal L}_i ( \param ; \hat{\param}^{(\tau_i^{k+1})} ) 
+%\eeq
+%Moreover, one has
+%\beq
+%\overline{\cal L}^{(k+1)} ( \param ) = \overline{\cal L}^{(k)} ( \param ) + { \frac{1}{n}} \big(  \hat{\cal L}_{i_k} ( \param ; \hat{\param}^{(k)} ) - \hat{\cal L}_{i_k} ( \param ; \hat{\param}^{(\tau_{i_k}^{k})} ) \big)
+%\eeq
+%Observe that $\hat{\param}^{(k+1)} \in \argmin_{\param \in \Param} \overline{\cal L}^{(k+1)} ( \param )$. We have 
+%\beq
+%\begin{split}
+%\overline{\cal L}^{(k+1)} ( \hat\param^{(k+1)} ) \leq \overline{\cal L}^{(k+1)} ( \hat\param^{(k)} ) & = \overline{\cal L}^{(k)} ( \hat\param^{(k)} ) + { \frac{1}{n}} \big( \hat{\cal L}_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(k)} ) - \hat{\cal L}_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(\tau_{i_k}^{k})} ) \big) \\
+%& = \overline{\cal L}^{(k)} ( \hat\param^{(k)} ) + { \frac{1}{n}} \big( {\cal L}_{i_k} ( \hat\param^{(k)} ) - \hat{\cal L}_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(\tau_{i_k}^{k})} ) \big)
+%\end{split}
+%\eeq
+%where we have used the identity ${\cal L}_{i_k} ( \hat\param^{(k)} ) = \hat{\cal L}_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(k)} )$. 
+%Arranging terms imply
+%\beq \label{eq:ineq1}
+%e_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(\tau_{i_k}^{k})} ) = 
+%\hat{\cal L}_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(\tau_{i_k}^{k})} ) -  {\cal L}_{i_k} ( \hat\param^{(k)} ) \leq n \big( \overline{\cal L}^{(k)} ( \hat\param^{(k)} ) - \overline{\cal L}^{(k+1)} ( \hat\param^{(k+1)} ) \big) 
+%\eeq
+%Let ${\cal F}_k$ be the filtration of random variables (up to iteration $k$), the conditional expectation evaluates to
+%\beq
+%\EE_{i_k} \big[ e_{i_k} ( \hat\param^{(k)} ; \hat{\param}^{(\tau_{i_k}^{k})} ) | {\cal F}_k \big]
+%= \overline{\cal L}^{(k)} (\hat{\param}^{(k)}) - \overline{\cal L}( \hat{\param}^{(k)} ) 
+%\eeq
+%Note that the function $\overline{\cal L}^{(k)} ( \param ) - \overline{\cal L}( \param )$ is $2L$-smooth and is non-negative. It follows that for any $\param$, the inequality holds
+%\beq
+%\begin{split}
+%0 & \leq  \overline{\cal L}^{(k)} ( \param ) - \overline{\cal L}( \param ) \leq \overline{\cal L}^{(k)} (\hat{\param}^{(k)}) - \overline{\cal L}( \hat{\param}^{(k)} ) - \pscal{\grd \overline{\cal L} ( \hat\param^{(k)} )}{ \param - \hat{\param}^{(k)} }+ L \| \param - \hat{\param}^{(k)} \|^2
+%\end{split},
+%\eeq
+%where we have used the fact $\grd \overline{\cal L}^{(k)} ( \hat\param^{(k)} ) = {\bm 0}$. Setting $\param = \hat{\param}^{(k)} - \frac{1}{2L} \grd \overline{\cal L} ( \hat\param^{(k)} )$ in the above yields
+%\beq
+%\frac{1}{4L} \| \grd \overline{\cal L} ( \hat\param^{(k)} ) \|^2 \leq \overline{\cal L}^{(k)} (\hat{\param}^{(k)}) - \overline{\cal L}( \hat{\param}^{(k)} )
+%\eeq
+%Therefore, taking the conditional expectation on both sides of \eqref{eq:ineq1} leads to
+%\beq
+%\frac{1}{4n L} \| \grd \overline{\cal L} ( \hat\param^{(k)} ) \|^2 \leq 
+%\overline{\cal L}^{(k)} ( \hat\param^{(k)} ) - \EE \big[  \overline{\cal L}^{(k+1)} ( \hat\param^{(k+1)} ) | {\cal F}_k \big]
+%\eeq
+%Note that as we have set $\gamma_{k+1} = 1$ in the IEM method, the terminating iteration number $K$ is chosen uniformly over $\{1,...,K_{\sf max}\}$, therefore taking the total expectations gives
+%\beq
+%\begin{split}
+% \EE \big[ \| \grd \overline{\cal L}( \hat{\param}^{(K)} ) \|^2 \big] & = \frac{1}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \EE \big[\| \grd \overline{\cal L} ( \hat\param^{(k)} ) \|^2 \big] \\
+%& \leq \frac{4nL}{K_{\sf max}} \EE \Big[ 
+%\overline{\cal L}^{(0)} ( \hat\param^{(0)} ) -  \overline{\cal L}^{(K_{\sf max})} ( \hat\param^{(K_{\sf max}+1)} ) \Big] \\
+%& \leq \frac{4nL}{K_{\sf max}} \EE \Big[ 
+%\overline{\cal L}^{(0)} ( \hat\param^{(0)} ) -  \overline{\cal L} ( \hat\param^{(K_{\sf max})} ) \Big]
+%\end{split}
+%\eeq
+%Lastly, we note that 
+%%\beq
+%%\overline{\cal L}^{(1)} ( \hat\param^{(1)} ) \leq  \overline{\cal L}^{(0)} ( \hat\param^{(0)} ) + { \frac{1}{n}} \big( {\cal L}_{i_0} ( \hat\param^{(0)} ) - \hat{\cal L}_{i_0} ( \hat\param^{(0)} ; \hat{\param}^{(\tau_{i_0}^{0})} ) \big) \leq \overline{\cal L}^{(0)} ( \hat\param^{(0)} ) 
+%%\eeq
+%%and 
+%$\overline{\cal L} ( \hat\param^{(0)} ) = \overline{\cal L}^{(0)} ( \hat\param^{(0)} )$. 
+%This leads to \eqref{eq:iem_bdd} and concludes our proof.
+%
+
+\subsection{Proof of Theorem 1}\label{appendix:misso}
+\paragraph{Non-asymptotic  Convergence} Let us define
+\beq
+\sumSur{k}{\param} \eqdef \frac{1}{n} \sum_{i=1}^n \tafct{i}{k}{\param}.
+\eeq 
+Notice that this gives
+\beq
+\begin{split}
+\sumSur{k+1}{\param} & = \frac{1}{n} \sum_{i=1}^n \ssur{i}{\param}{\hp{\tau_i^{k+1}}}{ \{ z_{i,m}^{(\tau_i^{k+1})} \}_{m=1}^{\Bsize{\tau_i^{k+1}}} } \\
+& = 
+\sumSur{k}{\param} + \frac{1}{n} \big( \ssur{i_k}{\param}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}}} - \ssur{i_k}{\param}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}}} \big).
+\end{split}
+\eeq
+We observe that $\eSur{k}{\param}$ is $2L$-smooth, and thus the following upper bound holds with $\param_0 = \hp{k} - \frac{1}{2L} \grd \eSur{k}{\hp{k}}$,
+\beq
+\eSur{k}{\param_0} \leq \eSur{k}{\hp{k}} - \frac{1}{4L} \| \grd \eSur{k}{\hp{k}} \|^2
+\eeq
+Subsequently, 
+\beq \label{eq:surbd}
+ \| \grd \eSur{k}{\hp{k}} \|^2 \leq 4L (\eSur{k}{\hp{k}} - {\eSur{k}{\param_0}}) \leq 4L \eSur{k}{\hp{k}},
+\eeq
+where in the last inequality we have used ${\eSur{k}{\param_0}} \geq 0$.
+To prove the first bound in \eqref{eq:misso_rate}, using the optimality of $\hp{k+1}$, one has
+\beq \label{eq:firsteq}
+\begin{split}
+& \sumSur{k+1}{\hp{k+1}} \leq \sumSur{k+1}{\hp{k}} \\
+& = \sumSur{k}{\hp{k}} + {\textstyle \frac{1}{n}} \big( 
+\ssur{i_k}{\hp{k}}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}} }
+- \ssur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}} } \big)
+\end{split}
+\eeq 
+Let ${\cal F}_k$ be the filtration of random variables $\{ ..., i_{k-1},\{ z_{i_{k-1},m}^{(k-1)} \}_{m=1}^{\Bsize{k-1}} ,\hp{k} \}$. We observe that the conditional expectation evaluates to 
+\beq
+\begin{split}
+& \EE_{i_k} \big[ \EE\big[ \ssur{i_k}{\hp{k}}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}} } | {\cal F}_k , i_k \big] | {\cal F}_k \big] \\
+& = {\cal L} ( \hp{k} ) + \EE_{i_k} \big[ \EE\big[ \frac{1}{\Bsize{k}}\sum_{m=1}^{\Bsize{k}} \rsur{i_k}{\hp{k}}{\hp{k}}{z_{i_k,m}^{(k)}} - \sur{i_k}{ \hp{k} }{ \hp{k} }  | {\cal F}_k, i_k \big] | {\cal F}_k \big]  \\
+& \leq {\cal L} ( \hp{k} ) +  \frac{C_{\sf r}}{\sqrt{\Bsize{k}}},
+\end{split}
+\eeq
+where the last inequality is due to H\ref{controlapprox}. 
+Moreover, 
+\beq
+\begin{split}
+& \EE \big[ \ssur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}} } | {\cal F}_k \big] \\
+& = \frac{1}{n} \sum_{i=1}^n  \ssur{i}{\hp{k}}{\hp{\tau_{i}^k}}{ \{ z_{i,m}^{(\tau_{i}^k)} \}_{m=1}^{\Bsize{\tau_{i}^k}} } = \sumSur{k}{\hp{k}}.
+\end{split}
+\eeq
+Taking the conditional expectations on both sides of \eqref{eq:firsteq} and re-arranging terms give:
+\beq \label{eq:afterarrange}
+\sumSur{k}{\hp{k}} - {\cal L} ( \hp{k} ) \leq n \!~ \EE \big[  \sumSur{k}{\hp{k}} - \sumSur{k+1}{\hp{k+1}} |{\cal F}_k \big] +  \frac{C_{\sf r}}{\sqrt{\Bsize{k}}}
+\eeq
+Proceeding from \eqref{eq:afterarrange}, we observe 
+\beq
+\begin{split}
+& \sumSur{k}{\hp{k}} - {\cal L} ( \hp{k} ) = \sumSur{k}{\hp{k}} - \Sur{k}{\hp{k}} + \eSur{k}{\hp{k}} \\
+& \geq \sumSur{k}{\hp{k}} - \Sur{k}{\hp{k}} + \frac{1}{4L} \| \grd \eSur{k}{\hp{k}} \|^2 \\
+& = \underbrace{\frac{1}{n} \sum_{i=1}^n \Big\{ \frac{1}{\Bsize{\tau_i^k}}\sum_{m=1}^{\Bsize{\tau_i^k}} \rsur{i}{\hp{k}}{\hp{\tau_i^k}}{z_{i,m}^{(\tau_i^k)}} -  \sur{i}{\hp{k}}{\hp{\tau_i^k}} \Big\}}_{ \eqdef - \delta^{(k)}( \hp{k} ) } + \frac{1}{4L} \| \grd \eSur{k}{\hp{k}} \|^2
+\end{split}
+\eeq
+where the inequality in the above is due to \eqref{eq:surbd} and we have defined the summation in the last equality as $- \delta^{(k)}( \hp{k} )$. 
+Applying \eqref{eq:gksur}, we further obtain
+\beq
+\sumSur{k}{\hp{k}} - {\cal L} ( \hp{k} ) \geq - \delta^{(k)}( \hp{k} ) + \frac{1}{4L} \| \grd \eSur{k}{\hp{k}} \|^2
+\eeq
+Substituting into \eqref{eq:afterarrange} yields
+\beq
+\frac{ \| \grd \eSur{k}{\hp{k}} \|^2}{4L} \leq n \!~ \EE \big[  \sumSur{k}{\hp{k}} - \sumSur{k+1}{\hp{k+1}} |{\cal F}_k \big] +  \frac{C_{\sf r}}{\sqrt{\Bsize{k}}} + \delta^{(k)}( \hp{k} ) 
+\eeq
+Observe the following bounds on the total expectations due to H\ref{controlapprox}:
+\beq
+\begin{split}
+& \EE \big[ \delta^{(k)}( \hp{k} ) \big] \leq \EE \Big[ \frac{1}{n} \sum_{i=1}^n \frac{C_{\sf r}}{ \sqrt{\Bsize{\tau_i^k}} } \Big] \\
+%& \EE \big[  \sup_{ \param \in \Param } \big( \epsilon^{(k)}(\param) \big)^2 \big]
+%\leq \EE \Big[ \frac{1}{n} \sum_{i=1}^n \frac{C_{\sf gr}}{ \sqrt{\Bsize{\tau_i^k}} } \Big]
+\end{split}
+\eeq
+It yields
+\beq \notag
+\begin{split}
+\EE\big[ \| \grd \eSur{k}{\hp{k}} \|^2 \big] & \leq 4nL \!~ \EE \big[  \sumSur{k}{\hp{k}} - \sumSur{k+1}{\hp{k+1}} \big] + \frac{4 L C_{\sf r}}{\sqrt{\Bsize{k}}} + \frac{1}{n}\sum_{i=1}^n \EE \Big[ \frac{ 4 L C_{\sf r} }{ \sqrt{ \Bsize{\tau_i^k} }} \Big]
+\end{split}
+\eeq
+Finally, for any $K_{\sf max} \in \NN$, we let $K$ be a discrete r.v.~that is uniformly drawn from $\{0,1,...,K_{\sf max} - 1\}$. Using H\ref{controlapprox} and taking total expectations lead to 
+\beq \label{eq:prebdd}
+\begin{split}
+& \EE \big[\| \grd \eSur{K}{\hp{K}} \|^2 \big] = \frac{1}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \EE [ \| \grd \eSur{k}{\hp{k}} \|^2 ] \\
+& \leq \frac{4n L \EE[  \sumSur{0}{\hp{0}} - \sumSur{K_{\sf max}}{\hp{K_{\sf max}}} ]}{K_{\sf max}} + \frac{4L C_{\sf r}}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \EE \Big[   \frac{1}{\sqrt{\Bsize{k}}} + \frac{1}{n}\sum_{i=1}^n \frac{ 1 }{ \sqrt{ \Bsize{\tau_i^k} }} \Big]
+\end{split}
+\eeq
+For all $i \in \inter$, the index $i$ is selected with a probability equal to $\frac{1}{n}$ when conditioned independently on the past. We observe: 
+\begin{equation}
+\EE [ \Bsize{\tau_i^k}^{-1/2}]  = \sum_{j=1}^{k} \frac{1}{n}  \left(1-\frac{1}{n}\right)^{j-1}\Bsize{k-j}^{-1/2} 
+\end{equation}
+Taking the sum yields:
+\begin{equation} \label{eq:mkcal}
+\begin{split}
+& \sum_{k=0}^{K_{\sf max}-1} \EE [ \Bsize{\tau_i^k}^{-1/2} ]  = \sum_{k=0}^{K_{\sf max}-1} \sum_{j=1}^k \frac{1}{n}  \left(1-\frac{1}{n}\right)^{j-1}\Bsize{k-j}^{-1/2} = \sum_{k=0}^{K_{\sf max}-1}{\sum_{l=0}^{ k-1} \frac{1}{n} \left(1-\frac{1}{n}\right)^{k-(l+1)}  \Bsize{l}^{-1/2}} \\
+& = \sum_{l=0}^{K_{\sf max}-1}
+%{\left(1-\frac{1}{n}\right)^{-(l+1)} 
+\Bsize{l}^{-1/2} \sum_{k=l+1}^{K_{\sf max}-1} \frac{1}{n} \left(1-\frac{1}{n}\right)^{k - (l+1)}  \leq \sum_{l=0}^{K_{\sf max}-1}  {\Bsize{l}^{-1/2}}
+\end{split}
+\end{equation}
+where the last inequality is due to upper bounding the geometric series.
+Plugging this back into \eqref{eq:prebdd} yields
+\beq 
+\begin{split}
+& \EE \big[ \| \grd \eSur{K}{\hp{K}} \|^2 \big] = \frac{1}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \EE [ \| \grd \eSur{k}{\hp{k}} \|^2 ] \\
+& \leq \frac{4 n L \EE[  \sumSur{0}{\hp{0}} - \sumSur{K_{\sf max}}{\hp{K_{\sf max}}} ]}{K_{\sf max}} + \frac{1}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \frac{8L C_{\sf r} }{\sqrt{\Bsize{k}}} = \frac{ \Delta( K_{\sf max} ) }{ K_{\sf max} }.
+\end{split}
+\eeq
+This concludes our proof for the first inequality in \eqref{eq:misso_rate}.
+
+To prove the second inequality of \eqref{eq:misso_rate}, we define the shorthand notations $g^{(k)} \eqdef g( \hp{k} )$, $g_-^{(k)} \eqdef - \min\{0, g^{(k)} \}$, $g_+^{(k)} \eqdef \max\{0, g^{(k)} \}$.
+We observe that
+\beq
+\begin{split}
+g^{(k)} & = \inf_{ \param \in \Param } \frac{ {\cal L}'( \hp{k} , \param - \hp{k} ) }{ \| \hp{k} - \param \|} \\
+& = \inf_{ \param \in \Param }  \Big\{ \frac{ \frac{1}{n} \sum_{i=1}^n \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } ) }{ \| \hp{k} - \param \|} - 
+\frac{ \pscal{\grd \eSur{k}{\hp{k}} }{ \param - \hp{k} } }{{ \| \hp{k} - \param \|} } \Big\} \\
+& \geq - \| \grd \eSur{k}{\hp{k}} \| + \inf_{ \param \in \Param } \frac{ \frac{1}{n} \sum_{i=1}^n \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } ) }{ \| \hp{k} - \param \|}
+\end{split}
+\eeq
+%\beq
+%g^{(k)} \geq - \| \grd \eSur{k}{\hp{k}} \| + \sup_{ \param \in \Param } \frac{ \frac{1}{n} \sum_{i=1}^n \widehat{\cal L}_i^{'}( \hp{k} , \hp{k} - \param ; \hp{ \tau_i^k } ) }{ \| \hp{k} - \param \|}
+%\eeq
+where the last inequality is due to the Cauchy-Schwarz inequality and we have defined $\widehat{\cal L}_i'( \param , {\bm d}; \hp{\tau_i^k} )$ as the directional derivative of $\widehat{\cal L}_i ( \cdot ; \hp{\tau_i^k} ) $ at $\param$ along the direction ${\bm d}$. Moreover, for any $\param \in \Param$,
+\beq
+\begin{split}
+& \frac{1}{n} \sum_{i=1}^n \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } )\\
+& = \underbrace{\widetilde{\cal L}^{(k) '} ( \hp{k}, \param - \hp{k} )}_{\geq 0} - \widetilde{\cal L}^{(k) '} ( \hp{k}, \param - \hp{k} ) +
+ \frac{1}{n} \sum_{i=1}^n \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } ) \\
+& \geq 
+ \frac{1}{n} \sum_{i=1}^n \Big\{ \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } ) - \frac{1}{\Bsize{\tau_i^k}} \sum_{m=1}^{\Bsize{\tau_i^k}} r_i' ( \hp{k}, \param - \hp{k}; \hp{\tau_i^k} , z_{i,m}^{(\tau_i^k)} ) \Big\} 
+ \end{split}
+\eeq
+where the inequality is due to the optimality of $\hp{k}$ and the convexity of $\sumSur{k}{\param}$ [cf.~H\ref{ass:lips}]. Denoting a scaled version of the above term as: 
+\beq \notag
+\epsilon^{(k)} ( \param) \eqdef \frac{ \frac{1}{n} \sum_{i=1}^n \Big\{ \frac{1}{\Bsize{\tau_i^k}} \sum_{m=1}^{\Bsize{\tau_i^k}} r_i' ( \hp{k}, \param - \hp{k} ; \hp{\tau_i^k} , z_{i,m}^{(\tau_i^k)} ) - \widehat{\cal L}_i^{'}( \hp{k} , \param - \hp{k} ; \hp{ \tau_i^k } )  \Big\} }{\| \hp{k} - \param \|}.
+\eeq 
+We have
+\beq \label{eq:gksur}
+g^{(k)} \geq - \| \grd \eSur{k}{\hp{k}} \| + \inf_{\param \in \Param} (-\epsilon^{(k)}(\param)) \geq 
+ - \| \grd \eSur{k}{\hp{k}} \| - \sup_{\param \in \Param} |\epsilon^{(k)}(\param)|.
+\eeq
+Since $g^{(k)} = g_+^{(k)} - g_-^{(k)}$ and $g_+^{(k)} g_-^{(k)} = 0$, this implies
+\beq \label{eq:gmbd}
+g_-^{(k)} \leq \| \grd \eSur{k}{\hp{k}} \| + \sup_{\param \in \Param} |\epsilon^{(k)}(\param)|.
+\eeq
+Consider the above inequality  when $k=K$, \ie the random index, and taking total expectations on both sides gives
+\beq
+\EE [ g_-^{(K)} ] \leq \EE[ \| \grd \eSur{K}{\hp{K}} \| ] + \EE[ \sup_{\param \in \Param} \epsilon^{(K)}(\param) ]
+\eeq
+We note that
+\beq
+\Big( \EE[ \| \grd \eSur{K}{\hp{K}} \| ] \Big)^2 \leq \EE[ \| \grd \eSur{K}{\hp{K}} \|^2 ] \leq \frac{ \Delta(K_{\sf max}) }{ K_{\sf max} },
+\eeq
+where the first inequality is due to the convexity of $(\cdot)^2$ and the Jensen's inequality,
+and
+\beq
+\begin{split} 
+\EE[ \sup_{\param \in \Param} \epsilon^{(K)}(\param) ] & = \frac{1}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}} \EE[ \sup_{\param \in \Param} \epsilon^{(k)}(\param) ] \overset{(a)}{\leq} 
+\frac{C_{\sf gr}}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \EE\Big[ \frac{1}{n}\sum_{i=1}^n \Bsize{\tau_i^k}^{-1/2} \Big] \\
+& \overset{(b)}{\leq} 
+\frac{C_{\sf gr}}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \Bsize{k}^{-1/2}
+\end{split}
+\eeq 
+where (a) is due to H\ref{controlapprox} and (b) is due to \eqref{eq:mkcal}.
+This implies
+\beq
+\EE [ g_-^{(K)} ] \leq \sqrt{ \frac{\Delta(K_{\sf max})}{K_{\sf max}} } + \frac{C_{\sf gr}}{K_{\sf max}} \sum_{k=0}^{K_{\sf max}-1} \Bsize{k}^{-1/2},
+\eeq
+and concludes the first part of the theorem.
+
+
+\subsection{Proof of Theorem 2}\label{appendix:missoasymptotic}
+To prove the second part of the theorem, we shall apply the following auxiliary lemma whose proof can be found in Appendix~\ref{}:
+\begin{Lemma}\label{lemmars}
+Let $\left(V_k \right)_{k\geq0}$ be a non negative sequence of random variables such that $\EE[V_0] < \infty$. Let $\left(X_k \right)_{k\geq0}$ a non negative sequence of random variables and $\left(E_k \right)_{k \geq 0}$ be a sequence of random variables such that $\sum_{k=0}^{\infty}{\EE[|E_k|]} < \infty$. If for any $k \geq 1$:
+\begin{equation}
+V_{k} \leq V_{k-1} - X_{k-1} + E_{k-1}
+\end{equation}
+ then:
+\begin{enumerate}[label=(\roman*)]
+\item for all $k \geq 0$, $\EE[V_k] < \infty$ and the sequence $\left(V_k \right)_{k\geq0}$  converges a.s. to a finite limit $V_{\infty}$.
+\item the sequence $\left(\EE[V_k] \right)_{k\geq0}$ converges and $\lim \limits_{k \to \infty}\EE[V_k] = \EE[V_{\infty}] $.
+\item the series $\sum_{k=0}^{\infty}{X_k}$ converges almost surely and $\sum_{k=0}^{\infty}{\EE[X_k]}< \infty$.
+\end{enumerate}
+\end{Lemma}
+We proceed from \eqref{eq:firsteq} by re-arranging terms and observing that
+\beq 
+\begin{split}
+ \Sur{k+1}{\hp{k+1}} & \leq \Sur{k}{\hp{k}} - {\textstyle \frac{1}{n}} \big( \sur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}} - \sur{i_k}{\hp{k}}{\hp{k}} \big)  \\
+& - \big( \sumSur{k+1}{\hp{k+1}} - \Sur{k+1}{\hp{k+1}} \big) + \big( \sumSur{k}{\hp{k}} - \Sur{k}{\hp{k}} \big) \\
+& + {\textstyle \frac{1}{n}} \big( 
+\ssur{i_k}{\hp{k}}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}} } - \sur{i_k}{\hp{k}}{\hp{k}} \big) \\
+& + {\textstyle \frac{1}{n}} \big( \sur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}
+- \ssur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}} } \big)
+\end{split}
+\eeq 
+Our idea is to apply Lemma~\ref{lemmars}. 
+Under H\ref{ass:lips}, the surrogate function $\Sur{k}{\param}$ is lower bounded by a constant $c_k > - \infty$ for any $\param$. To this end, we observe that
+\beq \label{eq:dvk}
+V_k \eqdef \Sur{k}{\hp{k}} - \inf_{k \geq 0} c_k \geq 0
+\eeq
+is a non-negative random variable.
+
+Secondly, under H\ref{ass:sur}, the following random variable is non-negative
+\beq \label{eq:dxk}
+X_{k} \eqdef {\textstyle \frac{1}{n}} \big( \sur{i_k}{\hp{\tau_{i_k}^k}}{\hp{k}} - \sur{i_k}{\hp{k}}{\hp{k}} \big) \geq 0.
+\eeq
+
+Thirdly, we define
+\beq \label{eq:dek}
+\begin{split}
+E_{k} & = - \big( \sumSur{k+1}{\hp{k+1}} - \Sur{k+1}{\hp{k+1}} \big) + \big( \sumSur{k}{\hp{k}} - \Sur{k}{\hp{k}} \big) \\
+& + {\textstyle \frac{1}{n}} \big( 
+\ssur{i_k}{\hp{k}}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}} } - \sur{i_k}{\hp{k}}{\hp{k}} \big) \\
+& + {\textstyle \frac{1}{n}} \big( \sur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}
+- \ssur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}} } \big).
+\end{split}
+\eeq
+Note that from the definitions \eqref{eq:dvk}, \eqref{eq:dxk}, \eqref{eq:dek}, we have 
+$V_{k+1} \leq V_k - X_k + E_k$ for any $k \geq 1$.
+
+Under H\ref{controlapprox}, we observe that
+\beq
+\EE \big[ | \ssur{i_k}{\hp{k}}{\hp{k}}{ \{ z_{i_k,m}^{(k)} \}_{m=1}^{\Bsize{k}} } - \sur{i_k}{\hp{k}}{\hp{k}} | \big] \leq C_{\sf r} \Bsize{k}^{-1/2} 
+\eeq
+\beq
+\EE \Big[ \Big| \sur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}
+- \ssur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}}{ \{ z_{i_k,m}^{(\tau_{i_k}^k)} \}_{m=1}^{\Bsize{\tau_{i_k}^k}} } \Big| \Big] \leq C_{\sf r} \EE \Big[ \Bsize{\tau_{i_k}^k}^{-1/2}  \Big]
+\eeq
+\beq
+\EE \big[ | \sumSur{k}{\hp{k}} - \Sur{k}{\hp{k}} | \big] \leq {\textstyle \frac{1}{n} \sum_{i=1}^n} 
+ C_{\sf r} \EE \Big[ \Bsize{\tau_{i}^k}^{-1/2}  \Big]
+\eeq
+Therefore,
+\beq
+\EE \big[ | E_{k} | \big] \leq {\textstyle \frac{C_{\sf r}}{n}}  \Big( \Bsize{k}^{-1/2} +
+\EE \Big[ \Bsize{\tau_{i_k}^k}^{-1/2} + {\textstyle \sum_{i=1}^n} \big\{ \Bsize{\tau_{i}^k}^{-1/2} + \Bsize{\tau_{i}^{k+1}}^{-1/2} \big\} \Big] \Big) 
+\eeq
+Using \eqref{eq:mkcal}, we obtain that
+\beq
+\sum_{k=0}^\infty \EE \big[ | E_{k} | \big] < {\frac{C_{\sf r}}{n}} (2 + 2n ){\sum_{k=0}^\infty} \Bsize{k}^{-1/2}  < \infty.
+\eeq
+Therefore, the conclusions in Lemma~\ref{lemmars} hold. Precisely, we have $\sum_{k=0}^\infty X_k < \infty$ and $\sum_{k=0}^\infty \EE[ X_k ] < \infty$ almost surely.
+Note that this implies 
+\beq
+\begin{split}
+\infty & > \sum_{k=0}^\infty \EE[ X_k ] = \frac{1}{n} \sum_{k = 0}^\infty \EE \big[ \sur{i_k}{\hp{k}}{\hp{\tau_{i_k}^k}} - \sur{i_k}{\hp{k}}{\hp{k}} \big] \\
+& = \frac{1}{n} \sum_{k = 0}^\infty \EE \big[ \Sur{k}{\hp{k}} - {\cal L}( \hp{k}) \big] = \frac{1}{n} \sum_{k=0}^\infty \EE\big[ \eSur{k}{\hp{k}} \big]
+\end{split}
+\eeq
+Since $\eSur{k}{\hp{k}} \geq 0$, the above implies
+\beq \label{eq:esur}
+\lim_{ k \rightarrow \infty } \eSur{k}{\hp{k}} = 0~~~\text{a.s.}
+\eeq
+and subsequently applying \eqref{eq:surbd}, we have $\lim_{ k \rightarrow \infty } \| \eSur{k}{\hp{k}} \| = 0$ almost surely. Finally, it follows from \eqref{eq:surbd} and \eqref{eq:gmbd} that
+\beq
+\lim_{k \rightarrow \infty} g_-^{(k)} \leq \lim_{k \rightarrow \infty} \sqrt{4L} \sqrt{ \eSur{k}{\hp{k}} } + \lim_{k \rightarrow \infty} \sup_{\param \in \Param} |\epsilon^{(k)}(\param)| = 0,
+\eeq
+where the last equality holds almost surely due to the fact that $\sum_{k=0}^\infty \EE[ \sup_{\param \in \Param} |\epsilon^{(k)}(\param)| ] < \infty$.
+This concludes the asymptotic convergence of the MISSO algorithm.
+
+Finally, we prove that ${\cal L}(\hp{k})$ converges almost surely. As a consequence of Lemma~\ref{lemmars}, it is clear that $\{ V_k \}_{k \geq 0}$ converges almost surely and so is $\{ \Sur{k}{\hp{k}} \}_{k \geq 0}$, \ie we have $\lim_{k \rightarrow \infty} \Sur{k}{\hp{k}} = \underline{\cal L}$. Applying \eqref{eq:esur} implies that
+\beq
+\underline{\cal L} = \lim_{ k \rightarrow \infty } \Sur{k}{\hp{k}} = \lim_{k \rightarrow \infty} {\cal L} (\hp{k})~~~~\text{a.s.}
+\eeq
+This shows that ${\cal L}(\hp{k})$ converges almost surely to $\underline{\cal L}$.
+
+
+
+\end{document}

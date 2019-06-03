@@ -1,0 +1,36 @@
+
+[LONGITUDINAL]
+input =  {beta0,beta1,gamma0,gamma1,delta0, delta1, dose}
+dose = {use=regressor}
+EQUATION:
+lm0 = beta0+gamma0*t + delta0*dose
+lm1 = beta1+gamma1*t + delta1*dose
+
+D = exp(lm0)+exp(lm1)+1
+
+p0 = exp(lm0)/D
+p1 = exp(lm1)/D
+p2 = 1/D
+
+DEFINITION:
+y = {type=categorical, categories={0, 1, 2}, 
+     P(y=0)=p0,
+     P(y=1)=p1,
+     P(y=2)=p2}
+
+[INDIVIDUAL]
+input={beta0_pop, o_beta0,beta1_pop, o_beta1,
+      gamma0_pop, o_gamma0,gamma1_pop, o_gamma1,
+      delta0_pop, o_delta0,delta1_pop, o_delta1}
+
+
+DEFINITION:
+beta0  ={distribution=normal, prediction=beta0_pop,  sd=o_beta0}
+beta1  ={distribution=normal, prediction=beta1_pop,  sd=o_beta1}
+
+gamma0  ={distribution=normal, prediction=gamma0_pop,  sd=o_gamma0}
+gamma1  ={distribution=normal, prediction=gamma1_pop,  sd=o_gamma1}
+
+delta0  ={distribution=normal, prediction=delta0_pop,  sd=o_delta0}
+delta1  ={distribution=normal, prediction=delta1_pop,  sd=o_delta1}
+

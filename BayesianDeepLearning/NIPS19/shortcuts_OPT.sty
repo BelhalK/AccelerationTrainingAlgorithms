@@ -1,0 +1,344 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    Comments shorcuts   			       %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 latin abbreviations                  %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\ie}{{\em i.e.,~}}
+\newcommand{\wlg}{{\em w.l.o.g.,~}}
+\newcommand{\eg}{{\em e.g.,~}}
+\newcommand{\lcf}{{\em cf.~}}
+\newcommand{\resp}{{\em resp.~}}
+\newcommand{\etal}{{\em et al.~}}
+\newcommand{\wrt}{{\em w.r.t.~}}
+
+%\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+%  #1\;\delimsize\|\;#2%
+%}
+\newcommand{\infdiv}[2]{\operatorname{KL}\left( #1 \!~||\!~ #2 \right)}
+\DeclareMathOperator{\logit}{logit}
+\DeclareMathOperator{\Tr}{Tr}
+\newcommand{\interi}{\llbracket n_i \rrbracket}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 Style mathbb                         %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\dw}{\mathrm{d}w}
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand{\prior}{\pi}
+\newcommand\barbelow[1]{\stackunder[1.2pt]{$#1$}{\rule{.8ex}{.075ex}}}
+
+\newcommandx{\Wset}[1][1=i]{\mathsf{W}_{#1}}
+\def\Id{\mathbf{I}}
+\def\EE{\mathbb{E}}
+
+\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}
+\def\JJ{\mathbb{J}}
+\def\E{\mathbf{E}}
+\def\W{{\bf W}}
+\def\X{{\bm X}}
+\def\Z{{\bm Z}}
+\def\StocEstep{{\bm{\mathcal{S}}}}
+%\def\X{{\bm X}}
+% \newcommand{\1}{\mathds{1}} %dsfont
+\newcommand{\1}{\mathbbm{1}} %mathbbm
+
+\newcommand{\Bsize}[1]{M_{(#1)}}
+\newcommand{\rsur}[4]{r_{#1}(#2;#3,#4)}
+\newcommand{\sumSurDet}[2]{\hat{\cal L}^{(#1)}(#2)}
+\newcommand{\sumSur}[2]{\widetilde{\cal L}^{(#1)}(#2)}
+\newcommand{\ssur}[4]{\widetilde{\cal L}_{#1}(#2;#3,#4)}
+\newcommand{\sur}[3]{\widehat{\cal L}_{#1}(#2;#3)}
+\newcommand{\tafctdet}[3]{{\cal A}_{#1}^{#2}(#3)}
+\newcommand{\tafct}[3]{\widetilde{\cal A}_{#1}^{#2}(#3)}
+%\newcommand{\sur}[3]{f_{#1,#2}(#3)}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beo}{\begin{array}{rl}}
+\newcommand{\eeo}{\end{array}}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\eSur}[2]{\widehat{e}^{(#1)}(#2)}
+\newcommand{\Sur}[2]{\widehat{\cal L}^{(#1)}(#2)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 Style mathcal                         %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\mcX{\mathcal{X}}
+\def\mcY{\mathcal{Y}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 bullet symbols                       %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\startri{\star \star \star}
+\def\stardble{\star\star\phantom{\star}}
+\def\starone{ \star\!\!\!\phantom{\star\star\star}}
+\def\iid{i.i.d.}
+\def\eqs{\;}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 defintion symbols                    %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\deq}{\stackrel{\Delta}{=}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  		 TODO and comments                    %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{color}
+\newcommand*{\TODO}[1]{\textbf{\textcolor{red}{TO~DO: #1}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    Theorems etc. 			               %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\theoremstyle{plain}
+%\newtheorem{theorem}{Theorem}%[section]
+%\newtheorem{definition}[theorem]{Definition}%[section]
+%\newtheorem{lemma}[theorem]{Lemma}%[section]
+%\newtheorem{proposition}[theorem]{Proposition}%[section]
+%\newtheorem{corollary}[theorem]{Corollary}
+%
+%% \theoremstyle{remark}
+%\newtheorem{remark}{Remark}%[section]
+%%\theoremstyle{plain}
+% \newtheorem{assumption}{H \hspace*{-5.5pt}}
+%\newtheorem{problem}{P}
+%\newcommand*{\assumptionrefname}{H}
+% \newcommand*{\propositionrefname}{Proposition}
+% \providecommand*{\assumptionautorefname}{H\!\!\!\!\!\!}  %hspace is stretchable, but \! is not and \!\! is too much
+%\providecommand*{\problemautorefname}{(P)\hspace*{-3.5pt}}  %hspace is stretchable, but \! is not and \!\! is too much
+%\providecommand*{\corollaryautorefname}{Corollary\hspace*{0pt}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    DeclarMathOperator 		               %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{rk}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Proj}{\mathcal{P}}
+\DeclareMathOperator{\Lik}{\Phi_Y}
+\DeclareMathOperator{\Likpi}{\Phi_Y^\Pi}
+\def\glik{\Sigma_Y}
+\def\speq{-}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    Functions 	 		               %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\argmin}{\mathop{\mathrm{arg\,min}}}
+\newcommand{\Breg}[3]{d_{ #1 }(#2,#3)}
+\newcommand{\HX}[2]{H_{#1} ( #2 )}
+\newcommandx{\PX}[2][1=]{{P}^{#1}_{\prm_{#2}}}
+\newcommandx{\PPX}[2]{{P}^{#1}_{\prm_{#2}}}
+\newcommand{\hHX}[2]{\hat{H}_{{#1}} ( #2 )}
+
+\newcommandx{\inter}[1][1={1,n}]{\llbracket #1\rrbracket}
+%\newcommand{\inter}{\llbracket n\rrbracket}
+\newcommandx{\Xset}[1][1=i]{\mathsf{X}_{#1}}
+\newcommand{\prob}{\mathbb{P}}
+\newcommand\infsum[1][n]{\ensuremath{\sum_{#1=-\infty}^\infty}}
+
+\newcommand{\Bregemp}[2]{D^n_\Gexp(#1,#2)}
+\newcommand{\Bregg}[2]{D(#1,#2)}
+\newcommand{\Bregpi}[2]{D_\Gexp(#1,#2)}
+
+\newcommand{\argmax}{\mathop{\mathrm{arg\,max}}}
+\newcommand{\nul}[2]{ \mathrm{0}_{#1 \times #2} }
+
+\newcommand{\scha}[1]{\| #1 \|_{\sigma,1}}
+\newcommand{\mat}[1]{#1}
+\newcommand{\ten}[1]{\mathcal{#1}}
+\newcommand{\tenset}[3]{\RR^{#1 \times #2 \times #3 }}
+\newcommand{\matset}[2]{\RR^{#1 \times #2}}
+\newcommand{\mrk}[1]{\operatorname{\rank}(#1)}
+\newcommand{\hs}[1]{\widehat{\bm s}^{(#1)}}
+\newcommand{\hp}[1]{{\param}^{(#1)}}
+\newcommand{\os}{\overline{\bm s}}
+\newcommand{\op}{\overline{\param}}
+
+\newcommand{\rth}{\bar{r}}
+\newcommand{\Dn}{\operatorname{D}_{n,Y}}
+\newcommand{\dhe}{d_H}
+\newcommand{\Obj}{f}
+\newcommand{\Objo}{\Phi}
+\DeclareMathOperator{\Liko}{\Phi}
+\DeclareMathOperator{\expo}{exp}
+\DeclareMathOperator{\Ber}{Ber}
+\newcommand{\Bern}[1]{#1}
+\newcommand{\Lc}{\nu}
+\newcommand{\const}{\kappa}
+\newcommand{\Curve}{C_{\Obj}}
+\newcommand{\Eob}{q}
+\newcommand{\grd}{{\nabla}}
+\newcommand{\Hgrd}{\hat{\nabla}}
+\newcommand{\Tgrd}{\tilde{\nabla}}
+\newcommand{\prm}{\bm{\eta}}
+\newcommand{\Prm}{\mathcal{H}}
+\newcommand{\Tprm}{\tilde{\bm{\theta}}}
+\newcommand{\Bprm}{\overline{\bm{\theta}}}
+\newcommand{\TPrm}{\tilde{\bm{\Theta}}}
+\newcommand{\alp}{\bm{\alpha}}
+\newcommand{\atom}{{\bm a}}
+\newcommand{\lgp}{{ \rm A}}
+\newcommand{\lgpm}{{ \mathcal{ A}}}
+\newcommand{\bms}{{ \rm m}}
+\newcommand{\Cset}{{\cal C}}
+\newcommand{\scv}{\mu}
+\newcommand{\Y}{{\bm Y}}
+\newcommand{\exs}{T}
+\newcommand{\noise}{\eta^\Delta}
+\newcommand{\rtrust}{\overline{\bm W}}
+\newcommand{\rB}{\overline{\bm B}}
+\newcommand{\rD}{\overline{\bm D}}
+\newcommand{\barx}{\overline{\bm x}}
+\newcommand{\targetx}{{\bm x}^{target}}
+\newcommand{\B}{{\bm B}}
+\newcommand{\D}{{\bm D}}
+\newcommand{\I}{{\bm I}}
+\newcommand{\trust}{{\bm W}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    exponential law		               %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\sexp}{\lambda}
+\newcommand{\Gexp}{G}
+\newcommand{\gexp}{G'}
+\newcommand{\dgexp}{G''}
+\newcommand{\explaw}{Exp}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    Missing from ERIC		               %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\eqdef}{\mathrel{\mathop:}=}
+\newcommand{\pscal}[2]{\left\langle#1\,|\,#2 \right\rangle}
+\newcommand{\Pscal}[2]{\left\langle#1\,|\,#2\right\rangle}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    FOR EXPERIMENTS SECTION		       %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\iset{\ensuremath{\mathbb{K}}}
+\def\Class{p}
+\def\qClass{q}
+\def\class{j}
+\def\qclass{l}
+\def\lmo{\rm top}
+\def\ST{ {\rm ST}}
+\def\stcv{K_\gamma}
+\def\sigup{\bar{\sigma}}
+\def\siglo{\underline{\sigma}}
+\def\mtop{\bar{M}}
+\def\mlo{\underline{M}}
+\def\tens{\mathcal{M}}
+\def\schat_const{s}
+\def\wrec{W}
+\def\lip{L}
+\def\Xmin{X^*}
+\def\cbern{c^*}
+\newcommand{\supp}{\operatornamewithlimits{supp}}
+\DeclareMathOperator{\Lin}{\mathcal{Q}}
+% \usepackage[ruled,vlined]{algorithm2e}
+\newcommand{\Objb}{\tilde{\Phi}_Y^{\lambda}}
+\newcommand{\Objob}{\tilde{\Phi}_{\lambda}}
+\def\rset{\ensuremath{\mathbb{R}}}
+\newcommand{\eqsp}{\;}
+\newcommand{\empf}[2]{ \Delta^2_Y (#1, #2) }
+\newcommand{\empfw}[2]  { \sum _{kl \in [m_1] \times [m_2]} \pi_{kl} (#1_{kl} - #2_{kl})^2 }
+\newcommand{\KL}[2]{\operatorname{KL}\left(#1,#2\right)}
+\newcommand{\KLd}[2]{{D}\left(#1\|#2\right)}
+\newcommand{\rscset}[2]{ \mathcal{C}(#1,#2) }
+\newcommand{\rscsett}[3]{ \mathcal{C}(#1,#2,#3) }
+\newcommand{\dhel}[2]{\operatorname{d_h}\left(#1,#2\right)}
+\newcommand{\dhes}[2]{\operatorname{d_H^2}\left(#1,#2\right)}
+\newcommand{\jacob}[3]{\operatorname{J}_{#1}^{#2} (#3)}
+\newcommand{\hess}[2]{\operatorname{H}_{#1}^{#2}}
+\newcommand{\mstep}[1]{\overline{\param}({#1})}
+\def\PE{\mathbb{E}}
+\def\prox{prox}
+\def\tX{\bar{\prm}}
+\def\tT{\bar{T}}
+\def\est{\hat{\mat{X}}}
+\def\gradpi{H}
+\def\estpi{\check{\mat{X}}}
+\def\bvarepsilon{\boldsymbol{\varepsilon}}
+\def\bE{\mathbf{E}}
+\newcommand{\Exp}[3]{\operatorname{Exp}_{#1,#2,#3}}
+\def\bY{\mathbf{Y}}
+\def\indic{\delta}
+\def\contset{\mathcal{C}}
+\def\contsetr{\mathcal{A}}
+\def\rme{\mathrm{e}}
+\newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+\newcommand{\normop}[1]{\| #1 \|_{\sigma,\infty}}
+\newcommand{\normfr}[1]{\| #1 \|_{\sigma,2}}
+\newcommand{\normtr}[1]{\| #1 \|_{\sigma,1}}
+\def\mrc{K}
+%\newcommand{\mrc}[1]{K(#1)}
+\def\link{l}
+\def\lu{{\rm U}}
+\def\lv{ {\rm V} }
+\def\lcoef{{\rm \theta }}
+\def\AA{{\cal A} }
+%\crefname{table}{Table}{Tables}
+%\Crefname{algocf}{Algorithm}{Algorithms}
+% \crefname{proposition}{Proposition}{Propositions}
+% % \providecommand*{\porpositionrefname}{Proposition}
+
+%% \newcommand*{\propositionrefname}{Proposition}
+%% \newcommand*{\propositionsrefname}{Propositions}
+%% \newcommand*{\propositionref}[1]{%
+%%   \objectref{#1}{\propositionrefname}{\propositionsrefname}{}{}}
+
+%%% definitions of sets
+\def\rset{\ensuremath{\mathbb{R}}}
+\def\rsetbar{\ensuremath{\bar{\rset}}}
+\def\rplus{\ensuremath{\rset_+}}
+\def\qset{\ensuremath{\mathbb{Q}}}
+\def\nset{\ensuremath{\mathbb{N}}}
+\def\zset{\ensuremath{\mathbb{Z}}}
+\def\cset{\ensuremath{\mathbb{C}}}
+\def\Xset{\mathsf{X}}
+\def\Yset{\mathsf{Y}}
+\def\Zset{\mathsf{Z}}
+\def\Zsigma{\mathcal{Z}}
+\def\Xsigma{\mathcal{X}}
+\def\param{{\bm{\theta}}}
+\def\Param{\Theta}
+\def\Rker{R}
+\def\borelA{\mathsf{A}}
+\def\borelSet{\mathcal{B}}
+\def\borel{\mathcal{B}}
+\newcommand{\coint}[1]{\left[#1\right)}
+\newcommand{\ocint}[1]{\left(#1\right]}
+\newcommand{\ooint}[1]{\left(#1\right)}
+\newcommand{\ccint}[1]{\left[#1\right]}
+\def\invpi{\pi}
+\def\pibar{\bar{\pi}}
+\newcommand{\eric}[1]{\todo[color=red!20]{{\bf EM:} #1}}
+\newcommand{\erici}[1]{\todo[color=red!20,inline]{{\bf EM:} #1}}
+
+\newcommand{\toi}[1]{\todo[color=green!20]{{\bf To:} #1}}
+\def\rmd{\mathrm d}
+\def\mcf{\mathcal{F}}
+\def\be{\bm{e}}
+\def\State{X}
+\def\state{x}
+\def\TV{\operatorname{TV}}
+
+
+\newcommandx{\indi}[2][1=]{\1^{#1}_{#2}}
+\newcommand{\indiacc}[1]{\1_{\{#1\}}}
+\newcommand{\indin}[1]{\1\left\{#1\right\}}
+
+\newcommandx{\CPE}[3][1=]{{\mathbb E}_{#1}\left[\left. #2 \, \right| #3 \right]} %%%% esperance conditionnelle
+\newcommandx{\CPP}[3][1=]
+{\ifthenelse{\equal{#1}{}}{{\mathbb P}\left(\left. #2 \, \right| #3 \right)}{{\mathbb P}_{#1}\left(\left. #2 \, \right | #3 \right)}}
+
+\def\Sset{\mathsf{S}}
+\def\Aset{\mathsf{A}}
+\def\Reward{\operatorname{R}}
+\def\transMDP{\operatorname{P}}
+\def\Policy{\Pi}
+\def\invarMDP{\upsilon}
+\def\Pen{\operatorname{R}}

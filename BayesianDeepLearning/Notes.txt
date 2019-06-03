@@ -1,0 +1,26 @@
+I - Dropout Priors
+
+See Cornebise and Gal papers
+
+a) Cornebise: Mixture of gaussians priors. Then Bayes by backprop. 
+Candidate q in VI is a Gaussian and prior p is a mixture of gaussians
+
+b) Dropout (Gal): Spike and SLab priors p(w) = f \delta + (1-f)\mathcal{N} where \delta is a Dirac
+
+c) Gal: Candidate q in VI is a Bernoulli and prior p is a Gaussian. 
+
+An option could be to use a candidate q as a mixture of Gaussians. This would mimic the Dropout. Bernoulli as in Gal et. al. does it as well but mixture of Gaussians would be a smoother variant
+
+
+II - SAEM to train BNN
+
+BNN can be trained using variational inference. 
+YET, seeing that maximizing the ELBO is actually maximizing the incomplete log likelihood (Jensen) we can use EM. 
+Note that if using the EM (MCEM or else), there is no longer a simple variational candidate q (it's actually the posterior p(z|y)).
+So no reparameterization trick.
+Expectations are thus taken from the intractable posterior.
+Could use MCEM even though it is bad because need many samples and requires MCMC to sample from p.
+BUT we could use SAEM seeing that each weights are individual parameters that need to be sampled from their posterior. No variational candidate here. Just a prior. 
+And in practice few runs of MCMC (random walk) to sample from p(w_i|y_i).
+w_i = w_pop + \eta_i where eta_i \sim \mathcal{N}(0,\omega^2)
+
