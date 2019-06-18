@@ -1,3 +1,7 @@
+I would like to suggest you the following project: to apply stochastic weight averaging (SWA) https://arxiv.org/abs/1803.05407 to variational inference and check whether it will help to improve ELBO/ensembling for test set. You may try using different optimization methods including your own. This is experimental part. The theoretical part of the project is to try understanding why SWA works (at least for point estimates of the weights) - we still have little intuition and need theoretical justification of SWA.
+
+https://towardsdatascience.com/stochastic-weight-averaging-a-new-way-to-get-state-of-the-art-results-in-deep-learning-c639ccf36a
+
 I - Dropout Priors
 
 See Cornebise and Gal papers
