@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2018)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: main.aux
+The style file: apalike.bst
+Database file #1: ref.bib
+Warning--there's a number but no volume in csiszarInformation1984
+Warning--can't use both volume and number fields in rio1995Invariance
+Warning--can't use both volume and number fields in fisher1925Theory
+Warning--empty publisher in fisher1925Theory
+You've used 41 entries,
+            1935 wiz_defined-function locations,
+            792 strings with 12959 characters,
+and the built_in function-call counts, 17448 in all, are:
+= -- 1749
+> -- 639
+< -- 37
++ -- 216
+- -- 204
+* -- 1492
+:= -- 2931
+add.period$ -- 131
+call.type$ -- 41
+change.case$ -- 294
+chr.to.int$ -- 41
+cite$ -- 45
+duplicate$ -- 672
+empty$ -- 1270
+format.name$ -- 276
+if$ -- 3497
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 45
+newline$ -- 209
+num.names$ -- 132
+pop$ -- 248
+preamble$ -- 1
+purify$ -- 299
+quote$ -- 0
+skip$ -- 523
+stack$ -- 0
+substring$ -- 1385
+swap$ -- 123
+text.length$ -- 13
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 234
+warning$ -- 4
+while$ -- 151
+width$ -- 0
+write$ -- 545
+(There were 4 warnings)

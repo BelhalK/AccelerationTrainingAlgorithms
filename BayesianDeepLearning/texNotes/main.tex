@@ -1,0 +1,195 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper]{geometry}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+% \usepackage{shortcuts_OPT}
+\usepackage{makecell}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}%
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[round]{natbib}
+\usepackage{titling} % Customising the title section
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multirow}
+%% The amsthm package provides extended theorem environments
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{fancyvrb}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{dsfont}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+%\usepackage{stackengine}
+\usepackage[toc,page]{appendix}
+\usepackage{stmaryrd}
+\usepackage{hyperref}% http://ctan.org/pkg/hyperref
+\usepackage{cleveref}% http://ctan.org/pkg/cleveref
+\usepackage{lipsum}%
+  {
+      \theoremstyle{plain}
+      \newtheorem{assumption}{M}
+      \newtheorem{lemma}{Lemma}
+      \newtheorem{remark}{Remark}
+      \newtheorem{prop}{Proposition}
+      \newtheorem{assumption_saem}{ISAEM}
+      \newtheorem{assumption_rm}{SA}
+      \newtheorem{assumption_iem}{IEM}
+      \newtheorem{assumption_imcem}{IMCEM}
+      \newtheorem{assumption_expo}{E}
+  }
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{assumption}{M}{assumption}
+\usepackage{amssymb,amsthm,mathrsfs,amsfonts,dsfont}
+\usepackage{mathtools}
+\usepackage{xargs}
+\usepackage{glossaries}
+
+\makeglossaries
+
+
+
+ % \newglossaryentry{pointtoset}
+ % {
+ %     name=point-to-set map,
+ %     description={Given two sets, $\mathcal{X}$ and $\mathcal{Y}$, a point-to-set mapping defined on X with range in $\mathcal{Y}$ is a map $\phi$ which assigns to each $x \in \mathcal{X}$ a subset $\phi(x)$ included in $\mathcal{Y}$ }
+ % }
+
+
+\newglossaryentry{iterapp}
+{
+    name=iterative application,
+    description={Let $\mathcal{X}$ be a set and $x_0 \in \mathcal{X}$ a given point. Then an iterative algorithm $A$ with initial point $x_0$ is a point-to-set mapping $A \colon \mathcal{X} \to \mathcal{X}$ which generates a sequence $\{x_n\}_{n=1}^{\infty}$ according to
+\begin{equation}
+x_{n+1} \in A(x_n)
+\end{equation}}
+}
+
+
+% \newglossaryentry{identfunc}
+% {
+%     name=Identification of a parametric function.,
+%     description={Let $\psi \colon \theta \to \delta$ be a function of $\theta$. The function $\psi$ is identifiable if for all $(\theta, \theta') \in \Theta^2$:
+% \begin{equation*}
+% P_{z|y,\theta}=P_{z|y,\theta'} \Rightarrow \psi(\theta) = \psi(\theta')
+% \end{equation*}}
+% }
+
+% \newglossaryentry{identmodel}
+% {
+%     name=Identification of a model.,
+%     description={A statistical model $(\mathcal{Z}, \mathcal{A}, \mathcal{P})$, with $\mathcal{Z}$ a set of possible observations, $\mathcal{A}$ a $\sigma$-algebra of events in $\mathcal{Z}$ and $\mathcal{P}$ a family of probability measures, is identifiable if all elements of $\Theta$ are}
+% }
+
+
+% \newglossaryentry{statpoint}
+% {
+%     name=stationary point,
+%     description={Consider a function $f:\Theta \to \mathbb{R}$ such as $f$ admits a directional derivative $\nabla f(\theta, \theta' - \theta)$ for all $(\theta, \theta') \in \Theta^2$. We say that $\theta$
+%  is a stationary point if for all $\theta' \in \Theta$, $\nabla f(\theta, \theta' - \theta) \geq 0$}
+% }
+
+\newglossaryentry{direcderivative}
+{
+    name=directional derivative,
+    description={Consider a function $f:\Theta \to \mathbb{R}$. For all $(\theta, \theta') \in \Theta^2$, the following  limit is called the directional derivative of $f$ at $\theta$ in the direction $\theta' - \theta$: $\nabla f(\theta, \theta' - \theta) \triangleq \lim \limits_{t \to 0} (f(\theta+t(\theta'-\theta))-f(\theta))/t$}
+}
+
+\newglossaryentry{smooth}
+{
+    name=smooth,
+    description={A function $f: \Theta \to \mathbb{R}$ is called L-smooth when it is differentiable and when its gradient $\nabla f$ is L-Lipschitz continuous.}
+}
+
+\glsaddall
+
+
+
+\renewcommand\appendixpagename{Proofs}
+
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+
+\def\eqs{\;}
+\def\argmax{\operatorname{argmax}}
+\newcommandx{\CPE}[3][1=]{{\mathbb E}_{#1}\left[\left. #2 \, \right| #3 \right]} %%%% esperance conditionnelle
+\newcommandx{\Zset}[1][1=i]{\mathsf{Z}_{#1}}
+\newcommandx{\Zsigma}[1][1=i]{\mathcal{Z}_{#1}}
+\newcommandx{\Eset}[1][1=i]{\mathsf{E}_{#1}}
+\newcommandx{\Esigma}[1][1=i]{\mathcal{E}_{#1}}
+\newcommand{\vois}{\mathcal{T}(\Theta)}
+\newcommand{\infdiv}{\operatorname{KL} \infdivx}
+\newcommand{\indic}{\mathbb{1}}
+\newcommand{\interi}{\llbracket1, n_i \rrbracket}
+\newcommand{\loglike}{\ell}
+\newcommand{\prob}{\mathbb{P}}
+\newcommand{\inter}{\llbracket1,N\rrbracket}
+\newcommand{\intersim}{\llbracket0,M_{k}-1\rrbracket}
+\newcommand{\obs}{y_{1:N}}
+\newcommand{\rset}{\mathbb{R}}
+\newcommand{\nset}{\mathbb{N}}
+
+\newcommand{\lat}{z_{1:N}}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\newcommand{\partition}{\mathcal{P}_{[1,N]}}
+\DeclareMathOperator{\logit}{logit}
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\DeclareMathOperator*{\St}{\tilde{S}}
+\DeclareMathOperator*{\s}{\barbelow{s}}
+\DeclareMathOperator{\Tr}{Tr}
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{exmp}{Example} % same for example numbers
+\newcommand{\Pt}{\~P}
+
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand{\MC}{\mathrm{MC}}
+\newcommand\barbelow[1]{\stackunder[1.2pt]{$#1$}{\rule{.8ex}{.075ex}}}
+
+
+%\usepackage{fancyhdr} % Headers and footers
+%\pagestyle{fancy} % All pages have headers and footers
+%\fancyhead{} % Blank out the default header
+%\fancyfoot{} % Blank out the default footer
+%\setlength{\droptitle}{-12\baselineskip} % Move the title up
+%\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+%\posttitle{\end{center}}
+
+\title{Generalization bounds for a simple averaging scheme}
+\author{%
+\textsc{Belhal Karimi}\\
+%\normalsize  CMAP, Ecole Polytechnique, Universite Paris-Saclay, 91128 Palaiseau, France\\ % Your institution
+%\normalsize  XPOP, INRIA, 91128 Palaiseau, France\\ 
+%\normalsize \href{mailto:belhal.karimi@polytechnique.edu}{belhal.karimi@polytechnique.edu} % Your email address
+%\and % Uncomment if 2 authors are required, duplicate these 4 lines if more
+%\textsc{Jane Smith}\thanks{Corresponding author} \\[1ex] % Second author's name
+%\normalsize University of Utah \\ % Second author's institution
+%\normalsize \href{mailto:jane@smith.com}{jane@smith.com} % Second author's email address
+}
+\date{\today} % Leave empty to omit a date
+
+\begin{document}
+
+
+\maketitle
+
+
+\section{Introduction}
+
+
+
+\bibliographystyle{apalike}
+%\bibliography{ref}
+\newpage
+\end{document} 

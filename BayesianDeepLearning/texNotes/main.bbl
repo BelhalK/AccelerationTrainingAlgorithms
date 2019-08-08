@@ -1,0 +1,261 @@
+\begin{thebibliography}{}
+
+\bibitem[Ablin et~al., 2018]{ablin2018algorithms}
+Ablin, P., Gramfort, A., Cardoso, J.-F., and Bach, F. (2018).
+\newblock Em algorithms for ica.
+\newblock {\em arXiv preprint arXiv:1805.10054}.
+
+\bibitem[Baey et~al., 2016]{baey2016nonlinear}
+Baey, C., Trevezas, S., and Courn{\`e}de, P.-H. (2016).
+\newblock A non linear mixed effects model of plant growth and estimation via
+  stochastic variants of the em algorithm.
+\newblock {\em Communications in Statistics-Theory and Methods},
+  45(6):1643--1669.
+
+\bibitem[Balakrishnan et~al., 2017]{balakrishnan2017Statistical}
+Balakrishnan, S., Wainwright, M.~J., and Yu, B. (2017).
+\newblock Statistical guarantees for the em algorithm: From population to
+  sample-based analysis.
+\newblock {\em Ann. Statist.}, 45(1):77--120.
+
+\bibitem[Blei et~al., 2017]{BleiVariational2017}
+Blei, D.~M., Kucukelbir, A., and McAuliffe, J.~D. ({2017}).
+\newblock {Variational Inference: A Review for Statisticians}.
+\newblock {\em {Journal of the American statistical Association}},
+  {112}({518}):{859--877}.
+
+\bibitem[Booth et~al., 2001]{booth2001survey}
+Booth, J.~G., Hobert, J.~P., and Jank, W. (2001).
+\newblock A survey of monte carlo algorithms for maximizing the likelihood of a
+  two-stage hierarchical model.
+\newblock {\em Statistical Modelling}, 1(4):333--349.
+
+\bibitem[Brooks et~al., 2011]{brooks2011Handbook}
+Brooks, S., Gelman, A., Jones, G.~L., and Meng, X.-L., editors (2011).
+\newblock {\em Handbook of {M}arkov chain {M}onte {C}arlo}.
+\newblock Chapman \& Hall/CRC Handbooks of Modern Statistical Methods. CRC
+  Press, Boca Raton, FL.
+
+\bibitem[Capp{\'e}, 2011]{cappe2011online}
+Capp{\'e}, O. (2011).
+\newblock Online em algorithm for hidden markov models.
+\newblock {\em Journal of Computational and Graphical Statistics},
+  20(3):728--749.
+
+\bibitem[Capp{\'e} and Moulines, 2009]{cappe2009line}
+Capp{\'e}, O. and Moulines, E. (2009).
+\newblock On-line expectation--maximization algorithm for latent data models.
+\newblock {\em Journal of the Royal Statistical Society: Series B (Statistical
+  Methodology)}, 71(3):593--613.
+
+\bibitem[Chakraborty and Das, 2010]{das2010Inferences}
+Chakraborty, A. and Das, K. (2010).
+\newblock Inferences for joint modelling of repeated ordinal scores and time to
+  event data.
+\newblock {\em Computational and mathematical methods in medicine},
+  11(3):281--295.
+
+\bibitem[Chan and Ledolter, 1995]{chan1995MonteCarlo}
+Chan, K. and Ledolter, J. (1995).
+\newblock Monte carlo em estimation for time series models involving counts.
+\newblock {\em Journal of the American Statistical Association},
+  90(429):242--252.
+
+\bibitem[Comets et~al., 2017]{comets2017Parameter}
+Comets, E., Lavenu, A., and Lavielle, M. (2017).
+\newblock Parameter estimation in nonlinear mixed effect models using saemix,
+  an r implementation of the saem algorithm.
+\newblock {\em Journal of Statistical Software}, 80(3):1--42.
+
+\bibitem[Csisz\'ar and Tusn\'ady, 1984]{csiszarInformation1984}
+Csisz\'ar, I. and Tusn\'ady, G. (1984).
+\newblock Information geometry and alternating minimization procedures.
+\newblock {\em Statist. Decisions}, (suppl. 1):205--237.
+\newblock Recent results in estimation theory and related topics.
+
+\bibitem[Defazio et~al., 2014]{defazio2014SAGA}
+Defazio, A., Bach, F.~R., and Lacoste{-}Julien, S. (2014).
+\newblock {SAGA:} {A} fast incremental gradient method with support for
+  non-strongly convex composite objectives.
+\newblock In Ghahramani, Z., Welling, M., Cortes, C., Lawrence, N.~D., and
+  Weinberger, K.~Q., editors, {\em Advances in Neural Information Processing
+  Systems 27: Annual Conference on Neural Information Processing Systems 2014,
+  December 8-13 2014, Montreal, Quebec, Canada}, pages 1646--1654.
+
+\bibitem[Dempster et~al., 1977]{dempster1977Maximum}
+Dempster, A.~P., Laird, N.~M., and Rubin, D.~B. (1977).
+\newblock Maximum likelihood from incomplete data via the em algorithm.
+\newblock {\em Journal of the royal statistical society. Series B
+  (methodological)}, pages 1--38.
+
+\bibitem[Doukhan et~al., 1995]{rio1995Invariance}
+Doukhan, P., Massart, P., and Rio, E. (1995).
+\newblock Invariance principles for absolutely regular empirical processes.
+\newblock In {\em Annales de l'IHP Probabilit{\'e}s et statistiques},
+  volume~31, pages 393--427. Gauthier-Villars.
+
+\bibitem[Fisher, 1925]{fisher1925Theory}
+Fisher, R.~A. (1925).
+\newblock {\em Theory of statistical estimation}, volume~22.
+
+\bibitem[Fort et~al., 2003]{fort2003Convergence}
+Fort, G., Moulines, E., et~al. (2003).
+\newblock Convergence of the monte carlo expectation maximization for curved
+  exponential families.
+\newblock {\em The Annals of Statistics}, 31(4):1220--1259.
+
+\bibitem[Gunawardana and Byrne, 2005]{gunawardana2005convergence}
+Gunawardana, A. and Byrne, W. (2005).
+\newblock Convergence theorems for generalized alternating minimization
+  procedures.
+\newblock {\em Journal of Machine Learning Research}, 6:2049--2073.
+
+\bibitem[Hsiao et~al., 2006]{hsiao2006overview}
+Hsiao, T., Khurd, P., Rangarajan, A., and Gindi, G. (2006).
+\newblock An overview of fast convergent ordered-subsets reconstruction methods
+  for emission tomography based on the incremental em algorithm.
+\newblock {\em Nuclear Instruments and Methods in Physics Research Section A:
+  Accelerators, Spectrometers, Detectors and Associated Equipment},
+  569(2):429--433.
+
+\bibitem[Hughes, 1999]{hughes1999mixed}
+Hughes, J.~P. (1999).
+\newblock Mixed effects models with censored data with application to hiv rna
+  levels.
+\newblock {\em Biometrics}, 55(2):625--629.
+
+\bibitem[Lavielle, 2014]{lavielle2014Mixed}
+Lavielle, M. (2014).
+\newblock {\em Mixed effects models for the population approach: models, tasks,
+  methods and tools}.
+\newblock CRC press.
+
+\bibitem[Levine and Casella, 2001]{levine2001Implementations}
+Levine, R.~A. and Casella, G. (2001).
+\newblock Implementations of the monte carlo em algorithm.
+\newblock {\em Journal of Computational and Graphical Statistics},
+  10(3):422--439.
+
+\bibitem[Likas and Galatsanos, 2004]{LikasVariational2004}
+Likas, A. and Galatsanos, N. ({2004}).
+\newblock {A variational approach for Bayesian blind image deconvolution}.
+\newblock {\em {IEEE Transactions on signal processing}},
+  {52}({8}):{2222--2233}.
+
+\bibitem[Louis, 1982]{louis1982Finding}
+Louis, T.~A. (1982).
+\newblock Finding the observed information matrix when using the em algorithm.
+\newblock {\em Journal of the Royal Statistical Society. Series B
+  (Methodological)}, pages 226--233.
+
+\bibitem[Mairal, 2015]{mairal2015Incremental}
+Mairal, J. (2015).
+\newblock Incremental majorization-minimization optimization with application
+  to large-scale machine learning.
+\newblock {\em {SIAM} Journal on Optimization}, 25(2):829--855.
+
+\bibitem[McCulloch, 1997]{mcculloch1997maximum}
+McCulloch, C.~E. (1997).
+\newblock Maximum likelihood algorithms for generalized linear mixed models.
+\newblock {\em Journal of the American statistical Association},
+  92(437):162--170.
+
+\bibitem[McLachlan and Krishnan, 2008]{McLachlanEMalgorithm2008}
+McLachlan, G.~J. and Krishnan, T. (2008).
+\newblock {\em The {EM} algorithm and extensions}.
+\newblock Wiley Series in Probability and Statistics. Wiley-Interscience [John
+  Wiley \& Sons], Hoboken, NJ, second edition.
+
+\bibitem[Meyn and Tweedie, 2012]{meyn2012Markov}
+Meyn, S.~P. and Tweedie, R.~L. (2012).
+\newblock {\em Markov chains and stochastic stability}.
+\newblock Springer Science \& Business Media.
+
+\bibitem[Neal and Hinton, 1998]{nealView1998}
+Neal, R. and Hinton, G. ({1998}).
+\newblock {A view of the EM algorithm that justifies incremental, sparse, and
+  other variants}.
+\newblock In {Jordan, MI}, editor, {\em {Learning in Graphical Models}},
+  volume~{89} of {\em {NATO advanced science institutes series, series D,
+  Behavioral and Social Sciences}}, pages {355--368}, {PO BOX 17, 3300 AA
+  Dordrecht, Netherlands}. {NATO}, {Springer}.
+\newblock {NATO Advanced Study Institute on Learning in Graphical Models,
+  Erice, Italy, Sep 27-Oct 07, 1996}.
+
+\bibitem[Neath et~al., 2013]{neath2013Convergence}
+Neath, R.~C. et~al. (2013).
+\newblock On convergence properties of the monte carlo em algorithm.
+\newblock In {\em Advances in Modern Statistical Theory and Applications: A
+  Festschrift in Honor of Morris L. Eaton}, pages 43--62. Institute of
+  Mathematical Statistics.
+
+\bibitem[Nesterov, 2007]{nesterov2007Gradient}
+Nesterov, Y. (2007).
+\newblock Gradient methods for minimizing composite objective function.
+\newblock CORE Discussion Papers 2007076, Université catholique de Louvain,
+  Center for Operations Research and Econometrics (CORE).
+
+\bibitem[Ng and McLachlan, 2003]{ngChoice2003}
+Ng, S. and McLachlan, G. ({2003}).
+\newblock {On the choice of the number of blocks with the incremental EM
+  algorithm for the fitting of normal mixtures}.
+\newblock {\em {Statistics and Computing}}, {13}({1}):{45--55}.
+
+\bibitem[Ng and McLachlan, 2004]{NgSpeeding2004}
+Ng, S. and McLachlan, G. ({2004}).
+\newblock {Speeding up the EM algorithm for mixture model-based segmentation of
+  magnetic resonance images}.
+\newblock {\em {Pattern Recognition}}, {37}({8}):{1573--1589}.
+
+\bibitem[Robert and Casella, 2005]{robert2005MonteCarlo}
+Robert, C.~P. and Casella, G. (2005).
+\newblock {\em Monte Carlo Statistical Methods (Springer Texts in Statistics)}.
+\newblock Springer-Verlag New York, Inc., Secaucus, NJ, USA.
+
+\bibitem[Roux et~al., 2012]{roux2012Stochastic}
+Roux, N.~L., Schmidt, M., and Bach, F.~R. (2012).
+\newblock A stochastic gradient method with an exponential convergence \_rate
+  for finite training sets.
+\newblock In Pereira, F., Burges, C. J.~C., Bottou, L., and Weinberger, K.~Q.,
+  editors, {\em Advances in Neural Information Processing Systems 25}, pages
+  2663--2671. Curran Associates, Inc.
+
+\bibitem[Sherman et~al., 1999]{sherman1999conditions}
+Sherman, R.~P., Ho, Y.-Y.~K., and Dalal, S.~R. (1999).
+\newblock Conditions for convergence of monte carlo em sequences with an
+  application to product diffusion modeling.
+\newblock {\em The Econometrics Journal}, 2(2):248--267.
+
+\bibitem[Thiesson et~al., 2001]{ThiessonAccelerating2001}
+Thiesson, B., Meek, C., and Heckerman, D. ({2001}).
+\newblock {Accelerating EM for large databases}.
+\newblock {\em {Machine Learning}}, {45}({3}):{279--299}.
+
+\bibitem[Vlassis and Likas, 2002]{VlassisGreedy2002}
+Vlassis, N. and Likas, A. ({2002}).
+\newblock {A greedy EM algorithm for Gaussian mixture learning}.
+\newblock {\em {Neural Processing Letters}}, {15}({1}):{77--87}.
+
+\bibitem[Wang et~al., 2014]{wang2014high}
+Wang, Z., Gu, Q., Ning, Y., and Liu, H. (2014).
+\newblock High dimensional expectation-maximization algorithm: Statistical
+  optimization and asymptotic normality.
+\newblock {\em arXiv preprint arXiv:1412.8729}.
+
+\bibitem[Wei and Tanner, 1990]{wei1990Montecarlo}
+Wei, G. C.~G. and Tanner, M.~A. (1990).
+\newblock A {Monte Carlo} implementation of the {EM} algorithm and the poor
+  man's data augmentation algorithms.
+\newblock {\em Journal of the American Statistical Association},
+  85(411):699--704.
+
+\bibitem[Zhu et~al., 2017]{zhu2017high}
+Zhu, R., Wang, L., Zhai, C., and Gu, Q. (2017).
+\newblock High-dimensional variance-reduced stochastic gradient
+  expectation-maximization algorithm.
+\newblock In Precup, D. and Teh, Y.~W., editors, {\em Proceedings of the 34th
+  International Conference on Machine Learning}, volume~70 of {\em Proceedings
+  of Machine Learning Research}, pages 4180--4188, International Convention
+  Centre, Sydney, Australia. PMLR.
+
+\end{thebibliography}
