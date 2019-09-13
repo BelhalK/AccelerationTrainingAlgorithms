@@ -122,11 +122,11 @@ miss.saem <- function(X.obs,y,pos_var=1:ncol(X.obs),maxruns=500,tol_em=1e-7,nmcm
 
     #INITIALIZE THE INDIVIDUAL LOGIT PARAMS AND INDIVIDUAL GRADIENTS
     H = X.sim[1,]%*%t(X.sim[1,])
+    epsilon = 1   #to make sure the Hessian is invertible
     for(i in 1:nrow(X.obs)){
       S = 1/(1+exp(-beta[pos_var]%*%X.sim[i,]))
       individualDi[,i] = (y[i] - S)[1]*X.sim[i,]
       individualbeta[,i] <- beta[pos_var]
-      H = max(X.sim[i,]%*%t(X.sim[i,]), H)
     }
 
     # while ((cstop>tol_em)*(k<maxruns)|(k<20)){
@@ -188,8 +188,7 @@ miss.saem <- function(X.obs,y,pos_var=1:ncol(X.obs),maxruns=500,tol_em=1e-7,nmcm
           S = 1/(1+exp(-beta[pos_var]%*%X.sim[i,]))
           individualDi[,i] = (y[i] - S)[1]*X.sim[i,]
           H = X.sim[i,]%*%t(X.sim[i,])
-          # inv.H = solve(H)
-          inv.H = H
+          inv.H = solve(H+epsilon)   #non diagonal matrix, inverse of Hessian
         }
       }
 
@@ -200,8 +199,12 @@ miss.saem <- function(X.obs,y,pos_var=1:ncol(X.obs),maxruns=500,tol_em=1e-7,nmcm
         beta_new= rep(0,p+1)
         ### Quasi Newton step with incremental updates of gradient term and Approximated HESSIAN
         beta_new[c(1)]= glm(y~ X.sim[,pos_var],family=binomial(link='logit'))$coef[1]
+        
+        sum.beta.i = rowMeans(individualbeta)
         sum.Di = rowMeans(individualDi)
-        beta_new[c(pos_var+1)] <- rowMeans(individualbeta) - inv.H%*%sum.Di
+        
+        #QN step (SAG like)
+        beta_new[c(pos_var+1)] <- sum.beta.i - inv.H%*%sum.Di
 
         beta <- beta_new
         cstop = sum((beta-beta.old)^2)
