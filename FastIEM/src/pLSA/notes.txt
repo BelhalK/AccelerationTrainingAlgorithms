@@ -1,0 +1,5 @@
+Database:
+https://code.google.com/archive/p/maui-indexer/downloads
+
+Blog Post:
+http://maui-indexer.blogspot.com/2009/10/data-sets-for-keyphrase-extraction-and.html
