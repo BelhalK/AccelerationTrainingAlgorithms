@@ -1,4 +1,4 @@
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/FINALPACKAGES/saemixextension/R")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/PackageContributions/FINALPACKAGES/saemixextension/R")
   source('aaa_generics.R') 
   source('compute_LL.R') 
   source('func_aux.R') 
@@ -16,7 +16,11 @@ setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/FI
   source('SaemixRes.R') 
   source('SaemixObject.R') 
   source('zzz.R') 
-setwd("/Users/karimimohammedbelhal/Documents/GitHub/saem/PackageContributions/FINALPACKAGES/saemixextension/demos")
+setwd("/Users/karimimohammedbelhal/Documents/GitHub/AccelerationTrainingAlgorithms/PackageContributions/FINALPACKAGES/saemixextension/demos")
+
+
+
+
 
 ###WARFA
 smx.ord <- read.table("data/categorical1_data.txt",header=T)
