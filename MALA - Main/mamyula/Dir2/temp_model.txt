@@ -1,0 +1,14 @@
+
+                       [LONGITUDINAL]
+                       input = {kf,kr,kcat}
+                       EQUATION:
+                       E_0=200
+                       S_0=500
+                       ES_0=0
+                       f_0=0
+                       t_0=0
+                       ddt_E=-kf*E*S+kr*ES+kcat*ES
+                       ddt_S=-kf*E*S+kr*ES
+                       ddt_ES=kf*E*S-kr*ES-kcat*ES
+                       ddt_f=kcat*ES
+                             

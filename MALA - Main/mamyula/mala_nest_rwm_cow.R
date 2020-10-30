@@ -1,5 +1,5 @@
 #library(rstan)
-setwd("/Users/karimimohammedbelhal/Desktop/variationalBayes/mcmc_R_isolate/Dir2")
+setwd("/Dir2")
   source('compute_LL.R') 
   source('func_aux.R') 
   source('func_cov.R') 
